@@ -22,7 +22,7 @@ from dataclasses import dataclass
 from datetime import datetime, timedelta
 
 from .ayar import ModulAyar
-from .fizik import Hava, Kabin, Yuk, ciy_noktasi, ic_bagil_nem
+from .fizik import Hava, Kabin, Yuk, YavasKayma, ciy_noktasi, ic_bagil_nem
 from .senaryo import Baglam, Senaryo
 from .sozlesme import (
     OLCUM_ARALIK,
@@ -88,9 +88,7 @@ class Modul:
         self._ark_sayaci = 0
         self._son_kare_an: datetime | None = None
         self._son_deger: dict[OlcumTipi, float] = {}
-        self._sinyal_kayma = __import__("modul_sim.fizik", fromlist=["YavasKayma"]).YavasKayma(
-            random.Random(ayar.tohum ^ 0x5EED4), ayar.saglik.sinyal_salinim, 1800.0
-        )
+        self._sinyal_kayma = YavasKayma(random.Random(ayar.tohum ^ 0x5EED4), ayar.saglik.sinyal_salinim, 1800.0)
         self._baslangic = baslangic
         self.son_ozet: TermalOzet | None = None
         self.son_kabin_c: float = ilk_hava + 6.0

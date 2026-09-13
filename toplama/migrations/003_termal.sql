@@ -41,7 +41,9 @@ CREATE TABLE IF NOT EXISTS gridup.termal_ozet (
     CONSTRAINT termal_ozet_satir_araligi CHECK (maks_satir BETWEEN 0 AND 23),
 
     -- Four 16x12 quadrants: top-left, top-right, bottom-left, bottom-right.
-    CONSTRAINT termal_ozet_bolge_sayisi CHECK (array_length(bolge_ort, 1) = 4),
+    -- cardinality() rather than array_length(): the latter returns NULL for an
+    -- empty array and a CHECK passes on NULL, so an empty array would slip in.
+    CONSTRAINT termal_ozet_bolge_sayisi CHECK (cardinality(bolge_ort) = 4),
     CONSTRAINT termal_ozet_bolge_araligi CHECK (
         NOT EXISTS (
             SELECT 1 FROM unnest(bolge_ort) AS o(deger)

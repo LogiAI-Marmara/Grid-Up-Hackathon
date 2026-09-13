@@ -55,8 +55,10 @@ class TermalDizi:
         self._rng = rng
 
         satir, sutun = ayar.satir, ayar.sutun
-        if satir * sutun != TERMAL_PIKSEL:
-            raise ValueError(f"frame geometry {sutun}x{satir} does not match the contract's {TERMAL_PIKSEL} pixels")
+        if (satir, sutun) != (TERMAL_SATIR, TERMAL_SUTUN):
+            raise ValueError(
+                f"frame geometry {sutun}x{satir} does not match the contract's {TERMAL_SUTUN}x{TERMAL_SATIR}"
+            )
 
         # --- static per-pixel terms, computed once -------------------------
         # Convection gradient plus this sensor's fixed pattern noise.

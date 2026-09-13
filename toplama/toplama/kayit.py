@@ -368,6 +368,7 @@ OLCUM_SQL = """
 INSERT INTO gridup.olcum (modul_id, olcum_tipi, zaman, deger, birim, kalite, alindi_zaman)
 VALUES (%s, %s, %s, %s, %s, %s, %s)
 ON CONFLICT (modul_id, olcum_tipi, zaman) DO NOTHING
+RETURNING 1
 """
 
 OZET_SQL = """
@@ -453,9 +454,10 @@ class PostgresKayit(Kayit):
             for deneme in (1, 2):
                 try:
                     return self._yaz(satir_kumesi, paket, alindi_zaman)
-                except psycopg.OperationalError:
-                    # A dropped connection (server restart, idle timeout) is not a
-                    # bad packet: reconnect once and retry before failing the
+                except (psycopg.OperationalError, psycopg.InterfaceError):
+                    # A dropped or broken connection (server restart, idle
+                    # timeout, transactional state out of sync) is not a bad
+                    # packet: reconnect once and retry before failing the
                     # request, because the module would otherwise have to buffer.
                     self._kapat_sessiz()
                     if deneme == 2:
@@ -491,9 +493,11 @@ class PostgresKayit(Kayit):
                         for s in satir_kumesi.olcum
                     ],
                 )
-                # rowcount is the total across the batch; ON CONFLICT DO NOTHING
-                # means a retransmitted packet reports 0 written, which is correct.
-                olcum_sayisi = imlec.rowcount if imlec.rowcount >= 0 else len(satir_kumesi.olcum)
+                # psycopg3's rowcount after executemany reflects only the last
+                # statement, so the count of actually-inserted rows comes from the
+                # RETURNING rows instead. ON CONFLICT DO NOTHING yields no row for
+                # a retransmitted packet, which correctly reports 0 written.
+                olcum_sayisi = len(imlec.fetchall())
 
             ozet_sayisi = 0
             if satir_kumesi.termal_ozet is not None:

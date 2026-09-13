@@ -110,6 +110,9 @@ def sozlesme_kurallari(paket: dict[str, Any]) -> list[str]:
         #     This is the check that keeps `kanit.piksel` meaningful: the operator
         #     is shown a pixel coordinate on top of an image, and if the two
         #     disagree the evidence points at the wrong terminal.
+        #     The two sub-checks are independent, so both must be evaluated: a
+        #     packet may name a pixel whose value differs from ozet.maks AND that
+        #     is not the hottest pixel, and both facts are worth reporting.
         sutun, satir = ozet["maks_konum"]
         indeks = piksel_indeks(sutun, satir)
         if abs(kare[indeks] - ozet["maks"]) > TOLERANS:
@@ -117,7 +120,7 @@ def sozlesme_kurallari(paket: dict[str, Any]) -> list[str]:
                 f"$['termal_ozet']['maks']: {ozet['maks']} does not match the frame at maks_konum "
                 f"[{sutun}, {satir}] ({kare[indeks]})"
             )
-        elif abs(max(kare) - ozet["maks"]) > TOLERANS:
+        if abs(max(kare) - ozet["maks"]) > TOLERANS:
             hatalar.append(
                 f"$['termal_ozet']['maks_konum']: [{sutun}, {satir}] is not the hottest pixel; "
                 f"frame maximum is {max(kare)}"
