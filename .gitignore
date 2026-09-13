@@ -1,0 +1,22 @@
+# Hackathon Drive Data and Binary Files
+drive_data/
+*.pdf
+*.zip
+*.tar.gz
+*.xlsx
+
+# Python & Environment
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+env/
+.pytest_cache/
+
+# Claude Code workspace files (not part of the deliverable)
+CLAUDE.md
+.claude/
+
+# System
+.DS_Store
