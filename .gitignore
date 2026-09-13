@@ -1,25 +1,18 @@
-# Hackathon Drive Data and Binary Files
-drive_data/
-*.pdf
-*.zip
-*.tar.gz
-*.xlsx
+# Scratch / working files (not deliverables)
+temp/
 
-# Python & Environment
+# Python & build artifacts
 __pycache__/
 *.py[cod]
 *$py.class
+.pytest_cache/
 .venv/
 venv/
 env/
-.pytest_cache/
 
-# Claude Code workspace files (not part of the deliverable)
-CLAUDE.md
+# Claude Code workspace files
 .claude/
+CLAUDE.md
 
-# System
+# OS
 .DS_Store
-# Agent scratch notes (not deliverables)
-youtube_transcript.txt
-PROJE_NOTLARI.md
