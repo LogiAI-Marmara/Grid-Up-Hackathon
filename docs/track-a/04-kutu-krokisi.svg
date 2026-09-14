@@ -141,7 +141,7 @@
       <rect x="100" y="252" width="112" height="28" stroke="#6a1b9a"/>
       <rect x="368" y="248" width="40" height="32" stroke="#ef6c00"/>
       <rect x="165" y="200" width="20" height="24" stroke="#2e7d32"/>
-      <rect x="50" y="235" width="52" height="20" stroke="#1565c0"/>
+      <rect x="44" y="235" width="52" height="20" stroke="#1565c0"/>
     </g>
     <text x="60" y="114" text-anchor="middle" font-size="10" fill="#455a64">ESP32-S3</text>
     <text x="331" y="118" text-anchor="middle" font-size="10" fill="#ad1457">RAC05</text>
@@ -149,7 +149,7 @@
     <text x="20" y="268" text-anchor="middle" font-size="9" fill="#2e7d32">RS-485</text>
     <text x="156" y="292" text-anchor="middle" font-size="9" fill="#6a1b9a">CT ×4</text>
     <text x="388" y="292" text-anchor="middle" font-size="9" fill="#ef6c00">230 V</text>
-    <text x="76" y="268" text-anchor="middle" font-size="9" fill="#1565c0">genişleme</text>
+    <text x="70" y="268" text-anchor="middle" font-size="9" fill="#1565c0">genişleme</text>
     <!-- ön yüz (düz) -->
     <circle cx="240" cy="150" r="30" fill="none" stroke="#c62828" stroke-width="2" stroke-dasharray="5 3"/>
     <circle cx="240" cy="150" r="18" fill="#37474f"/>

@@ -105,7 +105,7 @@
     <rect x="600" y="196" width="16" height="8" class="back" style="stroke:#ad1457"/><text x="620" y="204" class="sub">R_şarj</text>
     <rect x="600" y="316" width="16" height="8" class="back" style="stroke:#ad1457"/><rect x="600" y="328" width="16" height="8" class="back" style="stroke:#ad1457"/><text x="620" y="326" class="sub">bölücü→GPIO1</text>
 
-    <!-- süperkapasitör Ø21,5 merkez (70, 50) -->
+    <!-- süperkapasitör Ø21,5 merkez (65,75, 56,25) — sınırdan 5,5 mm -->
     <circle cx="526" cy="450" r="86" class="back" style="stroke:#f9a825;stroke-width:2.5"/>
     <text x="526" y="446" text-anchor="middle" class="lbl" font-weight="700" fill="#f57f17">Süperkapasitör</text>
     <text x="526" y="460" text-anchor="middle" class="sub">Ø21,5 / arka yüz / 02-bom §2.5</text>
@@ -124,11 +124,11 @@
     <text x="256" y="432" text-anchor="middle" class="sub" fill="#6a1b9a">4× R_burden + bias (3V3/2)</text>
     <rect x="200" y="504" width="224" height="56" class="back" style="stroke:#6a1b9a"/><text x="312" y="492" text-anchor="middle" class="lbl">CT klemens 8 kutup, 3,5 mm — L1 L2 L3 N</text>
 
-    <!-- genişleme başlığı 2×5 (6..19, 56..61) -->
-    <rect x="100" y="470" width="104" height="40" class="back" style="stroke:#1565c0"/>
-    <g fill="#1565c0"><circle cx="110" cy="480" r="3"/><circle cx="130" cy="480" r="3"/><circle cx="150" cy="480" r="3"/><circle cx="170" cy="480" r="3"/><circle cx="190" cy="480" r="3"/><circle cx="110" cy="500" r="3"/><circle cx="130" cy="500" r="3"/><circle cx="150" cy="500" r="3"/><circle cx="170" cy="500" r="3"/><circle cx="190" cy="500" r="3"/></g>
-    <text x="152" y="528" text-anchor="middle" class="lbl" fill="#1565c0">genişleme 2×5 (boş)</text>
-    <text x="152" y="542" text-anchor="middle" class="sub">I²C / UART / 3V3 / 5V / GND — §7.1 payı</text>
+    <!-- genişleme başlığı 2×5 (11..24, 58,75..63,75) — CT klemensi x 25 mm'de başlar -->
+    <rect x="88" y="470" width="104" height="40" class="back" style="stroke:#1565c0"/>
+    <g fill="#1565c0"><circle cx="98" cy="480" r="3"/><circle cx="118" cy="480" r="3"/><circle cx="138" cy="480" r="3"/><circle cx="158" cy="480" r="3"/><circle cx="178" cy="480" r="3"/><circle cx="98" cy="500" r="3"/><circle cx="118" cy="500" r="3"/><circle cx="138" cy="500" r="3"/><circle cx="158" cy="500" r="3"/><circle cx="178" cy="500" r="3"/></g>
+    <text x="140" y="528" text-anchor="middle" class="lbl" fill="#1565c0">genişleme 2×5 (boş)</text>
+    <text x="140" y="542" text-anchor="middle" class="sub">I²C / UART / 3V3 / 5V / GND — §7.1 payı</text>
 
     <!-- ölçüler -->
     <line x1="0" y1="590" x2="880" y2="590" stroke="#455a64" stroke-width="1.5" marker-start="url(#dim)" marker-end="url(#dim)"/>
