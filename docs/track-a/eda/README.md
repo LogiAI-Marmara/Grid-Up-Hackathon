@@ -1,27 +1,27 @@
 # EDA kaynağı ve şema üreteci (KiCad)
 
-`03-baglanti-semasi.svg` elle yazılmış SVG'dir; bu klasör aynı şemanın **KiCad** karşılığını taşır:
-gerçek bir `.kicad_sch` (ERC'den geçmiş, netlist'i 03-pinout §3.1 ile otomatik doğrulanmış) ve ondan
-üretilen `03-baglanti-semasi-kicad.svg`. `cad/` klasörüyle aynı felsefe: **elle çizim yok, kaynak model var.**
+`docs/track-a/03-baglanti-semasi.svg` bu klasördeki **KiCad şematiğinden** üretilir: gerçek bir `.kicad_sch`
+(ERC'den geçmiş, netlist'i 03-pinout §3.1 ile otomatik doğrulanmış) → `kicad-cli` → gömülebilir SVG.
+`cad/` klasörüyle aynı felsefe: **elle çizim yok, kaynak model var.** (Önceki elle yazılmış SVG git geçmişinde: `f5bf9be` ve öncesi.)
 
 ## Dosyalar
 
 | Dosya | İçerik |
 |---|---|
 | `gen_sch.py` | Şema üreteci. Sembolleri KiCad kütüphanesinden (`share/kicad/symbols`) okuyup `lib_symbols`'a gömer, `extends` sembolleri düzleştirir; pin uçlarını kütüphane geometrisinden hesaplar; tel / etiket / güç sembolü / NC / not yerleşimi burada. Kütüphanede olmayan MLX90640 için özel sembol (`GridUp.kicad_sym`). |
-| `GridUp-Modul.kicad_sch` / `.kicad_pro` | Üretilen şema (tek sayfa, A3) ve proje. `sym-lib-table` / `fp-lib-table` proje-yerel (`${KICAD10_SYMBOL_DIR}` / `${KICAD10_FOOTPRINT_DIR}`); KiCad GUI'de doğrudan açılır. |
+| `GridUp-Modul.kicad_sch` / `.kicad_pro` | Üretilen şema (tek sayfa, özel 340 × 300 mm kâğıt; SVG'de çerçeve atılır) ve proje. `sym-lib-table` / `fp-lib-table` proje-yerel (`${KICAD10_SYMBOL_DIR}` / `${KICAD10_FOOTPRINT_DIR}`); KiCad GUI'de doğrudan açılır. |
 | `GridUp-Modul.net` | `kicad-cli sch export netlist` çıktısı (mutlak yol ve zaman damgası temizlenmiş, deterministik) — doğrulamanın girdisi, commit'li. |
-| `verify_netlist.py` | Netlist'i beklenen bağlantılarla karşılaştırır: 91 kontrol (GPIO atamaları, güç rayları, D1/D2 yönü, 120 Ω, EN RC, V_bias, CT kanalları). Tek başına: `python verify_netlist.py GridUp-Modul.net`. |
-| `svg_min.py` | kicad-cli SVG'sini küçültür (2 MB → ~260 KB): çizgi-font yollarını atar, KiCad'in yazdığı gizli `<text>`'i Arial/Helvetica ile görünür yapar, koordinatları yuvarlar, tarih damgasını siler (deterministik). |
+| `verify_netlist.py` | Netlist'i beklenen bağlantılarla karşılaştırır: 95 kontrol (GPIO atamaları, güç rayları, D1/D2 yönü, 120 Ω, EN RC, V_bias, CT kanalları). Tek başına: `python verify_netlist.py GridUp-Modul.net`. |
+| `svg_min.py` | kicad-cli SVG'sini gömülebilir yapar (2 MB → ~280 KB): çizgi-font yollarını atar, KiCad'in yazdığı gizli `<text>`'i Arial/Helvetica ile görünür yapar (renk = grubun stroke rengi), viewBox'ı içeriğe kırpar, koordinatları yuvarlar, tarih damgasını siler (deterministik). |
 | `build.py` | Zincir: `gen_sch.py` → ERC → netlist + `verify_netlist.py` → SVG → `svg_min.py`. |
 | `erc-raporu.txt` | Son ERC çıktısı (`--severity-all`): 0 hata, 0 uyarı. |
-| `03-baglanti-semasi-kicad.svg` | Çıktı. Karşılaştırma referansı: `../03-baglanti-semasi.svg` (dokunulmadı). |
+| `../03-baglanti-semasi.svg` | Çıktı (dokümandaki şema). `build.py --out=PATH` ile başka yere de yazılabilir. |
 
 ## Üretim zinciri
 
 ```
 gen_sch.py → GridUp-Modul.kicad_sch → kicad-cli sch erc → kicad-cli sch export netlist → verify_netlist.py
-                                     → kicad-cli sch export svg → svg_min.py → 03-baglanti-semasi-kicad.svg
+                                     → kicad-cli sch export svg (çerçevesiz, atlama yaylı) → svg_min.py → ../03-baglanti-semasi.svg
 ```
 
 ```
@@ -40,21 +40,23 @@ python build.py                    # KiCad 10 (winget KiCad.KiCad) varsayılan y
   → **U6 LD1117S33** → +3V3; **R_şarj → C_sc süperkap → D2 → +5V** yedek yolu. PWR_FLAG'ler yalnız ERC için (dış kaynaklar).
 - Anten: SMA panel konnektörü (U.FL pigtail RF, şemada net değil). Genişleme 2×5: 3V3 / 5V / GND / SDA / SCL / GPIO10 / 11.
 
-## Neden iki çizim var — elle SVG ve KiCad karşılaştırması
+## Yerleşim ve okunurluk (gömme için tasarım)
 
-| | `03-baglanti-semasi.svg` (elle) | `eda/03-baglanti-semasi-kicad.svg` (KiCad) |
-|---|---|---|
-| Rol | **Dokümandaki ana görsel** (03-pinout.md §3.0) | **Kaynak / kanıt**: ERC'den geçmiş şematik, netlist doğrulaması |
-| Bilgi içeriği | Aynı netler, aynı pin atamaları (§3.1) | Aynı; ek olarak pin numaraları, ayak izleri, ERC/netlist kanıtı |
-| Doğrulama | Elle, tabloya göre | Otomatik: ERC 0/0 + `verify_netlist.py` 91 kontrol |
-| Sayfa | 1640 × 1040 birim, blok gruplu, renk kodlu lejant | A3 (420 × 297 mm), KiCad sembol standardı |
-| Yazı boyutu, dokümana **1200 px** genişlikte gömülünce | 11–13 birim → **8–9,5 px**, okunur | etiket 1,69 mm → **4,8 px**, notlar 1,33 mm → **3,8 px**, okunmaz |
-| Dosya | 21 KB | 260 KB (`svg_min.py` sonrası; ham kicad-cli 2 MB) |
-
-Sonuç: bilgi olarak eşdeğerler; KiCad'in artısı **kanıt** (ERC + netlist), elle SVG'nin artısı **okunurluk** (gömme
-ölçeğinde 2× büyük yazı, blok/renk düzeni). Bu yüzden dokümanda ana görsel elle SVG kalır, KiCad dosyaları kaynak
-olarak bağlanır; KiCad SVG dokümana gömülmez. Elle SVG değiştirilirse `gen_sch.py` de güncellenir (tek doğruluk kaynağı
-03-pinout §3.1 tablosu; `verify_netlist.py` bu tabloyu kodlar).
+- **Sinyal akışı soldan sağa:** sol sütun girişler — CT ön ucu üstte (ESP üst pinleri IO4–7), I²C sensörler altta
+  (IO8–9) → besleme telleri kesişmeden ESP'ye girer; orta ESP32-S3; sağ sütun çıkışlar (servis başlığı, RS-485,
+  anten, genişleme); altta besleme zinciri.
+- **Ana hatlar tel:** I²C bus (SDA/SCL dikey), CT_L1…N (kesişmesiz merdiven), UART1 ↔ MAX3485 (çip `mirror x` ile
+  aynalı → pin sırası ESP ile aynı, tek kesişme). Güç netleri sembol; VSENSE, V_BIAS, 5V_RAW ve servis/genişleme
+  başlıkları etiket (aynı ad = aynı net). Kaçınılmaz kesişmeler `--draw-hop-over` ile atlama yayı.
+- **Renk kodu** (tel + etiket): 3V3 kırmızı, 5 V/230 V koyu kırmızı, GND/PE gri, I²C mavi, UART/RS-485 mor, analog
+  turuncu; her blok açık tonlu dolgu + renkli başlık; lejant sağ üstte.
+- **Yazı boyutu:** etiket 2,0 mm, not 1,8, başlık 2,2, pin adı 1,6; içerik ~305 × 252 mm → dokümana 1200 px
+  genişlikte gömülünce etiket ≈ 8 px, not ≈ 7 px (eski elle SVG: 8–9,5 px). Çerçeve/başlık bloğu export'ta atılır,
+  viewBox içeriğe kırpılır.
+- **Elle SVG'den KiCad'e geçiş gerekçesi:** elle SVG'de metin kutularından taşmalar ve doğrulanmamış bağlantılar
+  vardı; KiCad şematik tek doğruluk kaynağı (03-pinout §3.1 → `verify_netlist.py`), ERC + netlist kanıtı, her
+  değişiklik script'te ve deterministik. Eksisi: KiCad sembol dili (NC pinler dahil büyük ESP32 dikdörtgeni), not
+  yerleşimi daha az özgür, 21 KB → ~280 KB.
 
 ## Kurallar / notlar
 

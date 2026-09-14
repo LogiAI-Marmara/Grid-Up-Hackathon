@@ -13,15 +13,15 @@ Arayüz özeti ve blok şema için bkz. [1. doküman](01-blok-sema.md).
 
 ![Modül bağlantı şeması — ESP32-S3 etrafında tüm hatlar](03-baglanti-semasi.svg)
 
-*(Şema §3.1 pin tablosunun birebir görsel karşılığıdır: sol tarafta I²C sensörler ve CT ön ucu,
-sağda RS-485/Modbus ve anten, altta besleme zinciri. Tabloda olmayan tek ekleme **GPIO1 besleme
-algılama** girişidir — aşağıdaki tabloya işlenmiştir. Pasif değerler tipik başlangıç değerleridir;
-üretim çizimi değildir, §1.4. Parçaların kart üzerindeki yeri: [02-pcb-yerlesimi.svg](02-pcb-yerlesimi.svg).)*
+*(Şema §3.1 pin tablosunun birebir görsel karşılığıdır: sol sütunda CT ön ucu (üst) ve I²C sensörler (alt), ortada
+ESP32-S3, sağ sütunda servis/RS-485/anten/genişleme, altta besleme zinciri. Ana hatlar tel (I²C bus, CT kanalları,
+UART1 ↔ RS-485), güç netleri sembol, aynı adlı etiketler aynı net; tel kesişmeleri atlama yayıyla gösterilir.
+Tabloda olmayan tek ekleme **GPIO1 besleme algılama** girişidir — aşağıdaki tabloya işlenmiştir. Pasif değerler tipik
+başlangıç değerleridir; üretim çizimi değildir, §1.4. Parçaların kart üzerindeki yeri: [02-pcb-yerlesimi.svg](02-pcb-yerlesimi.svg).)*
 
-*EDA karşılığı: [eda/GridUp-Modul.kicad_sch](eda/GridUp-Modul.kicad_sch) (KiCad; [ERC 0 hata / 0 uyarı](eda/erc-raporu.txt);
-[netlist](eda/GridUp-Modul.net) 91 kontrolle §3.1 ile birebir doğrulanmış) — SVG çıktısı
-[eda/03-baglanti-semasi-kicad.svg](eda/03-baglanti-semasi-kicad.svg) (A3 ölçeği; dokümana gömmek için değil, kaynak olarak).
-Üretim zinciri ve iki çizimin karşılaştırması: [eda/README.md](eda/README.md).*
+*Kaynak: KiCad şematik [eda/GridUp-Modul.kicad_sch](eda/GridUp-Modul.kicad_sch) — [ERC 0 hata / 0 uyarı](eda/erc-raporu.txt),
+[netlist](eda/GridUp-Modul.net) 95 kontrolle §3.1 ile birebir doğrulanmış; bu SVG `eda/build.py` ile o şemadan üretilir
+(elle çizim yok). Üretim zinciri: [eda/README.md](eda/README.md).*
 
 ---
 

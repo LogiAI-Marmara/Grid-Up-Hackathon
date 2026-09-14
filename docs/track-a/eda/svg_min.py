@@ -1,10 +1,12 @@
-# kicad-cli SVG çıktısını küçültür ve metni sistem fontuna çevirir:
+# kicad-cli SVG çıktısını dokümana gömülebilir hâle getirir:
 #   - KiCad her metni hem gizli <text> (opacity 0) hem <g class="stroked-text"> çizgi-font yolu olarak yazar;
-#     çizgi-font gruplarını atar, <text>'i görünür yapar (Arial/Helvetica), textLength'i kaldırır (glif esnemesin).
-#   - Koordinatlar 3 ondalığa yuvarlanır, path içi satır sonları tek boşluğa, tarih damgası silinir (deterministik).
+#     çizgi-font gruplarını atar, <text>'i görünür yapar (Arial/Helvetica, rengi grubun stroke rengi), textLength'i kaldırır.
+#   - viewBox içeriğin sınır kutusuna kırpılır (çizim çerçevesi build.py'de zaten dışlanır), kenar payı 4 mm.
+#   - Koordinatlar 3 ondalığa yuvarlanır, tarih damgası silinir (deterministik çıktı).
 # Kullanım: python svg_min.py in.svg out.svg
 import sys, re
 src = open(sys.argv[1], encoding='utf-8').read()
+MARGIN = 4.0
 def num(m):
     v = round(float(m.group(0)), 3)
     return ('%.3f' % v).rstrip('0').rstrip('.') if v != int(v) else str(int(v))
@@ -27,5 +29,22 @@ out = re.sub(r'<g style="([^"]*)">(.*?)</g>', fix_group, out, flags=re.S)
 out = re.sub(r'd="([^"]*)"', fix_path, out)
 out = re.sub(r'<title>.*?</title>\s*', '', out, flags=re.S)
 out = re.sub(r'\n\s*\n', '\n', out)
+# içeriğe kırp
+xs, ys = [], []
+for d in re.findall(r'd="([^"]*)"', out):
+    for cmd, args in re.findall(r'([MLA])([^MLAZz]*)', d):          # M/L: nokta; A: rx ry rot lf sf x y → son iki sayı
+        nums = [float(v) for v in re.findall(r'-?\d+(?:\.\d+)?', args)]
+        pts = [(nums[i], nums[i + 1]) for i in range(0, len(nums) - 1, 2)] if cmd != 'A' else [(nums[-2], nums[-1])]
+        for x, y in pts: xs.append(x); ys.append(y)
+for x, y in re.findall(r'<text[^>]*\sx="([-\d.]+)"\s+y="([-\d.]+)"', out): xs.append(float(x)); ys.append(float(y))
+for x, y, w, h in re.findall(r'<rect[^>]*\sx="([-\d.]+)"[^>]*\sy="([-\d.]+)"[^>]*\swidth="([-\d.]+)"[^>]*\sheight="([-\d.]+)"', out):
+    xs += [float(x), float(x) + float(w)]; ys += [float(y), float(y) + float(h)]
+w = h = 0
+if xs:
+    x0, y0, x1, y1 = min(xs) - MARGIN, min(ys) - MARGIN, max(xs) + MARGIN, max(ys) + MARGIN
+    w, h = round(x1 - x0, 3), round(y1 - y0, 3)
+    out = re.sub(r'width="[^"]*mm" height="[^"]*mm" viewBox="[^"]*"',
+                 'width="%gmm" height="%gmm" viewBox="%g %g %g %g"' % (w, h, round(x0, 3), round(y0, 3), w, h), out, count=1)
+    out = out.replace('<svg\n', '<svg\n  style="max-width:1200px;width:100%;height:auto;background:#fff"\n', 1)
 with open(sys.argv[2], 'w', encoding='utf-8', newline='') as fh: fh.write(out)
-print('%s: %d → %d bayt' % (sys.argv[2], len(src), len(out)))
+print('%s: %d → %d bayt%s' % (sys.argv[2], len(src), len(out), (', içerik %g × %g mm' % (w, h)) if xs else ''))
