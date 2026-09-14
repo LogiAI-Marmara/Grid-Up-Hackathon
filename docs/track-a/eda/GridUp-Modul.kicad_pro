@@ -1,0 +1,20 @@
+{
+  "meta": {
+    "filename": "GridUp-Modul.kicad_pro",
+    "version": 3
+  },
+  "schematic": {
+    "drawing": {
+      "default_font": "KiCad Font"
+    },
+    "legacy_lib_dir": "",
+    "legacy_lib_list": []
+  },
+  "sheets": [
+    [
+      "6f1e2a3b-0000-4000-8000-000000000001",
+      "Root"
+    ]
+  ],
+  "text_variables": {}
+}

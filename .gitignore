@@ -16,3 +16,5 @@ CLAUDE.md
 
 # OS
 .DS_Store
+# KiCad yerel ayar dosyasi (kullanici/oturum)
+*.kicad_prl
