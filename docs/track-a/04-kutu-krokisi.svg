@@ -84,9 +84,9 @@
 </g>
   <rect x="815.2" y="284" width="2.4" height="4" rx="4" fill="#ad1457" fill-opacity="0.18"/>
 <rect x="731.6" y="295" width="86" height="100" rx="4" fill="#f9a825" fill-opacity="0.18"/>
+<rect x="765.6" y="143.8" width="52" height="81.2" rx="4" fill="#ad1457" fill-opacity="0.18"/>
 <rect x="824" y="232.076" width="24" height="35.848" rx="4" fill="#37474f" fill-opacity="0.18"/>
 <rect x="815.2" y="278" width="2.4" height="4" rx="4" fill="#ad1457" fill-opacity="0.18"/>
-<rect x="765.6" y="143.8" width="52" height="81.2" rx="4" fill="#ad1457" fill-opacity="0.18"/>
 <rect x="810.8" y="232" width="6.8" height="28" rx="4" fill="#ad1457" fill-opacity="0.18"/>
   <g transform="translate(640,100)">
 <polyline points="20,290 20,292.91 20,295.7 20,298.23 20,300.4" fill="none" stroke="#546e7a" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"/>
@@ -238,11 +238,12 @@
   <circle cx="822" cy="238" r="2.5" fill="#37474f"/>
   <text x="790" y="242" font-size="11" fill="#37474f" text-anchor="end" font-weight="700">MLX90640 TO-39 Ø9</text>
   <text x="790" y="256" font-size="11" fill="#37474f" text-anchor="end">pencereye dayalı</text>
-  <text x="814.8" y="409" font-size="10" fill="#2e7d32" text-anchor="end">PCB 1,6</text>
+  <line x1="820.8" y1="420" x2="820.8" y2="430" stroke="#2e7d32" stroke-width="1"/>
+  <text x="820.8" y="442" font-size="10" fill="#2e7d32" text-anchor="middle">PCB 1,6</text>
   <text x="774.6" y="341" font-size="12" fill="#f57f17" text-anchor="middle">süperkap.</text>
   <text x="774.6" y="357" font-size="11" fill="#f57f17" text-anchor="middle">Ø21,5 yatık</text>
   <text x="791.6" y="182.4" font-size="12" fill="#ad1457" text-anchor="middle" font-weight="700">RAC05</text>
-  <text x="791.6" y="196.4" font-size="10" fill="#ad1457" text-anchor="middle">13 mm, arka yüz</text>
+  <text x="791.6" y="196.4" font-size="10" fill="#ad1457" text-anchor="middle">13 mm</text>
   <text x="630" y="256" font-size="12" fill="#37474f" text-anchor="middle" transform="rotate(-90 630 256)">DIN klips</text>
   <line x1="660" y1="445" x2="860" y2="445" stroke="#455a64" stroke-width="1.5" marker-start="url(#dim)" marker-end="url(#dim)"/>
   <line x1="660" y1="425" x2="660" y2="451" stroke="#455a64" stroke-width="1"/>
