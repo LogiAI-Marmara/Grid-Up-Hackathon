@@ -100,8 +100,8 @@
 
     <!-- ikincil güç: D1, LDO, R_şarj, D2, bölücü -->
     <rect x="560" y="224" width="52" height="56" class="back" style="stroke:#ad1457"/><text x="586" y="296" text-anchor="middle" class="sub">LDO 3.3 V</text><text x="586" y="308" text-anchor="middle" class="sub">SOT-223</text>
-    <rect x="596" y="226" width="34" height="21" class="back" style="stroke:#ad1457"/><text x="613" y="222" text-anchor="middle" class="sub">D1</text>
-    <rect x="596" y="258" width="34" height="21" class="back" style="stroke:#ad1457"/><text x="613" y="292" text-anchor="middle" class="sub">D2</text>
+    <rect x="614" y="226" width="34" height="21" class="back" style="stroke:#ad1457"/><text x="631" y="222" text-anchor="middle" class="sub">D1</text>
+    <rect x="614" y="258" width="34" height="21" class="back" style="stroke:#ad1457"/><text x="631" y="292" text-anchor="middle" class="sub">D2</text>
     <rect x="600" y="196" width="16" height="8" class="back" style="stroke:#ad1457"/><text x="620" y="204" class="sub">R_şarj</text>
     <rect x="600" y="316" width="16" height="8" class="back" style="stroke:#ad1457"/><rect x="600" y="328" width="16" height="8" class="back" style="stroke:#ad1457"/><text x="620" y="326" class="sub">bölücü→GPIO1</text>
 
