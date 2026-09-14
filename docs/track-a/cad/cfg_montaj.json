@@ -1,0 +1,67 @@
+{
+ "out": "views/montaj-views.json",
+ "views": [
+  {
+   "name": "kesit",
+   "d": [
+    1,
+    0,
+    0
+   ],
+   "u": [
+    0,
+    1,
+    0
+   ],
+   "clip": {
+    "axis": 0,
+    "min": 60
+   },
+   "section": true
+  },
+  {
+   "name": "ic",
+   "d": [
+    0,
+    0,
+    -1
+   ],
+   "u": [
+    0,
+    1,
+    0
+   ],
+   "exclude": [
+    "GridUp-Kutu/Kapak",
+    "GridUp-Kutu/IR pencere"
+   ]
+  },
+  {
+   "name": "ic_thru",
+   "d": [
+    0,
+    0,
+    -1
+   ],
+   "u": [
+    0,
+    1,
+    0
+   ],
+   "exclude": [
+    "GridUp-Kutu/Kapak",
+    "GridUp-Kutu/IR pencere",
+    "GridUp-PCB/PCB",
+    "GridUp-PCB/MLX90640",
+    "GridUp-PCB/SHT31",
+    "GridUp-PCB/LED",
+    "GridUp-PCB/R_pullup1",
+    "GridUp-PCB/R_pullup2",
+    "GridUp-PCB/C_100n",
+    "GridUp-PCB/EN_RC1",
+    "GridUp-PCB/EN_RC2",
+    "GridUp-PCB/Reset"
+   ]
+  }
+ ]
+}

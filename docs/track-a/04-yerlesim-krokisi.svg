@@ -337,23 +337,23 @@
   <polygon points="46,775 44.4,775 44.4,845 46,845 46,775" fill="#2e7d32" fill-opacity="0.35" stroke="#2e7d32" stroke-width="2"/>
   <polygon points="46,812 52,812 52,803 46,803 46,812" fill="#2e7d32" fill-opacity="0.35" stroke="#2e7d32" stroke-width="2"/>
   <polygon points="33.65,843.75 33.65,818.75" fill="#2e7d32" fill-opacity="0.35" stroke="#2e7d32" stroke-width="2"/>
-  <rect x="43.8" y="816" width="0.6" height="1" fill="#2e7d32" fill-opacity="0.15"/>
   <rect x="0" y="788" width="5" height="42" fill="#2e7d32" fill-opacity="0.15"/>
-  <rect x="42.7" y="803" width="1.7" height="7" fill="#2e7d32" fill-opacity="0.15"/>
-  <rect x="43.8" y="799.5" width="0.6" height="1" fill="#2e7d32" fill-opacity="0.15"/>
-  <rect x="380" y="300" width="50" height="150" fill="#78909c" fill-opacity="0.15"/>
-  <rect x="46" y="803" width="6" height="9" fill="#2e7d32" fill-opacity="0.15"/>
-  <rect x="46" y="778.5" width="1.5" height="3" fill="#2e7d32" fill-opacity="0.15"/>
-  <rect x="31.4" y="780.95" width="13" height="20.3" fill="#2e7d32" fill-opacity="0.15"/>
-  <rect x="25.604" y="818.75" width="16.092" height="25" fill="#2e7d32" fill-opacity="0.15"/>
-  <rect x="44.4" y="775" width="1.6" height="74" fill="#2e7d32" fill-opacity="0.15"/>
-  <rect x="385" y="1005" width="45" height="55" fill="#e65100" fill-opacity="0.15"/>
   <rect x="5" y="770" width="46" height="80" fill="#2e7d32" fill-opacity="0.15"/>
-  <rect x="360" y="560" width="70" height="120" fill="#e65100" fill-opacity="0.15"/>
-  <rect x="360" y="830" width="70" height="120" fill="#e65100" fill-opacity="0.15"/>
-  <rect x="360" y="695" width="70" height="120" fill="#e65100" fill-opacity="0.15"/>
-  <rect x="43.8" y="814.5" width="0.6" height="1" fill="#2e7d32" fill-opacity="0.15"/>
   <rect x="52" y="800" width="1" height="15" fill="#2e7d32" fill-opacity="0.15"/>
+  <rect x="43.8" y="814.5" width="0.6" height="1" fill="#2e7d32" fill-opacity="0.15"/>
+  <rect x="43.8" y="816" width="0.6" height="1" fill="#2e7d32" fill-opacity="0.15"/>
+  <rect x="42.7" y="803" width="1.7" height="7" fill="#2e7d32" fill-opacity="0.15"/>
+  <rect x="46" y="778.5" width="1.5" height="3" fill="#2e7d32" fill-opacity="0.15"/>
+  <rect x="46" y="803" width="6" height="9" fill="#2e7d32" fill-opacity="0.15"/>
+  <rect x="44.4" y="775" width="1.6" height="74" fill="#2e7d32" fill-opacity="0.15"/>
+  <rect x="31.4" y="780.95" width="13" height="20.3" fill="#2e7d32" fill-opacity="0.15"/>
+  <rect x="43.8" y="799.5" width="0.6" height="1" fill="#2e7d32" fill-opacity="0.15"/>
+  <rect x="25.604" y="818.75" width="16.092" height="25" fill="#2e7d32" fill-opacity="0.15"/>
+  <rect x="385" y="1005" width="45" height="55" fill="#e65100" fill-opacity="0.15"/>
+  <rect x="360" y="560" width="70" height="120" fill="#e65100" fill-opacity="0.15"/>
+  <rect x="360" y="695" width="70" height="120" fill="#e65100" fill-opacity="0.15"/>
+  <rect x="360" y="830" width="70" height="120" fill="#e65100" fill-opacity="0.15"/>
+  <rect x="380" y="300" width="50" height="150" fill="#78909c" fill-opacity="0.15"/>
   <g transform="translate(0,0)">
 <polyline points="0,1498 430,1498" fill="none" stroke="#37474f" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/>
 <polyline points="430,2 0,2" fill="none" stroke="#37474f" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/>

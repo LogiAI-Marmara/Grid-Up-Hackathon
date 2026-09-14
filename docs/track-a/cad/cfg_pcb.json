@@ -1,0 +1,56 @@
+{
+ "out": "views/pcb-views.json",
+ "views": [
+  {
+   "name": "on",
+   "d": [
+    0,
+    0,
+    -1
+   ],
+   "u": [
+    0,
+    1,
+    0
+   ]
+  },
+  {
+   "name": "arka_thru",
+   "d": [
+    0,
+    0,
+    -1
+   ],
+   "u": [
+    0,
+    1,
+    0
+   ],
+   "exclude": [
+    "PCB",
+    "MLX90640",
+    "SHT31",
+    "LED",
+    "R_pullup1",
+    "R_pullup2",
+    "C_100n",
+    "EN_RC1",
+    "EN_RC2",
+    "Reset"
+   ]
+  },
+  {
+   "name": "iso",
+   "d": [
+    -1,
+    -1,
+    -1
+   ],
+   "u": [
+    0,
+    1,
+    0
+   ]
+  }
+ ]
+}

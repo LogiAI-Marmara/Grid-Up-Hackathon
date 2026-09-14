@@ -24,6 +24,14 @@ kart yapısı, giriş-çıkış bağlantıları, bağlantı şemaları, temel bi
 
 ---
 
+## CAD kaynakları
+
+Kroki SVG'leri (`02-pcb-yerlesimi`, `04-kutu-krokisi`, `04-yerlesim-krokisi`) **Fusion 360 modellerinden** üretilir:
+modeller (`.f3d` / `.step`), model script'leri, projeksiyon/kesit üreteci ve SVG kompozisyon script'leri
+[`cad/`](cad/README.md) altındadır. Elle düzenleme yerine script'i değiştirip yeniden üretin.
+
+---
+
 ## İzlenebilirlik — her doküman hangi karara dayanıyor
 
 Bu tablo, "bu doküman neden böyle yazılmış" sorusunun cevabıdır. Atıflar
