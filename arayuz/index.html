@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grid Up — İZ C: Pano/Hücre Operasyon ve İzleme Merkezi</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="app-wrapper">
+        <!-- Üst Başlık ve Sistem Durumu (Top Bar) -->
+        <header class="ops-header">
+            <div class="header-brand">
+                <div class="logo-pulse">
+                    <span class="pulse-ring"></span>
+                    <span class="pulse-dot"></span>
+                </div>
+                <div class="brand-text">
+                    <h1>GRID UP <span class="badge-iz">İZ C: OPERASYON YÜZÜ</span></h1>
+                    <p class="brand-sub">Pano/Hücre İçi Anomali Erken Uyarı ve SCADA İzleme Sistemi</p>
+                </div>
+            </div>
+
+            <div class="header-controls">
+                <div class="control-item">
+                    <span class="status-indicator online" id="api-status-led"></span>
+                    <span class="status-label" id="api-status-text">API ÇEVRİMİÇİ</span>
+                </div>
+
+                <div class="control-divider"></div>
+
+                <div class="control-item">
+                    <label for="poll-interval" class="control-label">Yenileme:</label>
+                    <select id="poll-interval" class="select-box">
+                        <option value="2000">2 sn</option>
+                        <option value="3000" selected>3 sn</option>
+                        <option value="5000">5 sn</option>
+                        <option value="10000">10 sn</option>
+                    </select>
+                </div>
+
+                <div class="control-item">
+                    <button id="btn-audio-toggle" class="btn-icon" title="Sesli Alarm Uyarısı Aç/Kapat">
+                        <span id="audio-icon">🔔</span>
+                        <span id="audio-text">Ses Açık</span>
+                    </button>
+                </div>
+
+                <div class="control-item">
+                    <button id="btn-manual-refresh" class="btn-refresh" title="Şimdi Yenile">
+                        <span>🔄</span> Yenile
+                    </button>
+                </div>
+
+                <div class="clock-display" id="clock-display">--:--:--</div>
+            </div>
+        </header>
+
+        <!-- Ana Düzen (3 Sütunlu Operasyon Merkezi) -->
+        <div class="ops-layout">
+            <!-- Sol Panel: Saha Hiyerarşisi Ağacı -->
+            <aside class="panel hierarchy-panel">
+                <div class="panel-header">
+                    <div class="panel-title">
+                        <span class="icon">📍</span>
+                        <h2>Saha Hiyerarşisi</h2>
+                    </div>
+                    <span class="panel-tag" id="hierarchy-count">...</span>
+                </div>
+                <div class="panel-body hierarchy-body" id="hierarchy-container">
+                    <div class="loading-state">
+                        <div class="spinner"></div>
+                        <p>Hiyerarşi taranıyor...</p>
+                    </div>
+                </div>
+                <div class="hierarchy-footer">
+                    <div class="legend-chip normal"><span class="chip-dot"></span> Normal</div>
+                    <div class="legend-chip izle"><span class="chip-dot"></span> İzle</div>
+                    <div class="legend-chip uyari"><span class="chip-dot"></span> Uyarı</div>
+                    <div class="legend-chip kritik"><span class="chip-dot"></span> Kritik</div>
+                </div>
+            </aside>
+
+            <!-- Orta Panel: Canlı Ölçümler & 32x24 Termal Matris -->
+            <main class="panel main-monitor">
+                <div class="monitor-top-bar">
+                    <div class="module-title-wrap">
+                        <span class="module-code-badge" id="active-module-badge">TR041-P01-M1</span>
+                        <h2 id="active-module-name">Giriş Fideri Modülü</h2>
+                    </div>
+                    <div class="module-meta">
+                        <span class="meta-item">🕒 Son Güncelleme: <strong id="val-time">--:--:--</strong></span>
+                        <span class="meta-item">⚡ Besleme: <strong id="val-feed" class="badge-feed">ŞEBEKE</strong></span>
+                        <span class="meta-item">📶 RSSI: <strong id="val-rssi">-- dBm</strong></span>
+                    </div>
+                </div>
+
+                <!-- 6'lı Kritik Metrik Kartları -->
+                <section class="metrics-grid">
+                    <div class="metric-card">
+                        <div class="card-icon">🌡️</div>
+                        <div class="card-info">
+                            <span class="card-title">Ortam Sıcaklığı</span>
+                            <div class="card-value"><strong id="val-temp">--</strong><span class="unit">°C</span></div>
+                            <span class="card-sub" id="temp-status">Sensör: SHT31</span>
+                        </div>
+                    </div>
+
+                    <div class="metric-card">
+                        <div class="card-icon">💧</div>
+                        <div class="card-info">
+                            <span class="card-title">Bağıl Nem</span>
+                            <div class="card-value"><strong id="val-hum">--</strong><span class="unit">%</span></div>
+                            <span class="card-sub">Optimum: %40-60</span>
+                        </div>
+                    </div>
+
+                    <div class="metric-card card-highlight">
+                        <div class="card-icon">🔥</div>
+                        <div class="card-info">
+                            <span class="card-title">Termal Maks. Sıcaklık</span>
+                            <div class="card-value warning"><strong id="val-tmax">--</strong><span class="unit">°C</span></div>
+                            <span class="card-sub" id="hotspot-coord">Konum: --</span>
+                        </div>
+                    </div>
+
+                    <div class="metric-card">
+                        <div class="card-icon">⚡</div>
+                        <div class="card-info">
+                            <span class="card-title">3-Faz Akım Yükü</span>
+                            <div class="card-value-multi">
+                                <span>L1: <b id="val-l1">--</b> A</span>
+                                <span>L2: <b id="val-l2" class="text-alert">--</b> A</span>
+                                <span>L3: <b id="val-l3">--</b> A</span>
+                            </div>
+                            <span class="card-sub" id="current-diff">Faz Dengesizliği: %--</span>
+                        </div>
+                    </div>
+
+                    <div class="metric-card">
+                        <div class="card-icon">⚖️</div>
+                        <div class="card-info">
+                            <span class="card-title">Nötr Akımı</span>
+                            <div class="card-value"><strong id="val-notr">--</strong><span class="unit">A</span></div>
+                            <span class="card-sub">Dönüş Hattı Akımı</span>
+                        </div>
+                    </div>
+
+                    <div class="metric-card">
+                        <div class="card-icon">🛡️</div>
+                        <div class="card-info">
+                            <span class="card-title">Ark Olay Sayacı</span>
+                            <div class="card-value"><strong id="val-arc">0</strong><span class="unit">Trip</span></div>
+                            <span class="card-sub">TVOC-2 Optik Koruma</span>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Termal Isı Haritası Görüntüleyici Bölümü -->
+                <section class="thermal-section">
+                    <div class="thermal-header">
+                        <div class="thermal-title">
+                            <h3>🔥 32×24 Termal Matris Isı Haritası</h3>
+                            <span class="thermal-resolution">768 Piksel (MLX90640 Sensör)</span>
+                        </div>
+                        <div class="thermal-actions">
+                            <button id="btn-toggle-smooth" class="btn-sm">Pürüzsüzleştirme: Açık</button>
+                            <button id="btn-toggle-grid" class="btn-sm">Izgara: Kapalı</button>
+                        </div>
+                    </div>
+
+                    <div class="thermal-viewport-wrapper">
+                        <div class="canvas-box">
+                            <canvas id="thermalCanvas" width="480" height="360"></canvas>
+                            <!-- Canlı Sıcak Nokta Hedef Göstergesi -->
+                            <div id="hotspot-reticle" class="hotspot-reticle">
+                                <span class="reticle-ring"></span>
+                                <span class="reticle-label" id="reticle-temp">83.5 °C</span>
+                            </div>
+                            <!-- Fare Hover HUD Tooltip -->
+                            <div id="thermal-tooltip" class="thermal-tooltip">
+                                <div id="tooltip-temp">-- °C</div>
+                                <div id="tooltip-coord">X: --, Y: --</div>
+                            </div>
+                        </div>
+
+                        <!-- Termal Renk Skalası Lejantı -->
+                        <div class="thermal-legend-bar">
+                            <span class="legend-val">85°C+ (Aşırı Sıcak)</span>
+                            <div class="legend-gradient"></div>
+                            <span class="legend-val">20°C (Normal/Soğuk)</span>
+                        </div>
+                    </div>
+
+                    <!-- Canlı Hotspot ve Tanı Bildirim Şeridi -->
+                    <div class="thermal-status-banner" id="thermal-status-banner">
+                        <span class="banner-icon">⚠️</span>
+                        <div class="banner-text">
+                            <strong id="banner-title">Termal Anomali Analizi:</strong>
+                            <span id="banner-desc">Sıcak nokta taranıyor...</span>
+                        </div>
+                    </div>
+                </section>
+            </main>
+
+            <!-- Sağ Panel: Aktif Alarmlar ve Operatör Onay Akışı -->
+            <aside class="panel alarms-panel">
+                <div class="panel-header">
+                    <div class="panel-title">
+                        <span class="icon">🚨</span>
+                        <h2>Aktif Alarmlar</h2>
+                    </div>
+                    <span class="alarm-counter" id="active-alarm-count">0</span>
+                </div>
+
+                <div class="panel-tabs">
+                    <button class="tab-btn active" id="tab-btn-active">Açık Alarmlar</button>
+                    <button class="tab-btn" id="tab-btn-history">Operasyon Günlüğü</button>
+                </div>
+
+                <div class="panel-body alarms-body" id="alarms-container">
+                    <div class="loading-state">
+                        <p>Alarmlar kontrol ediliyor...</p>
+                    </div>
+                </div>
+
+                <!-- Operasyon Günlüğü (Geçmiş ve Onaylananlar) -->
+                <div class="panel-body audit-body" id="audit-container" style="display: none;">
+                    <div class="empty-audit">
+                        <p>Henüz operatör eylemi kaydedilmedi.</p>
+                    </div>
+                </div>
+
+                <div class="telegram-broadcast-status">
+                    <div class="tg-info">
+                        <span class="tg-icon">✈️</span>
+                        <div>
+                            <strong>Telegram Bot Entegrasyonu</strong>
+                            <p>Kritik ve Uyarı seviyeleri saha mühendislerine anında iletilir.</p>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+        </div>
+    </div>
+
+    <!-- Uygulama Scripti -->
+    <script src="app.js"></script>
+</body>
+</html>

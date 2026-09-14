@@ -1,0 +1,46 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Sözleşme 3 - Anomali Çıktısı (İZ B -> İZ C)",
+  "description": "İZ B tarafından üretilen ve İZ C (Operasyon Yüzü & Alarm) tarafından tüketilen anomali veri formatı",
+  "type": "object",
+  "required": ["id", "modul_id", "zaman", "seviye", "gerekce"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "example": "an_00412"
+    },
+    "modul_id": {
+      "type": "string",
+      "example": "TR041-P01-M1"
+    },
+    "zaman": {
+      "type": "string",
+      "format": "date-time",
+      "example": "2026-09-14T10:30:00Z"
+    },
+    "skor": {
+      "type": "number",
+      "minimum": 0.0,
+      "maximum": 1.0,
+      "example": 0.89
+    },
+    "seviye": {
+      "type": "string",
+      "enum": ["normal", "izle", "uyari", "kritik"],
+      "example": "uyari"
+    },
+    "tip": {
+      "type": "string",
+      "enum": ["sicak_nokta", "asiri_akim", "faz_dengesizligi", "ark_suphesi", "genel"],
+      "example": "sicak_nokta"
+    },
+    "gerekce": {
+      "type": "string",
+      "example": "L2 çıkış klemensi 34 dk içinde +18 °C yükseldi, akım sabit kaldı."
+    },
+    "onaylandi": {
+      "type": "boolean",
+      "default": false
+    }
+  }
+}

@@ -1,0 +1,74 @@
+# docker-compose.yml
+# Grid Up Hackathon - İZ C: On-Premise Dağıtım Kompozisyonu
+
+services:
+  # 1. Monitoring Arayüzü (Nginx üzerinde statik ve modern web arayüzü)
+  arayuz:
+    build:
+      context: ../arayuz
+      dockerfile: Dockerfile
+    container_name: gridup_arayuz
+    ports:
+      - "80:80"
+    restart: always
+    environment:
+      - TZ=Europe/Istanbul
+    networks:
+      - gridup_network
+    depends_on:
+      - mock_api
+      - modbus_server
+      - alarm_service
+
+  # 2. Saha & Hücre Simülasyon / Mock API Sunucusu
+  mock_api:
+    build:
+      context: ..
+      dockerfile: Dockerfile.mock
+    container_name: gridup_mock_api
+    ports:
+      - "8000:8000"
+    restart: always
+    environment:
+      - TZ=Europe/Istanbul
+    networks:
+      - gridup_network
+
+  # 3. SCADA Entegrasyonu için Modbus TCP Sunucusu (Port: 5020)
+  modbus_server:
+    build:
+      context: ../modbus
+      dockerfile: Dockerfile
+    container_name: gridup_modbus
+    ports:
+      - "5020:5020"
+    restart: always
+    environment:
+      - API_URL=http://mock_api:8000/api
+      - TZ=Europe/Istanbul
+    networks:
+      - gridup_network
+    depends_on:
+      - mock_api
+
+  # 4. Anomali Dinleyici & Telegram Bildirim Servisi (Anti-flapping)
+  alarm_service:
+    build:
+      context: ../alarm
+      dockerfile: Dockerfile
+    container_name: gridup_alarm
+    restart: always
+    environment:
+      - API_URL=http://mock_api:8000/api/anomaliler
+      - COOLDOWN_SECONDS=300
+      - LOG_LEVEL=INFO
+      - TZ=Europe/Istanbul
+    networks:
+      - gridup_network
+    depends_on:
+      - mock_api
+
+
+networks:
+  gridup_network:
+    driver: bridge
