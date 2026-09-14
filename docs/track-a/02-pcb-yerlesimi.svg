@@ -103,7 +103,7 @@
     <rect x="614" y="226" width="34" height="21" class="back" style="stroke:#ad1457"/><text x="631" y="222" text-anchor="middle" class="sub">D1</text>
     <rect x="614" y="258" width="34" height="21" class="back" style="stroke:#ad1457"/><text x="631" y="292" text-anchor="middle" class="sub">D2</text>
     <rect x="600" y="196" width="16" height="8" class="back" style="stroke:#ad1457"/><text x="620" y="204" class="sub">R_şarj</text>
-    <rect x="600" y="316" width="16" height="8" class="back" style="stroke:#ad1457"/><rect x="600" y="328" width="16" height="8" class="back" style="stroke:#ad1457"/><text x="596" y="350" text-anchor="end" class="sub">bölücü→GPIO1</text>
+    <rect x="600" y="316" width="16" height="8" class="back" style="stroke:#ad1457"/><rect x="600" y="328" width="16" height="8" class="back" style="stroke:#ad1457"/><text x="596" y="357" text-anchor="end" class="sub">bölücü→GPIO1</text>
 
     <!-- süperkapasitör Ø21,5 merkez (65,75, 56,25) — sınırdan 5,5 mm -->
     <circle cx="526" cy="450" r="86" class="back" style="stroke:#f9a825;stroke-width:2.5"/>
