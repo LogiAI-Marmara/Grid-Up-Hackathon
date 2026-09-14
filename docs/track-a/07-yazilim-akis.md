@@ -11,16 +11,18 @@ firmware akışından türetilmiştir. Kod tarafı PR #1 ile teslim edilmiştir.
 
 ```mermaid
 flowchart TD
-    START(["UYAN<br/>(paket çevrimi başlar)"]) --> W["Dünyayı oku<br/>dış hava, yük profili"]
+    START(["UYAN<br/>(paket çevrimi başlar)"]) --> W["Dünyayı oku<br/>dış hava, yük profili<br/>(simülatörde; sahada fiziksel dünya)"]
     W --> A["AKIM OKU<br/>2 sn alt örnekleme<br/>→ 10 sn ortalaması<br/>L1 / L2 / L3 / nötr"]
     A --> D["KABİN HAVASI<br/>sıcaklık + iç bağıl nem"]
     D --> ARC["ARK SAYACI<br/>TVOC-2 trip sayacı<br/>(olay bazlı, periyot yok)"]
     ARC --> CLK["MODÜL SAATİ<br/>serbest çalışır → kayma<br/>zaman damgası üret"]
-    CLK --> TERM{"Bu çevrimde<br/>termal okunacak mı?<br/>(her 20 sn)"}
+    CLK --> LP{"Düşük güç?<br/>(yedek besleme, kritik)"}
+    LP -->|"Evet — termal ve<br/>ölçümler atlanır"| ASM
+    LP -->|"Hayır"| TERM{"Bu çevrimde<br/>termal okunacak mı?<br/>(her 20 sn)"}
 
     TERM -->|"Hayır"| ASM
     TERM -->|"Evet"| FRAME["768 DEĞER OKU<br/>32×24 termal kare"]
-    FRAME --> SUM["ÖZETLE<br/>maks + konumu + 4 bölge ort.<br/>(768 → 3 değer)"]
+    FRAME --> SUM["ÖZETLE<br/>maks + konumu + 4 bölge ort.<br/>(768 → 7 sayı; kare ort. ayrı satır)"]
     SUM --> TH{"EŞİK KONTROLÜ<br/>tam kare eklensin mi?"}
 
     TH -->|"Tetik yok"| ASM
@@ -29,7 +31,7 @@ flowchart TD
     RATE -->|"Hayır / ark"| ATTACH["TAM KAREYİ EKLE<br/>768 değer = kanıt"]
     ATTACH --> ASM
 
-    ASM["ÖLÇÜM SATIRLARINI KUR<br/>(sözleşme ① formatı)"]
+    ASM["ÖLÇÜM SATIRLARINI KUR<br/>(sözleşme ① formatı)<br/>ark olayı varsa ark_olay satırı"]
     ASM --> CEVRE{"Ortam/nem çevrimi?<br/>(her 60 sn)"}
     CEVRE -->|"Evet"| ENV["Ortam sıcaklık + nem ekle"]
     CEVRE -->|"Hayır"| HEALTH
@@ -44,7 +46,7 @@ flowchart TD
     classDef frame fill:#ffe0b2,stroke:#e65100,color:#000
     classDef out fill:#c8e6c9,stroke:#2e7d32,color:#000
     class W,A,D,ARC,CLK,ASM,ENV,HEALTH read
-    class TERM,TH,RATE,CEVRE dec
+    class LP,TERM,TH,RATE,CEVRE dec
     class FRAME,SUM,ATTACH frame
     class START,SEND out
 ```
@@ -156,7 +158,10 @@ Her pakette `modul_durum` gönderilir:
 | `yazilim_surumu` | semver | Sürüm takibi |
 
 **Ek davranış (koddan):** Yedek beslemeye geçildiğinde verici **düşük güçte** çalışır ve sinyal
-değeri 4 dBm zayıflatılır — enerji tasarrufu.
+değeri 4 dBm zayıflatılır — enerji tasarrufu. Süperkapasitör kritik seviyeye inince (`dusuk_guc`)
+modül termal diziyi ve ölçüm satırlarını **tamamen atlar**; yalnız `modul_durum` (ve varsa ark olayı)
+gönderilir — *"termal dizi ile radyo aynı anda karşılanamaz, modül ölmekte olduğunu söyleyen kalp
+atışı dışında her şeyi bırakır"* (`senaryo.py`). Diyagramdaki **Düşük güç?** dalı budur.
 
 **Kalite alanı:** Sensör arızası senaryosunda (`sensor_arizasi`) ölçüm değeri ya `null` olur ve
 `kalite: yok` işaretlenir, ya da mantıksız bir değer `kalite: supheli` ile işaretlenir. Kural:
@@ -186,6 +191,7 @@ kullanmak, demoda *"bu yerel saat mi UTC mi"* sorusunu tamamen ortadan kaldırı
 | Kabin havası | adım 4 — `_kabin.ilerle()`, `ic_bagil_nem()` |
 | Ark sayacı | adım 5 — `ark_tetik` |
 | Modül saati | adım 6 — `saat_kayma_ppm` |
+| Düşük güç? | `b.dusuk_guc` — adım 7 ve 8'i atlar |
 | Termal oku + özetle | adım 7 — `dizi.kare()`, `TermalDizi.ozet()` |
 | Eşik kontrolü | `_kare_gerekli()` |
 | Ölçüm satırlarını kur | adım 8 |

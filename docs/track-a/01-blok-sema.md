@@ -29,6 +29,7 @@ flowchart TB
         subgraph GUC["Besleme"]
             PSU["AC/DC modül<br/>RECOM RAC05-05SK/277<br/>230 V → 5 V · −40…+90 °C"]
             SC["Yedek depo<br/>Süperkapasitör<br/>(float şarjlı)"]
+            LDO["3.3 V regülatör<br/>(LDO — MCU ve sensörler)"]
         end
 
         ANT["Dış anten konnektörü<br/>U.FL → panel SMA"]
@@ -46,9 +47,10 @@ flowchart TB
     CT -->|"analog / burden"| MCU
     RX -->|"UART"| MCU
 
-    PSU -->|"5 V"| MCU
+    PSU -->|"5 V"| LDO
     PSU -->|"float şarj"| SC
-    SC -->|"kesintide"| MCU
+    SC -->|"kesintide"| LDO
+    LDO -->|"3.3 V"| MCU
 
     MCU -->|"U.FL kablosu"| ANT
     ANT -.->|"kablosuz (2.4 GHz)"| GWA
@@ -61,7 +63,7 @@ flowchart TB
     class T,TH,EXT sensor
     class AN,CT,ARC olcum
     class MCU,RX mcu
-    class PSU,SC,ANT guc
+    class PSU,SC,LDO,ANT guc
     class GWA disi
 ```
 
