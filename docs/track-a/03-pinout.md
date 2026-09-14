@@ -16,7 +16,7 @@ Arayüz özeti ve blok şema için bkz. [1. doküman](01-blok-sema.md).
 *(Şema §3.1 pin tablosunun birebir görsel karşılığıdır: sol tarafta I²C sensörler ve CT ön ucu,
 sağda RS-485/Modbus ve anten, altta besleme zinciri. Tabloda olmayan tek ekleme **GPIO1 besleme
 algılama** girişidir — aşağıdaki tabloya işlenmiştir. Pasif değerler tipik başlangıç değerleridir;
-üretim çizimi değildir, §1.4.)*
+üretim çizimi değildir, §1.4. Parçaların kart üzerindeki yeri: [02-pcb-yerlesimi.svg](02-pcb-yerlesimi.svg).)*
 
 ---
 

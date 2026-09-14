@@ -1,0 +1,172 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1500 720" width="100%" style="max-width:1200px;background:#fff;font-family:Arial,Helvetica,sans-serif;font-size:12px">
+  <!--
+    PCB / kart yerleşimi — kavramsal (T2 "kart yapısı"). Ölçek 1 mm = 8 birim, kart 110 × 70 mm.
+    Bakış: ÖN yüz (kutu penceresine bakan taraf). Düz çizgi = ön yüz parçası, kesikli = arka yüz
+    (kart üzerinden görünür). Konumlar 04-kutu-krokisi.svg ile aynı mm'lerdedir:
+    IR pencere / MLX90640 merkezi (60, 37.5) · membran vent / SHT31 (12, 44) · LED (30, 10).
+    Parça ölçüleri datasheet'ten: ESP32-S3-WROOM-1U 18×19,2 · MLX90640 TO-39 Ø9 · RAC05-05SK 33,8×20,3×13 ·
+    süperkap Ø21,5 · MAX3485 SOIC-8 · klemensler 5,08 / 3,5 mm adım. Üretim çizimi değildir (§1.4).
+  -->
+  <defs>
+    <pattern id="pcb" width="16" height="16" patternUnits="userSpaceOnUse"><rect width="16" height="16" fill="#e8f5e9"/><circle cx="8" cy="8" r="1" fill="#a5d6a7"/></pattern>
+    <pattern id="hv" width="10" height="10" patternTransform="rotate(45)" patternUnits="userSpaceOnUse"><line x1="0" y1="0" x2="0" y2="10" stroke="#ef6c00" stroke-width="1.5" opacity="0.5"/></pattern>
+    <marker id="dim" markerWidth="10" markerHeight="10" refX="5" refY="3" orient="auto-start-reverse"><path d="M0,0 L6,3 L0,6 z" fill="#455a64"/></marker>
+  </defs>
+  <style>
+    .front{fill:#fff;stroke:#263238;stroke-width:2}
+    .back{fill:none;stroke:#546e7a;stroke-width:1.8;stroke-dasharray:6 3}
+    .lbl{font-size:11px;fill:#37474f}
+    .sub{font-size:10px;fill:#607d8b}
+    .ttl{font-size:13px;font-weight:700;fill:#263238}
+    .note{font-size:12px;fill:#37474f}
+    .warn{fill:#c62828}
+  </style>
+
+  <text x="750" y="34" text-anchor="middle" font-size="24" font-weight="700" fill="#263238">Kart yerleşimi — PCB 110 × 70 mm, ön yüzden bakış (1 mm = 8 birim)</text>
+
+  <!-- ===================== KART ===================== -->
+  <g transform="translate(80,80)">
+    <rect x="0" y="0" width="880" height="560" rx="16" fill="url(#pcb)" stroke="#2e7d32" stroke-width="3"/>
+
+    <!-- 230 V birincil bölge (x 82–110 mm) + izolasyon sınırı -->
+    <rect x="656" y="0" width="224" height="560" rx="16" fill="url(#hv)"/>
+    <line x1="656" y1="0" x2="656" y2="560" stroke="#ef6c00" stroke-width="3" stroke-dasharray="10 5"/>
+    <rect x="652" y="240" width="8" height="320" fill="#fff" stroke="#ef6c00" stroke-width="1.5"/>
+    <text x="768" y="290" text-anchor="middle" class="lbl warn" font-weight="700">230 V BİRİNCİL BÖLGE</text>
+    <text x="768" y="306" text-anchor="middle" class="sub">izolasyon sınırı ≥ 6 mm creepage</text>
+    <text x="768" y="320" text-anchor="middle" class="sub">alt yarıda frezelenmiş yarık (slot)</text>
+    <text x="768" y="334" text-anchor="middle" class="sub">RAC05 izolasyon bariyeri sınırın üstünde</text>
+
+    <!-- montaj delikleri M3, kenardan 3,5 mm -->
+    <g fill="#fff" stroke="#263238" stroke-width="2">
+      <circle cx="28" cy="28" r="13"/><circle cx="852" cy="28" r="13"/><circle cx="28" cy="532" r="13"/><circle cx="852" cy="532" r="13"/>
+    </g>
+    <g fill="none" stroke="#78909c" stroke-width="1" stroke-dasharray="3 2">
+      <circle cx="28" cy="28" r="22"/><circle cx="852" cy="28" r="22"/><circle cx="28" cy="532" r="22"/><circle cx="852" cy="532" r="22"/>
+    </g>
+    <text x="60" y="20" class="sub">M3 × 4, kenardan 3,5 mm</text>
+
+    <!-- ===== ÖN YÜZ PARÇALARI (düz) ===== -->
+    <!-- MLX90640 TO-39 merkez (60, 37.5) -->
+    <circle cx="480" cy="300" r="60" fill="none" stroke="#c62828" stroke-width="2" stroke-dasharray="6 3"/>
+    <circle cx="480" cy="300" r="36" class="front" style="fill:#37474f"/>
+    <circle cx="480" cy="300" r="14" fill="#90a4ae"/>
+    <text x="480" y="372" text-anchor="middle" class="lbl" font-weight="700">MLX90640ESF-BAA-000-TU</text>
+    <text x="480" y="386" text-anchor="middle" class="sub">TO-39 Ø9 / I²C 0x33 / merkez (60, 37,5) mm</text>
+    <text x="480" y="400" text-anchor="middle" class="sub warn">Ø15 IR pencere ekseni — çevresinde yüksek parça yok</text>
+    <!-- pull-up + kuplaj -->
+    <rect x="352" y="188" width="16" height="8" class="front"/><rect x="352" y="202" width="16" height="8" class="front"/>
+    <text x="376" y="200" class="sub">2× 4,7k pull-up (SDA/SCL)</text>
+    <rect x="400" y="188" width="10" height="8" class="front"/><text x="414" y="196" class="sub">100 nF</text>
+
+    <!-- SHT31 (12, 44) — vent hizası -->
+    <rect x="64" y="320" width="64" height="64" fill="none" stroke="#1565c0" stroke-width="1.5" stroke-dasharray="4 2"/>
+    <rect x="86" y="342" width="20" height="20" class="front" style="fill:#1565c0"/>
+    <text x="96" y="404" text-anchor="middle" class="lbl" font-weight="700">SHT31-DIS-B</text>
+    <text x="96" y="418" text-anchor="middle" class="sub">I²C 0x44 / vent hizası</text>
+    <text x="96" y="432" text-anchor="middle" class="sub">ısı kaynaklarından uzak köşe</text>
+    <!-- termal izolasyon yarığı SHT31 çevresi -->
+    <path d="M60 316 h72 v72" fill="none" stroke="#1565c0" stroke-width="2"/>
+    <text x="140" y="330" class="sub" fill="#1565c0">ısı yarığı (kart yalıtımı)</text>
+
+    <!-- LED (30, 10) -->
+    <circle cx="240" cy="80" r="8" class="front" style="fill:#43a047"/>
+    <text x="240" y="104" text-anchor="middle" class="sub">durum LED</text>
+
+    <!-- EN RC + buton -->
+    <rect x="216" y="140" width="16" height="8" class="front"/><rect x="216" y="152" width="16" height="8" class="front"/>
+    <rect x="240" y="138" width="24" height="24" class="front"/>
+    <text x="276" y="154" class="sub">EN: 10k + 1µF + reset</text>
+
+    <!-- ===== ARKA YÜZ PARÇALARI (kesikli) ===== -->
+    <!-- ESP32-S3-WROOM-1U (6..24, 6..25.2) -->
+    <rect x="48" y="48" width="144" height="154" class="back"/>
+    <rect x="60" y="60" width="120" height="100" class="back"/>
+    <circle cx="72" cy="72" r="6" fill="#ffd54f" stroke="#546e7a" stroke-width="1.5"/>
+    <text x="120" y="222" text-anchor="middle" class="lbl" font-weight="700">ESP32-S3-WROOM-1U-N8</text>
+    <text x="120" y="236" text-anchor="middle" class="sub">18 × 19,2 / arka yüz / U.FL ● kart kenarında</text>
+    <text x="120" y="250" text-anchor="middle" class="sub">pigtail → kutu SMA'sı</text>
+
+    <!-- RAC05-05SK (66..99.8, 6..26.3) — izolasyon sınırını köprüler -->
+    <rect x="528" y="48" width="270" height="162" class="back" style="stroke:#ad1457"/>
+    <text x="663" y="120" text-anchor="middle" class="lbl" font-weight="700" fill="#ad1457">RECOM RAC05-05SK/277</text>
+    <text x="663" y="134" text-anchor="middle" class="sub">33,8 × 20,3 × 13 / arka yüz</text>
+    <text x="663" y="148" text-anchor="middle" class="sub">sol uç 5 V ikincil, sağ uç 230 V birincil</text>
+    <text x="536" y="70" class="sub">+5V / GND</text><text x="790" y="70" class="sub" text-anchor="end">L / N</text>
+
+    <!-- birincil: F1, MOV, 230 V klemens -->
+    <rect x="704" y="360" width="49" height="22" class="back" style="stroke:#ef6c00"/><text x="728" y="398" text-anchor="middle" class="sub">F1 (SMD)</text>
+    <circle cx="800" cy="372" r="28" class="back" style="stroke:#ef6c00"/><text x="800" y="416" text-anchor="middle" class="sub">MOV Ø7</text>
+    <rect x="736" y="496" width="82" height="64" class="back" style="stroke:#ef6c00"/><text x="777" y="484" text-anchor="middle" class="lbl">230 V klemens</text><text x="777" y="472" text-anchor="middle" class="sub">2 kutup, 5,08 mm</text>
+
+    <!-- ikincil güç: D1, LDO, R_şarj, D2, bölücü -->
+    <rect x="560" y="224" width="52" height="56" class="back" style="stroke:#ad1457"/><text x="586" y="296" text-anchor="middle" class="sub">LDO 3.3 V</text><text x="586" y="308" text-anchor="middle" class="sub">SOT-223</text>
+    <rect x="624" y="226" width="34" height="21" class="back" style="stroke:#ad1457"/><text x="641" y="222" text-anchor="middle" class="sub">D1</text>
+    <rect x="624" y="258" width="34" height="21" class="back" style="stroke:#ad1457"/><text x="641" y="292" text-anchor="middle" class="sub">D2</text>
+    <rect x="600" y="196" width="16" height="8" class="back" style="stroke:#ad1457"/><text x="620" y="204" class="sub">R_şarj</text>
+    <rect x="600" y="316" width="16" height="8" class="back" style="stroke:#ad1457"/><rect x="600" y="328" width="16" height="8" class="back" style="stroke:#ad1457"/><text x="620" y="332" class="sub">bölücü → GPIO1</text>
+
+    <!-- süperkapasitör Ø21,5 merkez (70, 50) -->
+    <circle cx="560" cy="400" r="86" class="back" style="stroke:#f9a825;stroke-width:2.5"/>
+    <text x="560" y="396" text-anchor="middle" class="lbl" font-weight="700" fill="#f57f17">Süperkapasitör</text>
+    <text x="560" y="410" text-anchor="middle" class="sub">Ø21,5 / arka yüz / 02-bom §2.5</text>
+    <text x="560" y="424" text-anchor="middle" class="sub">tel uçlu, karta yatık</text>
+
+    <!-- MAX3485 + 120 Ω + RS-485 klemens -->
+    <rect x="240" y="416" width="40" height="48" class="back" style="stroke:#2e7d32"/><text x="260" y="404" text-anchor="middle" class="sub">MAX3485</text>
+    <rect x="290" y="440" width="8" height="16" class="back" style="stroke:#2e7d32"/><text x="304" y="452" class="sub">120 Ω</text>
+    <rect x="176" y="496" width="122" height="64" class="back" style="stroke:#2e7d32"/><text x="237" y="484" text-anchor="middle" class="lbl">RS-485 klemens A / B / GND</text>
+
+    <!-- CT ön ucu: burden ×4 + bias, 8 kutuplu klemens -->
+    <g class="back" style="stroke:#6a1b9a">
+      <rect x="320" y="440" width="16" height="8"/><rect x="344" y="440" width="16" height="8"/><rect x="368" y="440" width="16" height="8"/><rect x="392" y="440" width="16" height="8"/>
+      <rect x="416" y="436" width="16" height="16"/>
+    </g>
+    <text x="376" y="430" text-anchor="middle" class="sub" fill="#6a1b9a">4× R_burden + bias (3V3/2)</text>
+    <rect x="320" y="504" width="224" height="56" class="back" style="stroke:#6a1b9a"/><text x="432" y="492" text-anchor="middle" class="lbl">CT klemens 8 kutup, 3,5 mm — L1 L2 L3 N (analizör yoksa)</text>
+
+    <!-- genişleme başlığı 2×5 (6..19, 56..61) -->
+    <rect x="48" y="448" width="104" height="40" class="back" style="stroke:#1565c0"/>
+    <g fill="#1565c0"><circle cx="58" cy="458" r="3"/><circle cx="78" cy="458" r="3"/><circle cx="98" cy="458" r="3"/><circle cx="118" cy="458" r="3"/><circle cx="138" cy="458" r="3"/><circle cx="58" cy="478" r="3"/><circle cx="78" cy="478" r="3"/><circle cx="98" cy="478" r="3"/><circle cx="118" cy="478" r="3"/><circle cx="138" cy="478" r="3"/></g>
+    <text x="100" y="508" text-anchor="middle" class="lbl" fill="#1565c0">genişleme 2×5 (boş)</text>
+    <text x="100" y="522" text-anchor="middle" class="sub">I²C / UART / 3V3 / 5V / GND — §7.1 payı</text>
+
+    <!-- ölçüler -->
+    <line x1="0" y1="590" x2="880" y2="590" stroke="#455a64" stroke-width="1.5" marker-start="url(#dim)" marker-end="url(#dim)"/>
+    <text x="440" y="610" text-anchor="middle" class="note">110 mm</text>
+    <line x1="-30" y1="0" x2="-30" y2="560" stroke="#455a64" stroke-width="1.5" marker-start="url(#dim)" marker-end="url(#dim)"/>
+    <text x="-40" y="280" text-anchor="middle" class="note" transform="rotate(-90 -40 280)">70 mm</text>
+  </g>
+
+  <!-- ===================== NOTLAR ===================== -->
+  <g transform="translate(1000,80)">
+    <rect x="0" y="0" width="460" height="560" fill="#fff" stroke="#90a4ae" stroke-width="2"/>
+    <text x="16" y="28" class="ttl">Yerleşim kuralları</text>
+    <g class="note">
+      <text x="16" y="56"><tspan font-weight="700">Bakış:</tspan> ön yüz = kutu penceresine bakan taraf.</text>
+      <text x="16" y="72">Düz = ön yüz parçası, kesikli = arka yüz.</text>
+      <text x="16" y="100"><tspan font-weight="700">Ön yüz</tspan> (pencere ile PCB arası ~6 mm): yalnız</text>
+      <text x="16" y="116">alçak parçalar — MLX90640 (TO-39), SHT31, LED,</text>
+      <text x="16" y="132">pasifler. IR pencere ekseninde Ø15 boş alan.</text>
+      <text x="16" y="160"><tspan font-weight="700">Arka yüz</tspan> (~40 mm derinlik): ESP32 modülü, RAC05</text>
+      <text x="16" y="176">(13 mm), süperkapasitör (Ø21,5), klemensler,</text>
+      <text x="16" y="192">MAX3485. Kablolar kutunun alt yüzünden girer.</text>
+      <text x="16" y="220"><tspan font-weight="700">Güvenlik:</tspan> 230 V birincil bölge sağ şeritte,</text>
+      <text x="16" y="236">≥ 6 mm creepage + alt yarıda yarık; RAC05'in</text>
+      <text x="16" y="252">izolasyon bariyeri sınırı köprüler. Sigorta + MOV</text>
+      <text x="16" y="268">birincil tarafta.</text>
+      <text x="16" y="296"><tspan font-weight="700">Isı:</tspan> SHT31 kartın sol-alt köşesinde, RAC05 ve</text>
+      <text x="16" y="312">LDO'dan en uzak noktada; çevresinde ısı yarığı.</text>
+      <text x="16" y="328">MLX90640 kendi sıcaklığını ölçer (Ta), ısıdan uzak.</text>
+      <text x="16" y="356"><tspan font-weight="700">RF:</tspan> ESP32 kart kenarında, U.FL pigtail kısa;</text>
+      <text x="16" y="372">dahili anten kullanılmadığı için keepout yok.</text>
+      <text x="16" y="400"><tspan font-weight="700">Katman:</tspan> 2 katman, alt katman GND dolgu;</text>
+      <text x="16" y="416">birincil bölgede dolgu yok (yalıtım).</text>
+      <text x="16" y="444"><tspan font-weight="700">Montaj:</tspan> 4× M3, kutu içi dikmelere; kart kutuya</text>
+      <text x="16" y="460">04-kutu-krokisi B paneline göre oturur.</text>
+      <text x="16" y="488"><tspan font-weight="700">Konum uyumu:</tspan> pencere (60, 37,5) / vent (12, 44) /</text>
+      <text x="16" y="504">LED (30, 10) mm — 04-kutu-krokisi ile aynı.</text>
+    </g>
+    <text x="16" y="540" class="sub">Kavramsal yerleşim — üretim çizimi değildir (§1.4). Pasif değerler 03-baglanti-semasi ile aynı.</text>
+  </g>
+</svg>

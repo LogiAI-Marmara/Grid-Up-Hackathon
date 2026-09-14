@@ -31,7 +31,7 @@
 
 | # | Kalem | Adet | Birim $ | Birim ₺ | Not |
 |---|---|---|---|---|---|
-| 8 | PCB (küçük, 2 katman) | 1 | ~3,00 | ~146 | Kutu içi ölçülere göre |
+| 8 | PCB (110 × 70 mm, 2 katman) | 1 | ~3,00 | ~146 | Kart yerleşimi: [02-pcb-yerlesimi.svg](02-pcb-yerlesimi.svg) (bkz. 2.2a) |
 | 9 | Kutu (IP54) | 1 | ~8,00 | ~389 | Ölçü revizyonu bekliyor — bkz. [4. doküman](04-mekanik-yerlesim.md) |
 | 10 | Kızılötesi açıklık / pencere | 1 | ~3,00 | ~146 | Malzeme kararı [4. doküman](04-mekanik-yerlesim.md) |
 | 11 | Klemens, kablo, konnektör | — | ~5,00 | ~243 | |
@@ -41,6 +41,17 @@
 **Fiyat güvenilirliği:** 1–4 ve 7 numaralı kalemler **distribütör liste fiyatıdır** (doğrulanmış).
 5, 6 ve 8–12 numaralı kalemler **tahmindir** (~ işaretiyle gösterilmiştir) ve BOM kesinleştirilirken
 tedarik araştırması gerektirir.
+
+---
+
+### 2.2a Kart yerleşimi (T2 "PCB/kart yapısı")
+
+![PCB yerleşimi — 110 × 70 mm, ön yüzden bakış](02-pcb-yerlesimi.svg)
+
+*(Kavramsal yerleşim, 1 mm = 8 birim. Ön yüz kutu penceresine bakar: MLX90640, SHT31, LED ve pasifler;
+arka yüzde ESP32, RAC05, süperkapasitör, klemensler. 230 V birincil bölge sağ şeritte, ≥ 6 mm creepage
+ve yarıkla ayrılmış. Konumlar [04-kutu-krokisi.svg](04-kutu-krokisi.svg) ile aynı mm'lerdedir; hatlar
+[03-baglanti-semasi.svg](03-baglanti-semasi.svg) ile aynıdır.)*
 
 ---
 
