@@ -151,15 +151,17 @@ esnekliği bırakmıştır.
 
 ### Kutu krokisi (kavramsal)
 
-![Modül kutusu — ön yüz, yan görünüş, alt yüz, arka yüz, izometrik](04-kutu-krokisi.svg)
+![Modül kutusu — ön yüz, yan kesit, iç görünüş, arka yüz, alt yüz, izometrik](04-kutu-krokisi.svg)
 
-*(1 mm = 4 birim; 120 × 80 × 50 mm. Kaynak: Fusion 360 modeli `GridUp-Kutu.f3d`; görünüşler modelden
-projeksiyonla üretilmiştir, gizli çizgiler ayıklanmıştır. Beş görünüş: **A** ön yüz — IR pencere yuvası
-(Ø23 yükseltilmiş, 3 mm konik pah) ve SHT31 membran vent; **B** yan görünüş — kapak 4 mm, DIN klips;
-**E** alt yüz — 230 V rakor, RS-485, CT girişi, SMA anten; **D** arka yüz — DIN klips, oval M5 yuvalar,
-köşe mıknatıs pedleri (yalnız hizalama, §4.8); **C** izometrik. PCB kutu içinde (5, 5) mm ofsetlidir;
-kart üstü konumlar [02-pcb-yerlesimi.svg](02-pcb-yerlesimi.svg)'de PCB koordinatıyla verilir.
-Üretim çizimi değildir — §1.4.)*
+*(1 mm = 4 birim; 120 × 80 × 50 mm. Kaynak: Fusion 360 modelleri `GridUp-Kutu.f3d` + `GridUp-PCB.f3d`
+(montaj `GridUp-Kutu-Montaj.f3d`); görünüşler modelden projeksiyonla üretilmiş, gizli çizgiler ayıklanmış,
+kesit X = 60 düzleminden alınmıştır. Altı görünüş: **A** ön yüz — IR pencere yuvası (Ø23 yükseltilmiş,
+3 mm konik pah) ve SHT31 membran vent; **B** yan kesit — TO-39 sensörün pencereye dayalı yuvası, PCB,
+arkadaki hacimli parçalar (RAC05, süperkapasitör yatık); **C** iç görünüş — kapak açık, PCB 110 × 70 ve
+230 V bölgesi, arka yüz parçaları kesikli; **D** arka yüz — DIN klips, oval M5 yuvalar, köşe mıknatıs
+pedleri (yalnız hizalama, §4.8); **E** alt yüz — 230 V rakor, RS-485, CT girişi, SMA anten;
+**F** izometrik. PCB kutu içinde (5, 5, 39,4) mm; kart üstü konumlar
+[02-pcb-yerlesimi.svg](02-pcb-yerlesimi.svg)'de PCB koordinatıyla verilir. Üretim çizimi değildir — §1.4.)*
 
 **Dokümana yazılacak ifade:**
 > Kutunun nihai ölçüsü, bileşen yerleşimi kesinleştirildiğinde ~12 × 8 × 5 cm mertebesinde
