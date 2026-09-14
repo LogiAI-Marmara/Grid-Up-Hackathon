@@ -6,12 +6,12 @@
     Koordinat: SVG (x, y aşağı) = model (X, 70 − Y). Kart kutu içinde (5, 5) mm ofsetli → PCB koordinatı = kutu koordinatı − 5 mm.
     Ön yüz (Z 1,6 →): MLX90640 TO-39 Ø9 × 6 merkez (55, 37,5) [kutu IR pencere (60, 42,5)] / SHT31 2,5 × 2,5 (7, 31) [kutu vent (12, 36)] /
       LED Ø3 (25, 65) [kutu (30, 70)] / pull-up + 100 nF (37,5, 42–46,5) / EN RC (29, 50–52,5) + reset 3 × 3 (32–35, 49,75–52,75).
-    Arka yüz (Z 0 ←): ESP32-S3-WROOM-1U 18 × 19,2 × 3,2 (8–26, 42,8–62) / RAC05-05SK 33,8 × 20,3 × 13 (66–99,8, 43,75–64,05) /
+    Arka yüz (Z 0 ←): ESP32-S3-WROOM-1U 18 × 19,2 × 3,2 (10–28, 40,8–60) / RAC05-05SK 33,8 × 20,3 × 13 (64–97,8, 43,75–64,05) /
       F1 (88–94,1, 22,25–25) / MOV 7 × 4 × 8 (96,5–103,5, 21,5–25,5) / 230 V klemens 2p 5,08 (89–99,25, 0,5–8,5) /
-      LDO SOT-223 (70–76,5, 35–42) / D1 (76,75–81, 39,1–41,75) / D2 (76,75–81, 35,1–37,75) / R_şarj (75–77, 44,5–45,5) / bölücü (75–77, 28–30,5) /
+      LDO SOT-223 (70–76,5, 35–42) / D1 (76,75–81, 39,1–41,75) / D2 (76,75–81, 35,1–37,75) / R_şarj (60,5–62,5, 44,5–45,5) / bölücü (75–77, 28–30,5) /
       süperkap Ø21,5 × 25 yatık, eksen Y, merkez (65,75, 13,75), X 55–76,5 (sınırdan 5,5 mm) / MAX3485 SOIC-8 (41,25–46,25, 14–20) / 120 Ω (47,5–48,5, 15–17) /
-      RS-485 klemens 3p (1–9, 10–25,25) / R_burden ×4 (25–36, 14–15) + bias (37–39, 13–15) / CT klemens 8p 3,5 (25–53, 0,5–7,5) / genişleme 2×5 (11–24, 6,25–11,25).
-    Kart: M3 Ø3,2 (7, 7) (103, 7) (7, 63) (103, 63) → kutu dikmeleri Ø6 kutu (12, 12) vb.; izolasyon yarığı 1 mm (81,5–82,5, Y 0–40); 230 V bölgesi X ≥ 82.
+      RS-485 klemens 3p (1–9, 11–26,25) / R_burden ×4 (25–36, 14–15) + bias (37–39, 13–15) / CT klemens 8p 3,5 (25–53, 0,5–7,5) / genişleme 2×5 (11–24, 6,25–11,25).
+    Kart: M3 Ø3,2 (7, 7) (103, 7) (7, 63) (103, 63) → kutu dikmeleri Ø6 kutu (12, 12) vb.; köşelerde Ø8 boşluk (kapak vida direği Ø7); izolasyon yarığı 1 mm (81,5–82,5, Y 0–40); 230 V bölgesi X ≥ 82.
     Üretim çizimi değildir (§1.4).
   -->
   <defs>
@@ -38,14 +38,14 @@
   <circle cx="904" cy="136" r="22" fill="none" stroke="#78909c" stroke-width="1" stroke-dasharray="3 2"/>
   <text x="170" y="100" font-size="10" fill="#607d8b">M3 × 4 (7, 7) — kutu dikmeleri Ø6</text>
   <g fill="none" stroke-width="1.8" stroke-dasharray="6 3" stroke-linejoin="round">
-<polyline points="144,297.6 288,297.6" stroke="#546e7a"/>
-<polyline points="288,297.6 288,144" stroke="#546e7a"/>
-<polyline points="288,144 144,144" stroke="#546e7a"/>
-<polyline points="144,144 144,297.6" stroke="#546e7a"/>
-<polyline points="608,290 878.4,290" stroke="#ad1457"/>
-<polyline points="878.4,290 878.4,127.6" stroke="#ad1457"/>
-<polyline points="878.4,127.6 608,127.6" stroke="#ad1457"/>
-<polyline points="608,127.6 608,290" stroke="#ad1457"/>
+<polyline points="160,313.6 304,313.6" stroke="#546e7a"/>
+<polyline points="304,313.6 304,160" stroke="#546e7a"/>
+<polyline points="304,160 160,160" stroke="#546e7a"/>
+<polyline points="160,160 160,313.6" stroke="#546e7a"/>
+<polyline points="592,290 862.4,290" stroke="#ad1457"/>
+<polyline points="862.4,290 862.4,127.6" stroke="#ad1457"/>
+<polyline points="862.4,127.6 592,127.6" stroke="#ad1457"/>
+<polyline points="592,127.6 592,290" stroke="#ad1457"/>
 <polyline points="784,462 832.8,462" stroke="#ef6c00"/>
 <polyline points="832.8,462 832.8,440" stroke="#ef6c00"/>
 <polyline points="832.8,440 784,440" stroke="#ef6c00"/>
@@ -70,10 +70,10 @@
 <polyline points="728,359.2 728,338" stroke="#ad1457"/>
 <polyline points="728,338 694,338" stroke="#ad1457"/>
 <polyline points="694,338 694,359.2" stroke="#ad1457"/>
-<polyline points="680,284 696,284" stroke="#ad1457"/>
-<polyline points="696,284 696,276" stroke="#ad1457"/>
-<polyline points="696,276 680,276" stroke="#ad1457"/>
-<polyline points="680,276 680,284" stroke="#ad1457"/>
+<polyline points="564,284 580,284" stroke="#ad1457"/>
+<polyline points="580,284 580,276" stroke="#ad1457"/>
+<polyline points="580,276 564,276" stroke="#ad1457"/>
+<polyline points="564,276 564,284" stroke="#ad1457"/>
 <polyline points="680,404 696,404" stroke="#ad1457"/>
 <polyline points="696,404 696,396" stroke="#ad1457"/>
 <polyline points="696,396 680,396" stroke="#ad1457"/>
@@ -94,10 +94,10 @@
 <polyline points="468,520 468,504" stroke="#2e7d32"/>
 <polyline points="468,504 460,504" stroke="#2e7d32"/>
 <polyline points="460,504 460,520" stroke="#2e7d32"/>
-<polyline points="88,560 152,560" stroke="#2e7d32"/>
-<polyline points="152,560 152,438" stroke="#2e7d32"/>
-<polyline points="152,438 88,438" stroke="#2e7d32"/>
-<polyline points="88,438 88,560" stroke="#2e7d32"/>
+<polyline points="88,552 152,552" stroke="#2e7d32"/>
+<polyline points="152,552 152,430" stroke="#2e7d32"/>
+<polyline points="152,430 88,430" stroke="#2e7d32"/>
+<polyline points="88,430 88,552" stroke="#2e7d32"/>
 <polyline points="280,528 296,528" stroke="#6a1b9a"/>
 <polyline points="296,528 296,520" stroke="#6a1b9a"/>
 <polyline points="296,520 280,520" stroke="#6a1b9a"/>
@@ -132,26 +132,30 @@
   <rect x="126" y="382" width="20" height="20" fill="#1565c0"/>
   <circle cx="280" cy="120" r="8" fill="#43a047"/>
   <g transform="translate(80,80)">
-<polyline points="811.2,56 811.82,52.05 813.65,48.48 816.48,45.65 820.05,43.82 824,43.2 827.95,43.82 831.52,45.65 834.35,48.48 836.18,52.05 836.8,56 836.18,59.95 834.35,63.52 831.52,66.35 827.95,68.18 824,68.8 820.05,68.18 816.48,66.35 813.65,63.52 811.82,59.95 811.2,56" fill="none" stroke="#263238" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
-<polyline points="811.2,56 811.82,59.95 813.65,63.52 816.48,66.35 820.05,68.18 824,68.8 827.95,68.18 831.52,66.35 834.35,63.52 836.18,59.95 836.8,56 836.18,52.05 834.35,48.48 831.52,45.65 827.95,43.82 824,43.2 820.05,43.82 816.48,45.65 813.65,48.48 811.82,52.05 811.2,56" fill="none" stroke="#263238" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="32,0 31.38,6.24 29.57,12.25 26.61,17.78 22.62,22.62 17.78,26.61 12.25,29.57 6.24,31.38 0,32" fill="none" stroke="#263238" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="0,32 6.24,31.38 12.25,29.57 17.78,26.61 22.62,22.62 26.61,17.78 29.57,12.25 31.38,6.24 32,0" fill="none" stroke="#263238" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="32,560 31.38,553.76 29.57,547.75 26.61,542.22 22.62,537.38 17.78,533.39 12.25,530.43 6.24,528.62 0,528" fill="none" stroke="#263238" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="0,528 6.24,528.62 12.25,530.43 17.78,533.39 22.62,537.38 26.61,542.22 29.57,547.75 31.38,553.76 32,560" fill="none" stroke="#263238" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="660,240 660,560" fill="none" stroke="#263238" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="652,240 660,240" fill="none" stroke="#263238" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="652,560 652,240" fill="none" stroke="#263238" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
 <polyline points="43.2,56 43.82,52.05 45.65,48.48 48.48,45.65 52.05,43.82 56,43.2 59.95,43.82 63.52,45.65 66.35,48.48 68.18,52.05 68.8,56 68.18,59.95 66.35,63.52 63.52,66.35 59.95,68.18 56,68.8 52.05,68.18 48.48,66.35 45.65,63.52 43.82,59.95 43.2,56" fill="none" stroke="#263238" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
 <polyline points="43.2,56 43.82,59.95 45.65,63.52 48.48,66.35 52.05,68.18 56,68.8 59.95,68.18 63.52,66.35 66.35,63.52 68.18,59.95 68.8,56 68.18,52.05 66.35,48.48 63.52,45.65 59.95,43.82 56,43.2 52.05,43.82 48.48,45.65 45.65,48.48 43.82,52.05 43.2,56" fill="none" stroke="#263238" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
 <polyline points="811.2,504 811.82,500.05 813.65,496.48 816.48,493.65 820.05,491.82 824,491.2 827.95,491.82 831.52,493.65 834.35,496.48 836.18,500.05 836.8,504 836.18,507.95 834.35,511.52 831.52,514.35 827.95,516.18 824,516.8 820.05,516.18 816.48,514.35 813.65,511.52 811.82,507.95 811.2,504" fill="none" stroke="#263238" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
 <polyline points="811.2,504 811.82,507.95 813.65,511.52 816.48,514.35 820.05,516.18 824,516.8 827.95,516.18 831.52,514.35 834.35,511.52 836.18,507.95 836.8,504 836.18,500.05 834.35,496.48 831.52,493.65 827.95,491.82 824,491.2 820.05,491.82 816.48,493.65 813.65,496.48 811.82,500.05 811.2,504" fill="none" stroke="#263238" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="811.2,56 811.82,52.05 813.65,48.48 816.48,45.65 820.05,43.82 824,43.2 827.95,43.82 831.52,45.65 834.35,48.48 836.18,52.05 836.8,56 836.18,59.95 834.35,63.52 831.52,66.35 827.95,68.18 824,68.8 820.05,68.18 816.48,66.35 813.65,63.52 811.82,59.95 811.2,56" fill="none" stroke="#263238" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="811.2,56 811.82,59.95 813.65,63.52 816.48,66.35 820.05,68.18 824,68.8 827.95,68.18 831.52,66.35 834.35,63.52 836.18,59.95 836.8,56 836.18,52.05 834.35,48.48 831.52,45.65 827.95,43.82 824,43.2 820.05,43.82 816.48,45.65 813.65,48.48 811.82,52.05 811.2,56" fill="none" stroke="#263238" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
 <polyline points="43.2,504 43.82,500.05 45.65,496.48 48.48,493.65 52.05,491.82 56,491.2 59.95,491.82 63.52,493.65 66.35,496.48 68.18,500.05 68.8,504 68.18,507.95 66.35,511.52 63.52,514.35 59.95,516.18 56,516.8 52.05,516.18 48.48,514.35 45.65,511.52 43.82,507.95 43.2,504" fill="none" stroke="#263238" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
 <polyline points="43.2,504 43.82,507.95 45.65,511.52 48.48,514.35 52.05,516.18 56,516.8 59.95,516.18 63.52,514.35 66.35,511.52 68.18,507.95 68.8,504 68.18,500.05 66.35,496.48 63.52,493.65 59.95,491.82 56,491.2 52.05,491.82 48.48,493.65 45.65,496.48 43.82,500.05 43.2,504" fill="none" stroke="#263238" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
-<polyline points="660,240 660,560" fill="none" stroke="#263238" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
-<polyline points="652,240 660,240" fill="none" stroke="#263238" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
-<polyline points="652,560 652,240" fill="none" stroke="#263238" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
-<polyline points="660,560 864,560" fill="none" stroke="#263238" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
-<polyline points="880,544 879.46,548.14 877.86,552 875.31,555.31 872,557.86 868.14,559.46 864,560" fill="none" stroke="#263238" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
-<polyline points="880,544 880,16" fill="none" stroke="#263238" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
-<polyline points="864,0 868.14,0.54 872,2.14 875.31,4.69 877.86,8 879.46,11.86 880,16" fill="none" stroke="#263238" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
-<polyline points="864,0 16,0" fill="none" stroke="#263238" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
-<polyline points="0,16 0.54,11.86 2.14,8 4.69,4.69 8,2.14 11.86,0.54 16,0" fill="none" stroke="#263238" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
-<polyline points="0,16 0,544" fill="none" stroke="#263238" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
-<polyline points="16,560 11.86,559.46 8,557.86 4.69,555.31 2.14,552 0.54,548.14 0,544" fill="none" stroke="#263238" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
-<polyline points="16,560 652,560" fill="none" stroke="#263238" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="848,560 848.62,553.76 850.43,547.75 853.39,542.22 857.38,537.38 862.22,533.39 867.75,530.43 873.76,528.62 880,528" fill="none" stroke="#263238" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="880,528 873.76,528.62 867.75,530.43 862.22,533.39 857.38,537.38 853.39,542.22 850.43,547.75 848.62,553.76 848,560" fill="none" stroke="#263238" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="880,32 873.76,31.38 867.75,29.57 862.22,26.61 857.38,22.62 853.39,17.78 850.43,12.25 848.62,6.24 848,0" fill="none" stroke="#263238" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="848,0 848.62,6.24 850.43,12.25 853.39,17.78 857.38,22.62 862.22,26.61 867.75,29.57 873.76,31.38 880,32" fill="none" stroke="#263238" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="660,560 848,560" fill="none" stroke="#263238" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="32,560 652,560" fill="none" stroke="#263238" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="848,0 32,0" fill="none" stroke="#263238" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="0,32 0,528" fill="none" stroke="#263238" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="880,528 880,32" fill="none" stroke="#263238" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
 <polyline points="404,260 404.62,266.62 406.43,273.01 409.39,278.95 413.39,284.26 418.3,288.73 423.95,292.22 430.15,294.62 436.68,295.85 443.32,295.85 449.85,294.62 456.05,292.22 461.7,288.73 466.61,284.26 470.61,278.95 473.57,273.01 475.38,266.62 476,260 475.38,253.38 473.57,246.99 470.61,241.05 466.61,235.74 461.7,231.27 456.05,227.78 449.85,225.38 443.32,224.15 436.68,224.15 430.15,225.38 423.95,227.78 418.3,231.27 413.39,235.74 409.39,241.05 406.43,246.99 404.62,253.38 404,260" fill="none" stroke="#263238" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
 <polyline points="66,302 46,302" fill="none" stroke="#263238" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
 <polyline points="66,322 66,302" fill="none" stroke="#263238" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
@@ -194,14 +198,14 @@
   <text x="172" y="362" font-size="10" fill="#1565c0">ısı yarığı (kart yalıtımı)</text>
   <text x="292" y="114" font-size="10" fill="#607d8b">durum LED</text>
   <text x="364" y="234" font-size="10" fill="#607d8b">EN: 10k + 1µF + reset</text>
-  <text x="216" y="214.8" font-size="11" fill="#37474f" text-anchor="middle" font-weight="700">ESP32-S3-WROOM-1U-N8</text>
-  <text x="216" y="228.8" font-size="10" fill="#607d8b" text-anchor="middle">18 × 19,2 / arka yüz</text>
-  <text x="216" y="242.8" font-size="10" fill="#607d8b" text-anchor="middle">U.FL kenarda → kutu SMA</text>
-  <text x="743.2" y="202.8" font-size="11" fill="#ad1457" text-anchor="middle" font-weight="700">RECOM RAC05-05SK/277</text>
-  <text x="743.2" y="216.8" font-size="10" fill="#607d8b" text-anchor="middle">33,8 × 20,3 × 13 / arka yüz</text>
-  <text x="743.2" y="230.8" font-size="10" fill="#607d8b" text-anchor="middle">sol uç 5 V ikincil, sağ uç 230 V birincil</text>
-  <text x="616" y="148" font-size="10" fill="#607d8b">+5V / GND</text>
-  <text x="872" y="148" font-size="10" fill="#607d8b" text-anchor="end">L / N</text>
+  <text x="232" y="230.8" font-size="11" fill="#37474f" text-anchor="middle" font-weight="700">ESP32-S3-WROOM-1U-N8</text>
+  <text x="232" y="244.8" font-size="10" fill="#607d8b" text-anchor="middle">18 × 19,2 / arka yüz</text>
+  <text x="232" y="258.8" font-size="10" fill="#607d8b" text-anchor="middle">U.FL kenarda → kutu SMA</text>
+  <text x="727.2" y="202.8" font-size="11" fill="#ad1457" text-anchor="middle" font-weight="700">RECOM RAC05-05SK/277</text>
+  <text x="727.2" y="216.8" font-size="10" fill="#607d8b" text-anchor="middle">33,8 × 20,3 × 13 / arka yüz</text>
+  <text x="727.2" y="230.8" font-size="10" fill="#607d8b" text-anchor="middle">sol uç 5 V ikincil, sağ uç 230 V birincil</text>
+  <text x="600" y="148" font-size="10" fill="#607d8b">+5V / GND</text>
+  <text x="856" y="148" font-size="10" fill="#607d8b" text-anchor="end">L / N</text>
   <text x="808" y="481.2" font-size="10" fill="#607d8b" text-anchor="middle">F1 (SMD)</text>
   <text x="880" y="496" font-size="10" fill="#607d8b" text-anchor="middle">MOV Ø7</text>
   <text x="832.8" y="562" font-size="11" fill="#37474f" text-anchor="middle">230 V klemens</text>
@@ -210,15 +214,16 @@
   <text x="666" y="388" font-size="10" fill="#607d8b" text-anchor="middle">SOT-223</text>
   <text x="711.2" y="302.8" font-size="10" fill="#607d8b" text-anchor="middle">D1 (OR)</text>
   <text x="711.2" y="370.8" font-size="10" fill="#607d8b" text-anchor="middle">D2</text>
-  <text x="674" y="284" font-size="10" fill="#607d8b" text-anchor="end">R_şarj</text>
+  <line x1="564" y1="280" x2="508" y2="240" stroke="#607d8b" stroke-width="1"/>
+  <text x="504" y="244" font-size="10" fill="#607d8b" text-anchor="end" font-weight="700">R_şarj</text>
   <text x="682" y="428" font-size="10" fill="#607d8b" text-anchor="end">bölücü→GPIO1</text>
   <text x="606" y="526" font-size="11" fill="#f57f17" text-anchor="middle" font-weight="700">Süperkapasitör</text>
   <text x="606" y="540" font-size="10" fill="#607d8b" text-anchor="middle">Ø21,5 × 25 yatık / arka yüz / 02-bom §2.5</text>
   <text x="606" y="554" font-size="10" fill="#607d8b" text-anchor="middle">merkez (65,75, 13,75) mm — sınırdan 5,5 mm</text>
   <text x="404" y="496" font-size="10" fill="#607d8b" text-anchor="end">MAX3485</text>
   <text x="472" y="516" font-size="10" fill="#607d8b">120 Ω</text>
-  <text x="120" y="429.2" font-size="11" fill="#2e7d32" text-anchor="middle">RS-485</text>
-  <text x="120" y="553.2" font-size="10" fill="#2e7d32" text-anchor="middle">A/B/GND</text>
+  <text x="120" y="421.2" font-size="11" fill="#2e7d32" text-anchor="middle">RS-485</text>
+  <text x="120" y="545.2" font-size="10" fill="#2e7d32" text-anchor="middle">A/B/GND</text>
   <text x="336" y="512" font-size="10" fill="#6a1b9a" text-anchor="middle">4× R_burden + bias (3V3/2)</text>
   <text x="392" y="566" font-size="11" fill="#37474f" text-anchor="middle">CT klemens 8 kutup, 3,5 mm — L1 L2 L3 N</text>
   <text x="220" y="606" font-size="11" fill="#1565c0" text-anchor="middle">genişleme 2×5 — §7.1</text>
