@@ -13,7 +13,7 @@ Karar kaydı satır 627 bu işi tarif ederken *"sıfırdan çizim gerekmez"* diy
 üretilmiştir — temel alınan çizim: **TEDAŞ-MLZ/2003-06.B, EK-II/14**
 (*"1250–1600 kVA dahili tip AG pano boyutları ve cihazların yerleşim resimleri"*).
 
-![Modül yerleşimi ve termal görüş konisi](yerlesim-overlay.svg)
+![Modül yerleşimi ve termal görüş konisi](04-yerlesim-krokisi.svg)
 
 *(SVG repoda versiyonlanır ve ölçeklenebilir; 1 birim = 1 mm. Sol panel önden görünüş, sağ panel yan
 kesit. Görüş konisi yalnızca yan kesitte çizilidir — modül kapak içinden panonun **derinliğine** doğru
@@ -151,7 +151,7 @@ esnekliği bırakmıştır.
 
 ### Kutu krokisi (kavramsal)
 
-![Modül kutusu — ön yüz, yan kesit, alt yüz, iç yerleşim, arka yüz](kutu-krokisi.svg)
+![Modül kutusu — ön yüz, yan kesit, alt yüz, iç yerleşim, arka yüz](04-kutu-krokisi.svg)
 
 *(1 mm = 4 birim; 120 × 80 × 50 mm. Beş görünüş: **A** ön yüz — IR pencere yuvası ve SHT31 membran
 vent; **B** yan kesit — TO-39 sensörün pencereye dayalı yuvası, PCB, arkadaki hacimli parçalar (RAC05,

@@ -11,7 +11,7 @@ Arayüz özeti ve blok şema için bkz. [1. doküman](01-blok-sema.md).
 
 ## 3.0 Bağlantı şeması
 
-![Modül bağlantı şeması — ESP32-S3 etrafında tüm hatlar](baglanti-semasi.svg)
+![Modül bağlantı şeması — ESP32-S3 etrafında tüm hatlar](03-baglanti-semasi.svg)
 
 *(Şema §3.1 pin tablosunun birebir görsel karşılığıdır: sol tarafta I²C sensörler ve CT ön ucu,
 sağda RS-485/Modbus ve anten, altta besleme zinciri. Tabloda olmayan tek ekleme **GPIO1 besleme
