@@ -139,24 +139,26 @@ adlandırılmaz (§7.1 satır 230).
 ## 3.4 Besleme bağlantısı
 
 ```
-   230 V iç ihtiyaç                     Modül kartı
-   devresi (ilgili sigorta)             ┌───────────────────┐
-        │                               │                   │
-        ▼                               │                   │
-   ┌──────────────┐   5 V      ┌────────┤ 3V3     ESP32     │
-   │ AC/DC modül  ├────────────┤        │                   │
-   │ RAC05-05SK/277│  ─┬───────┤        │                   │
-   └──────────────┘   │        │  ┌─────┤ Süperkapasitör    │
-                      │        │  │     │ (float şarj)      │
-                      ────────┼──     │                   │
-                      float şarj│        └───────────────────
+   230 V iç ihtiyaç
+   devresi (ilgili sigorta)
+        │
+        ▼
+   ┌────────────────┐  5 V   D1        5 V rayı                   3V3 rayı
+   │ AC/DC modül    ├──────►|────────────┬──────┤ LDO 3.3 V ├────┬──► ESP32-S3
+   │ RAC05-05SK/277 │                    │                       ├──► MLX90640 / SHT31
+   └────────────────┘                    │ R_şarj                └──► RS-485, CT bias
+                                         ├──/\/\──┤ Süperkap ├──►|── D2 ──┐
+                                         │         (float şarj)           │
+                                         └────────────────────────────────┘
+                                         kesintide: süperkap → D2 → LDO girişi
+                                         (D1 ters akışı keser, sebeke sense D1 öncesinden)
 ```
 
 | Hat | Kaynak | Hedef | Not |
 |---|---|---|---|
 | 230 V AC | Pano iç ihtiyaç devresi | AC/DC modül girişi | Yalnız ilgili yardımcı devrenin sigortası çekilir; abonelere giden elektrik kesilmez (§7.3) |
 | 5 V DC | AC/DC modül | Kart rayı / süperkapasitör float şarjı | |
-| 3V3 | Kart regülatörü | ESP32, sensörler | |
+| 3V3 | Kart LDO regülatörü (BOM #12) | ESP32, sensörler, RS-485 | |
 | Kesinti hattı | Süperkapasitör | ESP32 beslemesi | Yalnız besleme kesildiğinde devreye girer |
 
 **Kaçınılacak bağlantı:** Enerji hasadı (CT'den enerji çekme) **varyanttır**, ana tasarım değildir.
@@ -221,7 +223,7 @@ düşürür (§7.1 satır 240).
 | 7 | RS-485 transceiver | UART | GPIO17 (TX), GPIO18 (RX), GPIO21 (DE/RE) | Çift yönlü | Modbus RTU |
 | 8 | Genişleme | I²C/UART/ADC | I²C hattı + GPIO10, GPIO11 | — | Ayrılmış, boş |
 | 9 | Anten | RF | U.FL konnektör | Çıkış | Panel SMA, dış |
-| 10 | Besleme | Güç | 3V3, GND, EN | — | AC/DC + süperkapasitör |
+| 10 | Besleme | Güç | 3V3, GND, EN | — | AC/DC 5 V → LDO 3V3; süperkapasitör kesintide |
 
 ---
 

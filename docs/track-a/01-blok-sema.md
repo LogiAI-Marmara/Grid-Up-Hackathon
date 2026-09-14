@@ -240,7 +240,7 @@ tanımlı, ölçüm kaydı uzun formatta tutuluyor ve dedektör arayüzü sabit.
 | **RS-485** | Enerji analizörü, TVOC-2 | Modbus okuma hattı |
 | **UART** | RS-485 alıcı-verici | Modbus istekleri |
 | **Analog** | Split-core CT ×4 (analizör yoksa) | Akım kanalı alternatifi |
-| **Besleme** | AC/DC modül → MCU; süperkapasitör → kesintide | Güç hattı |
+| **Besleme** | AC/DC modül 5 V → LDO 3,3 V → MCU ve sensörler; süperkapasitör → kesintide LDO girişini besler | Güç hattı |
 | **RF** | U.FL → panel SMA anten → gateway | Kablosuz hat |
 
 Ayrıntılı pin seviyesi bağlantılar [3. dokümanda](03-pinout.md) verilmiştir.
