@@ -151,7 +151,7 @@ adlandırılmaz (§7.1 satır 230).
                                          │         (float şarj)           │
                                          └────────────────────────────────┘
                                          kesintide: süperkap → D2 → LDO girişi
-                                         (D1 ters akışı keser, sebeke sense D1 öncesinden)
+                                         (D1 = OR diyotu, Schottky: süperkaptan şebekeye ters akışı keser; şebeke algılama D1 öncesinden)
 ```
 
 | Hat | Kaynak | Hedef | Not |

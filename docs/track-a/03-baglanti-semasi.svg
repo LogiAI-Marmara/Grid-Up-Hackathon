@@ -204,7 +204,7 @@
 
   <!-- D1 OR diyotu ve 5 V rayı -->
   <polygon points="470,872 486,880 470,888" fill="#fff" stroke="#ef6c00" stroke-width="2"/><line x1="486" y1="872" x2="486" y2="888" stroke="#ef6c00" stroke-width="2"/>
-  <text x="478" y="902" text-anchor="middle" class="part">D1 Schottky</text>
+  <text x="478" y="902" text-anchor="middle" class="part">D1 OR diyotu (Schottky)</text>
   <line x1="486" y1="880" x2="720" y2="880" class="n5"/>
   <text x="600" y="898" text-anchor="middle" class="part" fill="#ef6c00">5 V rayı</text>
 
