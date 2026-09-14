@@ -14,7 +14,7 @@ IRX, IRY = 650.0, 692.5   # IR pencere merkezi (model, Y yukarı)
 BACK_Z = -430.0           # montaj plakası ön yüzü
 NH_Z = -208.5             # NH ayırıcı ön yüzleri: plaka −430 + s 80 (izolatör 50 + bara grubu 30) + 141,5 (Eaton EBV 00)
 D_BACK = SENS_Z - BACK_Z  # 377
-D_NH = SENS_Z - NH_Z      # 307
+D_NH = SENS_Z - NH_Z      # 155.5
 def fov(d): return 2*d*math.tan(math.radians(55)), 2*d*math.tan(math.radians(37.5))
 WB, HB = fov(D_BACK); WN, HN = fov(D_NH)
 

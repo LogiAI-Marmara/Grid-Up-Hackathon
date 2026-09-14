@@ -32,7 +32,7 @@
 | # | Kalem | Adet | Birim $ | Birim ₺ | Not |
 |---|---|---|---|---|---|
 | 8 | PCB (110 × 70 mm, 2 katman) | 1 | ~3,00 | ~146 | Kart yerleşimi: [02-pcb-yerlesimi.svg](02-pcb-yerlesimi.svg) (bkz. 2.2a) |
-| 9 | Kutu (IP54) | 1 | ~8,00 | ~389 | Ölçü revizyonu bekliyor — bkz. [4. doküman](04-mekanik-yerlesim.md) |
+| 9 | Kutu (IP54, 120 × 80 × 50 mm) | 1 | ~8,00 | ~389 | Nihai ölçü — bkz. [4. doküman](04-mekanik-yerlesim.md) |
 | 10 | Kızılötesi açıklık / pencere | 1 | ~3,00 | ~146 | Malzeme kararı [4. doküman](04-mekanik-yerlesim.md) |
 | 11 | Klemens, kablo, konnektör | — | ~5,00 | ~243 | |
 | 12 | Regülatör + pasif bileşenler | — | ~3,00 | ~146 | |
@@ -163,7 +163,7 @@ depo teknolojisinin kullanıldığı sözleşmeye yansımaz.
 
 | Bileşen | Neden bu | Reddedilen alternatif |
 |---|---|---|
-| **MLX90640 (110°×75°)** | Kapsama hesabı §7.1'deki 114×61 cm değerini birebir veriyor; 32×24 = nokta başına ~3,6×2,5 cm (klemens ölçeği); −40…+85 °C | Dar açılı 55° varyant: 40 cm'de ~41×28 cm görür, klemens sırasını kapsamaz |
+| **MLX90640 (110°×75°)** | Gerçek montaj derinliğinde (377 mm plaka / 155,5 mm NH yüzü) kapsama 1077 × 579 ve 444 × 239 mm; 32×24 = nokta başına ~3,4×2,4 cm (plaka) ve 1,4×1,0 cm (NH — klemens adımından küçük, nokta bazında tespit); −40…+85 °C | Dar açılı 55° varyant: 377 mm'de ~39×24 cm görür, klemens sırasını kapsamaz |
 | **ESP32-S3-WROOM-1U-N8** | Harici anten konnektörü (`1U`) + −40…+85 °C (`N8`, PSRAM'siz); Wi-Fi/BLE dahili; I²C/UART/ADC mevcut | PSRAM'li varyant: −40…+65 °C'de kalır. PCB antenli varyant: metal panoda çalışmaz |
 | **SHT31** | −40…+125 °C (ihtiyacın üzerinde), ±0,2 °C, I²C | — |
 | **RECOM RAC05-05SK/277** | −40…+90 °C şartını karşılayan tek makul modül; 4 kVAC izolasyon; encapsulated | Standart 230 V modüller −25 °C'de başlar |

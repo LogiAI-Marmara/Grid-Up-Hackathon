@@ -4,7 +4,7 @@
     Kaynak: Fusion 360 modeli GridUp-Pano.f3d (pano gövdesi 1600 × 1500 × 450, sac 2 mm, montaj plakası 20 mm,
     kapak 22 mm, cihaz blokları; GridUp-Kutu-Montaj kapak iç yüzüne 180° döndürülerek yerleştirildi).
     Görünüşler modelden API ile projeksiyon; kesit X = 650 düzleminden (IR ekseni). Ölçek: 1 birim = 1 mm.
-    Model koordinatı: X sağ, Y yukarı, Z öne (kapak iç yüzü Z = 0, montaj plakası ön yüzü Z = −430, NH ön yüzü Z = −360).
+    Model koordinatı: X sağ, Y yukarı, Z öne (kapak iç yüzü Z = 0, montaj plakası ön yüzü Z = −430, NH ön yüzü Z = −208,5).
     Modül: kutu X 590–710, Y 650–730 (merkez 650, 690), DIN klips Z 0..−5, gövde Z −5..−51, IR pencere dış yüzü Z ≈ −53;
       IR pencere merkezi (650, 692,5) → önden görünüşte (650, 807,5) [y aşağı].
     NH ayırıcı derinliği 141,5 mm bara ön yüzünden (Eaton EBV 00 dikey yük ayırıcı, Pub. 10275 s.5).

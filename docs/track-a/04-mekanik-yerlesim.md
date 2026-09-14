@@ -44,38 +44,89 @@ jüriye *"panoya neden bir elektronik cihaz ekliyorsunuz"* sorusunun cevabı bud
 
 ---
 
-## 4.3 Termal görüş alanı hesabı (karar kaydı §7.1 ile doğrulanmış)
+## 4.3 Termal görüş alanı hesabı
 
-| Parametre | Değer |
-|---|---|
-| Sensörün hedefe mesafesi | **~40 cm** (pano derinliği 450 mm; kapak içi yerleşim) |
-| Sensör görüş açısı (yatay × dikey) | **110° × 75°** |
-| **Kapsama** | **1143 × 614 mm** |
-| Piksel başına alan | **~3,6 × 2,5 cm** |
+Hesap varsayımla değil, **Fusion 360 modelinden ölçülen gerçek derinliklerle** yapılıyor
+(`GridUp-Pano.f3d`). Kutu 50 mm + klips 5 mm olduğundan sensör yüzeyi kapak iç yüzünden 53 mm
+içeridedir; hedef düzleme göre **iki farklı mesafe** vardır:
 
-**Doğrulama:** Karar kaydı §7.1 satır 232 *"geniş açılı versiyon bu mesafeden kabaca 114 × 61 cm
-görür"* diyor. Hesabımız **114,3 × 61,4 cm** veriyor — **birebir örtüşüyor.** Bu, hem parça
-seçiminin (110°×75°) hem de mesafe varsayımının (40 cm) doğruluğunu teyit eder.
+| Düzlem | Sensör → hedef | Kapsama (110° × 75°) | Piksel başına |
+|---|---|---|---|
+| **Montaj plakası** | **377 mm** | **1077 × 579 mm** | 33,7 × 24,1 mm |
+| **NH ayırıcı ön yüzü** | **155,5 mm** | **444 × 239 mm** | 13,9 × 9,9 mm |
 
-**Kapsamanın klemens bölgesine oturması:**
+**NH ön yüzü nasıl bulundu (kaynaklı zincir):** NH dikey yük ayırıcı baralara oturur; baralar da
+mesnet izolatörleriyle plakadan ayrı durur (şartname §2.2.10.2). Plakadan NH ön yüzüne olan mesafe
+şu zincirle çıkar:
 
-| | Değer |
-|---|---|
-| Kritik bölge yüksekliği | 500 mm (≈560–1060 mm) |
-| Termal kapsama yüksekliği | 614 mm |
-| Sonuç | **✓ 614 > 500** — modül merkezi y≈810 mm'de iken kapsama 503–1117 mm; kritik bölge dikeyde **tamamen** kapsanıyor |
+| Adım | Değer | Kaynak |
+|---|---|---|
+| Mesnet izolatörü yüksekliği | **50 mm** | Socomec "Busbar Supports" katalogu — L: 33/40/45/50/60/65/70 mm; UL polyester standoff 40–71 mm |
+| Bara grubu (2 × 100×10 + 10 mm ara parça) | **30 mm** | Şartname EK-I/8 Tablo 8: 1600 kVA → 2×(100×10) mm² |
+| Plakadan bara ön yüzüne (**s**) | **80 mm** | 50 + 30 |
+| NH ayırıcı derinliği | **141,5 mm** | Eaton EBV 00 datasheet, Pub. 10275 s.5 |
+| **Plakadan NH ön yüzüne** | **221,5 mm** | 80 + 141,5 |
+
+Plaka ön yüzü Z = −430 mm olduğundan NH ön yüzü **Z = −208,5 mm**'dir. Sensör yüzeyi Z ≈ −53 mm
+olduğundan sensör → NH **155,5 mm** çıkar.
+
+> **İzolatör yüksekliği bir SEÇİMDİR.** Şartname bara standoff'unu milimetrik olarak vermez
+> (§2.2.10.2 yalnız "mesnet izolatörleri" der ve TS EN 60269-1'e atıf yapar; TEDAŞ EK-II/14 çizimi
+> dış karkas siluetinden ibarettir). **50 mm** seçildi: Socomec katalogu 33–70 mm aralığının ve
+> UL standoff 40–71 mm aralığının ortası; 2×(100×10) mm²'lik ağır bara grubunu taşımak için de
+> savunulabilir bir değer. Duyarlılık — farklı seçim kapsamayı doğrudan değiştirir:
+
+| İzolatör | Sensör → NH | Kapsama | Kritik bant | Tam kapsama |
+|---|---|---|---|---|
+| 40 mm | 165,5 mm | 473 × 254 mm | %39 / %51 | 6 modül |
+| **50 mm (seçilen)** | **155,5 mm** | **444 × 239 mm** | **%37 / %48** | **9 modül** |
+| 60 mm | 145,5 mm | 416 × 223 mm | %35 / %45 | 9 modül |
+
+> Aralığın tamamında kapsama ±%4 bandında kalır; modül sayısı yalnızca yuvarlama eşiğinde
+> (6 ↔ 9) değişir. Bu yüzden seçim bir sonuç iyileştirme değil, gerçekçi bir mühendislik
+> tercihidir.
+
+**Doğrulama:** Karar kaydı §7.1 satır 232 *"kapak içine konan sensör hedefe ~40 cm mesafededir;
+geniş açılı versiyon bu mesafeden kabaca 114 × 61 cm görür"* diyor. 40 cm'de kapsama **1143 × 614 mm**
+olur — yani kaydın kendi hesabı 400 mm varsayımıyla tutarlıdır. Gerçek modelde plaka mesafesi
+**377 mm** olduğundan kapsama **1077 × 579 mm**'ye iner; NH gibi öne çıkan yüzeylerde ise çok daha
+dardır. Bu bir karar kaydı değişikliği değildir: kayıt mesafeyi *"~40 cm"* diye yaklaşık vermişti,
+model kesin ölçüyü verdi. **Parça seçimi (110°×75°) değişmez** — dar açılı varyant (55°×35°)
+377 mm'de yalnızca 393 × 238 mm görür ve klemens sırasını hiç kapsamaz.
+
+**Yakınlaşmanın olumlu tarafı:** mesafe kısaldıkça piksel küçülür, yani tespit kabiliyeti artar.
+Klemens adımı ~20–25 mm olduğundan NH düzlemindeki **13,9 × 9,9 mm**'lik piksel her klemensi
+kendi pikselinde görür — *"gevşek klemensi nokta bazında yakala"* iddiasının dayanağı budur.
+Dar görüş alanı bir **çözünürlük değil, kapsama** sorunudur.
+
+**Kapsamanın klemens bölgesine oturması** (modül merkezi x ≈ 650, y ≈ 807,5 mm):
+
+| Düzlem | Dikey pencere | Kritik bölge (560–1060 mm) | Yatay pencere | Kritik genişlik (50–1250 mm) |
+|---|---|---|---|---|
+| **Montaj plakası** (377 mm) | 518–1097 mm | ✓ **Tamamen** kapsıyor (+42 / +37 mm pay) | 112–1188 mm | %90 — iki uçta **62 mm** pay |
+| **NH ön yüzü** (155,5 mm) | 688–927 mm | ✗ Üstten **128 mm**, alttan **133 mm** eksik | 428–872 mm | %37 — iki uçta 378 mm pay |
 
 | | Değer |
 |---|---|
 | Pano genişliği | 1600 mm |
-| Kritik bölge genişliği (çizimden) | ≈1200 mm (x ≈ 50–1250; sağ sütun ölçü/kontrol cihazları) |
-| Tek modül kapsama genişliği | 1143 mm (panonun **%71**'i, kritik bölgenin **%95**'i) |
-| Sonuç | Modül merkezi x≈650 mm'ye (kritik bölgenin ortasına) hizalanır → kapsama 78–1222 mm; sıraların iki ucundaki ~30 mm'lik pay dışında **tüm sigorta ve klemens sıraları** görülür. Sağ sütundaki ölçü cihazları kapsama dışıdır — orada izlenecek bağlantı yoktur |
+| Kritik bölge | ≈1200 × 500 mm (x ≈ 50–1250, y ≈ 560–1060; sağ sütun ölçü/kontrol cihazları dışta) |
+| Tek modül kapsama genişliği | plaka düzleminde 1077 mm, NH düzleminde **444 mm** — kritik genişliğin **%90 / %37**'si |
+| Sonuç | Modül x ≈ 650 mm'ye hizalanır → plaka düzleminde **112–1188 mm** (%90), NH düzleminde **428–872 mm** (%37). Sağ sütundaki ölçü cihazları kapsama dışıdır — orada izlenecek bağlantı yoktur |
 
-**Kapsama sınırı — dürüst ifade (§7.1 satır 232 + §7.5 satır 339):** Tek sensör panonun tamamını
-görmez. En kritik bölge olan **çıkış klemens sırasını** kapsar. Tam pano kapsaması gereken
-panolarda **2. modül** eklenir (merkezler ~400 mm ve ~1200 mm'ye konumlandığında 1600 mm'lik genişliğin
-tamamı kapsanır).
+**Kapsama sınırı — dürüst ifade (§7.1 satır 232 + §7.5 satır 339):** Tek modül panonun tamamını
+görmez; **hiçbir düzlemde kritik bölgeyi tek başına kaplamaz.** Kritik bölgenin tamamını kaplamak
+için gereken modül sayısı:
+
+| Düzlem | Kapsama | Gereken modül |
+|---|---|---|
+| Montaj plakası (377 mm) | 1077 × 579 mm | **2 modül** (2 kolon × 1 sıra) |
+| NH ön yüzü (155,5 mm) | 444 × 239 mm | **9 modül** (3 kolon × 3 sıra) |
+
+Karar kaydı satır 339 *"Pano başına modül sayısı: 1 modül baz senaryo"* der; baz senaryo **tek
+modülün en kritik noktaya hizalanmasıdır**, bölgenin tamamının kaplanması değil. Tam kaplama
+gereken panolarda modül sayısı hedef düzleme göre 2–9 arasında değişir. **"2 modül yeter" iddiası
+ölçümle çürütülmüştür:** NH düzleminde iki modül (merkezler 400 / 1200 mm) arasında **356 mm**
+boşluk kalır.
 
 ---
 
@@ -117,7 +168,7 @@ emin olunmalıdır; kutunun geri kalanı opak olabilir.
 
 | Özellik | Karar kaydı | Bu dokümanın değerlendirmesi |
 |---|---|---|
-| Boyut | ~10 × 7 × 3,5 cm mertebesi (§7.5 satır 316) | ️ **Revize edilmesi gerekiyor — bkz. 4.6** |
+| Boyut | ~10 × 7 × 3,5 cm mertebesi (§7.5 satır 316) | **120 × 80 × 50 mm** olarak belirlendi — bkz. 4.6 |
 | Koruma | IP54 muhafaza (§7.5 satır 317) | ✓ Korunuyor (IR pencere ile) |
 | Bileşen sıcaklık aralığı | Endüstriyel, −40…+85 °C (§7.5 satır 318) | ✓ BOM'daki tüm bileşenler uyumlu |
 | Termal sensör konumu | Kutunun **yüzeyinde, dışa bakan yuvada** (§7.5 satır 319) | ✓ IR pencere ile |
@@ -139,15 +190,15 @@ Seçilen bileşenlerle bu ölçü **sığmıyor**:
 
 | Bileşen | En büyük boyutu | Not |
 |---|---|---|
-| **AC/DC güç modülü** (RAC05-05SK/277) | **~33,8 mm uzunluk** | Serinin DIP modül ölçüsü; tek başına kutunun yüksekliğinin (35 mm) neredeyse tamamı |
-| Süperkapasitör (Eaton PM/HV sınıfı) | **~Ø21,5 mm** | Çap olarak kutunun 35 mm'sine zor sığar |
+| **AC/DC güç modülü** (RAC05-05SK/277) | **~33,8 mm uzunluk** | Serinin DIP modül ölçüsü; kutunun 50 mm yüksekliğinde rahat sığar |
+| Süperkapasitör (Eaton PM/HV sınıfı) | **~Ø21,5 mm** | Kutuda yatık konumlandırılır (Ø21,5 × 25) |
 | ESP32-S3-WROOM-1U modülü | ~18 × 19,2 mm | + PCB çevresi |
 | I²C/RS-485 pasifleri + klemensler | — | Ek yerleşim alanı |
 
-**Sonuç:** Kutu ölçüsünün **~12 × 8 × 5 cm** mertebesine çıkması beklenmektedir. Bu bir
-**karar kaydı değişikliği değildir** — kayıt ölçüyü zaten *"mertebesi"* ifadesiyle yaklaşık
-vermiş ve satır 339'da *"Pano başına modül sayısı: 1 modül baz senaryo"* diyerek yerleşim
-esnekliği bırakmıştır.
+**Sonuç:** Kutu ölçüsü **120 × 80 × 50 mm** olarak belirlenmiştir — karar kaydının *"~10 × 7 ×
+3,5 cm mertebesi"* hedefinin üzerinde, ama kayıt ölçüyü zaten *"mertebesi"* ifadesiyle yaklaşık
+vermiş ve satır 339'da *"Pano başına modül sayısı: 1 modül baz senaryo"* diyerek yerleşim esnekliği
+bırakmıştır. Nihai ölçü Fusion 360 modelleriyle (`GridUp-Kutu.f3d`, `GridUp-PCB.f3d`) sabitlenmiştir.
 
 ### Kutu krokisi (kavramsal)
 
@@ -164,10 +215,10 @@ pedleri (yalnız hizalama, §4.8); **E** alt yüz — 230 V rakor, RS-485, CT gi
 [02-pcb-yerlesimi.svg](02-pcb-yerlesimi.svg)'de PCB koordinatıyla verilir. Üretim çizimi değildir — §1.4.)*
 
 **Dokümana yazılacak ifade:**
-> Kutunun nihai ölçüsü, bileşen yerleşimi kesinleştirildiğinde ~12 × 8 × 5 cm mertebesinde
-> belirlenecektir. Karar kaydındaki "~10 × 7 × 3,5 cm" ifadesi tasarım hedefidir; seçilen AC/DC
-> modülün (33,8 mm) ve süperkapasitörün (Ø21,5 mm) fiziksel boyutları nedeniyle nihai ölçü
-> büyümektedir. Bu, kavramsal tasarımı değiştirmez.
+> Kutunun ölçüsü **120 × 80 × 50 mm** olarak belirlenmiştir. Karar kaydındaki "~10 × 7 × 3,5 cm"
+> ifadesi tasarım hedefidir; seçilen AC/DC modülün (33,8 mm) ve süperkapasitörün (Ø21,5 mm) fiziksel
+> boyutları nedeniyle nihai ölçü büyümüştür. Nihai geometri Fusion 360 modelinde sabitlenmiştir;
+> bu, kavramsal tasarımı değiştirmez.
 
 ---
 
@@ -188,9 +239,9 @@ pedleri (yalnız hizalama, §4.8); **E** alt yüz — 230 V rakor, RS-485, CT gi
 1. Kapak açılınca görüş kaybolur — pratikte sorun değil, *"kapak açıksa orada bir insan vardır."*
 2. Kablo menteşeden geçer — **menteşe yakınında kıvrım payı bırakılır.**
 
-**Konumlandırma:** Modül, kritik bölgenin merkezine — kapak iç yüzünde **(x, y) ≈ (650, 810) mm** —
-hizalanır; böylece 1143 × 614 mm'lik kapsama, ≈560–1060 mm arasındaki üç sigorta sırasını ve çıkış
-klemens sırasını genişlik boyunca örter (bkz. kroki, önden görünüş).
+**Konumlandırma:** Modül, kritik bölgenin merkezine — kapak iç yüzünde **(x, y) ≈ (650, 807,5) mm** —
+hizalanır; böylece **1077 × 579 mm**'lik kapsama (montaj plakası düzlemi), ≈560–1060 mm arasındaki
+üç sigorta sırasını ve çıkış klemens sırasını genişlik boyunca örter (bkz. kroki, önden görünüş).
 
 ---
 
@@ -230,8 +281,9 @@ ve baralara olan mesafesi tasarımda korunmalıdır.
 
 - [ ] Sensör klemens sırasına **dik** bakıyor mu?
 - [ ] Sensörün önünde kızılötesini kesen bir eleman (standart cam/plastik/kapak sacı) var mı?
-- [ ] Sensör kapsaması (614 mm) klemens bölgesini (500 mm) tamamen örtüyor mu?
-- [ ] Kapsama dışında kalan kritik klemens var mı? Varsa **2. modül** gerekli (§7.5 satır 339)
+- [ ] Sensör kapsaması düzlem bazında kontrol edildi mi? Plaka düzleminde 579 mm (kritik 500 mm'yi **örter**), NH düzleminde 239 mm (kritik 500 mm'yi **örtmez**)
+- [ ] Hedef düzlem doğru seçildi mi — plakadaki klemensler mi (377 mm), NH gibi öne çıkan yüzeydekiler mi (155,5 mm)? NH düzleminde dikeyde **3 sıra** gerekir
+- [ ] Kapsama dışında kalan kritik klemens var mı? Varsa tam kaplama gerekli — plaka düzleminde **2**, NH düzleminde **9 modül** (§7.5 satır 339)
 - [ ] Kablo menteşe yakınında kıvrım payı bırakılmış mı?
 - [ ] Sabitleme yeni delik gerektirmiyor mu (DIN rayı / mevcut cıvata / kapak çerçevesi)?
 - [ ] Güçlü mıknatıs akım trafolarından ve baralardan uzak mı?
@@ -243,4 +295,4 @@ ve baralara olan mesafesi tasarımda korunmalıdır.
 
 - Kutu üretim yöntemi ve malzeme detayı (döküm/enjeksiyon) — prototip imalatı yok (§1.4)
 - DIN rayı ve cıvata tiplerinin kesin seçimi — pano üreticisinin mevcut donanımına bağlı
-- 2. modül senaryosunun kesin montaj detayı — tam kapsama gerektiren panolarda uygulanır
+- Çoklu modül senaryosunun kesin montaj detayı — tam kapsama gerektiren panolarda uygulanır (plaka düzleminde 2, NH düzleminde 9 modül)

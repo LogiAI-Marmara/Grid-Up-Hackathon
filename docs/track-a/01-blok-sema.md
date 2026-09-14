@@ -86,13 +86,16 @@ flowchart TB
 ısındı"* der. En yaygın arıza nedeni olan gevşek klemensi **nokta bazında** yakalayan tek ölçüm
 budur ve projenin erken uyarı iddiasını gerçek kılan ölçüm budur (§7.1 satır 227).
 
-**Neden 110°×75°:** Modül kapağa takılıp klemenslere ~40 cm'den bakar; bu mesafede 114 × 61 cm
-görüş alanı gerekir (§7.1 satır 232), ki bu tan hesabıyla 110°×75°'ye denk gelir. Dar açılı
-(55°×35°) varyant aynı mesafeden yaklaşık 41 × 28 cm görür ve klemens sırasını kapsamaz.
+**Neden 110°×75°:** Modül kapağa takılıp klemenslere **377 mm** (montaj plakası) / **155,5 mm** (NH
+ayırıcı ön yüzü) mesafeden bakar; bu mesafelerde kapsama **1077 × 579 mm** ve **444 × 239 mm** olur
+(§7.1 satır 232 kayıt hesaplamasını *"~40 cm, kabaca 114 × 61 cm"* diye yaklaşık vermişti; gerçek
+model bunu kesinleştirdi — ayrıntı [4. doküman §4.3](04-mekanik-yerlesim.md)). Geniş açı, tan
+hesabıyla 110°×75°'ye denk gelir. Dar açılı (55°×35°) varyant aynı mesafeden yalnızca ~39 × 24 cm
+görür ve klemens sırasını hiç kapsamaz.
 
-**Piksel ölçeği:** 40 cm'de piksel başına yaklaşık **3,6 × 2,5 cm** düşer. Bir klemens zaten bu
-mertebede olduğundan, çözünürlük hedefe tam oturur — daha yüksek çözünürlük maliyeti artırır,
-tespit kabiliyetine bir şey katmaz.
+**Piksel ölçeği:** 377 mm'de piksel başına yaklaşık **3,4 × 2,4 cm**, 155,5 mm'de **1,4 × 1,0 cm**
+düşer. Klemens adımı ~20–25 mm olduğundan, NH düzlemindeki piksel her klemensi kendi pikselinde
+görür — *"gevşek klemensi nokta bazında yakala"* iddiasının dayanağı budur.
 
 **Duyarlılık:** NETD 0,1 K RMS @1 Hz (komşu noktalar arasındaki 0,1 °C farkı ayırt eder). Mutlak
 doğruluk ±1–2 °C'dir. Tespit için önemli olan **çözünürlük ve göreli fark**tır; *"bu klemens

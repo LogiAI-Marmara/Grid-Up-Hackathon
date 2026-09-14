@@ -88,21 +88,29 @@ liderine iletilir ve üç ize birden duyurulur (§0 değişiklik kuralı).
 
 ## Termal dizi seçiminin karar kaydıyla bağı
 
-Termal sensör olarak **MLX90640 (110°×75° görüş açılı, BAA kodu)** seçilmiştir. Bu, karar
-kaydının kapsama hesabıyla matematiksel olarak örtüşür:
+Termal sensör olarak **MLX90640 (110°×75° görüş açılı, BAA kodu)** seçilmiştir.
 
 - §7.1 satır 232: *"Pano derinliği 450 mm; kapak içine konan sensör hedefe ~40 cm mesafededir.
-  Geniş açılı versiyon bu mesafeden kabaca **114 × 61 cm** görür."*
-- 40 cm'de 114 × 61 cm'lik görüş alanı, tan hesabıyla **~110° × 75°** açıya denk gelir.
+  Geniş açılı versiyon bu mesafeden kabaca **114 × 61 cm** görür."* — kaydın kendi hesabı 400 mm
+  varsayımıyla tutarlıdır (40 cm'de tan hesabı 1143 × 614 mm verir).
+- **Gerçek model bunu kesinleştirdi:** Fusion 360 montajında kutu 50 mm + klips 5 mm olduğundan
+  sensör → montaj plakası **377 mm**'dir. NH ayırıcı ön yüzü ise baralar üzerinde durur ve öne
+  çıkar: plakadan 221,5 mm (mesnet izolatörü 50 mm + bara grubu 30 mm + NH derinliği 141,5 mm;
+  kaynaklar [4. doküman §4.3](04-mekanik-yerlesim.md)'te) → sensör → NH **155,5 mm**. Buna göre kapsama
+  **1077 × 579 mm** (plaka) ve **444 × 239 mm** (NH) olur.
 - MLX90640'ın geniş açılı varyantı tam olarak **110° × 75°**'dir (Melexis datasheet, device
   marking: `A` = 110°, `B` = 55°).
 
-Yani karar kaydındaki hesap, bu parçanın geniş açılı varyantını zaten varsaymıştır. **Çelişki yok,
-sözleşme değişikliği yok** — bu, izin kendi bileşen seçimidir.
+Yani karar kaydındaki hesap, bu parçanın geniş açılı varyantını zaten varsaymıştır. Kayıt mesafeyi
+*"~40 cm"* diye **yaklaşık** vermişti; model kesin ölçüyü verdi ve kapsama buna göre küçüldü.
+**Çelişki yok, sözleşme değişikliği yok** — parça seçimi (110°×75°) **değişmemiştir**: dar açılı
+varyant (55°×35°) 377 mm'de yalnızca ~39 × 24 cm görür ve klemens sırasını hiç kapsamaz.
 
-**Kapsama sınırı (dürüstçe):** Pano 160 × 150 cm olduğundan tek sensör tamamını görmez; en kritik
-bölge olan **çıkış klemens sırasını** kapsar (§7.1 satır 232 ve §7.5 satır 339). Tam kapsama
-gereken panolarda 2. modül eklenir.
+**Kapsama sınırı (dürüstçe):** Pano 160 × 150 cm olduğundan tek sensör tamamını görmez. Plaka
+düzleminde kritik genişliğin **%90**'ını, NH gibi öne çıkan yüzeylerde ise yalnızca **%37**'sini
+kapsar. Kritik bölgenin tamamını kaplamak için plaka düzleminde **2**, NH düzleminde **9 modül**
+gerekir (§7.1 satır 232 ve §7.5 satır 339). Karar kaydının *"1 modül baz senaryo"* ifadesi, tek
+modülün **en kritik noktaya hizalanması** olarak uygulanır.
 
 ---
 
