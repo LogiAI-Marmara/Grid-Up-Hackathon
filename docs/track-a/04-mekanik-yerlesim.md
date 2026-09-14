@@ -199,7 +199,7 @@ Seçilen bileşenlerle bu ölçü **sığmıyor**:
 | Bileşen | En büyük boyutu | Not |
 |---|---|---|
 | **AC/DC güç modülü** (RAC05-05SK/277) | **31,7 × 26,7 × 21,8 mm** | Datasheet DIMENSION (THT/wired); kutunun 50 mm yüksekliğinde rahat sığar |
-| Süperkapasitör (Eaton HV, 2 × 10 F) | **2 × Ø10 × 30 mm** | 2 hücre seri; kutuda yatık konumlandırılır. (Karşılaştırma: Eaton PM 5,0 V/1 F tek modül 16,8 × 8,5 × 21,5 — enerji yetersiz, §2.5) |
+| Süperkapasitör (Eaton HV, 2 × 10 F) | **2 × Ø10,5 × 31,5 mm** (maks. zarf) | 2 hücre seri; kutuda yatık konumlandırılır. Datasheet ölçü tablosu (Teknik Veri 4376): `ØD nominal 10,0` / **`ØD maks 10,5`** / **`L maks 31,5`**. Mekanik yerleşimde **maksimum zarf** esas alınır. (Karşılaştırma: Eaton PM 5,0 V/1 F tek modül 16,8 × 8,5 × 21,5 — enerji yetersiz, §2.5) |
 | ESP32-S3-WROOM-1U modülü | 18,0 × 19,2 × 3,2 mm | + PCB çevresi |
 | I²C/RS-485 pasifleri + klemensler | — | Ek yerleşim alanı |
 

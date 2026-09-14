@@ -50,7 +50,7 @@ tedarik araştırması gerektirir.
 ![PCB yerleşimi — 110 × 70 mm, ön yüzden bakış](02-pcb-yerlesimi.svg)
 
 *(Fusion 360 modeli `GridUp-PCB.f3d`'den projeksiyon, 1 mm = 8 birim. Ön yüz kutu penceresine bakar: MLX90640, SHT31, LED ve pasifler;
-arka yüzde ESP32, RAC05, süperkapasitör (2 × Ø10 × 30 mm, yatık), boost çevirici, klemensler. 230 V birincil bölge sağ şeritte, ≥ 6 mm creepage
+arka yüzde ESP32, RAC05, süperkapasitör (2 × Ø10,5 × 31,5 mm maks. zarf, yatık), boost çevirici, klemensler. 230 V birincil bölge sağ şeritte, ≥ 6 mm creepage
 ve yarıkla ayrılmış. Kart kutu içinde (5, 5) mm ofsetlidir. **Koordinat konvansiyonu: model (kutu) koordinatı esas alınır** —
 [04-kutu-krokisi.svg](04-kutu-krokisi.svg) ile aynı; SVG çizimleri `y` aşağı olduğu için görüntüde ters görünür. Örnek: MLX90640
 kutu koordinatı (55, 37,5), IR pencere (60, 42,5). Hatlar
