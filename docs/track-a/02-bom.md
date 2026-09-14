@@ -24,7 +24,7 @@
 | 4 | **AC/DC güç modülü** | `RECOM RAC05-05SK/277` | 1 | 10,25 | 499 | 230 V → 5 V, izoleli | −40…+90 °C | Link Electronics |
 | 5 | **Yedek depo (süperkapasitör)** | Eaton PM/HV serisi *(seçim açık — bkz. 2.5)* | 1 | ~5,00 | ~243 | Kesintide birkaç dk; "besleme kaybı" alarmı | −40 °C (derating'li) | Eaton |
 | 6 | **Anten + kablo** | Panel tipi harici anten + U.FL pigtail | 1 | ~5,00 | ~243 | Panodan dışarı sinyal | — | DigiKey / Data Alliance |
-| 7 | **RS-485 alıcı-verici** | Yarıçift yönlü transceiver (örn. MAX485 sınıfı) | 1 | ~1,50 | ~73 | Modbus hattı fiziksel katmanı | Endüstriyel sınıf seçilecek | — |
+| 7 | **RS-485 alıcı-verici** | Yarıçift yönlü 3,3 V transceiver (MAX3485 sınıfı) | 1 | ~1,50 | ~73 | Modbus hattı fiziksel katmanı | Endüstriyel sınıf seçilecek | — |
 | | | | | **60,53** | **2.945** | **Aktif bileşen ara toplamı** | | |
 
 ## 2.2 Destek kalemleri

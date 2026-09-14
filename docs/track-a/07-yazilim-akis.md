@@ -124,14 +124,14 @@ Bu, dokümanın en önemli ayrımıdır ve karıştırılırsa sistem yanlış a
 
 | Durum | Gönderilen | Boyut |
 |---|---|---|
-| **Normal çalışma** | `termal_ozet`: maks + konum + 4 bölge ortalaması | ~3 sayı |
+| **Normal çalışma** | `termal_ozet`: maks + konum (2) + 4 bölge ortalaması | 7 sayı (~30 B) |
 | **Tetik aktif** | `termal_ozet` **+** `termal_kare` (768 değer, kanıt) | ~3 KB |
 
 **Gerekçe (§7.4 satır 302):** *"Özet + olay bazlı tam kare politikası bant genişliğini düşük tutar
 ve 'edge'de işlem yapıyoruz' iddiasının somut karşılığıdır."*
 
 **Sayısal karşılığı:** 768 değer ≈ 3 KB. 100 modül bunu her 10 saniyede gönderse iletişim hattı
-çöker. Özet politikasıyla normal trafik **~3 sayı** düzeyinde kalır.
+çöker. Özet politikasıyla normal trafik **7 sayı** düzeyinde kalır.
 
 **Özetin içeriği (sözleşme ② ile birebir):**
 
