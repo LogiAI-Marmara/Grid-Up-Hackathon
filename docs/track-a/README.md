@@ -19,7 +19,7 @@ kart yapısı, giriş-çıkış bağlantıları, bağlantı şemaları, temel bi
 | 3 | [Bağlantı ve pinout tablosu](03-pinout.md) | Hangi bileşen hangi arayüzle bağlı (I²C, SPI/UART, RS-485, besleme) + [bağlantı şeması](03-baglanti-semasi.svg) | T2 |
 | 4 | [Mekanik yerleşim ve görüş hattı](04-mekanik-yerlesim.md) | Kutu ölçüsü, panodaki konum, kadraj krokisi ([yerleşim](04-yerlesim-krokisi.svg) · [kutu](04-kutu-krokisi.svg)), sabitleme | T1, T2 |
 | 5 | [Saha koşulları gerekçesi](05-saha-kosullari.md) | Sıcaklık, nem, IP, manyetik alan, kısa devre darbesi, yabancı cisim | T1, T2 · kriter 3 |
-| 6 | [Montaj prosedürü](06-montaj-proseduru.md) | 7 adım, süre, "kesinti yok" gerekçesi | T1 · kriter 3 |
+| 6 | [Montaj prosedürü](06-montaj-proseduru.md) | 7 adım, süre, "kesinti yok" gerekçesi + [adım akışı](09-montaj-adimlari.svg) | T1 · kriter 3 |
 | 7 | [Modül yazılım akış diyagramı](07-yazilim-akis.md) | Uyan → oku → özetle → eşik kontrol → gönder | T3 (modül kısmı) |
 
 ---

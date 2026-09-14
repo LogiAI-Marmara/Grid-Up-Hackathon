@@ -6,6 +6,15 @@
 
 ---
 
+## 6.0 Adım akışı
+
+![Montaj adımları — 7 adım, kesinti yok, tek teknisyen](09-montaj-adimlari.svg)
+
+*(Adım 1 ve 7 vurgulu: 1 = abonelere elektrik kesilmez, 7 = sessiz körlüğü önleyen zorunlu doğrulama.
+Adım süreleri tahminidir; toplam ~15–20 dk.)*
+
+---
+
 ## 6.1 Prosedür (karar kaydı satır 343–349, birebir)
 
 §7.5 montaj prosedürünü yedi adım olarak sabitlemiştir. Aşağıda her adım, **sahada ne anlama
