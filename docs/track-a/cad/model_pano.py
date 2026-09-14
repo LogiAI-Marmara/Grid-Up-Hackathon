@@ -57,8 +57,8 @@ def run(_ctx):
     sk = comp.sketches.add(plane(-448))
     sk.sketchCurves.sketchLines.addTwoPointRectangle(sk.modelToSketchSpace(P(2,2,-448)), sk.modelToSketchSpace(P(1598,1498,-448)))
     pf = extr(sk, JOIN, 18, POS, [govde])   # montaj plakasi on yuzu Z = -430
-    plaka = [pf.bodies.item(i) for i in range(pf.bodies.count) if pf.bodies.item(i) != govde]
-    for b in plaka: b.name = 'Pano plaka'     # JOIN govdeye birlesmezse ayri govde: adlandir, cep kesimine dahil et
+    plaka = [pf.bodies.item(i) for i in range(pf.bodies.count) if pf.bodies.item(i).entityToken != govde.entityToken]
+    for b in plaka: b.name = 'Pano plaka'     # JOIN govdeye birlesmezse ayri govde: adlandir
 
     # KAPAK (kapali konum) Z 0..22
     box('Kapak', 0, 0, 1600, 1500, 0, 22)
@@ -69,21 +69,25 @@ def run(_ctx):
     box('Modem', 1290, 1050, 1490, 1140, Z0, 50)
     box('T1 olcu (analizor)', 1320, 790, 1530, 940, Z0, 50)
     box('Kontrol', 1320, 630, 1530, 740, Z0, 50)
-    # BARA SISTEMI: 3 yatay bara (L1/L2/L3), 185 mm adim (sartname Tablo 8 DSYA). Kesit 1600 kVA icin 2x(100x10) mm2
-    #   (sartname EK-I/8 Tablo 8); burada faz basina TEK 100x10 bara modellendi — ikinci bara (toplam 20 mm)
-    #   s=0 kabulune sigmaz, karar bekliyor. Mesnet izolatorleri arkada.
-    # Bara standoff'u (s) kaynaksiz -> s = 0 en iyimser kabul: bara on yuzu = plaka on yuzu (Z0).
-    # Plaka NH bolgesinde cep (Z -448..-430), bara + izolator bu cebin icinde (sematik).
-    box('Plaka cebi', 30, 500, 1270, 990, -448, 18, CUT, [govde] + plaka)
+    # BARA SISTEMI: 3 yatay faz barasi (L1/L2/L3), 185 mm adim (sartname Tablo 8 DSYA); kesit 1600 kVA icin
+    #   2x(100x10) mm2 (sartname EK-I/8 Tablo 8): faz basina iki bara + 10 mm ara parca = 30 mm grup.
+    # Bara standoff'u (s) sartnamede mm olarak yok. Mesnet izolatoru 50 mm SECILDI (Socomec Busbar Supports
+    #   katalogu L 33-70 mm / UL standoff 40-71 mm) -> s = 50 + 30 = 80 mm, bara on yuzu Z = -350.
+    #   Izolator yuksekligi bir secimdir; farkli secim kapsamayi degistirir.
+    IZO_H = 50; BARA_T = 10; ARA_T = 10
+    Z_IZO = Z0 + IZO_H                 # -380 izolator tepesi = arka bara arka yuzu
+    Z_BARA_ON = Z_IZO + 2*BARA_T + ARA_T   # -350 on bara on yuzu
     for i, yc in enumerate([930, 745, 560]):
-        box('Bara L%d' % (i+1), 40, yc - 50, 1260, yc + 50, Z0 - 10, 10)
         for j, xc in enumerate([70, 650, 1230]):
-            box('Mesnet izolatoru L%d-%d' % (i+1, j+1), xc - 20, yc - 55, xc + 20, yc + 55, -448, 8)
-    # NH dikey yuk ayirici: derinlik 141,5 mm bara on yuzunden (Eaton EBV 00, Pub. 10275 s.5)
+            box('Mesnet izolatoru L%d-%d' % (i+1, j+1), xc - 20, yc - 55, xc + 20, yc + 55, Z0, IZO_H)
+            box('Ara parca L%d-%d' % (i+1, j+1), xc - 20, yc - 50, xc + 20, yc + 50, Z_IZO + BARA_T, ARA_T)
+        box('Bara L%d arka' % (i+1), 40, yc - 50, 1260, yc + 50, Z_IZO, BARA_T)
+        box('Bara L%d on' % (i+1), 40, yc - 50, 1260, yc + 50, Z_IZO + BARA_T + ARA_T, BARA_T)
+    # NH dikey yuk ayirici: bara on yuzune oturur, derinlik 141,5 mm (Eaton EBV 00, Pub. 10275 s.5) -> on yuz Z = -208,5
     for r, (y1, y2) in enumerate([(820, 940), (685, 805), (550, 670)]):
         for k in range(12):
             x1 = 50 + k*100 + 8
-            box('NH s%d-%02d' % (r+1, k+1), x1, y1, x1 + 84, y2, Z0, 141.5)
+            box('NH s%d-%02d' % (r+1, k+1), x1, y1, x1 + 84, y2, Z_BARA_ON, 141.5)
     box('Klemens sirasi', 50, 440, 1250, 495, Z0, 45)
 
     # MODUL: GridUp-Kutu, kapak ic yuzune (Z=0), 180 deg Y ekseni etrafinda; merkez (650, 690)

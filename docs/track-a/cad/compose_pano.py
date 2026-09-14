@@ -12,7 +12,7 @@ ORANGE = '#e65100'; ORANGE2 = '#ef6c00'; GREEN = '#2e7d32'; BLUE = '#0d47a1'; GR
 SENS_Z = -53.0            # IR pencere dış yüzü
 IRX, IRY = 650.0, 692.5   # IR pencere merkezi (model, Y yukarı)
 BACK_Z = -430.0           # montaj plakası ön yüzü
-NH_Z = -288.5             # NH ayırıcı ön yüzleri (bara ön yüzü Z0 + 141,5, Eaton EBV 00)
+NH_Z = -208.5             # NH ayırıcı ön yüzleri: plaka −430 + s 80 (izolatör 50 + bara grubu 30) + 141,5 (Eaton EBV 00)
 D_BACK = SENS_Z - BACK_Z  # 377
 D_NH = SENS_Z - NH_Z      # 307
 def fov(d): return 2*d*math.tan(math.radians(55)), 2*d*math.tan(math.radians(37.5))
@@ -169,11 +169,12 @@ comment = """    Modül yerleşimi ve termal görüş hattı — TEDAŞ-MLZ/2003
     Model koordinatı: X sağ, Y yukarı, Z öne (kapak iç yüzü Z = 0, montaj plakası ön yüzü Z = −430, NH ön yüzü Z = −360).
     Modül: kutu X 590–710, Y 650–730 (merkez 650, 690), DIN klips Z 0..−5, gövde Z −5..−51, IR pencere dış yüzü Z ≈ −53;
       IR pencere merkezi (650, 692,5) → önden görünüşte (650, 807,5) [y aşağı].
-    NH ayırıcı derinliği 141,5 mm bara ön yüzünden (Eaton EBV 00 dikey yük ayırıcı, Pub. 10275 s.5); bara standoff'u (s)
-      hiçbir kaynakta yok (TEDAŞ EK-II/14 yalnız dış siluet, şartname §2.2.10 "mesnet izolatörleri" der, mm vermez) →
-      s = 0 en iyimser kabul: bara ön yüzü = plaka ön yüzü Z = −430, NH ön yüzü Z = −288,5. Gerçek s > 0 kapsamayı küçültür.
-    Bara: 3 yatay bara, 185 mm adım (şartname Tablo 8); kesit 1600 kVA için 2×(100×10) mm² (EK-I/8 Tablo 8) — modelde faz
-      başına tek 100×10 bara (ikinci bara s=0 kabulüne sığmaz, karar bekliyor).
+    NH ayırıcı derinliği 141,5 mm bara ön yüzünden (Eaton EBV 00 dikey yük ayırıcı, Pub. 10275 s.5).
+    Bara: 3 yatay faz barası, 185 mm adım (şartname Tablo 8 DSYA); kesit 1600 kVA için 2×(100×10) mm² (EK-I/8 Tablo 8):
+      faz başına iki bara + 10 mm ara parça = 30 mm grup. Bara standoff'u (s) şartnamede mm olarak verilmemiştir
+      (TEDAŞ EK-II/14 yalnız dış siluet, §2.2.10 "mesnet izolatörleri" der); mesnet izolatörü 50 mm seçildi (Socomec
+      Busbar Supports kataloğu, L: 33–70 mm / UL standoff 40–71 mm) → s = 50 + 30 = 80 mm, bara ön yüzü Z = −350,
+      NH ön yüzü Z = −208,5. İzolatör yüksekliği bir SEÇİMDİR, şartname dayatmıyor; farklı seçim kapsamayı değiştirir.
     Termal kapsama (110° × 75°): sensör → montaj plakası %d mm → %d × %d mm; sensör → NH yüzü %.1f mm → %d × %d mm.
       (Karar kaydı §7.1: "~40 cm, kabaca 114 × 61 cm" — eski kroki 35 mm modül derinliğiyle 395 mm / 1128 × 606 almıştı
        [1143 × 614 = 400 mm]; kutu 50 mm + klips 5 mm olunca mesafe 377 mm'e iner.)
