@@ -2,8 +2,8 @@
   <!--
     PCB / kart yerleşimi — kavramsal (T2 "kart yapısı"). Ölçek 1 mm = 8 birim, kart 110 × 70 mm.
     Bakış: ÖN yüz (kutu penceresine bakan taraf). Düz çizgi = ön yüz parçası, kesikli = arka yüz
-    (kart üzerinden görünür). Konumlar 04-kutu-krokisi.svg ile aynı mm'lerdedir:
-    IR pencere / MLX90640 merkezi (60, 37.5) · membran vent / SHT31 (12, 44) · LED (30, 10).
+    (kart üzerinden görünür). Kart kutu içinde (5, 5) mm ofsetlidir → PCB koordinatı = kutu koordinatı − 5 mm:
+    MLX90640 merkezi (55, 32.5) [kutu IR pencere (60, 37.5)] / SHT31 (7, 39) [kutu vent (12, 44)] / LED (25, 5) [kutu (30, 10)].
     Parça ölçüleri datasheet'ten: ESP32-S3-WROOM-1U 18×19,2 · MLX90640 TO-39 Ø9 · RAC05-05SK 33,8×20,3×13 ·
     süperkap Ø21,5 (merkez 65,75, 56,25 — izolasyon sınırından 5,5 mm) · MAX3485 SOIC-8 · klemensler 5,08 / 3,5 mm adım. Üretim çizimi değildir (§1.4).
   -->
@@ -47,30 +47,30 @@
     <text x="60" y="20" class="sub">M3 × 4, kenardan 3,5 mm</text>
 
     <!-- ===== ÖN YÜZ PARÇALARI (düz) ===== -->
-    <!-- MLX90640 TO-39 merkez (60, 37.5) -->
-    <circle cx="480" cy="300" r="60" fill="none" stroke="#c62828" stroke-width="2" stroke-dasharray="6 3"/>
-    <circle cx="480" cy="300" r="36" class="front" style="fill:#37474f"/>
-    <circle cx="480" cy="300" r="14" fill="#90a4ae"/>
-    <text x="410" y="290" text-anchor="end" class="lbl" font-weight="700">MLX90640ESF-BAA-000-TU</text>
-    <text x="410" y="304" text-anchor="end" class="sub">TO-39 Ø9 / I²C 0x33 / merkez (60, 37,5) mm</text>
-    <text x="410" y="318" text-anchor="end" class="sub warn">Ø15 IR pencere ekseni — yüksek parça yok</text>
+    <!-- MLX90640 TO-39 merkez (55, 32.5) = kutu IR pencere (60, 37.5) − 5 -->
+    <circle cx="440" cy="260" r="60" fill="none" stroke="#c62828" stroke-width="2" stroke-dasharray="6 3"/>
+    <circle cx="440" cy="260" r="36" class="front" style="fill:#37474f"/>
+    <circle cx="440" cy="260" r="14" fill="#90a4ae"/>
+    <text x="370" y="250" text-anchor="end" class="lbl" font-weight="700">MLX90640ESF-BAA-000-TU</text>
+    <text x="370" y="264" text-anchor="end" class="sub">TO-39 Ø9 / I²C 0x33 / merkez (55, 32,5) mm</text>
+    <text x="370" y="278" text-anchor="end" class="sub warn">Ø15 IR pencere ekseni — yüksek parça yok</text>
     <!-- pull-up + kuplaj -->
     <rect x="300" y="188" width="16" height="8" class="front"/><rect x="300" y="202" width="16" height="8" class="front"/><rect x="300" y="216" width="10" height="8" class="front"/>
     <text x="322" y="206" class="sub">2× 4,7k pull-up + 100 nF</text>
 
-    <!-- SHT31 (12, 44) — vent hizası -->
-    <rect x="64" y="320" width="64" height="64" fill="none" stroke="#1565c0" stroke-width="1.5" stroke-dasharray="4 2"/>
-    <rect x="86" y="342" width="20" height="20" class="front" style="fill:#1565c0"/>
-    <text x="136" y="348" class="lbl" font-weight="700">SHT31-DIS-B</text>
-    <text x="136" y="362" class="sub">I²C 0x44 / vent hizası</text>
-    <text x="136" y="376" class="sub">ısı kaynaklarından uzak</text>
+    <!-- SHT31 (7, 39) = kutu vent (12, 44) − 5 -->
+    <rect x="24" y="280" width="64" height="64" fill="none" stroke="#1565c0" stroke-width="1.5" stroke-dasharray="4 2"/>
+    <rect x="46" y="302" width="20" height="20" class="front" style="fill:#1565c0"/>
+    <text x="96" y="308" class="lbl" font-weight="700">SHT31-DIS-B</text>
+    <text x="96" y="322" class="sub">I²C 0x44 / vent hizası</text>
+    <text x="96" y="336" class="sub">ısı kaynaklarından uzak</text>
     <!-- termal izolasyon yarığı SHT31 çevresi -->
-    <path d="M60 316 h72 v72" fill="none" stroke="#1565c0" stroke-width="2"/>
-    <text x="140" y="330" class="sub" fill="#1565c0">ısı yarığı (kart yalıtımı)</text>
+    <path d="M20 276 h72 v72" fill="none" stroke="#1565c0" stroke-width="2"/>
+    <text x="100" y="290" class="sub" fill="#1565c0">ısı yarığı (kart yalıtımı)</text>
 
-    <!-- LED (30, 10) -->
-    <circle cx="240" cy="80" r="8" class="front" style="fill:#43a047"/>
-    <text x="240" y="104" text-anchor="middle" class="sub">durum LED</text>
+    <!-- LED (25, 5) = kutu (30, 10) − 5 -->
+    <circle cx="200" cy="40" r="8" class="front" style="fill:#43a047"/>
+    <text x="200" y="64" text-anchor="middle" class="sub">durum LED</text>
 
     <!-- EN RC + buton -->
     <rect x="216" y="140" width="16" height="8" class="front"/><rect x="216" y="152" width="16" height="8" class="front"/>
@@ -163,8 +163,8 @@
       <text x="16" y="416">birincil bölgede dolgu yok (yalıtım).</text>
       <text x="16" y="444"><tspan font-weight="700">Montaj:</tspan> 4× M3, kutu içi dikmelere; kart kutuya</text>
       <text x="16" y="460">04-kutu-krokisi B paneline göre oturur.</text>
-      <text x="16" y="488"><tspan font-weight="700">Konum uyumu:</tspan> pencere (60, 37,5) / vent (12, 44) /</text>
-      <text x="16" y="504">LED (30, 10) mm — 04-kutu-krokisi ile aynı.</text>
+      <text x="16" y="488"><tspan font-weight="700">Konum uyumu:</tspan> MLX (55, 32,5) / SHT31 (7, 39) / LED (25, 5)</text>
+      <text x="16" y="504">= kutu koordinatı − 5 mm (kart kutuda (5, 5) ofsetli).</text>
     </g>
     <text x="16" y="540" class="sub">Kavramsal yerleşim — üretim çizimi değildir (§1.4). Pasif değerler 03-baglanti-semasi ile aynı.</text>
   </g>

@@ -50,7 +50,8 @@ tedarik araştırması gerektirir.
 
 *(Kavramsal yerleşim, 1 mm = 8 birim. Ön yüz kutu penceresine bakar: MLX90640, SHT31, LED ve pasifler;
 arka yüzde ESP32, RAC05, süperkapasitör, klemensler. 230 V birincil bölge sağ şeritte, ≥ 6 mm creepage
-ve yarıkla ayrılmış. Konumlar [04-kutu-krokisi.svg](04-kutu-krokisi.svg) ile aynı mm'lerdedir; hatlar
+ve yarıkla ayrılmış. Kart kutu içinde (5, 5) mm ofsetlidir: PCB koordinatı = [04-kutu-krokisi.svg](04-kutu-krokisi.svg)
+koordinatı − 5 mm (MLX (55, 32,5) ↔ IR pencere (60, 37,5)); hatlar
 [03-baglanti-semasi.svg](03-baglanti-semasi.svg) ile aynıdır.)*
 
 ---
