@@ -77,7 +77,7 @@ listelenmiştir.
 | Bileşen | Arayüz | Adres / yapılandırma | Ortak hat |
 |---|---|---|---|
 | **MLX90640** (termal dizi) | I²C | **Adres 0x33** (datasheet) | SDA=GPIO8, SCL=GPIO9 |
-| **SHT31** (sıcaklık+nem) | I²C | **Adres 0x44** (ADDR pini GND'ye; epsile 0x45) | SDA=GPIO8, SCL=GPIO9 |
+| **SHT31** (sıcaklık+nem) | I²C | **Adres 0x44** (ADDR pini GND'ye; VDD'ye bağlanırsa 0x45) | SDA=GPIO8, SCL=GPIO9 |
 | **Enerji analizörü** (varsa) | RS-485 | Modbus slave adresi + seri parametreler analizörden ayarlanır | A/B hattı → UART1 |
 | **TVOC-2** (varsa) | RS-485 | Modbus slave adresi ayarlanır | Aynı A/B hattı → UART1 |
 | **Split-core CT ×4** (analizör yoksa) | Analog | Burden direnci + yarımsal önyargı | ADC1_CH3…CH6 |

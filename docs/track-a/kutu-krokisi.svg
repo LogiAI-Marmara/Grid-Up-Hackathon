@@ -3,8 +3,8 @@
     Modül kutusu krokisi — kavramsal tasarım (04-mekanik-yerlesim.md §4.5–4.6, §4.4 IR pencere).
     Ölçek: 1 mm = 4 birim. Kutu dış ölçüsü 120 × 80 × 50 mm (karar kaydı hedefi ~10×7×3,5 cm;
     AC/DC modül 33,8 mm ve süperkapasitör Ø21,5 mm nedeniyle büyütüldü — §4.6).
-    Bileşen ölçüleri datasheet'lerden yaklaşık: MLX90640 TO-39 Ø9 mm · ESP32-S3-WROOM-1U 18×19,2 mm ·
-    RAC05-05SK 33,8×20,3×13 mm · süperkapasitör Ø21,5 mm. Üretim çizimi değildir.
+    Bileşen ölçüleri datasheet'lerden yaklaşık: MLX90640 TO-39 Ø9 mm / ESP32-S3-WROOM-1U 18×19,2 mm ·
+    RAC05-05SK 33,8×20,3×13 mm / süperkapasitör Ø21,5 mm. Üretim çizimi değildir.
   -->
   <defs>
     <pattern id="wall" width="8" height="8" patternTransform="rotate(45)" patternUnits="userSpaceOnUse">
@@ -26,7 +26,7 @@
 
   <!-- ================= A. ÖN YÜZ (klemenslere bakan) ================= -->
   <g transform="translate(60,100)">
-    <text x="240" y="-14" text-anchor="middle" font-size="20" font-weight="700" fill="#455a64">A · ÖN YÜZ — klemenslere bakan yüz (120 × 80)</text>
+    <text x="240" y="-14" text-anchor="middle" font-size="20" font-weight="700" fill="#455a64">A / ÖN YÜZ — klemenslere bakan yüz (120 × 80)</text>
     <rect x="0" y="0" width="480" height="320" rx="16" fill="#eceff1" stroke="#263238" stroke-width="4"/>
     <!-- IR pencere yuvası: yükseltilmiş çerçeve + IR geçirgen pencere -->
     <circle cx="240" cy="150" r="46" fill="#cfd8dc" stroke="#37474f" stroke-width="3"/>
@@ -57,7 +57,7 @@
 
   <!-- ================= B. YAN KESİT (sensör ekseninden) ================= -->
   <g transform="translate(640,100)">
-    <text x="100" y="-14" text-anchor="middle" font-size="20" font-weight="700" fill="#455a64">B · YAN KESİT (50 × 80)</text>
+    <text x="100" y="-14" text-anchor="middle" font-size="20" font-weight="700" fill="#455a64">B / YAN KESİT (50 × 80)</text>
     <!-- duvarlar 2 mm -->
     <rect x="0" y="0" width="200" height="320" fill="#fafafa" stroke="#263238" stroke-width="4"/>
     <rect x="0" y="0" width="8" height="320" fill="url(#wall)"/>
@@ -83,7 +83,7 @@
     <text x="52" y="296" font-size="12" fill="#455a64">ESP32-S3 (PCB arkası)</text>
     <!-- AC/DC modül: PCB arkasında, 13 mm yükseklik -->
     <rect x="128" y="24" width="52" height="135" fill="#fce4ec" stroke="#ad1457" stroke-width="2"/>
-    <text x="154" y="95" text-anchor="middle" font-size="12" fill="#ad1457" transform="rotate(-90 154 95)">RAC05 · 34×20×13</text>
+    <text x="154" y="95" text-anchor="middle" font-size="12" fill="#ad1457" transform="rotate(-90 154 95)">RAC05 / 34×20×13</text>
     <!-- süperkapasitör yatık, Ø21,5 -->
     <rect x="88" y="180" width="100" height="86" rx="8" fill="#fff8e1" stroke="#f9a825" stroke-width="2"/>
     <text x="138" y="218" text-anchor="middle" font-size="12" fill="#f57f17">süperkap.</text>
@@ -99,7 +99,7 @@
 
   <!-- ================= E. ALT/YAN YÜZ — kablo girişleri ================= -->
   <g transform="translate(980,100)">
-    <text x="240" y="-14" text-anchor="middle" font-size="20" font-weight="700" fill="#455a64">E · ALT YÜZ — kablo girişleri (120 × 50)</text>
+    <text x="240" y="-14" text-anchor="middle" font-size="20" font-weight="700" fill="#455a64">E / ALT YÜZ — kablo girişleri (120 × 50)</text>
     <rect x="0" y="0" width="480" height="200" rx="12" fill="#eceff1" stroke="#263238" stroke-width="4"/>
     <!-- 230 V rakor -->
     <circle cx="70" cy="100" r="26" fill="#fff" stroke="#37474f" stroke-width="3"/>
@@ -126,7 +126,7 @@
 
   <!-- ================= C. İÇ YERLEŞİM (kapak açık, önden) ================= -->
   <g transform="translate(60,560)">
-    <text x="240" y="-14" text-anchor="middle" font-size="20" font-weight="700" fill="#455a64">C · İÇ YERLEŞİM — kapak açık, PCB 110 × 70 (üstten)</text>
+    <text x="240" y="-14" text-anchor="middle" font-size="20" font-weight="700" fill="#455a64">C / İÇ YERLEŞİM — kapak açık, PCB 110 × 70 (üstten)</text>
     <rect x="0" y="0" width="480" height="320" rx="16" fill="#fafafa" stroke="#263238" stroke-width="4"/>
     <rect x="20" y="20" width="440" height="280" fill="url(#pcb)" stroke="#2e7d32" stroke-width="2"/>
     <!-- AC/DC + süperkap: PCB'nin arkasında, gölge olarak -->
@@ -147,7 +147,7 @@
     <rect x="336" y="46" width="60" height="50" fill="#546e7a"/>
     <circle cx="392" cy="108" r="5" fill="#ffd54f" stroke="#263238" stroke-width="1"/>
     <text x="366" y="135" text-anchor="middle" font-size="12" font-weight="700" fill="#37474f">ESP32-S3</text>
-    <text x="366" y="149" text-anchor="middle" font-size="11" fill="#546e7a">WROOM-1U · U.FL ●</text>
+    <text x="366" y="149" text-anchor="middle" font-size="11" fill="#546e7a">WROOM-1U / U.FL ●</text>
     <!-- RS-485 alıcı-verici -->
     <rect x="330" y="200" width="24" height="20" fill="#2e7d32"/>
     <text x="342" y="238" text-anchor="middle" font-size="11" fill="#2e7d32">MAX3485</text>
@@ -164,7 +164,7 @@
 
   <!-- ================= D. ARKA YÜZ — sabitleme ================= -->
   <g transform="translate(640,560)">
-    <text x="240" y="-14" text-anchor="middle" font-size="20" font-weight="700" fill="#455a64">D · ARKA YÜZ — sabitleme (kapağa bakan)</text>
+    <text x="240" y="-14" text-anchor="middle" font-size="20" font-weight="700" fill="#455a64">D / ARKA YÜZ — sabitleme (kapağa bakan)</text>
     <rect x="0" y="0" width="480" height="320" rx="16" fill="#eceff1" stroke="#263238" stroke-width="4"/>
     <!-- DIN klips 35 mm ray -->
     <rect x="170" y="70" width="140" height="170" fill="#cfd8dc" stroke="#546e7a" stroke-width="2"/>
@@ -183,7 +183,7 @@
       <circle cx="30" cy="30" r="14"/><circle cx="450" cy="30" r="14"/><circle cx="30" cy="290" r="14"/><circle cx="450" cy="290" r="14"/>
     </g>
     <text x="240" y="266" text-anchor="middle" font-size="12" fill="#c62828">4× mıknatıs pedi (köşeler) — yalnız konumlandırma/kadraj</text>
-    <text x="240" y="283" text-anchor="middle" font-size="11" fill="#c62828">mekanik tutma DEĞİL (§4.8) · akım trafolarından uzak (§7.5 satır 337)</text>
+    <text x="240" y="283" text-anchor="middle" font-size="11" fill="#c62828">mekanik tutma DEĞİL (§4.8) / akım trafolarından uzak (§7.5 satır 337)</text>
   </g>
 
   <!-- ================= NOTLAR ================= -->

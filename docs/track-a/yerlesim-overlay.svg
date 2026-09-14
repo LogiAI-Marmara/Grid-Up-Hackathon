@@ -89,8 +89,8 @@
     <circle cx="650" cy="810" r="9" fill="none" stroke="#fff" stroke-width="2"/>
     <rect x="705" y="765" width="330" height="92" fill="#fff" opacity="0.92" stroke="#2e7d32" stroke-width="1.5"/>
     <text x="718" y="790" font-size="18" font-weight="700" fill="#1b5e20">MODÜL — kapak iç yüzünde</text>
-    <text x="718" y="814" font-size="15" fill="#2e7d32">merkez (x, y) ≈ (650, 810) mm · ~100 × 70 mm</text>
-    <text x="718" y="836" font-size="15" fill="#2e7d32">bakış: sayfaya dik (→ yan kesit) · klemense DİK</text>
+    <text x="718" y="814" font-size="15" fill="#2e7d32">merkez (x, y) ≈ (650, 810) mm / ~100 × 70 mm</text>
+    <text x="718" y="836" font-size="15" fill="#2e7d32">bakış: sayfaya dik (→ yan kesit) / klemense DİK</text>
     <text x="718" y="852" font-size="13" fill="#558b2f" font-style="italic">kesikli çizgi = ön düzlemde, kapağa bağlı</text>
 
     <!-- ölçü okları A, B -->
