@@ -40,7 +40,7 @@ algılama** girişidir — aşağıdaki tabloya işlenmiştir. Pasif değerler t
 | **Besleme algılama** | 5 V sense | GPIO1 | **ADC1_CH0** — RAC05 çıkışı (OR diyotu öncesi) 100k/47k bölücüyle okunur; `modul_durum.besleme` = `sebeke`/`yedek` ayrımı bu pinden gelir (§7.3, sözleşme ②) |
 | **Genişleme payı** | (ayrılmış) | GPIO10, GPIO11 | Kullanılmıyor; PD/akustik için ayrıldı (§7.1 satır 237) |
 | **Anten** | U.FL | — | GPIO değil; `1U` varyantının harici konnektörü |
-| **Besleme** | 3V3 / GND | — | AC/DC modül çıkışı |
+| **Besleme** | 3V3 / GND | — | Kart LDO çıkışı (AC/DC modül 5 V verir, LDO 3,3 V'a düşürür — §3.4) |
 | **Reset** | EN | — | Kart üzerinde RC + buton |
 
 ### ⚠️ Kritik teknik kısıt — ADC2 Wi-Fi ile kullanılamaz
