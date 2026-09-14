@@ -15,7 +15,9 @@ Karar kaydı satır 627 bu işi tarif ederken *"sıfırdan çizim gerekmez"* diy
 
 ![Modül yerleşimi ve termal görüş konisi](yerlesim-overlay.svg)
 
-*(Yukarıdaki SVG repoda versiyonlanır ve ölçeklenebilir; render edilmiş PNG: `yerlesim-overlay.png`)*
+*(SVG repoda versiyonlanır ve ölçeklenebilir; 1 birim = 1 mm. Sol panel önden görünüş, sağ panel yan
+kesit. Görüş konisi yalnızca yan kesitte çizilidir — modül kapak içinden panonun **derinliğine** doğru
+bakar, önden görünüşte bu bakış bir dikdörtgen kapsama alanı olarak görünür.)*
 
 ---
 
@@ -31,9 +33,9 @@ Karar kaydı satır 627 bu işi tarif ederken *"sıfırdan çizim gerekmez"* diy
 
 | Bölge | Yaklaşık konum | İçerik |
 |---|---|---|
-| Üst bölüm | 0–450 mm | Kumanda ve haberleşme: `Sct. Komp.`, `Modem` kutusu, kontrol modülleri |
-| **Orta bölüm** | **≈500–1000 mm** | **Çıkış klemens sıraları — 3–4 yatay sıra (KRİTİK BÖLGE)** |
-| Alt bölüm | 1000–1500 mm | Kablo yönlendirme; çizimde *"En az 400 mm"* boşluk şartı |
+| Üst bölüm | ≈50–465 mm | Kumanda ve haberleşme: `Sbt. Komp.`, `Modem` kutusu, kontrol modülleri |
+| **Orta bölüm** | **≈560–1060 mm** | **3 sıra NH sigortalı yük ayırıcı + altta çıkış klemens sırası (KRİTİK BÖLGE)** — genişlikte ≈50–1250 mm; sağdaki ≈300 mm sütun ölçü/kontrol cihazları (T1) |
+| Alt bölüm | ≈1060–1500 mm | Kablo yönlendirme; çizimde *"En az 400 mm"* boşluk şartı |
 
 **Önemli emsal:** Çizimde **`Modem` kutusu** panonun üst bölümünde, iç ihtiyaç devresinden
 beslenen bir haberleşme cihazı olarak **hâlihazırda yer alır**. Şartname de panoda modem
@@ -59,20 +61,21 @@ seçiminin (110°×75°) hem de mesafe varsayımının (40 cm) doğruluğunu tey
 
 | | Değer |
 |---|---|
-| Klemens bölgesi yüksekliği | 500 mm (500–1000 mm) |
+| Kritik bölge yüksekliği | 500 mm (≈560–1060 mm) |
 | Termal kapsama yüksekliği | 614 mm |
-| Sonuç | **✓ 614 > 500** — klemens sırası dikeyde **tamamen** kapsanıyor |
+| Sonuç | **✓ 614 > 500** — modül merkezi y≈810 mm'de iken kapsama 503–1117 mm; kritik bölge dikeyde **tamamen** kapsanıyor |
 
 | | Değer |
 |---|---|
 | Pano genişliği | 1600 mm |
-| Tek modül kapsama genişliği | 1143 mm (**%71**) |
-| Sonuç | Tek modül panonun %71'ini görür; **çıkış klemens sırası** (kritik bölge) kapsanır |
+| Kritik bölge genişliği (çizimden) | ≈1200 mm (x ≈ 50–1250; sağ sütun ölçü/kontrol cihazları) |
+| Tek modül kapsama genişliği | 1143 mm (panonun **%71**'i, kritik bölgenin **%95**'i) |
+| Sonuç | Modül merkezi x≈650 mm'ye (kritik bölgenin ortasına) hizalanır → kapsama 78–1222 mm; sıraların iki ucundaki ~30 mm'lik pay dışında **tüm sigorta ve klemens sıraları** görülür. Sağ sütundaki ölçü cihazları kapsama dışıdır — orada izlenecek bağlantı yoktur |
 
 **Kapsama sınırı — dürüst ifade (§7.1 satır 232 + §7.5 satır 339):** Tek sensör panonun tamamını
 görmez. En kritik bölge olan **çıkış klemens sırasını** kapsar. Tam pano kapsaması gereken
-panolarda **2. modül** eklenir (2 modül merkezleri ~400 mm ve ~1200 mm'ye konumlandığında
-panonun tamamı kapsanır).
+panolarda **2. modül** eklenir (merkezler ~400 mm ve ~1200 mm'ye konumlandığında 1600 mm'lik genişliğin
+tamamı kapsanır).
 
 ---
 
@@ -146,6 +149,16 @@ Seçilen bileşenlerle bu ölçü **sığmıyor**:
 vermiş ve satır 339'da *"Pano başına modül sayısı: 1 modül baz senaryo"* diyerek yerleşim
 esnekliği bırakmıştır.
 
+### Kutu krokisi (kavramsal)
+
+![Modül kutusu — ön yüz, yan kesit, alt yüz, iç yerleşim, arka yüz](kutu-krokisi.svg)
+
+*(1 mm = 4 birim; 120 × 80 × 50 mm. Beş görünüş: **A** ön yüz — IR pencere yuvası ve SHT31 membran
+vent; **B** yan kesit — TO-39 sensörün pencereye dayalı yuvası, PCB, arkadaki hacimli parçalar (RAC05,
+süperkapasitör); **E** alt yüz — 230 V rakor, RS-485, CT girişi, SMA anten; **C** iç yerleşim — PCB 110 × 70,
+genişleme başlığı (§7.1 şartı); **D** arka yüz — DIN klips, oval M5 yuvalar, köşe mıknatıs pedleri (yalnız
+hizalama, §4.8). Üretim çizimi değildir — §1.4.)*
+
 **Dokümana yazılacak ifade:**
 > Kutunun nihai ölçüsü, bileşen yerleşimi kesinleştirildiğinde ~12 × 8 × 5 cm mertebesinde
 > belirlenecektir. Karar kaydındaki "~10 × 7 × 3,5 cm" ifadesi tasarım hedefidir; seçilen AC/DC
@@ -171,8 +184,9 @@ esnekliği bırakmıştır.
 1. Kapak açılınca görüş kaybolur — pratikte sorun değil, *"kapak açıksa orada bir insan vardır."*
 2. Kablo menteşeden geçer — **menteşe yakınında kıvrım payı bırakılır.**
 
-**Konumlandırma:** Modül, klemens sırasının dikey merkezine (üstten ~750 mm) hizalanır, böylece
-614 mm'lik dikey kapsama 500–1000 mm arasındaki klemens bölgesini tamamen örter.
+**Konumlandırma:** Modül, kritik bölgenin merkezine — kapak iç yüzünde **(x, y) ≈ (650, 810) mm** —
+hizalanır; böylece 1143 × 614 mm'lik kapsama, ≈560–1060 mm arasındaki üç sigorta sırasını ve çıkış
+klemens sırasını genişlik boyunca örter (bkz. kroki, önden görünüş).
 
 ---
 

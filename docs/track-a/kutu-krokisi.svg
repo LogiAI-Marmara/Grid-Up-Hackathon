@@ -1,0 +1,217 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1720 1000" width="100%" style="max-width:1100px;background:#fff;font-family:Arial,Helvetica,sans-serif">
+  <!--
+    Modül kutusu krokisi — kavramsal tasarım (04-mekanik-yerlesim.md §4.5–4.6, §4.4 IR pencere).
+    Ölçek: 1 mm = 4 birim. Kutu dış ölçüsü 120 × 80 × 50 mm (karar kaydı hedefi ~10×7×3,5 cm;
+    AC/DC modül 33,8 mm ve süperkapasitör Ø21,5 mm nedeniyle büyütüldü — §4.6).
+    Bileşen ölçüleri datasheet'lerden yaklaşık: MLX90640 TO-39 Ø9 mm · ESP32-S3-WROOM-1U 18×19,2 mm ·
+    RAC05-05SK 33,8×20,3×13 mm · süperkapasitör Ø21,5 mm. Üretim çizimi değildir.
+  -->
+  <defs>
+    <pattern id="wall" width="8" height="8" patternTransform="rotate(45)" patternUnits="userSpaceOnUse">
+      <line x1="0" y1="0" x2="0" y2="8" stroke="#78909c" stroke-width="2"/>
+    </pattern>
+    <pattern id="pcb" width="12" height="12" patternUnits="userSpaceOnUse">
+      <rect width="12" height="12" fill="#e8f5e9"/>
+      <circle cx="6" cy="6" r="1" fill="#a5d6a7"/>
+    </pattern>
+    <marker id="dim" markerWidth="10" markerHeight="10" refX="5" refY="3" orient="auto-start-reverse">
+      <path d="M0,0 L6,3 L0,6 z" fill="#455a64"/>
+    </marker>
+    <marker id="ir" markerWidth="10" markerHeight="10" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L6,3 L0,6 z" fill="#c62828"/>
+    </marker>
+  </defs>
+
+  <text x="860" y="38" text-anchor="middle" font-size="30" font-weight="700" fill="#263238">Modül kutusu — kavramsal kroki (120 × 80 × 50 mm, IP54, 1 mm = 4 birim)</text>
+
+  <!-- ================= A. ÖN YÜZ (klemenslere bakan) ================= -->
+  <g transform="translate(60,100)">
+    <text x="240" y="-14" text-anchor="middle" font-size="20" font-weight="700" fill="#455a64">A · ÖN YÜZ — klemenslere bakan yüz (120 × 80)</text>
+    <rect x="0" y="0" width="480" height="320" rx="16" fill="#eceff1" stroke="#263238" stroke-width="4"/>
+    <!-- IR pencere yuvası: yükseltilmiş çerçeve + IR geçirgen pencere -->
+    <circle cx="240" cy="150" r="46" fill="#cfd8dc" stroke="#37474f" stroke-width="3"/>
+    <circle cx="240" cy="150" r="30" fill="#b71c1c" opacity="0.15" stroke="#c62828" stroke-width="3"/>
+    <circle cx="240" cy="150" r="18" fill="#37474f"/>
+    <text x="240" y="225" text-anchor="middle" font-size="15" font-weight="700" fill="#c62828">IR geçirgen pencere Ø15</text>
+    <text x="240" y="245" text-anchor="middle" font-size="13" fill="#c62828">(standart cam/plastik DEĞİL — §4.4)</text>
+    <text x="240" y="263" text-anchor="middle" font-size="13" fill="#546e7a">arkasında MLX90640 TO-39, Ø9</text>
+    <!-- nem/sıcaklık için IP54 membran havalandırma -->
+    <circle cx="90" cy="80" r="18" fill="#fff" stroke="#37474f" stroke-width="2.5"/>
+    <circle cx="90" cy="80" r="10" fill="none" stroke="#78909c" stroke-width="1.5" stroke-dasharray="3 2"/>
+    <text x="90" y="118" text-anchor="middle" font-size="13" fill="#37474f">membran vent</text>
+    <text x="90" y="134" text-anchor="middle" font-size="12" fill="#546e7a">(SHT31 — IP54 korunur)</text>
+    <!-- durum LED -->
+    <circle cx="410" cy="60" r="7" fill="#43a047" stroke="#1b5e20" stroke-width="1.5"/>
+    <text x="410" y="86" text-anchor="middle" font-size="12" fill="#546e7a">durum LED</text>
+    <!-- kapak vidaları -->
+    <g fill="#fff" stroke="#546e7a" stroke-width="1.5">
+      <circle cx="20" cy="20" r="6"/><circle cx="460" cy="20" r="6"/><circle cx="20" cy="300" r="6"/><circle cx="460" cy="300" r="6"/>
+    </g>
+    <text x="240" y="300" text-anchor="middle" font-size="12" fill="#78909c">kapak: 4 vida + conta (IP54)</text>
+    <!-- ölçüler -->
+    <line x1="0" y1="345" x2="480" y2="345" stroke="#455a64" stroke-width="1.5" marker-start="url(#dim)" marker-end="url(#dim)"/>
+    <text x="240" y="366" text-anchor="middle" font-size="15" fill="#455a64">120 mm</text>
+    <line x1="-22" y1="0" x2="-22" y2="320" stroke="#455a64" stroke-width="1.5" marker-start="url(#dim)" marker-end="url(#dim)"/>
+    <text x="-30" y="160" text-anchor="middle" font-size="15" fill="#455a64" transform="rotate(-90 -30 160)">80 mm</text>
+  </g>
+
+  <!-- ================= B. YAN KESİT (sensör ekseninden) ================= -->
+  <g transform="translate(640,100)">
+    <text x="100" y="-14" text-anchor="middle" font-size="20" font-weight="700" fill="#455a64">B · YAN KESİT (50 × 80)</text>
+    <!-- duvarlar 2 mm -->
+    <rect x="0" y="0" width="200" height="320" fill="#fafafa" stroke="#263238" stroke-width="4"/>
+    <rect x="0" y="0" width="8" height="320" fill="url(#wall)"/>
+    <rect x="192" y="0" width="8" height="320" fill="url(#wall)"/>
+    <rect x="0" y="0" width="200" height="8" fill="url(#wall)"/>
+    <rect x="0" y="312" width="200" height="8" fill="url(#wall)"/>
+    <!-- IR pencere ön duvarda, sensör yuvası -->
+    <rect x="-4" y="120" width="12" height="60" fill="#c62828" opacity="0.35" stroke="#c62828" stroke-width="2"/>
+    <line x1="-30" y1="150" x2="-8" y2="150" stroke="#c62828" stroke-width="3" marker-start="url(#ir)"/>
+    <text x="-16" y="205" text-anchor="middle" font-size="12" fill="#c62828" transform="rotate(-90 -16 205)">IR pencere</text>
+    <!-- PCB: ön yüze paralel, 6 mm geride -->
+    <rect x="30" y="20" width="6" height="280" fill="url(#pcb)" stroke="#2e7d32" stroke-width="1.5"/>
+    <text x="22" y="300" font-size="12" fill="#2e7d32" transform="rotate(-90 22 300)">PCB 110 × 70</text>
+    <!-- MLX90640 TO-39 kutusu PCB'nin ön yüzünde, pencereye dayalı -->
+    <rect x="10" y="132" width="20" height="36" fill="#37474f"/>
+    <text x="52" y="150" font-size="12" fill="#37474f">MLX90640</text>
+    <text x="52" y="164" font-size="11" fill="#546e7a">TO-39, pencereye dayalı</text>
+    <!-- SHT31 membran vent'in arkasında -->
+    <rect x="22" y="70" width="8" height="10" fill="#1565c0"/>
+    <text x="52" y="80" font-size="12" fill="#1565c0">SHT31 (vent arkası)</text>
+    <!-- ESP32 PCB arka yüzünde -->
+    <rect x="36" y="200" width="12" height="76" fill="#455a64"/>
+    <text x="52" y="296" font-size="12" fill="#455a64">ESP32-S3 (PCB arkası)</text>
+    <!-- AC/DC modül: PCB arkasında, 13 mm yükseklik -->
+    <rect x="128" y="24" width="52" height="135" fill="#fce4ec" stroke="#ad1457" stroke-width="2"/>
+    <text x="154" y="95" text-anchor="middle" font-size="12" fill="#ad1457" transform="rotate(-90 154 95)">RAC05 · 34×20×13</text>
+    <!-- süperkapasitör yatık, Ø21,5 -->
+    <rect x="88" y="180" width="100" height="86" rx="8" fill="#fff8e1" stroke="#f9a825" stroke-width="2"/>
+    <text x="138" y="218" text-anchor="middle" font-size="12" fill="#f57f17">süperkap.</text>
+    <text x="138" y="234" text-anchor="middle" font-size="12" fill="#f57f17">Ø21,5 yatık</text>
+    <!-- DIN klips arka duvarda -->
+    <rect x="200" y="100" width="18" height="120" fill="#b0bec5" stroke="#546e7a" stroke-width="2"/>
+    <text x="232" y="150" font-size="12" fill="#37474f" transform="rotate(90 232 150)">DIN klips / vida</text>
+    <!-- ölçü -->
+    <line x1="0" y1="345" x2="200" y2="345" stroke="#455a64" stroke-width="1.5" marker-start="url(#dim)" marker-end="url(#dim)"/>
+    <text x="100" y="366" text-anchor="middle" font-size="15" fill="#455a64">50 mm</text>
+    <text x="100" y="392" text-anchor="middle" font-size="12" fill="#78909c">bakış yönü ← (klemenslere)</text>
+  </g>
+
+  <!-- ================= E. ALT/YAN YÜZ — kablo girişleri ================= -->
+  <g transform="translate(980,100)">
+    <text x="240" y="-14" text-anchor="middle" font-size="20" font-weight="700" fill="#455a64">E · ALT YÜZ — kablo girişleri (120 × 50)</text>
+    <rect x="0" y="0" width="480" height="200" rx="12" fill="#eceff1" stroke="#263238" stroke-width="4"/>
+    <!-- 230 V rakor -->
+    <circle cx="70" cy="100" r="26" fill="#fff" stroke="#37474f" stroke-width="3"/>
+    <circle cx="70" cy="100" r="14" fill="#cfd8dc" stroke="#546e7a" stroke-width="1.5"/>
+    <text x="70" y="150" text-anchor="middle" font-size="13" font-weight="700" fill="#37474f">230 V AC</text>
+    <text x="70" y="166" text-anchor="middle" font-size="12" fill="#546e7a">PG7 rakor (IP68)</text>
+    <!-- RS-485 rakor -->
+    <circle cx="190" cy="100" r="22" fill="#fff" stroke="#37474f" stroke-width="3"/>
+    <circle cx="190" cy="100" r="11" fill="#cfd8dc" stroke="#546e7a" stroke-width="1.5"/>
+    <text x="190" y="150" text-anchor="middle" font-size="13" font-weight="700" fill="#37474f">RS-485</text>
+    <text x="190" y="166" text-anchor="middle" font-size="12" fill="#546e7a">analizör / TVOC-2</text>
+    <!-- CT girişi -->
+    <circle cx="300" cy="100" r="22" fill="#fff" stroke="#37474f" stroke-width="3"/>
+    <circle cx="300" cy="100" r="11" fill="#cfd8dc" stroke="#546e7a" stroke-width="1.5"/>
+    <text x="300" y="150" text-anchor="middle" font-size="13" font-weight="700" fill="#37474f">CT ×4</text>
+    <text x="300" y="166" text-anchor="middle" font-size="12" fill="#546e7a">(analizör yoksa)</text>
+    <!-- SMA anten -->
+    <circle cx="410" cy="100" r="16" fill="#fff" stroke="#37474f" stroke-width="3"/>
+    <polygon points="410,84 396,100 424,100" fill="#37474f"/>
+    <text x="410" y="150" text-anchor="middle" font-size="13" font-weight="700" fill="#37474f">SMA panel</text>
+    <text x="410" y="166" text-anchor="middle" font-size="12" fill="#546e7a">→ dış anten kablosu</text>
+    <text x="240" y="30" text-anchor="middle" font-size="12" fill="#78909c">tüm girişler alt yüzde → kablolar menteşeye doğru iner (kıvrım payı, §4.7)</text>
+  </g>
+
+  <!-- ================= C. İÇ YERLEŞİM (kapak açık, önden) ================= -->
+  <g transform="translate(60,560)">
+    <text x="240" y="-14" text-anchor="middle" font-size="20" font-weight="700" fill="#455a64">C · İÇ YERLEŞİM — kapak açık, PCB 110 × 70 (üstten)</text>
+    <rect x="0" y="0" width="480" height="320" rx="16" fill="#fafafa" stroke="#263238" stroke-width="4"/>
+    <rect x="20" y="20" width="440" height="280" fill="url(#pcb)" stroke="#2e7d32" stroke-width="2"/>
+    <!-- AC/DC + süperkap: PCB'nin arkasında, gölge olarak -->
+    <rect x="40" y="40" width="135" height="81" fill="#fce4ec" opacity="0.7" stroke="#ad1457" stroke-width="1.5" stroke-dasharray="6 3"/>
+    <text x="107" y="150" text-anchor="middle" font-size="11" fill="#ad1457">RAC05-05SK (PCB arkası)</text>
+    <rect x="40" y="188" width="100" height="86" rx="8" fill="#fff8e1" opacity="0.8" stroke="#f9a825" stroke-width="1.5" stroke-dasharray="6 3"/>
+    <text x="90" y="235" text-anchor="middle" font-size="11" fill="#f57f17">süperkap. (PCB arkası)</text>
+    <!-- MLX90640 merkezde (ön yüz penceresiyle hizalı) -->
+    <circle cx="240" cy="150" r="18" fill="#37474f"/>
+    <circle cx="240" cy="150" r="30" fill="none" stroke="#c62828" stroke-width="2" stroke-dasharray="5 3"/>
+    <text x="240" y="196" text-anchor="middle" font-size="12" font-weight="700" fill="#37474f">MLX90640</text>
+    <text x="240" y="210" text-anchor="middle" font-size="11" fill="#546e7a">I²C 0x33</text>
+    <!-- SHT31 vent hizasında -->
+    <rect x="78" y="68" width="24" height="24" fill="#1565c0"/>
+    <text x="90" y="110" text-anchor="middle" font-size="12" fill="#1565c0">SHT31</text>
+    <!-- ESP32-S3-WROOM-1U -->
+    <rect x="330" y="40" width="72" height="77" fill="#455a64" stroke="#263238" stroke-width="1.5"/>
+    <rect x="336" y="46" width="60" height="50" fill="#546e7a"/>
+    <circle cx="392" cy="108" r="5" fill="#ffd54f" stroke="#263238" stroke-width="1"/>
+    <text x="366" y="135" text-anchor="middle" font-size="12" font-weight="700" fill="#37474f">ESP32-S3</text>
+    <text x="366" y="149" text-anchor="middle" font-size="11" fill="#546e7a">WROOM-1U · U.FL ●</text>
+    <!-- RS-485 alıcı-verici -->
+    <rect x="330" y="200" width="24" height="20" fill="#2e7d32"/>
+    <text x="342" y="238" text-anchor="middle" font-size="11" fill="#2e7d32">MAX3485</text>
+    <!-- genişleme arayüzü -->
+    <rect x="180" y="205" width="48" height="20" fill="#fff" stroke="#1565c0" stroke-width="2" stroke-dasharray="4 2"/>
+    <text x="204" y="243" text-anchor="middle" font-size="11" fill="#1565c0">genişleme 2×5</text>
+    <text x="204" y="256" text-anchor="middle" font-size="10" fill="#1565c0">(I²C/UART, PD-akustik payı)</text>
+    <!-- alt kenar klemensler -->
+    <rect x="200" y="272" width="40" height="24" fill="#607d8b"/><text x="220" y="313" text-anchor="middle" font-size="10" fill="#455a64">230 V</text>
+    <rect x="250" y="272" width="60" height="24" fill="#607d8b"/><text x="280" y="313" text-anchor="middle" font-size="10" fill="#455a64">RS-485 A/B/G</text>
+    <rect x="320" y="272" width="130" height="24" fill="#607d8b"/><text x="385" y="313" text-anchor="middle" font-size="10" fill="#455a64">CT L1 L2 L3 N (burden)</text>
+    <text x="240" y="15" text-anchor="middle" font-size="11" fill="#78909c">kesikli = PCB arkasındaki hacimli parçalar</text>
+  </g>
+
+  <!-- ================= D. ARKA YÜZ — sabitleme ================= -->
+  <g transform="translate(640,560)">
+    <text x="240" y="-14" text-anchor="middle" font-size="20" font-weight="700" fill="#455a64">D · ARKA YÜZ — sabitleme (kapağa bakan)</text>
+    <rect x="0" y="0" width="480" height="320" rx="16" fill="#eceff1" stroke="#263238" stroke-width="4"/>
+    <!-- DIN klips 35 mm ray -->
+    <rect x="170" y="70" width="140" height="170" fill="#cfd8dc" stroke="#546e7a" stroke-width="2"/>
+    <rect x="170" y="95" width="140" height="120" fill="none" stroke="#37474f" stroke-width="3"/>
+    <text x="240" y="150" text-anchor="middle" font-size="13" font-weight="700" fill="#37474f">DIN klips</text>
+    <text x="240" y="168" text-anchor="middle" font-size="12" fill="#546e7a">(35 mm ray)</text>
+    <text x="240" y="186" text-anchor="middle" font-size="11" fill="#546e7a">yaylı, aletsiz</text>
+    <!-- oval vida yuvaları (mevcut cıvata delikleri / kapak çerçevesi) -->
+    <rect x="40" y="130" width="60" height="18" rx="9" fill="#fff" stroke="#37474f" stroke-width="2.5"/>
+    <rect x="380" y="130" width="60" height="18" rx="9" fill="#fff" stroke="#37474f" stroke-width="2.5"/>
+    <text x="70" y="170" text-anchor="middle" font-size="12" fill="#37474f">oval yuva M5</text>
+    <text x="410" y="170" text-anchor="middle" font-size="12" fill="#37474f">oval yuva M5</text>
+    <text x="240" y="40" text-anchor="middle" font-size="12" fill="#37474f">mevcut cıvata / kapak çerçevesi için (yeni delik YOK)</text>
+    <!-- mıknatıs pedleri: yalnız konumlandırma -->
+    <g fill="#ffcdd2" stroke="#c62828" stroke-width="2" stroke-dasharray="4 2">
+      <circle cx="30" cy="30" r="14"/><circle cx="450" cy="30" r="14"/><circle cx="30" cy="290" r="14"/><circle cx="450" cy="290" r="14"/>
+    </g>
+    <text x="240" y="266" text-anchor="middle" font-size="12" fill="#c62828">4× mıknatıs pedi (köşeler) — yalnız konumlandırma/kadraj</text>
+    <text x="240" y="283" text-anchor="middle" font-size="11" fill="#c62828">mekanik tutma DEĞİL (§4.8) · akım trafolarından uzak (§7.5 satır 337)</text>
+  </g>
+
+  <!-- ================= NOTLAR ================= -->
+  <g transform="translate(1160,340)">
+    <rect x="0" y="0" width="500" height="540" fill="#fff" stroke="#90a4ae" stroke-width="2"/>
+    <text x="16" y="30" font-size="18" font-weight="700" fill="#263238">Tasarım notları</text>
+    <g font-size="13" fill="#37474f">
+      <text x="16" y="62"><tspan font-weight="700">Ölçü:</tspan> 120 × 80 × 50 mm. Karar kaydı hedefi ~100×70×35;</text>
+      <text x="16" y="80">RAC05 (33,8 mm) + süperkap (Ø21,5) sığmadığı için büyüdü (§4.6).</text>
+      <text x="16" y="108"><tspan font-weight="700">IR pencere:</tspan> MLX90640 8–14 µm bandında çalışır; standart</text>
+      <text x="16" y="126">cam/plastik geçirmez. Pencere IR geçirgen malzeme (Ge/kalkojenit</text>
+      <text x="16" y="144">veya ince polietilen film), conta ile IP54 korunur (§4.4).</text>
+      <text x="16" y="172"><tspan font-weight="700">Sensör yuvası:</tspan> TO-39 pencereye dayalı, ön yüzden 0 mm geride;</text>
+      <text x="16" y="190">kutu kenarı görüş açısını (110°×75°) kesmez — yuva konik açılır.</text>
+      <text x="16" y="218"><tspan font-weight="700">Nem/sıcaklık:</tspan> SHT31 kabin havasını görmeli → IP54 membran</text>
+      <text x="16" y="236">vent (PTFE) arkasında; su/toz geçmez, hava/nem geçer.</text>
+      <text x="16" y="264"><tspan font-weight="700">Isı:</tspan> AC/DC modül PCB'nin arkasında, sensörlerden uzak; SHT31</text>
+      <text x="16" y="282">güç modülüne en uzak köşede (öz-ısınma hatası).</text>
+      <text x="16" y="310"><tspan font-weight="700">Kablolar:</tspan> tüm girişler alt yüzde; kapak içi montajda kablolar</text>
+      <text x="16" y="328">menteşeye iner, kıvrım payı bırakılır (§4.7). Anten kablosu SMA'dan</text>
+      <text x="16" y="346">mevcut kablo girişiyle pano dışına (§7.4).</text>
+      <text x="16" y="374"><tspan font-weight="700">Sabitleme:</tspan> DIN klips <tspan font-style="italic">veya</tspan> oval yuvalardan mevcut cıvataya;</text>
+      <text x="16" y="392">mıknatıs pedleri sadece hizalama. Yeni delik açılmaz (§4.8).</text>
+      <text x="16" y="420"><tspan font-weight="700">Sıcaklık sınıfı:</tspan> tüm bileşenler −40…+85 °C endüstriyel;</text>
+      <text x="16" y="438">kutu malzemesi UV/ısı dayanımlı PC veya alüminyum döküm.</text>
+      <text x="16" y="466"><tspan font-weight="700">Genişleme payı:</tspan> 2×5 başlık ayrılmış I²C/UART — PD/akustik</text>
+      <text x="16" y="484">fark katmanı için (§7.1 şartı); kutuda ilgili yüzde kör tapa.</text>
+    </g>
+    <text x="16" y="522" font-size="12" fill="#78909c">Kavramsal kroki — üretim çizimi değildir (§1.4: fiziksel donanım yok).</text>
+  </g>
+</svg>
