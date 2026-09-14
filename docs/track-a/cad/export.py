@@ -11,6 +11,5 @@ def run(_ctx):
         done.add(d.name); d.activate()
         em = adsk.fusion.Design.cast(d.products.itemByProductType('DesignProductType')).exportManager
         em.execute(em.createFusionArchiveExportOptions(os.path.join(OUT, d.name + '.f3d')))
-        if d.name != 'GridUp-Pano':
-            em.execute(em.createSTEPExportOptions(os.path.join(OUT, d.name + '.step')))
+        em.execute(em.createSTEPExportOptions(os.path.join(OUT, d.name + '.step')))
         print('exported', d.name)
