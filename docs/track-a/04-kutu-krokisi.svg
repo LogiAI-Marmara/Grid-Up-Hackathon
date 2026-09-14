@@ -630,11 +630,12 @@
   <text x="1176" y="747" font-size="13" fill="#37474f">mıknatıs pedleri sadece hizalama. Yeni delik açılmaz (§4.8).</text>
   <text x="1176" y="769" font-size="13" fill="#37474f"><tspan font-weight="700">Sıcaklık sınıfı:</tspan> tüm bileşenler −40…+85 °C endüstriyel;</text>
   <text x="1176" y="786" font-size="13" fill="#37474f">kutu malzemesi UV/ısı dayanımlı PC veya alüminyum döküm.</text>
-  <text x="1176" y="808" font-size="13" fill="#37474f"><tspan font-weight="700">PCB:</tspan> 110 × 70, kutu içinde (5, 5, 39,4) mm, 4 × Ø6 dikme üstünde (M3);</text>
-  <text x="1176" y="825" font-size="13" fill="#37474f">ön yüzü kapaktan 5 mm geride, PCB koordinatı = kutu − 5 mm (02-pcb-yerlesimi.svg).</text>
-  <text x="1176" y="847" font-size="13" fill="#37474f"><tspan font-weight="700">Genişleme payı:</tspan> 2×5 başlık ayrılmış I²C/UART — PD/akustik</text>
-  <text x="1176" y="864" font-size="13" fill="#37474f">fark katmanı için (§7.1 şartı); kutuda ilgili yüzde kör tapa.</text>
-  <text x="1176" y="902" font-size="12" fill="#78909c">Kavramsal tasarım — üretim çizimi değildir (§1.4: fiziksel donanım yok).</text>
+  <text x="1176" y="808" font-size="13" fill="#37474f"><tspan font-weight="700">PCB:</tspan> 110 × 70, kutu içinde (5, 5, 39,4) mm,</text>
+  <text x="1176" y="842" font-size="13" fill="#37474f">PCB koordinatı = kutu − 5 mm (02-pcb-yerlesimi.svg).</text>
+  <text x="1176" y="875" font-size="13" fill="#37474f"><tspan font-weight="700">Genişleme payı:</tspan> 2×5 başlık ayrılmış I²C/UART — PD/akustik</text>
+  <text x="1176" y="894" font-size="13" fill="#37474f">fark katmanı için (§7.1 şartı); kutuda ilgili yüzde kör tapa.</text>
+  <text x="1176" y="911" font-size="12" fill="#78909c">Kavramsal tasarım — üretim çizimi değildir</text>
+  <text x="1176" y="927" font-size="12" fill="#78909c">(§1.4: fiziksel donanım yok).</text>
   <rect x="60" y="1020" width="480" height="150" fill="#fff" stroke="#90a4ae" stroke-width="1.5"/>
   <text x="76" y="1048" font-size="15" fill="#263238" font-weight="700">Lejant</text>
   <rect x="76" y="1064" width="40" height="16" fill="url(#hatch)" stroke="#263238" stroke-width="1.5"/>

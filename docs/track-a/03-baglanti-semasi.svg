@@ -154,13 +154,13 @@
   <rect x="1400" y="222" width="30" height="60" fill="#607d8b"/><text x="1415" y="296" text-anchor="middle" class="part">klemens</text>
   <text x="1415" y="310" text-anchor="middle" class="part">A / B / GND</text>
   <rect x="1460" y="170" width="160" height="60" rx="6" class="blk" style="fill:#fff3e0"/>
-  <text x="1540" y="194" text-anchor="middle" class="pin">Enerji analizörü</text><text x="1540" y="212" text-anchor="middle" class="lbl">Modbus RTU slave, adres 1 / akım</text>
+  <text x="1540" y="194" text-anchor="middle" class="pin">Enerji analizörü</text><text x="1540" y="208" text-anchor="middle" class="lbl">Modbus RTU slave, adres 1</text><text x="1540" y="222" text-anchor="middle" class="lbl">/ akım ölçümü</text>
   <rect x="1460" y="250" width="160" height="60" rx="6" class="blk" style="fill:#fff3e0"/>
-  <text x="1540" y="274" text-anchor="middle" class="pin">TVOC-2 (ark dedektörü)</text><text x="1540" y="292" text-anchor="middle" class="lbl">slave, adres 2 / yalnız trip/diag. kaydı</text>
+  <text x="1540" y="274" text-anchor="middle" class="pin">TVOC-2 (ark dedektörü)</text><text x="1540" y="288" text-anchor="middle" class="lbl">slave, adres 2</text><text x="1540" y="302" text-anchor="middle" class="lbl">/ yalnız trip/diag. kaydı</text>
   <g class="nr"><line x1="1430" y1="240" x2="1460" y2="200"/><line x1="1430" y1="270" x2="1460" y2="280"/></g>
   <line x1="1446" y1="262" x2="1470" y2="318" class="nx"/>
-  <text x="1470" y="332" class="lbl">A/B hattı: bükümlü çift, ekranlı,</text>
-  <text x="1470" y="346" class="lbl">son cihazda 2. 120 Ω sonlandırma</text>
+  <text x="1380" y="332" class="lbl">A/B hattı: bükümlü çift, ekranlı,</text>
+  <text x="1380" y="346" class="lbl">son cihazda 2. 120 Ω sonlandırma</text>
 
   <!-- ===================== ANTEN ===================== -->
   <g class="ng"><line x1="1020" y1="370" x2="1090" y2="370"/></g>
