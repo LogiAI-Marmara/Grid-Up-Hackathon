@@ -14,7 +14,7 @@ def run(_ctx):
     doc = None
     for i in range(app.documents.count):
         d = app.documents.item(i)
-        if d.name == 'GridUp-Pano': doc = d
+        if d.name.split(' (')[0] == 'GridUp-Pano': doc = d   # '(~recovered)' ekini tolere et
     if doc is None:
         doc = app.documents.add(adsk.core.DocumentTypes.FusionDesignDocumentType)
     doc.activate()
@@ -67,10 +67,19 @@ def run(_ctx):
     box('Modem', 1290, 1050, 1490, 1140, Z0, 50)
     box('T1 olcu (analizor)', 1320, 790, 1530, 940, Z0, 50)
     box('Kontrol', 1320, 630, 1530, 740, Z0, 50)
+    # BARA SISTEMI: 3 yatay bara (L1/L2/L3), 185 mm adim, 60 x 10 mm; mesnet izolatorleri arkada.
+    # Bara standoff'u (s) kaynaksiz -> s = 0 en iyimser kabul: bara on yuzu = plaka on yuzu (Z0).
+    # Plaka NH bolgesinde cep (Z -448..-430), bara + izolator bu cebin icinde (sematik).
+    box('Plaka cebi', 30, 520, 1270, 970, -448, 18, CUT, [govde])
+    for i, yc in enumerate([930, 745, 560]):
+        box('Bara L%d' % (i+1), 40, yc - 30, 1260, yc + 30, Z0 - 10, 10)
+        for j, xc in enumerate([70, 650, 1230]):
+            box('Mesnet izolatoru L%d-%d' % (i+1, j+1), xc - 20, yc - 35, xc + 20, yc + 35, -448, 8)
+    # NH dikey yuk ayirici: derinlik 141,5 mm bara on yuzunden (Eaton EBV 00, Pub. 10275 s.5)
     for r, (y1, y2) in enumerate([(820, 940), (685, 805), (550, 670)]):
         for k in range(12):
             x1 = 50 + k*100 + 8
-            box('NH s%d-%02d' % (r+1, k+1), x1, y1, x1 + 84, y2, Z0, 70)
+            box('NH s%d-%02d' % (r+1, k+1), x1, y1, x1 + 84, y2, Z0, 141.5)
     box('Klemens sirasi', 50, 440, 1250, 495, Z0, 45)
 
     # MODUL: GridUp-Kutu, kapak ic yuzune (Z=0), 180 deg Y ekseni etrafinda; merkez (650, 690)

@@ -10,7 +10,7 @@ FILE_DESCRIPTION(
 
 FILE_NAME(
 /* name */ 'GridUp-Kutu.step',
-/* time_stamp */ '2026-09-14T09:24:27+03:00',
+/* time_stamp */ '2026-09-14T12:04:38+03:00',
 /* author */ (''),
 /* organization */ (''),
 /* preprocessor_version */ 'ST-DEVELOPER v20.1',
@@ -30,7 +30,7 @@ DATA;
 #15=STYLED_ITEM('',(#2433),#19);
 #16=STYLED_ITEM('',(#2433),#20);
 #17=STYLED_ITEM('',(#2433),#21);
-#18=MANIFOLD_SOLID_BREP('G\X\C3\X\B6vde',#1411);
+#18=MANIFOLD_SOLID_BREP('G\X\F6vde',#1411);
 #19=MANIFOLD_SOLID_BREP('Kapak',#1412);
 #20=MANIFOLD_SOLID_BREP('IR pencere',#1413);
 #21=MANIFOLD_SOLID_BREP('DIN klips',#1414);

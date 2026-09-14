@@ -12,7 +12,7 @@ ORANGE = '#e65100'; ORANGE2 = '#ef6c00'; GREEN = '#2e7d32'; BLUE = '#0d47a1'; GR
 SENS_Z = -53.0            # IR pencere dış yüzü
 IRX, IRY = 650.0, 692.5   # IR pencere merkezi (model, Y yukarı)
 BACK_Z = -430.0           # montaj plakası ön yüzü
-NH_Z = -360.0             # NH ayırıcı ön yüzleri
+NH_Z = -288.5             # NH ayırıcı ön yüzleri (bara ön yüzü Z0 + 141,5, Eaton EBV 00)
 D_BACK = SENS_Z - BACK_Z  # 377
 D_NH = SENS_Z - NH_Z      # 307
 def fov(d): return 2*d*math.tan(math.radians(55)), 2*d*math.tan(math.radians(37.5))
@@ -135,7 +135,7 @@ sx, sy = -SENS_Z, 1500 - IRY
 svg.text(30, sy - 55, 'MODÜL', 14, '#1b5e20', 'middle', '700')
 svg.text(2, sy - 40, 'kutu 50 + klips 5 mm', 12, '#1b5e20')
 svg.add('<line x1="%g" y1="%g" x2="430" y2="%g" stroke="#0d47a1" stroke-width="1.5" stroke-dasharray="4 6"/>' % (sx, sy, sy))
-svg.add('<line x1="%g" y1="%g" x2="%g" y2="%g" stroke="#0d47a1" stroke-width="2" stroke-dasharray="3 5"/>' % (360, sy-hn, 360, sy+hn))
+svg.add('<line x1="%g" y1="%g" x2="%g" y2="%g" stroke="#0d47a1" stroke-width="2" stroke-dasharray="3 5"/>' % (-NH_Z, sy-hn, -NH_Z, sy+hn))
 svg.text(235, sy-12, '75° (dikey)', 18, BLUE, 'middle', '700')
 svg.text(225, 1165, 'plakada %d / NH yüzünde %d mm yükseklik' % (round(2*hb), round(2*hn)), 15, BLUE, 'middle')
 svg.add('<line x1="%g" y1="%g" x2="%g" y2="%g" stroke="#c62828" stroke-width="5" marker-end="url(#arw-red)"/>' % (sx+10, sy+35, sx+115, sy+35))
@@ -169,9 +169,12 @@ comment = """    Modül yerleşimi ve termal görüş hattı — TEDAŞ-MLZ/2003
     Model koordinatı: X sağ, Y yukarı, Z öne (kapak iç yüzü Z = 0, montaj plakası ön yüzü Z = −430, NH ön yüzü Z = −360).
     Modül: kutu X 590–710, Y 650–730 (merkez 650, 690), DIN klips Z 0..−5, gövde Z −5..−51, IR pencere dış yüzü Z ≈ −53;
       IR pencere merkezi (650, 692,5) → önden görünüşte (650, 807,5) [y aşağı].
-    Termal kapsama (110° × 75°): sensör → montaj plakası %d mm → %d × %d mm; sensör → NH yüzü %d mm → %d × %d mm.
-      (Karar kaydı §7.1: "~40 cm, kabaca 114 × 61 cm" — eski kroki 35 mm modül derinliğiyle 395 mm / 1143 × 614 almıştı;
-       kutu 50 mm + klips 5 mm olunca mesafe 377 mm'e iner. 04-mekanik-yerlesim.md kapsama sayıları buna göre güncellenmeli.)
-    Bölge sınırları TEDAŞ çiziminden orantıyla ölçülmüştür (±30 mm).""" % (round(D_BACK), round(WB), round(HB), round(D_NH), round(WN), round(HN))
+    NH ayırıcı derinliği 141,5 mm bara ön yüzünden (Eaton EBV 00 dikey yük ayırıcı, Pub. 10275 s.5); bara standoff'u (s)
+      hiçbir kaynakta yok (TEDAŞ EK-II/14 yalnız dış siluet, şartname §2.2.10 "mesnet izolatörleri" der, mm vermez) →
+      s = 0 en iyimser kabul: bara ön yüzü = plaka ön yüzü Z = −430, NH ön yüzü Z = −288,5. Gerçek s > 0 kapsamayı küçültür.
+    Termal kapsama (110° × 75°): sensör → montaj plakası %d mm → %d × %d mm; sensör → NH yüzü %.1f mm → %d × %d mm.
+      (Karar kaydı §7.1: "~40 cm, kabaca 114 × 61 cm" — eski kroki 35 mm modül derinliğiyle 395 mm / 1128 × 606 almıştı
+       [1143 × 614 = 400 mm]; kutu 50 mm + klips 5 mm olunca mesafe 377 mm'e iner.)
+    Bölge sınırları TEDAŞ çiziminden orantıyla ölçülmüştür (±30 mm).""" % (round(D_BACK), round(WB), round(HB), D_NH, round(WN), round(HN))
 n = svg.write(OUT, comment)
 print('written', OUT, n, 'FOV', round(WB), round(HB), '@', round(D_BACK), '/', round(WN), round(HN), '@', round(D_NH))
