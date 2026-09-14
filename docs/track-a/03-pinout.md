@@ -18,6 +18,11 @@ sağda RS-485/Modbus ve anten, altta besleme zinciri. Tabloda olmayan tek ekleme
 algılama** girişidir — aşağıdaki tabloya işlenmiştir. Pasif değerler tipik başlangıç değerleridir;
 üretim çizimi değildir, §1.4. Parçaların kart üzerindeki yeri: [02-pcb-yerlesimi.svg](02-pcb-yerlesimi.svg).)*
 
+*EDA karşılığı: [eda/GridUp-Modul.kicad_sch](eda/GridUp-Modul.kicad_sch) (KiCad; [ERC 0 hata / 0 uyarı](eda/erc-raporu.txt);
+[netlist](eda/GridUp-Modul.net) 91 kontrolle §3.1 ile birebir doğrulanmış) — SVG çıktısı
+[eda/03-baglanti-semasi-kicad.svg](eda/03-baglanti-semasi-kicad.svg) (A3 ölçeği; dokümana gömmek için değil, kaynak olarak).
+Üretim zinciri ve iki çizimin karşılaştırması: [eda/README.md](eda/README.md).*
+
 ---
 
 ## 3.1 Arayüzler ve kullanılan pinler (öneri)

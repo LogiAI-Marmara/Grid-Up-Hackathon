@@ -25,10 +25,17 @@ rc = run(CLI, 'sch', 'erc', '--format', 'report', '--severity-all', '--exit-code
 print('ERC:', 'temiz' if rc == 0 else 'İHLAL VAR (erc-raporu.txt)')
 rep = os.path.join(HERE, 'erc-raporu.txt')   # kicad-cli CRLF yazar → LF
 data = open(rep, 'rb').read().replace(b'\r\n', b'\n')
+import re
+data = re.sub(rb'\(\d{4}-\d\d-\d\dT[^,]*, ', b'(', data)   # zaman damgası → deterministik
 open(rep, 'wb').write(data)
 tmp = tempfile.mkdtemp()
-net = os.path.join(tmp, 'netlist.net')
+net = os.path.join(HERE, 'GridUp-Modul.net')   # commit'li: verify_netlist.py tekrar üretilebilir
 run(CLI, 'sch', 'export', 'netlist', '--format', 'kicadsexpr', '-o', net, SCH)
+import re
+txt = open(net, encoding='utf-8').read().replace('\r\n', '\n')
+txt = re.sub(r'\(source "[^"]*GridUp-Modul\.kicad_sch"\)', '(source "GridUp-Modul.kicad_sch")', txt)   # mutlak yol → dosya adı
+txt = re.sub(r'\(date "\d{4}-\d\d-\d\dT[^"]*"\)', '(date "")', txt)                                     # zaman damgası → deterministik
+open(net, 'w', encoding='utf-8', newline='').write(txt)
 run(PY, os.path.join(HERE, 'verify_netlist.py'), net)
 run(CLI, 'sch', 'export', 'svg', '--no-background-color', '-o', tmp, SCH)
 run(PY, os.path.join(HERE, 'svg_min.py'), os.path.join(tmp, 'GridUp-Modul.svg'), os.path.join(HERE, '03-baglanti-semasi-kicad.svg'))
