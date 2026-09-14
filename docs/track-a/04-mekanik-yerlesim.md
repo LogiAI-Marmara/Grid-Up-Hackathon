@@ -138,7 +138,15 @@ Karar kaydı §7.5 satır 323 bu konuda kesin konuşur:
 > arkasından baktırılamaz; kutu yüzeyinde kendi yuvasında, dışarı bakar konumda olmalıdır."*
 
 **Teknik açıklama:** Termal sensör 8–14 µm bandında (uzak kızılötesi / LWIR) çalışır. Standart cam
-ve çoğu plastik bu bandı **geçirmez** — sensörün önüne konursa sensör hiçbir şey görmez.
+ve **çoğu sert plastik** bu bandı **geçirmez** — sensörün önüne konursa sensör hiçbir şey görmez.
+
+> **İstisna — ince polietilen film LWIR'ı geçirir.** Standart cam ve sert plastikler (PC, PMMA,
+> ABS) opaktır; ancak **ince PE/HDPE film** (ör. yiyecek saklama filmi, ~20–50 µm) 8–14 µm bandını
+> belirgin biçimde geçirir. Bu, **düşük maliyetli bir alternatiftir** ve germanyum/kalkojenit
+> pencerenin tedarik riski/ maliyetine karşı sunulabilir. Sınırı: mekanik dayanım zayıftır, IP54
+> için gergin ve contalı bir çerçeveye alınmalı; geçirgenlik %70–85 bandındadır (ölçüm sapması
+> kalibrasyonla telafi edilir). **Seçim:** birincil çözüm IR geçirgen pencere (germanium/kalkojenit)
+> kalır; PE film, tedarik/maliyet gerekirse uygulanabilir alternatif olarak dokümanda anılır.
 
 **İkinci teknik incelik:** MLX90640'ın TO39 kılıfı **kendi filtresini zaten taşır.** Bu nedenle
 kutuda *pencere* değil, **açıklık (aperture)** kavramsal olarak yeterlidir. Ancak burada bir
@@ -190,9 +198,9 @@ Seçilen bileşenlerle bu ölçü **sığmıyor**:
 
 | Bileşen | En büyük boyutu | Not |
 |---|---|---|
-| **AC/DC güç modülü** (RAC05-05SK/277) | **~33,8 mm uzunluk** | Serinin DIP modül ölçüsü; kutunun 50 mm yüksekliğinde rahat sığar |
-| Süperkapasitör (Eaton PM/HV sınıfı) | **~Ø21,5 mm** | Kutuda yatık konumlandırılır (Ø21,5 × 25) |
-| ESP32-S3-WROOM-1U modülü | ~18 × 19,2 mm | + PCB çevresi |
+| **AC/DC güç modülü** (RAC05-05SK/277) | **31,7 × 26,7 × 21,8 mm** | Datasheet DIMENSION (THT/wired); kutunun 50 mm yüksekliğinde rahat sığar |
+| Süperkapasitör (Eaton HV, 2 × 10 F) | **2 × Ø10 × 30 mm** | 2 hücre seri; kutuda yatık konumlandırılır. (Karşılaştırma: Eaton PM 5,0 V/1 F tek modül 16,8 × 8,5 × 21,5 — enerji yetersiz, §2.5) |
+| ESP32-S3-WROOM-1U modülü | 18,0 × 19,2 × 3,2 mm | + PCB çevresi |
 | I²C/RS-485 pasifleri + klemensler | — | Ek yerleşim alanı |
 
 **Sonuç:** Kutu ölçüsü **120 × 80 × 50 mm** olarak belirlenmiştir — karar kaydının *"~10 × 7 ×
@@ -216,9 +224,9 @@ pedleri (yalnız hizalama, §4.8); **E** alt yüz — 230 V rakor, RS-485, CT gi
 
 **Dokümana yazılacak ifade:**
 > Kutunun ölçüsü **120 × 80 × 50 mm** olarak belirlenmiştir. Karar kaydındaki "~10 × 7 × 3,5 cm"
-> ifadesi tasarım hedefidir; seçilen AC/DC modülün (33,8 mm) ve süperkapasitörün (Ø21,5 mm) fiziksel
-> boyutları nedeniyle nihai ölçü büyümüştür. Nihai geometri Fusion 360 modelinde sabitlenmiştir;
-> bu, kavramsal tasarımı değiştirmez.
+> ifadesi tasarım hedefidir; seçilen AC/DC modülün (31,7 × 26,7 × 21,8 mm) ve yedek depo
+> hücrelerinin fiziksel boyutları nedeniyle nihai ölçü büyümüştür. Nihai geometri Fusion 360
+> modelinde sabitlenmiştir; bu, kavramsal tasarımı değiştirmez.
 
 ---
 

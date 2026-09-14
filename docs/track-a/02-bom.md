@@ -22,10 +22,11 @@
 | 2 | **Mikrodenetleyici + radyo** | `ESP32-S3-WROOM-1U-N8` | 1 | 5,66 | 275 | Okuma, özet, eşik mantığı, Wi-Fi/BLE, harici anten | −40…+85 °C | DigiKey |
 | 3 | **Sıcaklık + nem** | `SHT31-DIS-B2.5KS` | 1 | 4,50 | 219 | Referans çizgisi + yoğuşma riski | −40…+125 °C | DigiKey |
 | 4 | **AC/DC güç modülü** | `RECOM RAC05-05SK/277` | 1 | 10,25 | 499 | 230 V → 5 V, izoleli | −40…+90 °C | Link Electronics |
-| 5 | **Yedek depo (süperkapasitör)** | Eaton PM/HV serisi *(seçim açık — bkz. 2.5)* | 1 | ~5,00 | ~243 | Kesintide birkaç dk; "besleme kaybı" alarmı | −40 °C (derating'li) | Eaton |
+| 5a | **Yedek depo — süperkapasitör** | `Eaton HV1030-2R7106-R` (10 F / 2,7 V) **×2 seri** | 2 | ~2,40 | ~117 | 5 F / 5,4 V (4,6 V derate) yedek depo; kesintide birkaç dk | −40…+65 °C; **−40…+85 °C** (2,3 V/hücre derate) | DigiKey / Mouser |
+| 5b | **Yedek depo — boost çevirici** | 0,3–5,5 V giriş → 3,3 V çıkış (TPS61200 sınıfı) | 1 | ~3,48 | ~169 | Süperkapı 1 V'a kadar sömürür → %74 daha fazla enerji | −40…+85 °C | DigiKey |
 | 6 | **Anten + kablo** | Panel tipi harici anten + U.FL pigtail | 1 | ~5,00 | ~243 | Panodan dışarı sinyal | — | DigiKey / Data Alliance |
 | 7 | **RS-485 alıcı-verici** | Yarıçift yönlü 3,3 V transceiver (MAX3485 sınıfı) | 1 | ~1,50 | ~73 | Modbus hattı fiziksel katmanı | Endüstriyel sınıf seçilecek | — |
-| | | | | **60,53** | **2.945** | **Aktif bileşen ara toplamı** | | |
+| | | | | **63,81** | **3.105** | **Aktif bileşen ara toplamı** | | |
 
 ## 2.2 Destek kalemleri
 
@@ -49,9 +50,10 @@ tedarik araştırması gerektirir.
 ![PCB yerleşimi — 110 × 70 mm, ön yüzden bakış](02-pcb-yerlesimi.svg)
 
 *(Fusion 360 modeli `GridUp-PCB.f3d`'den projeksiyon, 1 mm = 8 birim. Ön yüz kutu penceresine bakar: MLX90640, SHT31, LED ve pasifler;
-arka yüzde ESP32, RAC05, süperkapasitör (yatık, Ø21,5 × 25), klemensler. 230 V birincil bölge sağ şeritte, ≥ 6 mm creepage
-ve yarıkla ayrılmış. Kart kutu içinde (5, 5) mm ofsetlidir: PCB koordinatı = [04-kutu-krokisi.svg](04-kutu-krokisi.svg)
-koordinatı − 5 mm (MLX (55, 32,5) ↔ IR pencere (60, 37,5)); hatlar
+arka yüzde ESP32, RAC05, süperkapasitör (2 × Ø10 × 30 mm, yatık), boost çevirici, klemensler. 230 V birincil bölge sağ şeritte, ≥ 6 mm creepage
+ve yarıkla ayrılmış. Kart kutu içinde (5, 5) mm ofsetlidir. **Koordinat konvansiyonu: model (kutu) koordinatı esas alınır** —
+[04-kutu-krokisi.svg](04-kutu-krokisi.svg) ile aynı; SVG çizimleri `y` aşağı olduğu için görüntüde ters görünür. Örnek: MLX90640
+kutu koordinatı (55, 37,5), IR pencere (60, 42,5). Hatlar
 [03-baglanti-semasi.svg](03-baglanti-semasi.svg) ile aynıdır.)*
 
 ---
@@ -60,15 +62,15 @@ koordinatı − 5 mm (MLX (55, 32,5) ↔ IR pencere (60, 37,5)); hatlar
 
 | Senaryo | Birim maliyet | Not |
 |---|---|---|
-| **Panoda analizör VARSA** (akım Modbus'tan okunur) | **$82,53 ≈ ₺4.016** | CT gerekmez — **hedef senaryo** |
-| Panoda analizör YOKSA (4× split-core CT) | $92,13 ≈ ₺4.483 | CT tanesi ~$2,40 (OEM liste fiyatı, düşük güvenilirlik) |
+| **Panoda analizör VARSA** (akım Modbus'tan okunur) | **$85,81 ≈ ₺4.175** | CT gerekmez — **hedef senaryo** |
+| Panoda analizör YOKSA (4× split-core CT) | $95,41 ≈ ₺4.642 | CT tanesi ~$2,40 (OEM liste fiyatı, düşük güvenilirlik) |
 
 **Ölçek karşılığı (bilgi amaçlı):**
 
 | Ölçek | Tutar |
 |---|---|
-| Demo (9 modül) | ~$743 ≈ ₺36.100 |
-| 100 modül (T5 senaryosu) | ~$8.253 ≈ ₺401.600 |
+| Demo (9 modül) | ~$772 ≈ ₺37.575 |
+| 100 modül (T5 senaryosu) | ~$8.581 ≈ 417.500 |
 
 > **Dikkat — tam sistem maliyeti bundan fazladır.** Bu tablo yalnız **modül** maliyetidir. Saha
 > gateway'i, on-prem sunucu ve yazılım altyapısı ayrıca değerlendirilir (İZ C kapsamı). 100 modül
@@ -117,30 +119,53 @@ doldurur.
 
 ---
 
-## 2.5 ⚠️ Açık kalem — yedek depo bileşen seçimi
+## 2.5 Yedek depo bileşen seçimi — **karara bağlandı**
 
-Bu kalem **doküman içinde karara bağlanacaktır**; karar kaydı seçimi izime bırakmıştır (§7.3 satır 268:
-*"süperkapasitör **veya** küçük hücre"*). Seçilen yöntem **süperkapasitördür**; bileşen seçiminde
-şu sürtünme vardır:
+Karar kaydı §7.3 satır 268 seçimi izime bırakmıştır (*"süperkapasitör **veya** küçük hücre"*).
+**Seçim: süperkapasitör — Eaton HV serisi, 2 × 10 F seri (5 F / 5,4 V) + boost çevirici.**
 
-| Aday | Sıcaklık aralığı | Sorun |
+### Aday karşılaştırması
+
+| Aday | Sıcaklık aralığı | Sonuç |
 |---|---|---|
-| Panasonic EECF5R5H105 (1 F / 5,5 V) | **−25…+85 °C** | −40 °C şartını karşılamıyor |
-| Panasonic NF / EEC-S5R5 (1–1,5 F) | −25…+70 °C | Aynı |
-| Kamcap SE serisi | −25…+70 °C | Aynı |
-| **Eaton PM serisi** | −40…+60 °C; genişletilmiş **−40…+85 °C** | +85 °C'de gerilim **3,9 V'a derate** |
-| **Eaton HV serisi** | −40…+65 °C; genişletilmiş −40…+85 °C | 2,7 V anma; +85 °C'de **2,3 V'a derate** |
+| Panasonic EECF5R5H105 (1 F / 5,5 V) | **−25…+85 °C** |  −40 °C şartını karşılamıyor |
+| Panasonic NF / EEC-S5R5 (1–1,5 F) | −25…+70 °C | ✗ Aynı |
+| Kamcap SE serisi | −25…+70 °C | ✗ Aynı |
+| Eaton PM serisi (5,0 V / 1 F modül) | −40…+60 °C; genişletilmiş **−40…+85 °C** | △ Ama enerji yetersiz (aşağıya bak) |
+| **Eaton HV serisi (2,7 V / 10 F hücre)** | −40…+65 °C; genişletilmiş **−40…+85 °C** | ✓ **Seçildi** |
 
-**Gerçek durum:** *"5,5 V + −40…+85 °C"* kombinasyonu tek parçada bulunamamıştır. −40 °C'ye inen
-seriler +85 °C'de gerilim derating ister. **Dokümana dürüstçe yazılacak yaklaşım:**
+**Gerçek durum:** *"5,5 V + −40…+85 °C"* kombinasyonu **tek parçada yoktur** — −40 °C'ye inen seriler
++85 °C'de gerilim derating ister. Bu yüzden seçim **enerji bütçesiyle** yapılmıştır.
 
-1. **Amaç enerji sağlamak değil:** kesinti anında birkaç dakika yaşayıp *"besleme kaybı"* alarmını
-   gönderebilmek (§7.3 satır 269). Bu, gereken enerjiyi **çok küçük** tutar.
-2. **Ömür hesabı sürekli çalışma üzerinden YAPILMAZ** — *"yılda kaç kesinti × birkaç dakika"*
-   üzerinden yapılır. Float durumda bekleyen depo, panonun bakım periyodundan uzun ömür verir
-   (§7.3 satır 282).
-3. **Alternatif karşılaştırma olarak korunur:** karşılaştırma tablosu yukarıdaki gibi dokümanda
-   kalır; tek seçenek savunmak yerine gerekçeli sunum yapılır (§7.3 satır 284'teki ilkeyle aynı).
+### Kararı belirleyen hesap
+
+E = ½C(V₁²−V₂²). Yedek modda (`dusuk_guc`) termal dizi ve radyo birlikte beslenemez; yalnızca
+*"besleme kaybı"* paketi gönderilir → ~50 mA @ 3,3 V ≈ 165 mW.
+
+| Senaryo | Kullanılabilir enerji | 50 mA'da süre |
+|---|---|---|
+| **HV 2×10 F (5 F / 5,4 V) + boost** | **70 J** | **~7 dk** |
+| HV 2×10 F, +85 °C derate (4,6 V) + boost | **50 J** | **~5 dk** |
+| HV 2×10 F + LDO (3,6 V'ta durur) | 40 J | ~4 dk |
+| Eaton PM 1 F + LDO | 8 J | ~50 sn |
+| **Eaton PM 1 F, +85 °C derate (3,9 V) + LDO** | **1 J** | **~7 sn** ✗ |
+
+**Üç sonuç:**
+1. **HV, PM'den ~8,7× fazla enerji verir** — hücre voltajı 2,7 V olduğu için seri bağlandığında
+   tüm pencere kullanılır; PM'in 5,4 V'lik modülü 3,6 V LDO dropout'una kadar iner.
+2. **Boost şart:** LDO 3,6 V'ta dururken ~30 J (≈90 sn) çöpe gider; boost süperkapı **1 V'a kadar**
+   sömürür → **%74 daha fazla enerji**.
+3. **PM'in derating senaryosu çöker:** +85 °C'de PM 3,9 V'a derate olur, 3,6 V dropout'u kalır →
+   pencere **0,3 V** → **~7 saniye.** Alarm paketini bile gönderemez. Bu, kararı tek başına verir.
+
+**Karar kaydı §7.3 uyumu:** *"besleme kesildiğinde birkaç dakika yaşayıp 'besleme kaybı' alarmını
+gönderebilmek"* — hedef 3–5 dk ≈ 30–50 J. HV + boost **70 J (20 °C) / 50 J (+85 °C ile karşılıyor)**;
+PM 1 F (**8 J / 1 J**) **karşılamıyor**.
+
+**Ömür notu:** Ömür sürekli çalışma üzerinden hesaplanmaz — *"yılda kaç kesinti × birkaç dakika"*
+üzerinden hesaplanır. Float durumda bekleyen depo, panonun bakım periyodundan uzun ömür verir
+(§7.3 satır 282). Veri sayfası ömrü **1000 saat @ 65 °C** (tam anma geriliminde); bizim kullanım
+(float + seyrek deşarj + derate) bunun çok altında.
 
 **Kod tarafı etkisi:** Yok. `modul_durum.besleme` alanı `sebeke` | `yedek` değerlerini taşır; hangi
 depo teknolojisinin kullanıldığı sözleşmeye yansımaz.
@@ -153,7 +178,7 @@ depo teknolojisinin kullanıldığı sözleşmeye yansımaz.
 |---|---|---|
 | 1 | **MCU'nun PSRAM'li varyantı −40…+65 °C** — PSRAM'siz varyant −40…+85 °C | −40…+85 °C şartı için **PSRAM'siz N8 zorunlu**. Kısıt bedava: 768 değerlik kare ~3 KB, PSRAM gereksiz |
 | 2 | **Standart 230 V AC/DC modüller −25 °C'de başlıyor** (RECOM RAC02, Mornsun LD03, Hi-Link HLK-PM01) | −40 °C için **277 VAC serisi** (RAC05-K/277, −40…+90 °C) seçildi. Gerekçe dokümanda yazılır |
-| 3 | **"5,5 V + −40…+85 °C" süperkapasitör yok** | Bkz. 2.5 — derating veya alternatif |
+| 3 | **"5,5 V + −40…+85 °C" süperkapasitör yok** | Bkz. 2.5 — **HV serisi 2×10 F + boost** seçildi; enerji bütçesiyle gerekçelendi |
 | 4 | **Termal sensör −40…+85 °C hedef sıcaklık −40…+300 °C** | ✓ Şartı karşılıyor |
 | 5 | **Tedarik süresi:** MLX90640 Mouser'da *non-stocked*, **12–16 hafta** | Prototip üretimi planlanırsa erken sipariş gerekir. **Hackathon'u etkilemez** (fiziksel donanım üretilmiyor) |
 

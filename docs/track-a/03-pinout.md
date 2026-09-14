@@ -69,7 +69,7 @@ listelenmiştir.
 | **GPIO19, GPIO20** | USB D−/D+ — seri debug/olası firmware güncellemesi için ayrılır |
 | **GPIO43, GPIO44** | U0TXD/U0RXD — seri konsol/debug için ayrılır |
 | **GPIO26–GPIO32** | Modül içindeki QSPI flash / (varsa) PSRAM tarafından kullanılır, modül pinlerinde yoktur |
-| **GPIO35–GPIO37 (modül pin 28–30)** | Datasheet notu: bu pinlerin varsayılan işlevleri **flash'a ayrılmıştır**; kullanılması önerilmez |
+| **GPIO35–GPIO37 (modül pin 28–30)** | **Octal PSRAM'li varyantlarda** (ESP32-S3**R8**/**R16V**) bu pinler Octal SPI PSRAM'e bağlıdır ve başka amaçla kullanılamaz. **Bizim seçtiğimiz N8 varyantında PSRAM yoktur → bu pinler serbesttir.** Yine de NC bırakılır: gereksinim yok ve pin 28–30'a bağlanacak bir sinyal tanımlı değil |
 
 > **Neden bunu yazma gereği duyduk:** Strapping pinine yanlışlıkla sensör bağlamak, cihazın
 > açılış modunu bozar ve sahada "rastgele çalışmayan modül" olarak görünür — teşhisi zor bir hata
