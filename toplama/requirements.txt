@@ -1,0 +1,17 @@
+# Collection service runtime dependencies.
+#
+# Pinned to minimum versions rather than exact ones: the hackathon has to install
+# these on an on-prem machine whose wheel cache is unknown, and an exact pin that
+# has no wheel there costs more than it buys.
+fastapi>=0.115
+uvicorn[standard]>=0.30
+pydantic>=2.7
+
+# Contract validation. `referencing` is what resolves the relative $ref from
+# modul_paketi.schema.json to olcum_kaydi.schema.json.
+jsonschema>=4.21
+referencing>=0.34
+
+# PostgreSQL driver. Only imported when TOPLAMA_KAYIT=postgres, so the `dosya`
+# backend and the test suite run without it.
+psycopg[binary]>=3.1

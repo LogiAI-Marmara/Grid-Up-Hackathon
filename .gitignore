@@ -1,0 +1,18 @@
+# Scratch / working files (not deliverables)
+temp/
+
+# Python & build artifacts
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.venv/
+venv/
+env/
+
+# Claude Code workspace files
+.claude/
+CLAUDE.md
+
+# OS
+.DS_Store
