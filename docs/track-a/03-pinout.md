@@ -2,8 +2,21 @@
 
 **Teslimat karşılığı:** T2 (giriş-çıkış bağlantıları, bağlantı şemaları)
 **Dayandığı kararlar:** §7.1 ölçüm kümesi · §7.4 haberleşme
-**Biçim notu:** §7 karar kaydı satır 626: *"Çizim olmak zorunda değil, tablo da olabilir."*
-Bu doküman tablo biçimindedir; arayüz özeti ve blok şema için bkz. [1. doküman](01-blok-sema.md).
+**Biçim notu:** Karar kaydı satır 626 *"çizim olmak zorunda değil, tablo da olabilir"* der; ancak
+organizatörün açılış sunumu (transkript 735 s) *"bir tasarımınız varsa bunun bağlantı şemalarını görmek
+isteriz"* diyerek şemayı açıkça istedi. Bu nedenle tabloların yanında **bağlantı şeması** da verilmiştir.
+Arayüz özeti ve blok şema için bkz. [1. doküman](01-blok-sema.md).
+
+---
+
+## 3.0 Bağlantı şeması
+
+![Modül bağlantı şeması — ESP32-S3 etrafında tüm hatlar](baglanti-semasi.svg)
+
+*(Şema §3.1 pin tablosunun birebir görsel karşılığıdır: sol tarafta I²C sensörler ve CT ön ucu,
+sağda RS-485/Modbus ve anten, altta besleme zinciri. Tabloda olmayan tek ekleme **GPIO1 besleme
+algılama** girişidir — aşağıdaki tabloya işlenmiştir. Pasif değerler tipik başlangıç değerleridir;
+üretim çizimi değildir, §1.4.)*
 
 ---
 
@@ -24,6 +37,7 @@ Bu doküman tablo biçimindedir; arayüz özeti ve blok şema için bkz. [1. dok
 | **Modbus hattı** | UART TX | GPIO17 | Datasheet: `U1TXD` |
 | | UART RX | GPIO18 | Datasheet: `U1RXD` |
 | | DE/RE (yön) | GPIO21 | RS-485 alıcı-verici yön kontrolü |
+| **Besleme algılama** | 5 V sense | GPIO1 | **ADC1_CH0** — RAC05 çıkışı (OR diyotu öncesi) 100k/47k bölücüyle okunur; `modul_durum.besleme` = `sebeke`/`yedek` ayrımı bu pinden gelir (§7.3, sözleşme ②) |
 | **Genişleme payı** | (ayrılmış) | GPIO10, GPIO11 | Kullanılmıyor; PD/akustik için ayrıldı (§7.1 satır 237) |
 | **Anten** | U.FL | — | GPIO değil; `1U` varyantının harici konnektörü |
 | **Besleme** | 3V3 / GND | — | AC/DC modül çıkışı |
