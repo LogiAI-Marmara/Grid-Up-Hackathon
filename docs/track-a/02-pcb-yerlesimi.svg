@@ -32,10 +32,10 @@
     <rect x="656" y="0" width="224" height="560" rx="16" fill="url(#hv)"/>
     <line x1="656" y1="0" x2="656" y2="560" stroke="#ef6c00" stroke-width="3" stroke-dasharray="10 5"/>
     <rect x="652" y="240" width="8" height="320" fill="#fff" stroke="#ef6c00" stroke-width="1.5"/>
-    <text x="768" y="290" text-anchor="middle" class="lbl warn" font-weight="700">230 V BİRİNCİL BÖLGE</text>
-    <text x="768" y="306" text-anchor="middle" class="sub">izolasyon sınırı ≥ 6 mm creepage</text>
-    <text x="768" y="320" text-anchor="middle" class="sub">alt yarıda frezelenmiş yarık (slot)</text>
-    <text x="768" y="334" text-anchor="middle" class="sub">RAC05 izolasyon bariyeri sınırın üstünde</text>
+    <text x="768" y="240" text-anchor="middle" class="lbl warn" font-weight="700">230 V BİRİNCİL BÖLGE</text>
+    <text x="768" y="256" text-anchor="middle" class="sub">izolasyon sınırı ≥ 6 mm creepage</text>
+    <text x="768" y="270" text-anchor="middle" class="sub">alt yarıda frezelenmiş yarık (slot)</text>
+    <text x="768" y="284" text-anchor="middle" class="sub">RAC05 bariyeri sınırın üstünde</text>
 
     <!-- montaj delikleri M3, kenardan 3,5 mm -->
     <g fill="#fff" stroke="#263238" stroke-width="2">
@@ -51,13 +51,12 @@
     <circle cx="480" cy="300" r="60" fill="none" stroke="#c62828" stroke-width="2" stroke-dasharray="6 3"/>
     <circle cx="480" cy="300" r="36" class="front" style="fill:#37474f"/>
     <circle cx="480" cy="300" r="14" fill="#90a4ae"/>
-    <text x="480" y="372" text-anchor="middle" class="lbl" font-weight="700">MLX90640ESF-BAA-000-TU</text>
-    <text x="480" y="386" text-anchor="middle" class="sub">TO-39 Ø9 / I²C 0x33 / merkez (60, 37,5) mm</text>
-    <text x="480" y="400" text-anchor="middle" class="sub warn">Ø15 IR pencere ekseni — çevresinde yüksek parça yok</text>
+    <text x="410" y="290" text-anchor="end" class="lbl" font-weight="700">MLX90640ESF-BAA-000-TU</text>
+    <text x="410" y="304" text-anchor="end" class="sub">TO-39 Ø9 / I²C 0x33 / merkez (60, 37,5) mm</text>
+    <text x="410" y="318" text-anchor="end" class="sub warn">Ø15 IR pencere ekseni — yüksek parça yok</text>
     <!-- pull-up + kuplaj -->
-    <rect x="352" y="188" width="16" height="8" class="front"/><rect x="352" y="202" width="16" height="8" class="front"/>
-    <text x="376" y="200" class="sub">2× 4,7k pull-up (SDA/SCL)</text>
-    <rect x="400" y="188" width="10" height="8" class="front"/><text x="414" y="196" class="sub">100 nF</text>
+    <rect x="300" y="188" width="16" height="8" class="front"/><rect x="300" y="202" width="16" height="8" class="front"/><rect x="300" y="216" width="10" height="8" class="front"/>
+    <text x="322" y="206" class="sub">2× 4,7k pull-up + 100 nF</text>
 
     <!-- SHT31 (12, 44) — vent hizası -->
     <rect x="64" y="320" width="64" height="64" fill="none" stroke="#1565c0" stroke-width="1.5" stroke-dasharray="4 2"/>
@@ -104,13 +103,13 @@
     <rect x="624" y="226" width="34" height="21" class="back" style="stroke:#ad1457"/><text x="641" y="222" text-anchor="middle" class="sub">D1</text>
     <rect x="624" y="258" width="34" height="21" class="back" style="stroke:#ad1457"/><text x="641" y="292" text-anchor="middle" class="sub">D2</text>
     <rect x="600" y="196" width="16" height="8" class="back" style="stroke:#ad1457"/><text x="620" y="204" class="sub">R_şarj</text>
-    <rect x="600" y="316" width="16" height="8" class="back" style="stroke:#ad1457"/><rect x="600" y="328" width="16" height="8" class="back" style="stroke:#ad1457"/><text x="620" y="332" class="sub">bölücü → GPIO1</text>
+    <rect x="600" y="316" width="16" height="8" class="back" style="stroke:#ad1457"/><rect x="600" y="328" width="16" height="8" class="back" style="stroke:#ad1457"/><text x="620" y="326" class="sub">bölücü→GPIO1</text>
 
     <!-- süperkapasitör Ø21,5 merkez (70, 50) -->
-    <circle cx="560" cy="400" r="86" class="back" style="stroke:#f9a825;stroke-width:2.5"/>
-    <text x="560" y="396" text-anchor="middle" class="lbl" font-weight="700" fill="#f57f17">Süperkapasitör</text>
-    <text x="560" y="410" text-anchor="middle" class="sub">Ø21,5 / arka yüz / 02-bom §2.5</text>
-    <text x="560" y="424" text-anchor="middle" class="sub">tel uçlu, karta yatık</text>
+    <circle cx="610" cy="450" r="86" class="back" style="stroke:#f9a825;stroke-width:2.5"/>
+    <text x="610" y="446" text-anchor="middle" class="lbl" font-weight="700" fill="#f57f17">Süperkapasitör</text>
+    <text x="610" y="460" text-anchor="middle" class="sub">Ø21,5 / arka yüz / 02-bom §2.5</text>
+    <text x="610" y="474" text-anchor="middle" class="sub">tel uçlu, karta yatık</text>
 
     <!-- MAX3485 + 120 Ω + RS-485 klemens -->
     <rect x="240" y="416" width="40" height="48" class="back" style="stroke:#2e7d32"/><text x="260" y="404" text-anchor="middle" class="sub">MAX3485</text>
@@ -119,11 +118,11 @@
 
     <!-- CT ön ucu: burden ×4 + bias, 8 kutuplu klemens -->
     <g class="back" style="stroke:#6a1b9a">
-      <rect x="320" y="440" width="16" height="8"/><rect x="344" y="440" width="16" height="8"/><rect x="368" y="440" width="16" height="8"/><rect x="392" y="440" width="16" height="8"/>
-      <rect x="416" y="436" width="16" height="16"/>
+      <rect x="300" y="440" width="16" height="8"/><rect x="324" y="440" width="16" height="8"/><rect x="348" y="440" width="16" height="8"/><rect x="372" y="440" width="16" height="8"/>
+      <rect x="396" y="436" width="16" height="16"/>
     </g>
-    <text x="376" y="430" text-anchor="middle" class="sub" fill="#6a1b9a">4× R_burden + bias (3V3/2)</text>
-    <rect x="320" y="504" width="224" height="56" class="back" style="stroke:#6a1b9a"/><text x="432" y="492" text-anchor="middle" class="lbl">CT klemens 8 kutup, 3,5 mm — L1 L2 L3 N (analizör yoksa)</text>
+    <text x="356" y="430" text-anchor="middle" class="sub" fill="#6a1b9a">4× R_burden + bias (3V3/2)</text>
+    <rect x="296" y="504" width="216" height="56" class="back" style="stroke:#6a1b9a"/><text x="404" y="492" text-anchor="middle" class="lbl">CT klemens 8 kutup, 3,5 mm — L1 L2 L3 N</text>
 
     <!-- genişleme başlığı 2×5 (6..19, 56..61) -->
     <rect x="48" y="448" width="104" height="40" class="back" style="stroke:#1565c0"/>

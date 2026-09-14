@@ -73,17 +73,17 @@
     <text x="22" y="300" font-size="12" fill="#2e7d32" transform="rotate(-90 22 300)">PCB 110 × 70</text>
     <!-- MLX90640 TO-39 kutusu PCB'nin ön yüzünde, pencereye dayalı -->
     <rect x="10" y="132" width="20" height="36" fill="#37474f"/>
-    <text x="52" y="150" font-size="12" fill="#37474f">MLX90640</text>
-    <text x="52" y="164" font-size="11" fill="#546e7a">TO-39, pencereye dayalı</text>
+    <text x="52" y="146" font-size="12" fill="#37474f">MLX90640</text>
+    <text x="52" y="159" font-size="10" fill="#546e7a">TO-39</text>
     <!-- SHT31 membran vent'in arkasında -->
     <rect x="22" y="171" width="8" height="10" fill="#1565c0"/>
-    <text x="52" y="188" font-size="12" fill="#1565c0">SHT31 (vent arkası)</text>
+    <text x="40" y="190" font-size="11" fill="#1565c0">SHT31</text>
     <!-- ESP32 PCB arka yüzünde -->
     <rect x="36" y="24" width="12" height="77" fill="#455a64"/>
-    <text x="52" y="40" font-size="12" fill="#455a64">ESP32-S3 (PCB arkası)</text>
+    <text x="52" y="116" font-size="11" fill="#455a64">ESP32-S3 (arka)</text>
     <!-- AC/DC modül: PCB arkasında, 13 mm yükseklik -->
     <rect x="128" y="24" width="52" height="81" fill="#fce4ec" stroke="#ad1457" stroke-width="2"/>
-    <text x="154" y="66" text-anchor="middle" font-size="11" fill="#ad1457" transform="rotate(-90 154 66)">RAC05 34×20×13</text>
+    <text x="154" y="66" text-anchor="middle" font-size="11" fill="#ad1457" transform="rotate(-90 154 66)">RAC05</text>
     <!-- süperkapasitör yatık, Ø21,5 -->
     <rect x="88" y="156" width="100" height="88" rx="8" fill="#fff8e1" stroke="#f9a825" stroke-width="2"/>
     <text x="138" y="196" text-anchor="middle" font-size="12" fill="#f57f17">süperkap.</text>
@@ -145,7 +145,7 @@
     </g>
     <text x="60" y="114" text-anchor="middle" font-size="10" fill="#455a64">ESP32-S3</text>
     <text x="331" y="118" text-anchor="middle" font-size="10" fill="#ad1457">RAC05</text>
-    <text x="280" y="204" text-anchor="middle" font-size="10" fill="#f57f17">süperkap.</text>
+    <text x="280" y="232" text-anchor="middle" font-size="10" fill="#f57f17">süperkap.</text>
     <text x="118" y="292" text-anchor="middle" font-size="9" fill="#2e7d32">RS-485</text>
     <text x="216" y="292" text-anchor="middle" font-size="9" fill="#6a1b9a">CT ×4</text>
     <text x="388" y="292" text-anchor="middle" font-size="9" fill="#ef6c00">230 V</text>
