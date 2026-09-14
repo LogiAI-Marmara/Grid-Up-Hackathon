@@ -486,6 +486,13 @@ class PostgresKayit(Kayit):
 
             olcum_sayisi = 0
             if satir_kumesi.olcum:
+                # `rowcount` is the inserted-row count here, and it is the only
+                # correct source: a *single* `fetchall()` after `executemany`
+                # (with or without `returning=True`) returns just the first
+                # statement's result set, so it would report 1 even when five
+                # rows landed. `ON CONFLICT DO NOTHING` means a retransmitted
+                # packet contributes 0, which is exactly what makes `yinelenen`
+                # work. Verified against PostgreSQL 17 with psycopg 3.3.
                 imlec.executemany(
                     OLCUM_SQL,
                     [
@@ -493,11 +500,7 @@ class PostgresKayit(Kayit):
                         for s in satir_kumesi.olcum
                     ],
                 )
-                # psycopg3's rowcount after executemany reflects only the last
-                # statement, so the count of actually-inserted rows comes from the
-                # RETURNING rows instead. ON CONFLICT DO NOTHING yields no row for
-                # a retransmitted packet, which correctly reports 0 written.
-                olcum_sayisi = len(imlec.fetchall())
+                olcum_sayisi = max(imlec.rowcount, 0)
 
             ozet_sayisi = 0
             if satir_kumesi.termal_ozet is not None:
