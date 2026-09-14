@@ -56,7 +56,9 @@ def run(_ctx):
     box('plaka', 2, 2, 1598, 1498, -448, -0.0001 + 18, JOIN, [govde]) if False else None
     sk = comp.sketches.add(plane(-448))
     sk.sketchCurves.sketchLines.addTwoPointRectangle(sk.modelToSketchSpace(P(2,2,-448)), sk.modelToSketchSpace(P(1598,1498,-448)))
-    extr(sk, JOIN, 18, POS, [govde])   # montaj plakasi on yuzu Z = -430
+    pf = extr(sk, JOIN, 18, POS, [govde])   # montaj plakasi on yuzu Z = -430
+    plaka = [pf.bodies.item(i) for i in range(pf.bodies.count) if pf.bodies.item(i) != govde]
+    for b in plaka: b.name = 'Pano plaka'     # JOIN govdeye birlesmezse ayri govde: adlandir, cep kesimine dahil et
 
     # KAPAK (kapali konum) Z 0..22
     box('Kapak', 0, 0, 1600, 1500, 0, 22)
@@ -67,14 +69,16 @@ def run(_ctx):
     box('Modem', 1290, 1050, 1490, 1140, Z0, 50)
     box('T1 olcu (analizor)', 1320, 790, 1530, 940, Z0, 50)
     box('Kontrol', 1320, 630, 1530, 740, Z0, 50)
-    # BARA SISTEMI: 3 yatay bara (L1/L2/L3), 185 mm adim, 60 x 10 mm; mesnet izolatorleri arkada.
+    # BARA SISTEMI: 3 yatay bara (L1/L2/L3), 185 mm adim (sartname Tablo 8 DSYA). Kesit 1600 kVA icin 2x(100x10) mm2
+    #   (sartname EK-I/8 Tablo 8); burada faz basina TEK 100x10 bara modellendi — ikinci bara (toplam 20 mm)
+    #   s=0 kabulune sigmaz, karar bekliyor. Mesnet izolatorleri arkada.
     # Bara standoff'u (s) kaynaksiz -> s = 0 en iyimser kabul: bara on yuzu = plaka on yuzu (Z0).
     # Plaka NH bolgesinde cep (Z -448..-430), bara + izolator bu cebin icinde (sematik).
-    box('Plaka cebi', 30, 520, 1270, 970, -448, 18, CUT, [govde])
+    box('Plaka cebi', 30, 500, 1270, 990, -448, 18, CUT, [govde] + plaka)
     for i, yc in enumerate([930, 745, 560]):
-        box('Bara L%d' % (i+1), 40, yc - 30, 1260, yc + 30, Z0 - 10, 10)
+        box('Bara L%d' % (i+1), 40, yc - 50, 1260, yc + 50, Z0 - 10, 10)
         for j, xc in enumerate([70, 650, 1230]):
-            box('Mesnet izolatoru L%d-%d' % (i+1, j+1), xc - 20, yc - 35, xc + 20, yc + 35, -448, 8)
+            box('Mesnet izolatoru L%d-%d' % (i+1, j+1), xc - 20, yc - 55, xc + 20, yc + 55, -448, 8)
     # NH dikey yuk ayirici: derinlik 141,5 mm bara on yuzunden (Eaton EBV 00, Pub. 10275 s.5)
     for r, (y1, y2) in enumerate([(820, 940), (685, 805), (550, 670)]):
         for k in range(12):

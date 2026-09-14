@@ -172,6 +172,8 @@ comment = """    Modül yerleşimi ve termal görüş hattı — TEDAŞ-MLZ/2003
     NH ayırıcı derinliği 141,5 mm bara ön yüzünden (Eaton EBV 00 dikey yük ayırıcı, Pub. 10275 s.5); bara standoff'u (s)
       hiçbir kaynakta yok (TEDAŞ EK-II/14 yalnız dış siluet, şartname §2.2.10 "mesnet izolatörleri" der, mm vermez) →
       s = 0 en iyimser kabul: bara ön yüzü = plaka ön yüzü Z = −430, NH ön yüzü Z = −288,5. Gerçek s > 0 kapsamayı küçültür.
+    Bara: 3 yatay bara, 185 mm adım (şartname Tablo 8); kesit 1600 kVA için 2×(100×10) mm² (EK-I/8 Tablo 8) — modelde faz
+      başına tek 100×10 bara (ikinci bara s=0 kabulüne sığmaz, karar bekliyor).
     Termal kapsama (110° × 75°): sensör → montaj plakası %d mm → %d × %d mm; sensör → NH yüzü %.1f mm → %d × %d mm.
       (Karar kaydı §7.1: "~40 cm, kabaca 114 × 61 cm" — eski kroki 35 mm modül derinliğiyle 395 mm / 1128 × 606 almıştı
        [1143 × 614 = 400 mm]; kutu 50 mm + klips 5 mm olunca mesafe 377 mm'e iner.)
