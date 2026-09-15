@@ -43,10 +43,20 @@ import random
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 
+from .etiket import EtiketDosyasi, EtiketSenaryosu, SURUM
 from .fikstur import Fikstur
 from .sozlesme import Kalite, OlcumTipi, Tip
 
-__all__ = ["Senaryo", "SENARYOLAR", "kur", "beklenen_tipler", "temiz_moduller"]
+__all__ = [
+    "Senaryo",
+    "SENARYOLAR",
+    "kur",
+    "beklenen_tipler",
+    "temiz_moduller",
+    "etiket_uret",
+    "SESSIZ_DAKIKA",
+    "TESPIT_SAAT",
+]
 
 
 @dataclass(frozen=True, slots=True)
@@ -66,6 +76,31 @@ class Senaryo:
     #: temperature anomaly is the specific mistake section 5 puts layer 0 there
     #: to prevent, so it is asserted directly rather than hoped for.
     yasak: frozenset[Tip] = frozenset()
+
+    # -- ground truth, for the label file -----------------------------------
+    #
+    # These three describe the injection in the vocabulary of `etiket.py`, so
+    # this set can emit a label file in exactly the format track A's blind sets
+    # will use. They describe *when* the injection happened; they do not change
+    # what is injected, so the signals the detector sees are untouched.
+
+    #: Which of the seven scenarios of section 7.6 this is. Empty for a clean or
+    #: hard-negative module.
+    senaryo: str = ""
+
+    #: Where in the injection ramp the fault begins, as a fraction. 0.0 is the
+    #: start of the detection stretch. 1.0 for a fault that is instantaneous at
+    #: the end of it, such as a module going dark.
+    baslangic_oran: float = 0.0
+
+    #: Where in the ramp the fault reaches its critical state, as a fraction.
+    #:
+    #: `None` for a fault that does not escalate: a frozen sensor is exactly as
+    #: broken on the first sample as on the last, and inventing a critical moment
+    #: for it would invent a lead time too. A scenario with no critical moment
+    #: contributes to the detection rate and not to lead time, which is correct —
+    #: there was no deadline to beat.
+    kritik_oran: float | None = None
 
 
 # --------------------------------------------------------------------------
@@ -387,36 +422,50 @@ SENARYOLAR: tuple[Senaryo, ...] = (
         "senaryo_01_gevsek_klemens",
         "Tek noktada yavaş ısınma, akım ve ortam sabit.",
         beklenen=frozenset({Tip.AKIM_SICAKLIK_SAPMASI}),
+        senaryo="gevsek_klemens",
+        kritik_oran=1.0,
     ),
     Senaryo(
         "TR041-P02-M1",
         "senaryo_02_asiri_yuk",
         "Akım yükseliyor, pano geneli ısınıyor.",
         beklenen=frozenset({Tip.SICAK_NOKTA}),
+        senaryo="asiri_yuk",
+        kritik_oran=1.0,
     ),
     Senaryo(
         "TR052-P01-M1",
         "senaryo_03_faz_dengesizligi",
         "L3 yük atıyor, nötr akımı yükseliyor.",
         beklenen=frozenset({Tip.FAZ_DENGESIZLIGI}),
+        senaryo="faz_dengesizligi",
+        kritik_oran=1.0,
     ),
     Senaryo(
         "TR052-P01-M2",
         "senaryo_04_nem_yukselmesi",
         "Nem yoğuşma sınırına tırmanıyor.",
         beklenen=frozenset({Tip.NEM_YUKSEK}),
+        senaryo="nem_yukselmesi",
+        kritik_oran=1.0,
     ),
     Senaryo(
         "TR052-P02-M1",
         "senaryo_05_ark_olayi",
         "Ark koruma cihazı trip kaydı bıraktı.",
         beklenen=frozenset({Tip.ARK}),
+        senaryo="ark_olayi",
+        # The arc IS the critical moment; it does not ramp up to one.
+        baslangic_oran=0.91,
+        kritik_oran=0.91,
     ),
     Senaryo(
         "TR063-P01-M1",
         "senaryo_06a_sensor_kalitesiz",
         "Termal sensör 150 °C saçmalıyor, kalite alanı bunu söylüyor.",
         beklenen=frozenset({Tip.SENSOR_ARIZASI}),
+        senaryo="sensor_arizasi",
+        # No kritik_oran: a broken sensor does not get worse.
         yasak=frozenset({Tip.SICAK_NOKTA, Tip.AKIM_SICAKLIK_SAPMASI}),
     ),
     Senaryo(
@@ -424,6 +473,7 @@ SENARYOLAR: tuple[Senaryo, ...] = (
         "senaryo_06b_sensor_donuk",
         "Termal sensör 78.00 °C'de donmuş, kalite 'iyi' diyor.",
         beklenen=frozenset({Tip.SENSOR_ARIZASI}),
+        senaryo="sensor_arizasi",
         yasak=frozenset({Tip.SICAK_NOKTA, Tip.AKIM_SICAKLIK_SAPMASI}),
     ),
     Senaryo(
@@ -431,12 +481,20 @@ SENARYOLAR: tuple[Senaryo, ...] = (
         "senaryo_07a_modul_sessiz",
         "Modül 40 dakikadır ölçüm göndermiyor.",
         beklenen=frozenset({Tip.MODUL_SAGLIK}),
+        senaryo="modul_saglik",
+        # The module goes dark at the end of its own stretch, and that instant is
+        # both the onset and the critical state: there is no warning to be had
+        # ahead of a module simply stopping.
+        baslangic_oran=1.0,
+        kritik_oran=1.0,
     ),
     Senaryo(
         "TR063-P02-M2",
         "senaryo_07b_saat_kaymasi",
         "Ölçüm zamanı ile varış zamanı 15 dakika ayrışmış.",
         beklenen=frozenset({Tip.MODUL_SAGLIK}),
+        senaryo="modul_saglik",
+        # Drift is present from the first sample and does not escalate.
     ),
     # --- clean modules: the set is worthless without them -------------------
     Senaryo("TR041-P01-M2", "temiz_01", "Hiçbir şey enjekte edilmedi."),
@@ -454,6 +512,14 @@ SENARYOLAR: tuple[Senaryo, ...] = (
     Senaryo("TR085-P01-M3", "ortak_isinma_03", "Sıcak öğleden sonra; tüm saha birlikte ısınıyor."),
     Senaryo("TR085-P02-M1", "ortak_isinma_04", "Sıcak öğleden sonra; tüm saha birlikte ısınıyor."),
 )
+
+#: How long the detection stretch is, and which module goes dark for how long.
+#: Both the row generator and the label emitter read these, so the timeline in
+#: the label file cannot drift from the timeline in the data — which would be an
+#: invisible, systematic error in every lead time.
+TESPIT_SAAT = 7.0
+SESSIZ_DAKIKA: dict[str, float] = {"TR063-P02-M1": 40.0}
+
 
 #: modul_id -> the injection to apply. Absent means a healthy module.
 _BOZUCULAR = {
@@ -502,7 +568,8 @@ def kur(
             senaryo.modul_id,
             gecmis_gun=gecmis_gun,
             bozucu=_BOZUCULAR.get(senaryo.modul_id),
-            sessiz_dakika=40.0 if senaryo.modul_id == "TR063-P02-M1" else 0.0,
+            tespit_saat=TESPIT_SAAT,
+            sessiz_dakika=SESSIZ_DAKIKA.get(senaryo.modul_id, 0.0),
             termal_kare=senaryo.modul_id in _KARELI,
         )
     return fikstur.yaz()
@@ -516,3 +583,67 @@ def beklenen_tipler() -> dict[str, frozenset[Tip]]:
 def temiz_moduller() -> tuple[str, ...]:
     """Modules that must produce no episode at all — clean and hard negatives alike."""
     return tuple(s.modul_id for s in SENARYOLAR if not s.beklenen)
+
+
+def etiket_uret(
+    simdi: datetime,
+    tohum: int = 20260915,
+    gecmis_gun: float = 15.0,
+    secim: "tuple[str, ...] | None" = None,
+) -> EtiketDosyasi:
+    """Emit this set's answer key in `etiket.py`'s format.
+
+    The fixture set and a real blind set differ in who holds this file and when,
+    not in what it contains — so the evaluation tool is exercised against exactly
+    the shape track A will hand over, and a real blind set drops straight in.
+
+    The timeline is recomputed from the same constants the row generator used
+    (`TESPIT_SAAT`, `SESSIZ_DAKIKA`), not copied, so the two cannot drift apart.
+
+    ON `kritik_esik`. This is the generator's declaration of when the injected
+    fault reached the state it was injected to reach — for a ramp, the end of the
+    ramp; for the arc, the instant it fired; for a module going dark, the moment
+    it stopped. Only the generator can know it, which is the whole reason the
+    label file has to carry it: lead time is a subtraction between that instant
+    and the moment the detector first opened an episode, and one of those two
+    numbers is not in our database.
+    """
+    senaryolar: list[EtiketSenaryosu] = []
+    temiz: list[str] = []
+
+    for s in SENARYOLAR:
+        if secim is not None and s.modul_id not in secim:
+            continue
+        if not s.senaryo:
+            temiz.append(s.modul_id)
+            continue
+
+        son = simdi - timedelta(minutes=SESSIZ_DAKIKA.get(s.modul_id, 0.0))
+        tespit_bas = son - timedelta(hours=TESPIT_SAAT)
+        uzunluk = (son - tespit_bas).total_seconds()
+
+        senaryolar.append(
+            EtiketSenaryosu(
+                senaryo_id=s.ad,
+                modul_id=s.modul_id,
+                senaryo=s.senaryo,
+                baslangic=tespit_bas + timedelta(seconds=uzunluk * s.baslangic_oran),
+                kritik_esik=(
+                    tespit_bas + timedelta(seconds=uzunluk * s.kritik_oran)
+                    if s.kritik_oran is not None
+                    else None
+                ),
+                aciklama=s.aciklama,
+            )
+        )
+
+    return EtiketDosyasi(
+        surum=SURUM,
+        senaryolar=tuple(senaryolar),
+        temiz_moduller=tuple(temiz),
+        tohum=tohum,
+        uretim_zamani=simdi,
+        kapsam_bas=simdi - timedelta(days=gecmis_gun),
+        kapsam_bit=simdi,
+        aciklama="İZ B etiketli geliştirme seti — kör test değil, regresyon setidir.",
+    )
