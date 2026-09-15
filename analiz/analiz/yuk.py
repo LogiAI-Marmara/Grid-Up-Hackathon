@@ -47,7 +47,105 @@ from .fikstur import Fikstur
 from .senaryolar import Profil, Uretec, _bozucu_gevsek_klemens, _bozucu_nem
 from .tarama import Tarayici
 
-__all__ = ["SorguKaydi", "TurOlcumu", "YukSonucu", "olc", "yazdir"]
+__all__ = ["Donanim", "SorguKaydi", "TurOlcumu", "YukSonucu", "donanim", "olc", "yazdir"]
+
+
+# --------------------------------------------------------------------------
+# Hardware
+# --------------------------------------------------------------------------
+
+
+@dataclass(frozen=True, slots=True)
+class Donanim:
+    """What the measurement ran on.
+
+    A turn duration without the machine it was measured on is not a result, it
+    is a number. "18.9 s at 100 modules" says nothing portable; "2.9 core-seconds
+    per turn on a 4-core Xeon at 2.10 GHz" can be carried to other hardware.
+    """
+
+    cekirdek_mantiksal: int
+    cekirdek_fiziksel: int
+    model: str
+    ram_gb: float
+    cgroup_cpu: str
+
+    @classmethod
+    def topla(cls) -> "Donanim":
+        import psutil
+
+        model = "bilinmiyor"
+        try:
+            for satir in open("/proc/cpuinfo", encoding="utf-8"):
+                if satir.startswith("model name"):
+                    model = satir.split(":", 1)[1].strip()
+                    break
+        except OSError:  # pragma: no cover - not Linux
+            pass
+
+        # A container can be capped below the core count the kernel reports, and
+        # then `nproc` is a promise the scheduler will not keep. Read the cgroup
+        # quota too, so a capped run cannot be mistaken for an uncapped one.
+        cgroup = "sınırsız"
+        try:
+            ham = open("/sys/fs/cgroup/cpu.max", encoding="utf-8").read().strip()
+            if ham and not ham.startswith("max"):
+                kota, periyot = ham.split()
+                cgroup = f"{int(kota) / int(periyot):.2f} çekirdek"
+        except (OSError, ValueError):
+            pass
+
+        return cls(
+            cekirdek_mantiksal=psutil.cpu_count(logical=True) or 0,
+            cekirdek_fiziksel=psutil.cpu_count(logical=False) or 0,
+            model=model,
+            ram_gb=psutil.virtual_memory().total / 1e9,
+            cgroup_cpu=cgroup,
+        )
+
+    def __str__(self) -> str:
+        return (
+            f"{self.cekirdek_fiziksel} fiziksel / {self.cekirdek_mantiksal} mantıksal "
+            f"çekirdek, {self.ram_gb:.1f} GB RAM, {self.model}"
+            f"{'' if self.cgroup_cpu == 'sınırsız' else f', cgroup {self.cgroup_cpu}'}"
+        )
+
+
+def donanim() -> Donanim:
+    return Donanim.topla()
+
+
+def _sistem_cpu() -> float:
+    """System-wide CPU seconds (user + system + friends), across all cores."""
+    import psutil
+
+    z = psutil.cpu_times()
+    return sum(
+        getattr(z, alan, 0.0)
+        for alan in ("user", "nice", "system", "irq", "softirq", "steal", "guest")
+    )
+
+
+def _postgres_cpu() -> float:
+    """Total CPU seconds burned by every PostgreSQL backend on this machine.
+
+    The detector's own process CPU is only half the bill: the queries run in
+    separate server processes, and their cost does not appear in
+    `Process.cpu_times()`. Counting only the Python side would understate the
+    work per turn by roughly the SQL share and make the per-core capacity figure
+    flattering.
+    """
+    import psutil
+
+    toplam = 0.0
+    for surec in psutil.process_iter(["name"]):
+        try:
+            if "postgres" in (surec.info["name"] or ""):
+                zamanlar = surec.cpu_times()
+                toplam += zamanlar.user + zamanlar.system
+        except (psutil.NoSuchProcess, psutil.AccessDenied):
+            continue
+    return toplam
 
 
 # --------------------------------------------------------------------------
@@ -154,6 +252,16 @@ class YukSonucu:
     bellek_artis_mb: float
     veri_satiri: int
     kurulum_sn: float
+    #: CPU seconds burned by PostgreSQL backends during the measured turns. The
+    #: detector's own process CPU is only half the bill; the queries run in
+    #: separate server processes.
+    pg_cpu_sn: float = 0.0
+    #: System-wide CPU seconds during the measured turns, and the wall-clock time
+    #: they spanned. The ratio is how many cores were actually busy — which is
+    #: how "is this single-core work?" gets answered rather than assumed.
+    sistem_cpu_sn: float = 0.0
+    olcum_suresi_sn: float = 0.0
+    donanim: Donanim | None = None
     sorgular: dict[str, dict[str, float]] = field(default_factory=dict)
 
     @property
@@ -202,6 +310,59 @@ class YukSonucu:
     @property
     def modul_basina_ms(self) -> float:
         return (self.ort_sure * 1000.0 / self.modul_sayisi) if self.modul_sayisi else 0.0
+
+    # -- per-core accounting ------------------------------------------------
+
+    @property
+    def cekirdek_sn_tur(self) -> float:
+        """CPU core-seconds a turn costs: the detector process plus PostgreSQL.
+
+        This, not wall time, is the portable number. Wall time depends on how
+        much of the work overlapped; core-seconds is what the turn actually costs
+        a machine, and it carries to hardware with a different clock speed by a
+        single ratio.
+        """
+        if not self.turlar:
+            return 0.0
+        return (self.cpu_sn + self.pg_cpu_sn) / len(self.turlar)
+
+    @property
+    def modul_basina_cekirdek_sn(self) -> float:
+        """Core-seconds per module per turn — the unit capacity is computed from."""
+        return self.cekirdek_sn_tur / self.modul_sayisi if self.modul_sayisi else 0.0
+
+    @property
+    def mesgul_cekirdek(self) -> float:
+        """Average number of cores busy across the measured window.
+
+        Near 1.0 means the work is serial and adding cores will not help; near
+        the core count means it is already spread. Measured system-wide, so it
+        includes the PostgreSQL backends the detector is waiting on.
+        """
+        if self.olcum_suresi_sn <= 0:
+            return 0.0
+        return self.sistem_cpu_sn / self.olcum_suresi_sn
+
+    @property
+    def paralellik(self) -> float:
+        """How much of this turn's CPU work overlapped in time.
+
+        `cekirdek_sn_tur / ort_sure`. At 1.0 nothing overlapped — one core's
+        worth of work, done one thing at a time. Above 1.0 some of the SQL ran
+        in parallel with something else, or PostgreSQL used parallel workers.
+        """
+        return self.cekirdek_sn_tur / self.ort_sure if self.ort_sure > 0 else 0.0
+
+    @property
+    def cekirdek_basina_kapasite(self) -> float:
+        """Modules one core can carry at this scan period.
+
+        `periyot / core-seconds per module`. The figure to quote instead of a
+        turn duration, because it survives a change of machine: a box with twice
+        the clock speed carries roughly twice as many per core.
+        """
+        birim = self.modul_basina_cekirdek_sn
+        return self.periyot_sn / birim if birim > 0 else 0.0
 
 
 # --------------------------------------------------------------------------
@@ -335,6 +496,11 @@ def olc(
         gc.collect()
         bellek_once = surec.memory_info().rss / 1e6
         cpu_once = sum(surec.cpu_times()[:2])
+        pg_once = _postgres_cpu()
+        # System-wide CPU, so nothing the turn provokes goes uncounted — including
+        # PostgreSQL backends that start and exit inside the measured window.
+        sistem_once = _sistem_cpu()
+        duvar_once = time.perf_counter()
 
         kayit.sifirla()
         kayit.acik = True
@@ -352,7 +518,10 @@ def olc(
             )
         kayit.acik = False
 
+        duvar_sonra = time.perf_counter()
         cpu_sonra = sum(surec.cpu_times()[:2])
+        pg_sonra = _postgres_cpu()
+        sistem_sonra = _sistem_cpu()
         bellek_sonra = surec.memory_info().rss / 1e6
 
     return YukSonucu(
@@ -364,6 +533,10 @@ def olc(
         bellek_artis_mb=bellek_sonra - bellek_once,
         veri_satiri=veri_satiri,
         kurulum_sn=kurulum_sn,
+        pg_cpu_sn=max(0.0, pg_sonra - pg_once),
+        sistem_cpu_sn=max(0.0, sistem_sonra - sistem_once),
+        olcum_suresi_sn=duvar_sonra - duvar_once,
+        donanim=donanim(),
         sorgular=kayit.ozet(),
     )
 
@@ -374,32 +547,80 @@ def olc(
 
 
 def sinir_tahmini(sonuclar: "list[YukSonucu]") -> str:
-    """Where turn duration crosses the scan period.
+    """Where turn duration crosses the scan period, stated per core.
 
     Reported as a measurement where one was taken and as an extrapolation
     otherwise, and the difference is stated rather than blurred. Turn cost is
     close to linear in module count — the work is per-module window fetches and
     per-module baselines — so a straight line through the largest measured point
     is a defensible estimate, but it is still an estimate and says so.
+
+    The capacity figure is per core, not an absolute duration, because a turn
+    duration is only true of the machine it was measured on. Core-seconds per
+    module carries to other hardware by one ratio.
     """
+    en_buyuk = max(sonuclar, key=lambda s: s.modul_sayisi)
+    kapasite = en_buyuk.cekirdek_basina_kapasite
+    birim_ms = en_buyuk.modul_basina_cekirdek_sn * 1000.0
+
     asan = [s for s in sonuclar if not s.yetisiyor]
     if asan:
         ilk = min(asan, key=lambda s: s.modul_sayisi)
         return (
             f"ÖLÇÜLDÜ: tur süresi {ilk.modul_sayisi} modülde tarama periyodunu "
             f"({ilk.periyot_sn:.0f} sn) aşıyor — p95 {ilk.p95_sure:.2f} sn, "
-            f"doluluk %{ilk.doluluk * 100:.0f}. Dedektör bu noktadan sonra geride kalır."
+            f"doluluk %{ilk.doluluk * 100:.0f}. Dedektör bu noktadan sonra geride kalır.\n"
+            f"Çekirdek başına kapasite: modül başına {birim_ms:.0f} ms çekirdek "
+            f"zamanı ile {ilk.periyot_sn:.0f} sn'lik periyotta ~{kapasite:.0f} modül/çekirdek."
         )
 
-    en_buyuk = max(sonuclar, key=lambda s: s.modul_sayisi)
-    if en_buyuk.modul_basina_ms <= 0:
-        return "Sınır belirlenemedi."
-    tahmini = int(en_buyuk.periyot_sn * 1000.0 / (en_buyuk.p95_sure * 1000.0 / en_buyuk.modul_sayisi))
     return (
-        f"100 modülde sınıra ULAŞILMADI: p95 tur süresi {en_buyuk.p95_sure:.2f} sn, "
-        f"tarama periyodunun (%{en_buyuk.doluluk * 100:.0f}) altında. "
-        f"Modül başına {en_buyuk.modul_basina_ms:.1f} ms ile doğrusal varsayımla "
-        f"sınır ~{tahmini} modül civarındadır (ölçüm değil, tahmin)."
+        f"{en_buyuk.modul_sayisi} modülde sınıra ULAŞILMADI: p95 tur süresi "
+        f"{en_buyuk.p95_sure:.2f} sn, tarama periyodunun "
+        f"(%{en_buyuk.doluluk * 100:.0f}) altında.\n"
+        f"Çekirdek başına kapasite: modül başına {birim_ms:.0f} ms çekirdek zamanı "
+        f"ile {en_buyuk.periyot_sn:.0f} sn'lik periyotta ~{kapasite:.0f} modül/çekirdek "
+        f"(doğrusal varsayım, ölçüm değil tahmin)."
+    )
+
+
+def paralellik_notu(sonuclar: "list[YukSonucu]") -> str:
+    """Whether the work is serial, measured rather than assumed.
+
+    CPU time close to wall time is *suggestive* of single-core work but does not
+    establish it, because the detector's own process CPU excludes the PostgreSQL
+    backends it waits on: a turn could be half Python and half SQL, each using a
+    different core, and still show a process CPU/wall ratio near one. So this
+    reads system-wide CPU across the measured window and reports how many cores
+    were genuinely busy.
+    """
+    en_buyuk = max(sonuclar, key=lambda s: s.modul_sayisi)
+    mesgul = en_buyuk.mesgul_cekirdek
+    paralel = en_buyuk.paralellik
+    cekirdek = en_buyuk.donanim.cekirdek_mantiksal if en_buyuk.donanim else 0
+
+    if paralel < 1.25:
+        hüküm = (
+            "TEK ÇEKİRDEK. Tur içindeki iş neredeyse hiç örtüşmüyor: dedektör "
+            "tek süreç, tek iş parçacığı ve her modülü sırayla değerlendiriyor; "
+            "SQL çalışırken Python bekliyor. Çekirdek eklemek tur süresini "
+            "kısaltmaz — ölçeklemek için modülleri süreçlere bölmek gerekir."
+        )
+    elif paralel < cekirdek * 0.6:
+        hüküm = (
+            "KISMEN PARALEL. İşin bir kısmı örtüşüyor (muhtemelen PostgreSQL "
+            "paralel işçileri), ama mevcut çekirdeklerin tamamı kullanılmıyor."
+        )
+    else:
+        hüküm = "PARALEL. Mevcut çekirdekler büyük ölçüde kullanılıyor."
+
+    return (
+        f"Ortalama meşgul çekirdek: {mesgul:.2f} / {cekirdek} "
+        f"(sistem geneli CPU ÷ duvar saati).\n"
+        f"Tur içi paralellik: {paralel:.2f}× "
+        f"(tur başına {en_buyuk.cekirdek_sn_tur:.2f} çekirdek-sn ÷ "
+        f"{en_buyuk.ort_sure:.2f} sn duvar saati).\n"
+        f"Hüküm: {hüküm}"
     )
 
 
@@ -408,27 +629,41 @@ def yazdir(sonuclar: "list[YukSonucu]", akis=None) -> None:
     if not sonuclar:
         return
     periyot = sonuclar[0].periyot_sn
+    dnm = next((s.donanim for s in sonuclar if s.donanim), None)
 
     yaz("\nT5 — YÜK TESTİ VE KAYNAK RAPORU\n")
+    if dnm is not None:
+        yaz(f"donanım: {dnm}\n")
     yaz(f"tarama periyodu {periyot:.0f} sn | tur başına ölçüm {len(sonuclar[0].turlar)}\n")
-    yaz("=" * 112 + "\n")
+    yaz("=" * 122 + "\n")
     yaz(
-        f"{'modül':>6} {'veri satırı':>12} {'tur ort':>9} {'p95':>8} {'azami':>8} "
-        f"{'satır/tur':>10} {'CPU/tur':>9} {'bellek':>9} {'doluluk':>9} {'yetişiyor':>10}\n"
+        f"{'modül':>6} {'veri satırı':>12} {'tur ort':>9} {'p95':>8} "
+        f"{'satır/tur':>10} {'çekirdek-sn':>12} {'ms/modül':>9} {'bellek':>9} "
+        f"{'doluluk':>8} {'mod/çekirdek':>13} {'yetişiyor':>10}\n"
     )
-    yaz("-" * 112 + "\n")
+    yaz("-" * 122 + "\n")
     for s in sorted(sonuclar, key=lambda x: x.modul_sayisi):
         yaz(
             f"{s.modul_sayisi:>6} {s.veri_satiri:>12,} "
-            f"{s.ort_sure:>8.3f}s {s.p95_sure:>7.3f}s {s.azami_sure:>7.3f}s "
-            f"{s.ort_satir:>10.0f} {s.cpu_sn / len(s.turlar):>8.3f}s "
-            f"{s.bellek_mb:>8.1f}M {s.doluluk * 100:>8.0f}% "
+            f"{s.ort_sure:>8.3f}s {s.p95_sure:>7.3f}s "
+            f"{s.ort_satir:>10.0f} {s.cekirdek_sn_tur:>12.2f} "
+            f"{s.modul_basina_cekirdek_sn * 1000:>9.0f} {s.bellek_mb:>8.1f}M "
+            f"{s.doluluk * 100:>7.0f}% {s.cekirdek_basina_kapasite:>13.0f} "
             f"{('evet' if s.yetisiyor else 'HAYIR'):>10}\n"
         )
-    yaz("=" * 112 + "\n")
+    yaz("=" * 122 + "\n")
+    yaz(
+        "çekirdek-sn = tur başına CPU çekirdek saniyesi (dedektör süreci + "
+        "PostgreSQL arka uçları)\n"
+        "mod/çekirdek = bu periyotta bir çekirdeğin taşıyabileceği modül sayısı\n"
+    )
+
+    yaz("\nÇEKİRDEK KULLANIMI\n")
+    yaz("-" * 122 + "\n")
+    yaz(paralellik_notu(sonuclar) + "\n")
 
     yaz("\nVERİTABANI SORGU SÜRELERİ (tur başına, en pahalıdan)\n")
-    yaz("-" * 112 + "\n")
+    yaz("-" * 122 + "\n")
     en_buyuk = max(sonuclar, key=lambda s: s.modul_sayisi)
     tur = len(en_buyuk.turlar)
     yaz(f"{en_buyuk.modul_sayisi} modül:\n")
@@ -439,7 +674,7 @@ def yazdir(sonuclar: "list[YukSonucu]", akis=None) -> None:
             f"{olcum['toplam_ms'] / tur:>11.1f}ms {olcum['ort_ms']:>8.1f}ms "
             f"{olcum['azami_ms']:>8.1f}ms\n"
         )
-    yaz("-" * 112 + "\n")
+    yaz("-" * 122 + "\n")
 
     yaz("\nÖLÇEK SINIRI\n")
     yaz(sinir_tahmini(sonuclar) + "\n")
@@ -450,7 +685,12 @@ def main(argv: "list[str] | None" = None) -> int:
     ayristirici.add_argument("--dsn", default="postgresql:///gridup_yuk")
     ayristirici.add_argument("--moduller", default="10,50,100", help="comma-separated counts")
     ayristirici.add_argument("--tur", type=int, default=12, help="measured turns per count")
-    ayristirici.add_argument("--periyot", type=float, default=10.0, help="scan period, seconds")
+    ayristirici.add_argument(
+        "--periyot",
+        type=float,
+        default=Ayar().tarama.periyot_sn,
+        help="scan period, seconds (default: the configured default)",
+    )
     ayristirici.add_argument("--gun", type=float, default=15.0, help="days of baseline history")
     ayristirici.add_argument(
         "--sik-sn", type=float, default=10.0, help="detection-window sampling interval"
@@ -503,6 +743,12 @@ def main(argv: "list[str] | None" = None) -> int:
                         "bellek_mb": s.bellek_mb,
                         "doluluk": s.doluluk,
                         "yetisiyor": s.yetisiyor,
+                        "cekirdek_sn_tur": s.cekirdek_sn_tur,
+                        "modul_basina_cekirdek_sn": s.modul_basina_cekirdek_sn,
+                        "cekirdek_basina_kapasite": s.cekirdek_basina_kapasite,
+                        "mesgul_cekirdek": s.mesgul_cekirdek,
+                        "paralellik": s.paralellik,
+                        "donanim": str(s.donanim) if s.donanim else None,
                     }
                     for s in sonuclar
                 ],
