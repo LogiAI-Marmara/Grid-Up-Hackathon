@@ -62,8 +62,25 @@ class VeritabaniAyari:
 class TaramaAyari:
     """Decision K1 — the scan loop."""
 
-    #: How often the detector visits the database. Section 3.7: 10 s.
-    periyot_sn: float = 10.0
+    #: How often the detector visits the database.
+    #:
+    #: Section 3.7 names 10 s and marks it adjustable. This default is 30 s, and
+    #: the change is deliberate: the T5 load test measured a turn at 100 modules
+    #: taking ~19 s, so a 10 s period leaves the detector permanently behind at
+    #: the fleet size section 7.7 targets, while the same work fits inside 30 s
+    #: with room to spare. See `analiz/README.md` § T5 for the measurements.
+    #:
+    #: Nothing is lost by the change. Section 3.5 fixes the timescale of every
+    #: event this system detects at minutes to hours — a loose terminal takes
+    #: days, overload hours — so 20 s of additional latency is invisible against
+    #: them. The one event needing an instant response is the arc, and that is
+    #: the TVOC-2's job (SIL-2, sub-millisecond); we only relay its record, and
+    #: relaying it 20 s later changes nothing, because the protection device has
+    #: already tripped.
+    #:
+    #: The scan period is unrelated to the evaluation window (section 3.6): the
+    #: detector still looks back hours, it just looks back less often.
+    periyot_sn: float = 30.0
 
     #: Name of the cursor row. A second named cursor is how a historical
     #: re-scan runs alongside the live one without either one moving the other.
