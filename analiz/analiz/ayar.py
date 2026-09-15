@@ -34,6 +34,7 @@ __all__ = [
     "Katman2Ayari",
     "Katman3Ayari",
     "OlayAyari",
+    "ApiAyari",
     "Ayar",
 ]
 
@@ -325,6 +326,40 @@ class Katman3Ayari:
 
 
 @dataclass(frozen=True)
+class ApiAyari:
+    """Contract 5 — the read API track C consumes.
+
+    Served as its own process, separate from the scan loop. Decision K1 makes the
+    database the only contact surface between components, and that applies inside
+    track B too: a slow or crashed API must not be able to stop the detector, and
+    a long scan turn must not be able to stall the dashboard.
+    """
+
+    adres: str = "127.0.0.1"
+    port: int = 8080
+
+    #: Default and maximum page size for list endpoints. The maximum exists so a
+    #: caller cannot ask for the whole anomaly table in one response.
+    sayfa_boyutu: int = 50
+    azami_sayfa_boyutu: int = 500
+
+    #: Hard cap on points returned by the series endpoint. Beyond this the
+    #: request is refused with an explanation rather than silently truncated —
+    #: a chart drawn from quietly-dropped points is worse than an error, because
+    #: nobody can see that it is wrong.
+    azami_seri_noktasi: int = 5000
+
+    #: Connection pool bounds for the API process.
+    havuz_asgari: int = 1
+    havuz_azami: int = 8
+
+    #: Allowed CORS origins for the dashboard. Empty disables CORS entirely,
+    #: which is the right default for an on-prem deployment serving the UI from
+    #: the same host.
+    cors_kaynaklari: tuple[str, ...] = ()
+
+
+@dataclass(frozen=True)
 class OlayAyari:
     """Decision K3 — the event lifecycle."""
 
@@ -353,6 +388,7 @@ class Ayar:
     katman2: Katman2Ayari = field(default_factory=Katman2Ayari)
     katman3: Katman3Ayari = field(default_factory=Katman3Ayari)
     olay: OlayAyari = field(default_factory=OlayAyari)
+    api: ApiAyari = field(default_factory=ApiAyari)
 
     # -- construction ------------------------------------------------------
 

@@ -61,12 +61,32 @@ def main(argv: list[str] | None = None) -> int:
 
     alt.add_parser("durum", help="show cursor and episode state")
 
+    p_sunucu = alt.add_parser("sunucu", help="run the read API (contract 5)")
+    p_sunucu.add_argument("--adres", help="bind address")
+    p_sunucu.add_argument("--port", type=int, help="bind port")
+
     args = ayristirici.parse_args(argv)
     logging.basicConfig(
         level=logging.DEBUG if args.ayrinti else logging.INFO,
         format="%(asctime)s %(levelname)-7s %(name)s: %(message)s",
     )
     ayar = _ayar(args)
+
+    if args.komut == "sunucu":
+        # Runs its own process and opens its own pool, so it does not borrow the
+        # connection the other subcommands share.
+        from .api import main as api_main
+
+        arg_listesi: list[str] = []
+        if args.dsn:
+            arg_listesi += ["--dsn", args.dsn]
+        if args.adres:
+            arg_listesi += ["--adres", args.adres]
+        if args.port:
+            arg_listesi += ["--port", str(args.port)]
+        if args.ayrinti:
+            arg_listesi.append("--ayrinti")
+        return api_main(arg_listesi)
 
     with baglan(ayar) as baglanti:
         if args.komut == "sema":

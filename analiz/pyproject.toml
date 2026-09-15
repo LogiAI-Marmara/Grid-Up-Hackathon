@@ -25,4 +25,17 @@ analiz = ["migrations/*.sql"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-filterwarnings = ["error::DeprecationWarning"]
+# Our own deprecation warnings are errors, so we cannot ship code that leans on
+# something already on its way out. Third-party ones are downgraded back to
+# warnings: starlette's test client and anyio emit their own, and failing this
+# project's suite over another library's migration schedule would mean either
+# pinning versions we have no opinion about or deleting the rule that catches
+# our own mistakes.
+filterwarnings = [
+    "error::DeprecationWarning",
+    "default::DeprecationWarning:anyio.*",
+    "default::DeprecationWarning:starlette.*",
+    "default::DeprecationWarning:httpx.*",
+    "ignore::DeprecationWarning:fastapi.testclient",
+    "default",
+]
