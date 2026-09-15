@@ -1,0 +1,41 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "gridup-analiz"
+version = "0.1.0"
+description = "Grid Up — track B, the analysis layer: scan loop, four-layer detector, anomaly event lifecycle."
+requires-python = ">=3.11"
+dependencies = [
+    "psycopg[binary]>=3.1",
+]
+
+[project.optional-dependencies]
+test = ["pytest>=7.4"]
+
+[project.scripts]
+gridup-analiz = "analiz.__main__:main"
+
+[tool.setuptools.packages.find]
+include = ["analiz*"]
+
+[tool.setuptools.package-data]
+analiz = ["migrations/*.sql"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+# Our own deprecation warnings are errors, so we cannot ship code that leans on
+# something already on its way out. Third-party ones are downgraded back to
+# warnings: starlette's test client and anyio emit their own, and failing this
+# project's suite over another library's migration schedule would mean either
+# pinning versions we have no opinion about or deleting the rule that catches
+# our own mistakes.
+filterwarnings = [
+    "error::DeprecationWarning",
+    "default::DeprecationWarning:anyio.*",
+    "default::DeprecationWarning:starlette.*",
+    "default::DeprecationWarning:httpx.*",
+    "ignore::DeprecationWarning:fastapi.testclient",
+    "default",
+]
