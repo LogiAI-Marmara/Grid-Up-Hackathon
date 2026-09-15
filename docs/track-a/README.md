@@ -21,6 +21,7 @@ kart yapısı, giriş-çıkış bağlantıları, bağlantı şemaları, temel bi
 | 5 | [Saha koşulları gerekçesi](05-saha-kosullari.md) | Sıcaklık, nem, IP, manyetik alan, kısa devre darbesi, yabancı cisim | T1, T2 · kriter 3 |
 | 6 | [Montaj prosedürü](06-montaj-proseduru.md) | 7 adım, süre, "kesinti yok" gerekçesi + [adım akışı](09-montaj-adimlari.svg) | T1 · kriter 3 |
 | 7 | [Modül yazılım akış diyagramı](07-yazilim-akis.md) | Uyan → oku → özetle → eşik kontrol → gönder | T3 (modül kısmı) |
+| — | [**Kaynakça**](KAYNAKCA.md) | Dokümanlarda geçen her dış teknik değerin kaynağı, doküman no/sayfa/URL ve **doğrulama durumu** (okundu / özet / atıf / seçim) | — |
 
 ---
 

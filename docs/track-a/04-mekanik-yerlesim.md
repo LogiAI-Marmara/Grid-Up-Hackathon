@@ -84,7 +84,7 @@ olduğundan sensör → NH **155,5 mm** çıkar.
 
 > Aralığın tamamında kapsama ±%4 bandında kalır; modül sayısı yalnızca yuvarlama eşiğinde
 > (6 ↔ 9) değişir. Bu yüzden seçim bir sonuç iyileştirme değil, gerçekçi bir mühendislik
-> tercihidir.
+> tercihidir. **Kaynak künyesi ve doğrulama durumu: [KAYNAKÇA.md §1.4](KAYNAKCA.md).**
 
 **Doğrulama:** Karar kaydı §7.1 satır 232 *"kapak içine konan sensör hedefe ~40 cm mesafededir;
 geniş açılı versiyon bu mesafeden kabaca 114 × 61 cm görür"* diyor. 40 cm'de kapsama **1143 × 614 mm**
