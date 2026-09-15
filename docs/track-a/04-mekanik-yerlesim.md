@@ -218,7 +218,8 @@ kesit X = 60 düzleminden alınmıştır. Altı görünüş: **A** ön yüz — 
 3 mm konik pah) ve SHT31 membran vent; **B** yan kesit — TO-39 sensörün pencereye dayalı yuvası, PCB,
 arkadaki hacimli parçalar (RAC05, süperkapasitör yatık); **C** iç görünüş — kapak açık, PCB 110 × 70 ve
 230 V bölgesi, arka yüz parçaları kesikli; **D** arka yüz — DIN klips, oval M5 yuvalar, köşe mıknatıs
-pedleri (yalnız hizalama, §4.8); **E** alt yüz — 230 V rakor, RS-485, CT girişi, SMA anten;
+pedleri (yalnız hizalama, §4.8); **E** alt yüz — RS-485, SMA, CT, 230 V (PCB klemensleriyle aynı
+sıra: soldan sağa);
 **F** izometrik. PCB kutu içinde (5, 5, 39,4) mm; kart üstü konumlar
 [02-pcb-yerlesimi.svg](02-pcb-yerlesimi.svg)'de PCB koordinatıyla verilir. Üretim çizimi değildir — §1.4.)*
 
