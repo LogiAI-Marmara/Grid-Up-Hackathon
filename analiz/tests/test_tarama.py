@@ -190,3 +190,40 @@ def test_emniyet_payi_araligi_simdinin_gerisinde_bitirir(baglanti, fikstur, ayar
     assert tarayici.tur(simdi=an).satir == 0, "a row inside the safety margin waits"
     # Once the margin has passed, the same row is picked up.
     assert tarayici.tur(simdi=an + timedelta(seconds=10)).satir == 1
+
+
+def test_imlec_hic_okunmamisken_de_geri_alinabilir(baglanti, fikstur, ayar, an):
+    """Rewinding a cursor that does not exist yet must create it, not do nothing.
+
+    Regression test. `geri_al` was a plain UPDATE, which affects no rows before
+    the cursor has ever been read — so on a fresh deployment `analiz geri-al`
+    reported success, changed nothing, and the next turn created the cursor at
+    its cold-start position instead. The history the operator asked to re-scan
+    was skipped silently, which is the worst way for a rewind to fail: section
+    3.4 makes re-scanning the first argument for polling over push, and an
+    operator has no way to tell it did not happen.
+
+    The failure only appears when the cold-start position lands *after* the data,
+    which is why the suite missed it: the test configuration's cold start reaches
+    thirty days back and covered the rows by accident.
+    """
+    modul_id = "TR041-P01-M1"
+    _duz_seri(fikstur, modul_id, an, 20, aralik_sn=10)
+    fikstur.yaz()
+
+    with baglanti.cursor() as imlec:
+        imlec.execute("SELECT count(*) AS n FROM gridup.tarama_imleci")
+        assert imlec.fetchone()["n"] == 0, "no cursor row exists yet"
+
+    # A cold start that would land well past the fixture data.
+    ileri = ayar.ile(tarama={"ilk_imlec_geri_sn": 1.0})
+    tarayici = Tarayici(baglanti, ileri)
+    tarayici.imlecler.geri_al(ileri.tarama.imlec_adi, an - timedelta(hours=1))
+
+    imlec_durumu = tarayici.imlecler.oku(ileri.tarama.imlec_adi)
+    assert imlec_durumu.son_islenen == an - timedelta(hours=1), (
+        "the rewind must have created the cursor at the requested position"
+    )
+
+    sonuc = tarayici.tur(simdi=an + timedelta(seconds=1))
+    assert sonuc.satir == 20, "the rewound history must actually be re-scanned"

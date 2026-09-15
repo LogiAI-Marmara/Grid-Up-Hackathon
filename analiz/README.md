@@ -14,19 +14,22 @@ Every design decision below is from it; section numbers in the code refer to it.
 
 ## What is here, and what is not
 
-| Delivered | Not yet (deliberately) |
-|---|---|
-| Package skeleton, config, entry point | Read API — contract ⑤ and `/gecisler` |
-| Database layer, track B's own tables | Blind-test evaluation tool — four metrics |
-| Scan loop, cursor, manual rewind (K1) | Load test and resource report (T5) |
-| Evaluation-window fetcher | |
-| All four detector layers (K2) | |
-| Score, severity, `gerekce` production | |
-| Episode lifecycle and journal (K3) | |
-| Fixtures: 7 scenarios + clean + hard negatives | |
+| Delivered |
+|---|
+| Package skeleton, config, entry point |
+| Database layer, track B's own tables |
+| Scan loop, cursor, manual rewind (K1) |
+| Evaluation-window fetcher |
+| All four detector layers (K2) |
+| Score, severity, `gerekce` production |
+| Episode lifecycle and journal (K3) |
+| Fixtures: 7 scenarios + clean + hard negatives |
+| **Read API — contract ⑤, including `/gecisler`** |
+| **Label file format** (a contract track A must satisfy) |
+| **Blind-test evaluation tool — four metrics** |
+| **Load test and resource report (T5)** |
 
-The three deferred items have seams waiting for them, described under
-[Extension points](#extension-points).
+Track B is complete.
 
 ---
 
@@ -45,11 +48,32 @@ python -m analiz durum         # cursor and episode state
 python -m analiz geri-al -24h  # rewind, re-scan the last day
 ```
 
+The read API, as its own process:
+
+```bash
+python -m analiz.api --dsn postgresql:///gridup --port 8080
+# or: python -m analiz sunucu --port 8080
+# OpenAPI schema at /openapi.json, browsable docs at /docs
+```
+
 Everything end to end against the scenario set, leaving the database to inspect:
 
 ```bash
 createdb gridup_dogrulama
 python -m analiz.dogrulama --dsn postgresql:///gridup_dogrulama
+```
+
+Blind test (see [the protocol](#kör-test-protokolü)):
+
+```bash
+python -m analiz.kortest dondur      --dsn postgresql:///gridup --cikti cikti.json
+python -m analiz.kortest degerlendir --etiket etiket.json --cikti cikti.json
+```
+
+Load test (T5):
+
+```bash
+python -m analiz.yuk --dsn postgresql:///gridup_yuk --moduller 10,50,100
 ```
 
 Tests (needs a PostgreSQL 14+ the current user can `createdb` on):
@@ -83,9 +107,13 @@ analiz/
   skor.py           magnitude -> (severity, score)
   gerekce.py        the sentence the operator reads
   olay.py           episode lifecycle and the journal                   K3
+  api.py            contract ⑤, served as its own process
+  etiket.py         the label file format — the blind test's answer key
+  kortest.py        blind-test evaluation: freeze, then four metrics
+  yuk.py            load test and resource report                        T5
   fikstur.py        contract-shaped row writer
   senaryolar.py     the labelled set: 7 scenarios + clean + hard negatives
-  dogrulama.py      end-to-end harness
+  dogrulama.py      end-to-end harness, and the turn-by-turn replay
 ```
 
 ---
@@ -197,6 +225,234 @@ afternoon, and every open is an alarm.
 
 ---
 
+## API kararları (sözleşmenin sessiz kaldığı yerler)
+
+Contract ⑤ fixes the paths, the query parameter names and the field names. It
+says nothing about pagination, error shapes or status codes. These are the
+choices this implementation made; **track C needs all of them.**
+
+### Sayfalama
+
+`GET /anomaliler` pages by **keyset on `sira`**, not by offset:
+
+```
+GET /anomaliler?limit=50            -> {"veriler": [...], "sonraki": 1234, "limit": 50}
+GET /anomaliler?limit=50&sonra=1234 -> the next page
+```
+
+`sonraki` is `null` on the last page. Section 7.2 puts a monotonic sequence on
+the anomaly table precisely so the alarm service can ask for "everything after
+the last id I handled" and be certain it missed nothing — offset paging cannot
+make that promise, because an episode opening between two requests shifts every
+later row by one and the caller silently skips an alarm.
+
+`GET /moduller` uses `limit`/`ofset` and returns `toplam`. The module list is
+bounded by the size of the fleet and does not change under the reader.
+
+### Hata biçimi
+
+One shape for every failure, so track C writes one handler:
+
+```json
+{"hata": {"kod": "bulunamadi", "mesaj": "Anomali bulunamadı: an_00412", "kimlik": "an_00412"}}
+```
+
+`kod` is a stable slug to branch on. `mesaj` is Turkish, because it can end up
+in front of an operator. Extra keys are error-specific and additive.
+
+| Kod | Durum | Ne zaman |
+|---|---|---|
+| `bulunamadi` | 404 | unknown module, anomaly or frame id |
+| `gecersiz_zaman` | 400 | `bas` / `bit` is not ISO 8601 |
+| `gecersiz_aralik` | 400 | `bit` precedes `bas` |
+| `gecersiz_aralik_adi` | 400 | `aralik` outside the accepted set |
+| `cok_fazla_nokta` | 400 | the series would exceed `azami_seri_noktasi` |
+| `onaylanamaz` | 409 | acknowledging an episode that is not `acik` |
+| `veritabani_erisilemez` | 503 | `/saglik` cannot reach the database |
+| — | 422 | FastAPI enum/validation failure (e.g. an unknown `olcum_tipi`) |
+
+### Diğer kararlar
+
+**`durum` on `/moduller` is the MODULE's state**, with the vocabulary
+`aktif | sessiz | pasif` — *not* the anomaly lifecycle's
+`acik | onaylandi | kapandi`. The contract lists the column under that name and
+the collision is the easiest thing to get wrong here. `sessiz` means no
+measurement for longer than `katman0.sessizlik_sn`.
+
+**The series endpoint refuses rather than truncates.** Over
+`azami_seri_noktasi` (default 5000) it returns `cok_fazla_nokta` naming the
+remedy. A chart quietly missing its last three days looks fine and is wrong, and
+the caller cannot tell.
+
+**A bucketed series carries `asgari` and `azami` beside `ort`.** `aralik` accepts
+`10s | 1m | 5m | 15m | 1h | 1d`. A mean alone hides exactly the spike an operator
+is looking for — a bucket averaging 46 °C may have touched 130.
+
+**`/saglik` reports the scan cursor's lag**, not just liveness. Section 8 names a
+detector falling behind its scan period as the real scaling limit, so a green
+light over a stale anomaly table would be a lie. Watch `imlecler[].gecikme_sn`.
+
+**Timestamps are always UTC ISO 8601 with a literal `Z`.** Offsets are never
+emitted.
+
+**The anomaly body carries `zaman` as an alias for `ilk_gorulme`**, alongside
+section 7.2's `ilk_gorulme` / `son_gorulme` / `maks_seviye`. It is a
+compatibility alias for the un-amended schema on track A's branch, not a third
+timestamp. See [Contract mismatches](#contract-mismatches-found-on-featuretrack-a).
+
+**Writes.** The API is read-only except `POST /anomaliler/{id}/onayla`, which
+requires `aktor` and goes through `OlayDeposu` rather than issuing its own
+UPDATE — so the episode tables keep exactly one writer and the acknowledgement
+lands in the journal with who and when.
+
+---
+
+## Etiket dosyası formatı
+
+> **İZ A için.** The blind-test tool cannot compute lead time without this file,
+> and lead time is the project's headline claim. This section is the spec.
+
+A blind set is data plus a label file. The data goes into the database; the label
+file **stays with the producer** until the detector's output has been frozen
+(section 4.4). It is JSON, UTF-8, and `analiz.etiket` parses it strictly.
+
+```json
+{
+  "surum": 1,
+  "tohum": 20260915,
+  "uretim_zamani": "2026-09-15T09:40:00Z",
+  "kapsam": { "bas": "2026-08-31T09:40:00Z", "bit": "2026-09-15T09:40:00Z" },
+  "senaryolar": [
+    {
+      "senaryo_id": "senaryo_01",
+      "modul_id": "TR041-P01-M1",
+      "senaryo": "gevsek_klemens",
+      "baslangic": "2026-09-08T14:00:00Z",
+      "kritik_esik": "2026-09-10T03:00:00Z",
+      "aciklama": "L2 çıkış klemensi gevşetildi"
+    }
+  ],
+  "temiz_moduller": ["TR041-P01-M2", "TR052-P01-M1"]
+}
+```
+
+| Alan | Zorunlu | Anlamı |
+|---|---|---|
+| `surum` | evet | Format version. Currently `1`. A reader refuses a version it was not built for rather than guessing. |
+| `senaryolar[].modul_id` | evet | Which module the scenario was injected into. |
+| `senaryolar[].senaryo` | evet | Which of the seven. Fixed vocabulary, below. |
+| `senaryolar[].baslangic` | evet | When the injection began — the first moment anything was wrong. |
+| `senaryolar[].kritik_esik` | hayır | When the fault reached its critical state. **Lead time is computed from this.** Omit only for a fault that does not escalate. |
+| `senaryolar[].senaryo_id` | hayır | A label for the report. Defaults to `senaryo_01`, `senaryo_02`, … |
+| `senaryolar[].beklenen_tip` | hayır | Pins the accepted anomaly `tip`(s). Normally omitted — see below. |
+| `temiz_moduller` | evet | Modules deliberately left untouched. May be empty only if the set genuinely has none, and then the false-alarm rate cannot be measured at all. |
+| `kapsam` | hayır | Observation window. The denominator of the per-module-day false-alarm rate. |
+| `tohum`, `uretim_zamani`, `aciklama` | hayır | Provenance. |
+
+**`senaryo` vocabulary** — section 7.6's seven, and no others:
+
+```
+gevsek_klemens | asiri_yuk | faz_dengesizligi | nem_yukselmesi |
+ark_olayi | sensor_arizasi | modul_saglik
+```
+
+### İki nokta İZ A'nın dikkatine
+
+**1. `kritik_esik` olmadan kazanılan süre hesaplanamaz.** Lead time is the
+subtraction between the moment the detector first opened an episode and the
+moment the fault became critical. The first number is in our database; the
+second is known **only to the generator**. If it is not written down the metric
+cannot exist, however good the detector is — and section 2.5 makes that metric
+the project's actual product. For a ramp injection the end of the ramp is a
+perfectly good answer; for an instantaneous event it is the event itself.
+
+**2. `beklenen_tip` yazmayın — gerek yok.** Track A knows it injected a loose
+terminal. Whether that surfaces as `akim_sicaklik_sapmasi` (the diagnosis) or
+`sicak_nokta` (the observation) is track B's business, and both are correct
+detections of the same screw. The mapping from scenario to acceptable `tip`
+lives in `etiket.SENARYO_TIPLERI`, on this side. If track A pinned a single
+expected `tip`, the evaluation would be measuring whether track B's naming
+matched track A's guess about track B's naming, which is not a property of the
+detector. `beklenen_tip` exists only for a set deliberately testing one specific
+classification.
+
+### Ayrıca
+
+- Parsing is strict. An unknown scenario name, a missing field, a naive
+  timestamp, a `kritik_esik` before its `baslangic`, or a module listed both
+  clean and injected are all **errors**, never skipped rows. A half-parsed label
+  file yields a detection rate computed over whatever survived parsing — which
+  looks like a result, is not one, and is wrong in the flattering direction.
+- Timestamps are UTC ISO 8601. A naive timestamp is rejected rather than assumed
+  to be UTC: an unstated timezone shifts every lead time by the offset, silently
+  and by hours.
+- The fixture set emits this exact format (`senaryolar.etiket_uret`), so a real
+  blind set drops straight into the tool with nothing to adapt.
+
+---
+
+## Kör test protokolü
+
+Section 4.4, as commands:
+
+```bash
+# 1-2. track A generates the data and keeps the label file.
+#      track B loads only the data.
+
+# 3. the detector runs, and its output is FROZEN.
+python -m analiz tara --tur 500
+python -m analiz.kortest dondur --dsn postgresql:///gridup --cikti cikti.json
+
+# 4. the key is opened and the four metrics are computed.
+python -m analiz.kortest degerlendir --etiket etiket.json --cikti cikti.json
+```
+
+Freezing is a separate command on purpose. Section 4.4's second trap is that a
+set stops being blind the moment a result is seen and the detector is re-tuned
+against it. A frozen output file makes "this is what the detector said before
+anyone looked at the answers" a checkable artefact rather than a promise.
+Nothing in the freeze path reads the labels.
+
+**The four metrics are reported together, always.** Any one alone is misleading:
+a detector that alarms on everything scores a perfect detection rate, and one
+that never fires a perfect false-alarm rate.
+
+| Metrik | Nasıl hesaplanır |
+|---|---|
+| Tespit oranı | Per scenario, whether an episode of an accepted `tip` appeared on that module. |
+| **Kazanılan süre** | `kritik_esik` − the earliest matching episode's `ilk_gorulme`. Positive means we warned that far ahead. |
+| Yanlış alarm | Episodes on `temiz_moduller` ÷ (clean modules × observation days). |
+| Sensör ayrımı | Share of `sensor_arizasi` / `modul_saglik` scenarios classified as such **and** producing no grid-fault episode. |
+
+Judgement calls, each covered by a test:
+
+- An extra episode on a genuinely faulty module is a **second true symptom, not
+  a false alarm** — overload heats the cabinet as well as the busbar. False
+  alarms are counted on the clean modules, where section 4.4 puts them.
+- A scenario with no `kritik_esik` contributes to detection but is **excluded
+  from the lead-time median** rather than counted as zero.
+- With no clean modules the false-alarm rate is **undefined, not perfect**.
+- Lead time uses the earliest matching episode **by measurement time**, not by
+  episode id: the id is the order rows were written; the claim is about when we
+  could first have told someone.
+- A late detection yields a **negative** lead time rather than an absolute
+  value, so a detector that is consistently late cannot look like one that is
+  early.
+
+### Kazanılan süre neden tur tur oynatmayı gerektirir
+
+`dogrulama.kos` runs a couple of turns at the end of the fixture window. That is
+enough to prove each scenario is found and **useless for saying when**: every
+episode opens at the last measurement, so lead time reads ≈0 for everything.
+
+`dogrulama.oynat` replays the loop turn by turn across the data the way the clock
+passes in the field, so an episode opens on the turn where the evidence first
+crossed a threshold — which is when a real deployment would have spoken. Any
+lead-time number produced without it is meaningless.
+
+
+---
+
 ## Running standalone
 
 `migrations/000_sozlesme.sql` restates track A's contract tables — column for
@@ -254,22 +510,103 @@ relationship all match what this layer was built against.
 
 ---
 
-## Extension points
+## T5 — ölçeklenebilirlik raporu
 
-The three out-of-scope items have seams, not stubs:
+Measured with `python -m analiz.yuk --moduller 10,50,100 --tur 10`, on one
+container sharing a CPU with PostgreSQL. Scan period 10 s, 15 days of baseline
+history per module, detection window sampled at the contract's 10 s cadence,
+15% of each fleet carrying an injected fault.
 
-- **Read API (contract ⑤).** `OlayDeposu` already owns every write to the episode
-  and journal tables, including `onayla()` with its actor — so the API is a read
-  layer plus one call, not a second place episode state is mutated.
-  `GET /anomaliler/{id}/gecisler` is a select on `anomali_gecis`.
-- **Blind-test tool (four metrics).** `dogrulama.Rapor` computes detection rate,
-  false alarms and sensor separation. The missing one is lead time, which needs
-  the injection's true onset — precisely what a blind set withholds until the key
-  is opened, so it belongs to the tool that opens it.
-- **Load test (T5).** `TurSonucu` already carries per-turn duration, row count and
-  module count, and `tarama_imleci` persists the last turn's figures. Everything
-  section 8 asks to be measured is emitted; what is missing is the harness that
-  varies module count and records CPU and memory.
+```
+ modül  veri satırı   tur ort      p95    azami  satır/tur   CPU/tur    bellek   doluluk  yetişiyor
+    10      311,610    1.719s   1.911s   1.911s         90    1.143s    164.8M       19%       evet
+    50    1,558,050    8.833s   9.145s   9.145s        450    5.998s    472.9M       91%       evet
+   100    3,116,100   18.285s  18.867s  18.867s        900   12.233s    745.5M      189%      HAYIR
+```
+
+### Sınır: ~55 modül, 10 saniyelik tarama periyodunda
+
+**This is a measurement, not an extrapolation.** At 100 modules a turn takes
+18.9 s against a 10 s period — the detector processes one turn while two more
+fall due, and the backlog grows without bound. 50 modules fits, but at 91% of
+the period there is no headroom: a slow query, a vacuum, or a burst of episodes
+pushes it over.
+
+Turn cost is close to linear in module count (183 ms per module across the whole
+range), which is what the design predicts — the work is a per-module window fetch
+and a per-module baseline, and neither depends on how many other modules exist.
+
+### Nerede gidiyor
+
+At 100 modules, ~6.5 s of the 18.9 s is SQL and the remaining ~12 s is Python:
+
+| | ms/tur |
+|---|---|
+| taban çizgisi (medyan + MAD) | 2473 |
+| pencere: ölçüm serileri | 2200 |
+| pencere: son ölçüm | 1466 |
+| pencere: termal özet | 350 |
+| olay yazımı (18 çağrı) | 38 |
+| tur aralık sorgusu | 4 |
+
+The Python side is dominated by materialising the evaluation window: 6 hours at
+10 s across 9 channels is ~19,000 samples per module, and each becomes a `Nokta`.
+The detector layers themselves are cheap by comparison.
+
+**İndeks etkisi.** The range query that opens every turn — the one that would be
+a sequential scan over 3.1 million rows without it — costs **4.1 ms** at 100
+modules. That is `olcum_alindi_zaman_idx` doing its job; it is the index track A's
+migrations do not have, because track A never queries by `alindi_zaman`
+(mismatch 3 above).
+
+### Sınırı ötelemenin yolları
+
+Not implemented — this delivery measures, it does not tune. In rough order of
+return:
+
+1. **Raise the scan period.** It is configuration (`tarama.periyot_sn`), and
+   section 3.5 already argues the events we detect run on scales of minutes to
+   hours. At 30 s the same hardware carries ~160 modules with the same code.
+2. **Shard by module across processes.** The cursor is per named cursor and the
+   layers are pure functions of a window, so two detectors on disjoint module
+   sets share nothing but the tables.
+3. **Stop building `Nokta` objects for the whole window.** The layers consume
+   medians, slopes and endpoints; most of that could be computed in SQL, as the
+   baseline already is.
+4. **Drop the `son ölçüm` query** (1.5 s/turn) in favour of `modul.son_gorulme`,
+   which the contract maintains for exactly this question. Track B reads from
+   `olcum` instead because `son_gorulme` only exists if track A's collector wrote
+   it, and track B has to run standalone — so this one is a trade, not a free win.
+
+The 100-module target of section 7.7 is therefore **reachable but not on default
+settings**: it needs either a longer scan period or a second detector process,
+both of which are configuration rather than redesign.
+
+---
+
+## Düzeltme — P1'in kazanılan süre notu yanlıştı
+
+The first delivery's README said, under "Extension points", that lead time could
+not be computed because it "needs the injection's true onset — precisely what a
+blind set withholds".
+
+**That was wrong.** A blind set withholds the labels *while the detector runs*,
+not while the evaluation runs. Section 4.4's protocol is explicit: the output is
+frozen at step 3, the key is opened at step 4, and every metric is computed then
+with the labels in hand. Lead time is computable and is now computed —
+`kortest.SenaryoSonucu.kazanilan_sure_sn`.
+
+What the earlier note got right, buried under the wrong conclusion, is that the
+onset and critical times have to **come from the generator**, because nothing in
+our database knows when an injected fault became critical. That is why
+`kritik_esik` is a required part of the label format rather than something the
+tool infers.
+
+Measured on the labelled fixture set, with the loop replayed turn by turn: median
+lead time **+4.0 hours**, from +5.8 h (overload) down to −0.1 h for the arc. The
+negative one is correct and worth keeping visible — an arc is instantaneous, and
+no monitoring system can warn ahead of it. The TVOC-2 trips in under a
+millisecond and we relay the record.
 
 ---
 

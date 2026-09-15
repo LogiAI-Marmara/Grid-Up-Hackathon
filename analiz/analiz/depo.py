@@ -108,12 +108,23 @@ class ImlecDeposu:
         is the same episode, so it is updated rather than duplicated. `_guncelle`
         moves `son_gorulme` forward only, so a replay cannot make an episode look
         stale and get it closed by the hysteresis sweep.
+
+        UPSERT, not UPDATE. A plain UPDATE affects no rows when the cursor has
+        never been read, and a rewind on a fresh deployment would then be a
+        silent no-op: the operator sees no error, the next turn creates the
+        cursor at its cold-start position instead, and the history they asked to
+        re-scan is quietly skipped. Creating the row here means "rewind to T"
+        means the same thing whether or not the detector has run before.
         """
         with self._baglanti.cursor() as imlec:
             imlec.execute(
-                "UPDATE gridup.tarama_imleci SET son_islenen = %s, guncelleme = now() "
-                "WHERE ad = %s",
-                (zaman, ad),
+                """
+                INSERT INTO gridup.tarama_imleci (ad, son_islenen)
+                VALUES (%s, %s)
+                ON CONFLICT (ad) DO UPDATE
+                    SET son_islenen = EXCLUDED.son_islenen, guncelleme = now()
+                """,
+                (ad, zaman),
             )
         self._baglanti.commit()
         _gunluk.warning("cursor %s rewound to %s", ad, zaman.isoformat())
