@@ -332,7 +332,8 @@ def build():
     # ---------- başlık / lejant ----------
     S.text('Modül bağlantı şeması — ESP32-S3-WROOM-1U etrafında (03-pinout §3.1–3.6)', (25.4, 33.0), SZ_TITLE, bold=True)
     S.text('KiCad şematik (eda/GridUp-Modul.kicad_sch): ERC 0 hata / 0 uyarı, netlist §3.1 tablosuyla otomatik doğrulanmış. Kavramsal — üretim çizimi değildir (§1.4); pasif değerler tipik.', (25.4, 37.5), SZ_NOTE)
-    S.text('Lejant (tel / etiket rengi) — aynı adlı etiketler aynı nettir; tel kesişmeleri atlama yayıyla gösterilir (bağlantı yok):', (222.0, 28.5), SZ_NOTE, bold=True)
+    S.text('Lejant (tel / etiket rengi) — aynı adlı etiketler aynı nettir;', (222.0, 26.0), SZ_NOTE, bold=True)
+    S.text('tel kesişmeleri atlama yayıyla gösterilir (bağlantı yok):', (222.0, 28.5), SZ_NOTE, bold=True)
     legend = [('3V3', COL['3V3']), ('5 V / 230 V', COL['5V']), ('GND / PE', COL['GND']), ('I²C', I2C),
               ('UART / RS-485', UART), ('analog (CT, algılama)', ANA), ('diğer / bileşen içi', COL['DEF'])]
     for k, (name, c) in enumerate(legend):
@@ -439,7 +440,7 @@ def build():
                 footprint='Connector_PinHeader_2.54mm:PinHeader_1x04_P2.54mm_Vertical')
     for num, net in [('1', 'U0TXD'), ('2', 'U0RXD'), ('3', 'USB_DN'), ('4', 'USB_DP')]: S.pin_label(J9, num, net)
     # RS-485: MAX3485 aynalı (mirror x) → DI / DE / RE / RO sırası ESP IO17 / IO21 / IO18 ile kesişmesiz
-    S.rect((222.0, 60.5), (322.0, 116.0), UART, title='RS-485 / Modbus RTU — MAX3485, 3,3 V, yarıçift; 120 Ω sonlandırma')
+    S.rect((222.0, 60.5), (322.0, 116.0), UART, title='RS-485 / Modbus RTU — MAX3485 3,3 V, yarıçift, 120 Ω sonlandırma')
     U4 = S.part(MAX, 'U4', 'MAX3485', (254.0, 87.63), mirror='x', ref_at=(236.22, 73.66), val_at=(236.22, 76.2),
                 footprint='Package_SO:SOIC-8_3.9x4.9mm_P1.27mm')
     S.pin_power(U4, 'VCC', '+3V3', L=2.54, rot=90); S.pin_power(U4, 'GND', 'GND', L=2.54, rot=270)   # aynalı çip: güç sembolleri yatay
