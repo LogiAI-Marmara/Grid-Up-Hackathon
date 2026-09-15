@@ -7,6 +7,7 @@
   (lib (name "Interface_UART")(type "KiCad")(uri "${KICAD10_SYMBOL_DIR}/Interface_UART.kicad_sym")(options "")(descr ""))
   (lib (name "Converter_ACDC")(type "KiCad")(uri "${KICAD10_SYMBOL_DIR}/Converter_ACDC.kicad_sym")(options "")(descr ""))
   (lib (name "Regulator_Linear")(type "KiCad")(uri "${KICAD10_SYMBOL_DIR}/Regulator_Linear.kicad_sym")(options "")(descr ""))
+  (lib (name "Regulator_Switching")(type "KiCad")(uri "${KICAD10_SYMBOL_DIR}/Regulator_Switching.kicad_sym")(options "")(descr ""))
   (lib (name "Switch")(type "KiCad")(uri "${KICAD10_SYMBOL_DIR}/Switch.kicad_sym")(options "")(descr ""))
   (lib (name "Connector")(type "KiCad")(uri "${KICAD10_SYMBOL_DIR}/Connector.kicad_sym")(options "")(descr ""))
   (lib (name "Connector_Generic")(type "KiCad")(uri "${KICAD10_SYMBOL_DIR}/Connector_Generic.kicad_sym")(options "")(descr ""))

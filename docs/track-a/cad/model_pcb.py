@@ -81,25 +81,30 @@ def run(_ctx):
 
     # ---- ARKA YUZ (Z = 0 <-)
     box('ESP32-S3-WROOM-1U', 10, 40.8, 28, 60, 0, -3.2)
-    box('RAC05-05SK', 64, 43.75, 97.8, 64.05, 0, -13)
+    box('RAC05-05SK', 64, 42, 95.7, 68.7, 0, -21.8)          # datasheet 31,7 x 26,7 x 21,8 (THT); giris pinleri sag uc
     box('F1', 88, 22.25, 94.1, 25, 0, -2.6)
     box('MOV', 96.5, 21.5, 103.5, 25.5, 0, -8)
     box('Klemens 230V', 89, 0.5, 99.25, 8.5, 0, -10)
-    box('LDO SOT-223', 70, 35, 76.5, 42, 0, -1.7)
-    box('D1', 76.75, 39.1, 81, 41.75, 0, -1.5)
-    box('D2', 76.75, 35.1, 81, 37.75, 0, -1.5)
+    box('LDO SOT-223', 70, 34, 76.5, 41, 0, -1.7)             # AP7361C-33E
+    box('D1', 76.75, 39, 81, 41.65, 0, -1.5)
+    box('D2', 76.75, 35, 81, 37.65, 0, -1.5)
     box('R_sarj', 60.5, 44.5, 62.5, 45.5, 0, -0.6)
-    box('Bolucu1', 75, 29.5, 77, 30.5, 0, -0.6)
-    box('Bolucu2', 75, 28, 77, 29, 0, -0.6)
-    # superkap: yatik, eksen Y, O21.5 x 25, merkez (65.75, 13.75), govde Z 0..-21.5
-    pi = comp.constructionPlanes.createInput(); pi.setByOffset(comp.xZConstructionPlane, V('13.75 mm'))
+    box('Bolucu1', 77.5, 29.5, 79.5, 30.5, 0, -0.6)
+    box('Bolucu2', 77.5, 28, 79.5, 29, 0, -0.6)
+    box('Boost U7', 55, 36, 57.5, 38, 0, -1)                   # TPS61099 WSON-6
+    box('L_boost', 59, 35.5, 62, 38.5, 0, -1.5)               # 4,7 uH 3x3
+    box('R_bal1', 52, 28, 54, 29, 0, -0.6)
+    box('R_bal2', 52, 30.5, 54, 31.5, 0, -0.6)
+    # superkap: 2x Eaton HV1030 (O10.5 x 31.5, 10 F 2,7 V) seri, yatik, eksen Y; merkezler x 61 / 72, y 17.75 (Y 2..33.5), govde Z 0..-10.5
+    pi = comp.constructionPlanes.createInput(); pi.setByOffset(comp.xZConstructionPlane, V('17.75 mm'))
     pl = comp.constructionPlanes.add(pi)
-    sk = comp.sketches.add(pl)
-    c = sk.modelToSketchSpace(P(65.75, 13.75, -10.75))
-    sk.sketchCurves.sketchCircles.addByCenterRadius(c, mm(10.75))
-    f = extr(sk, NEW, 12.5, symmetric=True); sc = f.bodies.item(0); sc.name = 'Superkap'
-    bb = sc.boundingBox
-    print('superkap bbox', [round(v*10,2) for v in (bb.minPoint.x,bb.minPoint.y,bb.minPoint.z,bb.maxPoint.x,bb.maxPoint.y,bb.maxPoint.z)])
+    for i, cx in enumerate([61, 72]):
+        sk = comp.sketches.add(pl)
+        c = sk.modelToSketchSpace(P(cx, 17.75, -5.25))
+        sk.sketchCurves.sketchCircles.addByCenterRadius(c, mm(5.25))
+        f = extr(sk, NEW, 15.75, symmetric=True); sc = f.bodies.item(0); sc.name = 'Superkap%d' % (i+1)
+        bb = sc.boundingBox
+        print('superkap bbox', [round(v*10,2) for v in (bb.minPoint.x,bb.minPoint.y,bb.minPoint.z,bb.maxPoint.x,bb.maxPoint.y,bb.maxPoint.z)])
     box('MAX3485', 41.25, 14, 46.25, 20, 0, -1.5)
     box('R120', 47.5, 15, 48.5, 17, 0, -0.6)
     box('Klemens RS-485', 1, 11, 9, 26.25, 0, -10)

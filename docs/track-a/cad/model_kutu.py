@@ -97,9 +97,9 @@ def run(_ctx):
     sk = sketch_on(plane(47.5)); circ(sk, 60,42.5,47.5, 15)
     extr(sk, NEW, 0.5, symmetric=True).bodies.item(0).name = 'IR pencere'
 
-    # ALT YUZ (Y=0), merkez Z=23: PG7 O12.5 / PG7 O11 / PG7 O11 / SMA O6.4
+    # ALT YUZ (Y=0), merkez Z=23, soldan saga = PCB klemens sirasi: RS-485 PG7 O12.5 / SMA O6.4 / CT PG7 O12.5 / 230 V PG7 O12.5
     sk = sketch_on(comp.xZConstructionPlane)
-    for (x,d) in [(17.5,12.5),(47.5,11),(75,11),(102.5,6.4)]:
+    for (x,d) in [(17.5,12.5),(40,6.4),(65,12.5),(102.5,12.5)]:
         sk.sketchCurves.sketchCircles.addByCenterRadius(sk.modelToSketchSpace(P(x,0,23)), mm(d/2))
     extr(sk, CUT, 3, symmetric=True, bodies=[govde])
 

@@ -12,7 +12,7 @@ COL = {'IR pencere': RED}
 BOXBG = '<rect x="0" y="0" width="480" height="320" rx="16" fill="#eceff1"/>'
 GRP = {'ESP32': '#546e7a', 'RAC05': '#ad1457', 'F1': '#ef6c00', 'MOV': '#ef6c00', 'Klemens 230V': '#ef6c00',
        'LDO': '#ad1457', 'D1': '#ad1457', 'D2': '#ad1457', 'R_sarj': '#ad1457', 'Bolucu': '#ad1457',
-       'Superkap': '#f9a825', 'MAX3485': '#2e7d32', 'R120': '#2e7d32', 'Klemens RS-485': '#2e7d32',
+       'Superkap': '#f9a825', 'Boost': '#ad1457', 'L_boost': '#ad1457', 'R_bal': '#f9a825', 'MAX3485': '#2e7d32', 'R120': '#2e7d32', 'Klemens RS-485': '#2e7d32',
        'R_burden': '#6a1b9a', 'R_bias': '#6a1b9a', 'Klemens CT': '#6a1b9a', 'Genisleme': '#1565c0',
        'MLX90640': '#37474f', 'SHT31': '#1565c0', 'LED': '#43a047', 'PCB': '#2e7d32'}
 def col_of(name):
@@ -83,8 +83,8 @@ svg.add('<line x1="%g" y1="%g" x2="%g" y2="%g" stroke="%s" stroke-width="3" mark
 svg.text(x + 24, y + 62, 'IR pencere', 12, RED, 'middle', rotate=-90)
 x, y = B(41, 42.5); svg.leader(x - 2, y - 12, x - 30, y - 12, ['MLX90640 TO-39 Ø9', 'pencereye dayalı'], 11, DARK, 'end')
 x, y = B(40.2, 5); svg.add('<circle cx="%g" cy="%g" r="2" fill="#2e7d32"/><line x1="%g" y1="%g" x2="%g" y2="%g" stroke="#2e7d32" stroke-width="1.2"/>' % (x, y, x, y, x, y + 24)); svg.text(x, y + 35, 'PCB 1,6', 10, '#2e7d32', 'middle')
-x, y = B(28.65, 18.75); svg.text(x, y - 4, 'süperkap.', 12, '#f57f17', 'middle'); svg.text(x, y + 12, 'Ø21,5 yatık', 11, '#f57f17', 'middle')
-x, y = B(32.9, 58.9); svg.text(x, y - 2, 'RAC05', 12, '#ad1457', 'middle', '700'); svg.text(x, y + 12, '13 mm', 10, '#ad1457', 'middle')
+x, y = B(34.15, 22.75); svg.text(x, y - 4, '2× süperkap.', 12, '#f57f17', 'middle'); svg.text(x, y + 12, 'Ø10,5 yatık', 11, '#f57f17', 'middle')
+x, y = B(28.5, 60.35); svg.text(x, y - 2, 'RAC05', 12, '#ad1457', 'middle', '700'); svg.text(x, y + 12, '21,8 mm', 10, '#ad1457', 'middle')
 x, y = B(-5, 41); svg.text(x - 10, y, 'DIN klips', 12, DARK, 'middle', rotate=-90)
 svg.dim_h(B(0, 0)[0], B(50, 0)[0], oy + 345, '50 mm', off=20)
 svg.text(ox + 114, oy + 392, 'bakış yönü → (klemenslere)', 12, MUTED, 'middle')
@@ -95,14 +95,16 @@ svg.text(ox + 240, oy - 14, 'E / ALT YÜZ — kablo girişleri (120 × 50)', 20,
 svg.view(V['alt'], ox, oy, S, (0, -52), colors=COL,
          bg='<rect x="0" y="8" width="480" height="200" rx="12" fill="#eceff1"/>')
 def E(x, z): return ox + x * S, oy + (52 - z) * S
-for (xm, d, t1, t2) in [(17.5, 12.5, '230 V AC', 'PG7 rakor Ø12,5'), (47.5, 11, 'RS-485', 'analizör / TVOC-2'),
-                        (75, 11, 'CT ×4', 'analizör yoksa'), (102.5, 6.4, 'SMA panel', 'Ø6,4 → dış anten')]:
+for (xm, d, t1, t2) in [(17.5, 12.5, 'RS-485', 'PG7 Ø12,5'), (40, 6.4, 'SMA panel', 'Ø6,4 → anten'),
+                        (65, 12.5, 'CT ×4', 'PG7 Ø12,5'), (102.5, 12.5, '230 V AC', 'PG7 Ø12,5')]:
     x, y = E(xm, 23)
     r = d / 2 * S + 6
     svg.add('<g stroke="#455a64" stroke-width="0.8"><line x1="%g" y1="%g" x2="%g" y2="%g"/><line x1="%g" y1="%g" x2="%g" y2="%g"/></g>' % (x - r, y, x + r, y, x, y - r, x, y + r))
     svg.text(x, y + 52, t1, 13, DARK, 'middle', '700')
     svg.text(x, y + 68, t2, 12, GREY, 'middle')
-svg.text(ox + 240, oy + 250, 'tüm girişler alt yüzde → kablolar menteşeye doğru iner (kıvrım payı, §4.7); merkez Z = 23', 12, MUTED, 'middle')
+svg.text(ox + 240, oy + 250, 'her giriş kendi klemensinin altında; 230 V sağ uçta, alçak gerilim girişlerinden ayrı', 11, MUTED, 'middle')
+svg.text(ox + 240, oy + 266, 'RS-485: analizör / TVOC-2 · SMA: dış anten · CT: analizör yoksa', 11, MUTED, 'middle')
+svg.text(ox + 240, oy + 282, 'kablolar menteşeye doğru iner (kıvrım payı, §4.7); merkez Z = 23', 11, MUTED, 'middle')
 svg.dim_v(ox - 22, E(0, 50)[1], E(0, 0)[1], '50 mm', off=-16)
 
 # ---------- D / ARKA YÜZ ----------
@@ -141,8 +143,8 @@ svg.view(M['ic'], ox, oy, S, (0, -80), stroke=INK, sw=1.4, colors=ic_col)
 svg.text(C(60, 42.5)[0], C(60, 42.5)[1] + 34, 'MLX90640', 11, DARK, 'middle', '700')
 svg.text(C(12, 36)[0], C(12, 36)[1] + 22, 'SHT31', 10, '#1565c0', 'middle')
 svg.text(C(24, 55.4)[0], C(24, 55.4)[1], 'ESP32-S3', 10, '#455a64', 'middle')
-svg.text(C(85.9, 58.9)[0], C(85.9, 58.9)[1], 'RAC05', 10, '#ad1457', 'middle')
-svg.text(C(70.75, 18.75)[0], C(70.75, 18.75)[1], 'süperkap.', 10, '#f57f17', 'middle')
+svg.text(C(84.85, 60.35)[0], C(84.85, 60.35)[1], 'RAC05', 10, '#ad1457', 'middle')
+svg.text(C(71.5, 22.75)[0], C(71.5, 22.75)[1], '2× süperkap.', 10, '#f57f17', 'middle')
 svg.text(C(10, 22.6)[0], C(10, 22.6)[1], 'RS-485', 9, '#2e7d32', 'middle')
 svg.text(C(44, 9)[0], C(44, 9)[1], 'CT ×4', 9, '#6a1b9a', 'middle')
 svg.text(C(22.5, 13.75)[0], C(22.5, 13.75)[1], 'genişleme', 9, '#1565c0', 'middle')
@@ -162,11 +164,12 @@ svg.text(ox + 240, oy + 338, 'kaynak: GridUp-Kutu.f3d + GridUp-PCB.f3d (montaj) 
 
 # ---------- NOTLAR ----------
 ox, oy = 1160, 400
-svg.add('<rect x="%d" y="%d" width="500" height="520" fill="#fff" stroke="#90a4ae" stroke-width="2"/>' % (ox, oy))
+svg.add('<rect x="%d" y="%d" width="500" height="560" fill="#fff" stroke="#90a4ae" stroke-width="2"/>' % (ox, oy))
 svg.text(ox + 16, oy + 30, 'Tasarım notları', 18, INK, weight='700')
 notes = [
     ('Ölçü:', ' 120 × 80 × 50 mm, duvar 2 mm, köşe R4. Karar kaydı hedefi'),
-    (None, '~100×70×35; RAC05 (33,8 mm) + süperkap (Ø21,5) sığmadığı için büyüdü (§4.6).'),
+    (None, '~100×70×35; RAC05 (31,7 × 26,7 × 21,8) + 2× süperkap (Ø10,5 × 31,5'),
+    (None, 'yatık) sığmadığı için büyüdü (§4.6).'),
     ('IR pencere:', ' MLX90640 8–14 µm bandında çalışır; standart'),
     (None, 'cam/plastik geçirmez. Pencere IR geçirgen malzeme (Ge/kalkojenit'),
     (None, 'veya ince polietilen film), conta ile IP54 korunur (§4.4).'),
@@ -176,15 +179,17 @@ notes = [
     (None, 'vent M6 (PTFE) arkasında; su/toz geçmez, hava/nem geçer.'),
     ('Isı:', ' AC/DC modül PCB\'nin arkasında, sensörlerden uzak; SHT31'),
     (None, 'güç modülüne en uzak köşede (öz-ısınma hatası).'),
-    ('Kablolar:', ' tüm girişler alt yüzde; kapak içi montajda kablolar'),
-    (None, 'menteşeye iner, kıvrım payı bırakılır (§4.7). Anten kablosu SMA\'dan'),
-    (None, 'mevcut kablo girişiyle pano dışına (§7.4).'),
+    ('Kablolar:', ' tüm girişler alt yüzde, soldan sağa RS-485 / SMA / CT / 230 V —'),
+    (None, 'her giriş kendi klemensinin altında, 230 V kablosu alçak gerilim'),
+    (None, 'bölgesini geçmez. Kapak içi montajda kablolar menteşeye iner, kıvrım'),
+    (None, 'payı bırakılır (§4.7). Anten kablosu SMA\'dan pano dışına (§7.4).'),
     ('Sabitleme:', ' DIN klips veya oval yuvalardan mevcut cıvataya;'),
     (None, 'mıknatıs pedleri sadece hizalama. Yeni delik açılmaz (§4.8).'),
     ('Sıcaklık sınıfı:', ' tüm bileşenler −40…+85 °C endüstriyel;'),
     (None, 'kutu malzemesi UV/ısı dayanımlı PC veya alüminyum döküm.'),
-    ('PCB:', ' 110 × 70, kutu içinde (5, 5, 39,4) mm, 4 × Ø6 dikme üstünde (M3);'),
-    (None, 'ön yüzü kapaktan 5 mm geride, PCB koordinatı = kutu − 5 mm (02-pcb-yerlesimi.svg).'),
+    ('PCB:', ' 110 × 70, kutu içinde (5, 5, 39,4) mm, 4 × Ø6 dikme üstünde'),
+    (None, '(M3); ön yüzü kapaktan 5 mm geride, PCB koordinatı = kutu − 5 mm'),
+    (None, '(02-pcb-yerlesimi.svg).'),
     ('Genişleme payı:', ' 2×5 başlık ayrılmış I²C/UART — PD/akustik'),
     (None, 'fark katmanı için (§7.1 şartı); kutuda ilgili yüzde kör tapa.'),
 ]
@@ -195,7 +200,7 @@ for i, (b, t) in enumerate(notes):
     else:
         svg.text(ox + 16, y, t, 13, DARK)
     y += 17 if (i + 1 < len(notes) and notes[i + 1][0] is None) else 22
-svg.text(ox + 16, oy + 502, 'Kavramsal tasarım — üretim çizimi değildir (§1.4: fiziksel donanım yok).', 12, MUTED)
+svg.text(ox + 16, y + 4, 'Kavramsal tasarım — üretim çizimi değildir (§1.4: fiziksel donanım yok).', 12, MUTED)
 
 # lejant (sol alt boşluk)
 ox, oy = 60, 1020
@@ -218,11 +223,11 @@ comment = """    Modül kutusu — teknik kroki (04-mekanik-yerlesim.md §4.5–
     Kutu 120 × 80 × 50 mm: gövde Z 0..46 (duvar 2 mm, köşe R4, 4 × Ø7 kapak vida direği köşelerde, 4 × Ø6 PCB dikmesi Z 2..39,4 kutu (12,12) (108,12) (12,68) (108,68) = PCB (7,7) vb., M3), kapak Z 46..50 (4 mm), 4 × M3 (5,5) (115,5) (5,75) (115,75).
     Ön yüz (Z=50): IR pencere Ø15 merkez model (60, 42,5) [svg (60, 37,5)]; yuva Ø23 +2 mm, 3 mm pah; pencere plakası Ø15 × 1 (Z 47..48).
       Membran vent M6 model (12, 36) [svg (12, 44)], Ø9 halka. Durum LED Ø3,2 model (30, 70) [svg (30, 10)].
-    Alt yüz (Y=0), merkez Z=23: PG7 Ø12,5 x=17,5 / PG7 Ø11 x=47,5 (RS-485) / PG7 Ø11 x=75 (CT) / SMA Ø6,4 x=102,5.
+    Alt yüz (Y=0), merkez Z=23, soldan sağa PCB klemens sırasıyla: RS-485 PG7 Ø12,5 x=17,5 / SMA Ø6,4 x=40 / CT PG7 Ø12,5 x=65 / 230 V PG7 Ø12,5 x=102,5.
     Arka yüz (Z=0): DIN klips 35 × 42 × 5 merkez (60, 41), ray kanalı 35,5 × 3; oval yuva M5 15 × 5,5 merkez (17,5, 45,25) ve (102,5, 45,25);
       mıknatıs cepleri Ø7 × 1 mm köşelerde (7,5, 7,5) vb.
     PCB 110 × 70 × 1,6 kutu içinde (5, 5, 39,4) → ön yüzü Z=41, MLX90640 tepesi Z=47 (pencereye dayalı); PCB koordinatı = kutu − 5 mm.
-    Bileşen ölçüleri datasheet'lerden yaklaşık: MLX90640 TO-39 Ø9 × 6 / ESP32-S3-WROOM-1U 18 × 19,2 × 3,2 / RAC05-05SK 33,8 × 20,3 × 13 / süperkap Ø21,5 × 25 yatık.
+    Bileşen ölçüleri datasheet'lerden: MLX90640 TO-39 Ø9,3 × 5,7 / ESP32-S3-WROOM-1U 18 × 19,2 × 3,2 / RAC05-05SK/277 31,7 × 26,7 × 21,8 / 2× Eaton HV1030 Ø10,5 × 31,5 yatık.
     Üretim çizimi değildir."""
 n = svg.write(OUT, comment)
 print('written', OUT, n)

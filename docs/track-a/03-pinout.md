@@ -20,7 +20,7 @@ Tabloda olmayan tek ekleme **GPIO1 besleme algılama** girişidir — aşağıda
 başlangıç değerleridir; üretim çizimi değildir, §1.4. Parçaların kart üzerindeki yeri: [02-pcb-yerlesimi.svg](02-pcb-yerlesimi.svg).)*
 
 *Kaynak: KiCad şematik [eda/GridUp-Modul.kicad_sch](eda/GridUp-Modul.kicad_sch) — [ERC 0 hata / 0 uyarı](eda/erc-raporu.txt),
-[netlist](eda/GridUp-Modul.net) 95 kontrolle §3.1 ile birebir doğrulanmış; bu SVG `eda/build.py` ile o şemadan üretilir
+[netlist](eda/GridUp-Modul.net) 103 kontrolle §3.1 ile birebir doğrulanmış; bu SVG `eda/build.py` ile o şemadan üretilir
 (elle çizim yok). Üretim zinciri: [eda/README.md](eda/README.md).*
 
 ---
