@@ -28,12 +28,13 @@ import pytest
 
 from analiz.ayar import Ayar
 from analiz.db import baglan, sema_kur
-from analiz.dogrulama import dogrulama_ayari, kos
+from analiz.dogrulama import dogrulama_ayari, kos, oynat
 from analiz.fikstur import Fikstur
 
 #: Override with GRIDUP_TEST_DSN / GRIDUP_SENARYO_DSN to point at another server.
 TEST_DSN = os.environ.get("GRIDUP_TEST_DSN", "postgresql:///gridup_analiz_test")
 SENARYO_DSN = os.environ.get("GRIDUP_SENARYO_DSN", "postgresql:///gridup_analiz_senaryo")
+KORTEST_DSN = os.environ.get("GRIDUP_KORTEST_DSN", "postgresql:///gridup_analiz_kortest")
 
 #: A fixed instant, so every run of the suite produces the same numbers. Not
 #: `now()`: the fixtures contain daily load and temperature cycles, and a suite
@@ -112,3 +113,39 @@ def senaryo_vt():
     with baglan(ayar) as baglanti:
         rapor = kos(baglanti, ayar, simdi=SABIT_AN, tur_sayisi=2)
         yield baglanti, rapor, ayar
+
+
+@pytest.fixture(scope="session")
+def kortest_vt():
+    """The scenario set with the scan loop REPLAYED across it, turn by turn.
+
+    Separate from `senaryo_vt`, and the difference is the whole point of having
+    both. `senaryo_vt` runs a couple of turns at the end of the window: enough to
+    prove each scenario is found, useless for saying *when*. Every episode there
+    opens at the last measurement, so lead time comes out at roughly zero for
+    everything — and lead time is the project's headline claim.
+
+    This one steps the clock through the data the way it passes in the field, so
+    an episode opens on the turn where the evidence first crossed a threshold.
+    That costs about half a minute, which is why it is session-scoped and why the
+    cheap fixture still exists for everything that does not need it.
+    """
+    from datetime import timedelta
+
+    from analiz.db import sema_kur
+    from analiz.fikstur import Fikstur
+    from analiz.senaryolar import TESPIT_SAAT, etiket_uret, kur
+
+    _veritabani_kur(KORTEST_DSN)
+    ayar = dogrulama_ayari(KORTEST_DSN)
+    with baglan(ayar) as baglanti:
+        sema_kur(baglanti)
+        kur(Fikstur(baglanti), SABIT_AN, gecmis_gun=15.0)
+        oynat(
+            baglanti,
+            ayar,
+            simdi=SABIT_AN,
+            bas=SABIT_AN - timedelta(hours=TESPIT_SAAT),
+            adim_dk=15.0,
+        )
+        yield baglanti, etiket_uret(SABIT_AN), ayar

@@ -30,7 +30,7 @@ from .senaryolar import SENARYOLAR, Senaryo, kur
 from .sozlesme import Tip
 from .tarama import Tarayici
 
-__all__ = ["dogrulama_ayari", "kos", "rapor", "Rapor", "SenaryoSonucu"]
+__all__ = ["dogrulama_ayari", "kos", "oynat", "rapor", "Rapor", "SenaryoSonucu"]
 
 
 def dogrulama_ayari(dsn: str) -> Ayar:
@@ -149,6 +149,47 @@ def kos(
         tarayici.tur(simdi=simdi + timedelta(seconds=i * ayar.tarama.periyot_sn))
 
     return rapor(baglanti, tur_sayisi=tur_sayisi, satir=satir)
+
+
+def oynat(
+    baglanti: psycopg.Connection,
+    ayar: Ayar,
+    simdi: datetime,
+    bas: datetime,
+    adim_dk: float = 15.0,
+) -> int:
+    """Replay the scan loop forward across the data, turn by turn.
+
+    WHY THIS EXISTS, AND WHY LEAD TIME IS MEANINGLESS WITHOUT IT. `kos` runs a
+    couple of turns at the end of the window, which is enough to prove the
+    detector finds each scenario but says nothing about *when* it would have.
+    Every episode opens at the last measurement, so the gap between the first
+    detection and the critical moment comes out at roughly zero for everything —
+    and that gap is the project's headline claim (section 2.5).
+
+    Replaying steps the clock through the data the way it would pass in the
+    field: a turn every `adim_dk` minutes, each one seeing only what had arrived
+    by then. An episode therefore opens on the turn where the evidence first
+    crossed a threshold, which is exactly the moment a real deployment would have
+    told somebody — so the subtraction against the label's `kritik_esik` measures
+    the thing it claims to measure.
+
+    Returns the number of turns run.
+    """
+    tarayici = Tarayici(baglanti, ayar)
+    tarayici.imlecler.geri_al(ayar.tarama.imlec_adi, bas)
+
+    adim = timedelta(minutes=adim_dk)
+    an = bas + adim
+    sayac = 0
+    while an <= simdi:
+        tarayici.tur(simdi=an)
+        sayac += 1
+        an += adim
+    if sayac == 0 or (an - adim) < simdi:
+        tarayici.tur(simdi=simdi)
+        sayac += 1
+    return sayac
 
 
 def rapor(baglanti: psycopg.Connection, tur_sayisi: int = 0, satir: int = 0) -> Rapor:
