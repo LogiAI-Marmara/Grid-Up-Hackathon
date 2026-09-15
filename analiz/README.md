@@ -122,7 +122,8 @@ analiz/
 
 ### K1 — periodic scan, cursor, rewindable
 
-A background job. Every `tarama.periyot_sn` (default 10 s) it asks what has
+A background job. Every `tarama.periyot_sn` (default 30 s — see [T5](#t5--ölçeklenebilirlik-raporu)
+for why it is not section 3.7's 10 s) it asks what has
 arrived since its cursor, works out which modules those rows belong to,
 evaluates **each of those modules once**, writes findings, advances the cursor.
 
@@ -512,75 +513,122 @@ relationship all match what this layer was built against.
 
 ## T5 — ölçeklenebilirlik raporu
 
-Measured with `python -m analiz.yuk --moduller 10,50,100 --tur 10`, on one
-container sharing a CPU with PostgreSQL. Scan period 10 s, 15 days of baseline
-history per module, detection window sampled at the contract's 10 s cadence,
-15% of each fleet carrying an injected fault.
-
 ```
- modül  veri satırı   tur ort      p95    azami  satır/tur   CPU/tur    bellek   doluluk  yetişiyor
-    10      311,610    1.719s   1.911s   1.911s         90    1.143s    164.8M       19%       evet
-    50    1,558,050    8.833s   9.145s   9.145s        450    5.998s    472.9M       91%       evet
-   100    3,116,100   18.285s  18.867s  18.867s        900   12.233s    745.5M      189%      HAYIR
+python -m analiz.yuk --moduller 10,50,100 --tur 10
 ```
 
-### Sınır: ~55 modül, 10 saniyelik tarama periyodunda
+**Donanım:** 4 fiziksel / 4 mantıksal çekirdek, 16.5 GB RAM,
+Intel(R) Xeon(R) Processor @ 2.10GHz, cgroup CPU sınırı yok.
+PostgreSQL 16 aynı makinede.
 
-**This is a measurement, not an extrapolation.** At 100 modules a turn takes
-18.9 s against a 10 s period — the detector processes one turn while two more
-fall due, and the backlog grows without bound. 50 modules fits, but at 91% of
-the period there is no headroom: a slow query, a vacuum, or a burst of episodes
-pushes it over.
+Scan period **30 s** (the default), 15 days of baseline history per module,
+detection window sampled at the contract's 10 s cadence, 15% of each fleet
+carrying an injected fault.
 
-Turn cost is close to linear in module count (183 ms per module across the whole
-range), which is what the design predicts — the work is a per-module window fetch
+```
+ modül  veri satırı   tur ort      p95  satır/tur  çekirdek-sn  ms/modül    bellek  doluluk  mod/çekirdek  yetişiyor
+    10      311,610    2.029s   2.705s        270         2.08       208    164.0M       9%           144       evet
+    50    1,558,050   11.177s  14.541s       1350        11.45       229    464.5M      48%           131       evet
+   100    3,116,100   19.449s  22.687s       2700        19.89       199    758.6M      76%           151       evet
+```
+
+`çekirdek-sn` is CPU core-seconds per turn, **detector process plus PostgreSQL
+backends**. The queries run in separate server processes and their cost never
+appears in the detector's own `cpu_times()`, so a CPU figure that counted only
+the Python side would be roughly half the real bill.
+
+### Sonuç: 100 modül 30 saniyelik periyotta yetişiyor
+
+p95 turn duration 22.7 s against a 30 s period — **76% duty, with headroom but
+not a lot of it.** Section 7.7's 100-module target is met on default settings.
+
+At the previous 10 s default the same fleet did not keep up: 19.9 core-seconds
+of work per turn against a 10 s budget is ~199% duty, and the detector falls
+permanently behind. That is why the default moved (see `ayar.TaramaAyari`).
+
+### Kapasite: çekirdek başına ~151 modül
+
+Stated per core rather than as a duration, because a turn duration is only true
+of the machine it was measured on:
+
+| | |
+|---|---|
+| modül başına çekirdek zamanı | **199 ms** (10/50/100 modülde 208 / 229 / 199 ms) |
+| 30 sn periyotta çekirdek başına kapasite | **~151 modül** |
+| 10 sn periyotta çekirdek başına kapasite | ~50 modül |
+
+Per-module cost is flat across a tenfold range in fleet size (208 → 229 → 199
+ms), which is what the design predicts: the work is a per-module window fetch
 and a per-module baseline, and neither depends on how many other modules exist.
+That flatness is what makes the capacity figure usable — it extrapolates because
+the underlying cost does not change with scale.
+
+Carrying it to other hardware is one ratio: a core 1.5× faster carries ~1.5×
+as many modules.
+
+### Tek çekirdek — varsayım değil, ölçüm
+
+The previous run showed process CPU close to wall time, which *suggests* serial
+work but does not establish it: the detector's process CPU excludes the
+PostgreSQL backends it waits on, so a turn that was half Python and half SQL on
+two different cores would show the same ratio. So the harness measures
+system-wide CPU across the window instead.
+
+```
+Ortalama meşgul çekirdek: 1.16 / 4   (sistem geneli CPU ÷ duvar saati)
+Tur içi paralellik:       1.02×      (19.89 çekirdek-sn ÷ 19.45 sn duvar saati)
+```
+
+**1.02× means essentially nothing overlaps.** The detector is one process, one
+thread, evaluating modules in a loop; while a query runs, Python waits. Three of
+the four cores on this box are idle during a turn.
+
+The consequence for scaling advice is the point: **adding cores does not shorten
+a turn.** A 16-core machine runs this at the same speed as a 4-core one. What
+buys capacity is a longer period, or more detector processes.
 
 ### Nerede gidiyor
 
-At 100 modules, ~6.5 s of the 18.9 s is SQL and the remaining ~12 s is Python:
+At 100 modules, ~6.7 s of the 19.4 s is SQL and the remaining ~12.7 s is Python:
 
 | | ms/tur |
 |---|---|
-| taban çizgisi (medyan + MAD) | 2473 |
-| pencere: ölçüm serileri | 2200 |
-| pencere: son ölçüm | 1466 |
-| pencere: termal özet | 350 |
-| olay yazımı (18 çağrı) | 38 |
-| tur aralık sorgusu | 4 |
+| pencere: ölçüm serileri | 2417 |
+| taban çizgisi (medyan + MAD) | 2309 |
+| pencere: son ölçüm | 1613 |
+| pencere: termal özet | 353 |
+| olay yazımı (33 çağrı) | 27 |
+| tur aralık sorgusu | 4.8 |
 
 The Python side is dominated by materialising the evaluation window: 6 hours at
 10 s across 9 channels is ~19,000 samples per module, and each becomes a `Nokta`.
 The detector layers themselves are cheap by comparison.
 
-**İndeks etkisi.** The range query that opens every turn — the one that would be
-a sequential scan over 3.1 million rows without it — costs **4.1 ms** at 100
-modules. That is `olcum_alindi_zaman_idx` doing its job; it is the index track A's
-migrations do not have, because track A never queries by `alindi_zaman`
-(mismatch 3 above).
+**İndeks etkisi.** The range query that opens every turn — a sequential scan over
+3.1 million rows without it — costs **4.8 ms** at 100 modules. That is
+`olcum_alindi_zaman_idx` doing its job; it is the index track A's migrations do
+not have, because track A never queries by `alindi_zaman` (mismatch 3 above).
 
 ### Sınırı ötelemenin yolları
 
 Not implemented — this delivery measures, it does not tune. In rough order of
 return:
 
-1. **Raise the scan period.** It is configuration (`tarama.periyot_sn`), and
+1. **Shard modules across processes.** The measured 1.02× says this is the only
+   lever that uses the hardware already present. The cursor is per named cursor
+   and the layers are pure functions of a window, so two detectors on disjoint
+   module sets share nothing but the tables. Four processes on this box would
+   carry ~600 modules at 30 s.
+2. **Raise the period further.** Configuration (`tarama.periyot_sn`), and
    section 3.5 already argues the events we detect run on scales of minutes to
-   hours. At 30 s the same hardware carries ~160 modules with the same code.
-2. **Shard by module across processes.** The cursor is per named cursor and the
-   layers are pure functions of a window, so two detectors on disjoint module
-   sets share nothing but the tables.
+   hours. 60 s doubles capacity to ~300 modules per core.
 3. **Stop building `Nokta` objects for the whole window.** The layers consume
    medians, slopes and endpoints; most of that could be computed in SQL, as the
-   baseline already is.
-4. **Drop the `son ölçüm` query** (1.5 s/turn) in favour of `modul.son_gorulme`,
+   baseline already is. This is the largest single cost.
+4. **Drop the `son ölçüm` query** (1.6 s/turn) in favour of `modul.son_gorulme`,
    which the contract maintains for exactly this question. Track B reads from
    `olcum` instead because `son_gorulme` only exists if track A's collector wrote
    it, and track B has to run standalone — so this one is a trade, not a free win.
-
-The 100-module target of section 7.7 is therefore **reachable but not on default
-settings**: it needs either a longer scan period or a second detector process,
-both of which are configuration rather than redesign.
 
 ---
 
