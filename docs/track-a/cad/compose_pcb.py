@@ -86,10 +86,10 @@ x, y = px(72.5, 57.5)
 L(x, y - 6, 'RECOM RAC05-05SK/277', 11, '#ad1457', 'middle', '700')
 L(x, y + 8, '31,7 × 26,7 × 21,8 / arka yüz', 10, SUB, 'middle')
 L(x, y + 22, 'sol 5 V ikincil / sağ 230 V birincil', 10, SUB, 'middle')
-L(px(65, 66)[0], px(65, 66)[1], '+5V / GND', 10, SUB); L(px(95, 66)[0], px(95, 66)[1], 'L / N', 10, SUB, 'end')
+L(px(65, 66)[0], px(65, 66)[1], '+5V / GND', 10, SUB); L(px(95, 66)[0], px(95, 66)[1], 'L / N / PE', 10, SUB, 'end')
 x, y = px(91, 23.6); L(x, y + 30, 'F1 (SMD)', 10, SUB, 'middle')
 x, y = px(100, 23.5); L(x, y + 44, 'MOV Ø7', 10, SUB, 'middle')
-x, y = px(94.1, 4.5); L(x, y - 42, '230 V klemens', 11, '#37474f', 'middle'); L(x, y - 57, '2 kutup, 5,08 mm', 10, SUB, 'middle')
+x, y = px(91.6, 4.5); L(x, y - 42, '230 V klemens', 11, '#37474f', 'middle'); L(x, y - 57, '3 kutup L/N/PE, 5,08 mm', 10, SUB, 'middle')
 x, y = px(73.25, 37.5); L(x, y - 2, 'LDO', 9, SUB, 'middle'); L(x, y + 9, '3,3 V', 9, SUB, 'middle')
 x, y = px(78.9, 40.3); L(x, y - 14, 'D1 (OR)', 10, SUB, 'middle')
 x, y = px(78.9, 36.3); L(x, y + 17, 'D2', 10, SUB, 'middle')
@@ -156,7 +156,7 @@ comment = """    PCB / kart yerleşimi — (T2 "kart yapısı"). Ölçek 1 mm = 
     Ön yüz (Z 1,6 →): MLX90640 TO-39 Ø9 × 6 merkez (55, 37,5) [kutu IR pencere (60, 42,5)] / SHT31 2,5 × 2,5 (7, 31) [kutu vent (12, 36)] /
       LED Ø3 (25, 65) [kutu (30, 70)] / pull-up + 100 nF (37,5, 42–46,5) / EN RC (29, 50–52,5) + reset 3 × 3 (32–35, 49,75–52,75).
     Arka yüz (Z 0 ←): ESP32-S3-WROOM-1U 18 × 19,2 × 3,2 (10–28, 40,8–60) / RAC05-05SK/277 31,7 × 26,7 × 21,8 (64–95,7, 42–68,7) /
-      F1 (88–94,1, 22,25–25) / MOV 7 × 4 × 8 (96,5–103,5, 21,5–25,5) / 230 V klemens 2p 5,08 (89–99,25, 0,5–8,5) /
+      F1 (88–94,1, 22,25–25) / MOV 7 × 4 × 8 (96,5–103,5, 21,5–25,5) / 230 V klemens 3p 5,08 (84–99,25, 0,5–8,5) /
       LDO AP7361C SOT-223 (70–76,5, 34–41) / D1 (76,75–81, 39–41,65) / D2 (76,75–81, 35–37,65) / R_şarj (60,5–62,5, 44,5–45,5) / bölücü (77,5–79,5, 28–30,5) /
       boost U7 (55–57,5, 36–38) + L 3×3 (59–62, 35,5–38,5) / dengeleme R (52–54, 28–31,5) /
       2× süperkap Eaton HV1030 Ø10,5 × 31,5 yatık, eksen Y, merkezler (61, 17,75) (72, 17,75), Y 2–33,5 / MAX3485 SOIC-8 (41,25–46,25, 14–20) / 120 Ω (47,5–48,5, 15–17) /

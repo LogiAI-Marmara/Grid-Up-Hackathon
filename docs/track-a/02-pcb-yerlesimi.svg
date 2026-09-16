@@ -7,7 +7,7 @@
     Ön yüz (Z 1,6 →): MLX90640 TO-39 Ø9 × 6 merkez (55, 37,5) [kutu IR pencere (60, 42,5)] / SHT31 2,5 × 2,5 (7, 31) [kutu vent (12, 36)] /
       LED Ø3 (25, 65) [kutu (30, 70)] / pull-up + 100 nF (37,5, 42–46,5) / EN RC (29, 50–52,5) + reset 3 × 3 (32–35, 49,75–52,75).
     Arka yüz (Z 0 ←): ESP32-S3-WROOM-1U 18 × 19,2 × 3,2 (10–28, 40,8–60) / RAC05-05SK/277 31,7 × 26,7 × 21,8 (64–95,7, 42–68,7) /
-      F1 (88–94,1, 22,25–25) / MOV 7 × 4 × 8 (96,5–103,5, 21,5–25,5) / 230 V klemens 2p 5,08 (89–99,25, 0,5–8,5) /
+      F1 (88–94,1, 22,25–25) / MOV 7 × 4 × 8 (96,5–103,5, 21,5–25,5) / 230 V klemens 3p 5,08 (84–99,25, 0,5–8,5) /
       LDO AP7361C SOT-223 (70–76,5, 34–41) / D1 (76,75–81, 39–41,65) / D2 (76,75–81, 35–37,65) / R_şarj (60,5–62,5, 44,5–45,5) / bölücü (77,5–79,5, 28–30,5) /
       boost U7 (55–57,5, 36–38) + L 3×3 (59–62, 35,5–38,5) / dengeleme R (52–54, 28–31,5) /
       2× süperkap Eaton HV1030 Ø10,5 × 31,5 yatık, eksen Y, merkezler (61, 17,75) (72, 17,75), Y 2–33,5 / MAX3485 SOIC-8 (41,25–46,25, 14–20) / 120 Ω (47,5–48,5, 15–17) /
@@ -55,10 +55,10 @@
 <polyline points="908,468 908,436" stroke="#ef6c00"/>
 <polyline points="908,436 852,436" stroke="#ef6c00"/>
 <polyline points="852,436 852,468" stroke="#ef6c00"/>
-<polyline points="792,636 874,636" stroke="#ef6c00"/>
+<polyline points="752,636 874,636" stroke="#ef6c00"/>
 <polyline points="874,636 874,572" stroke="#ef6c00"/>
-<polyline points="874,572 792,572" stroke="#ef6c00"/>
-<polyline points="792,572 792,636" stroke="#ef6c00"/>
+<polyline points="874,572 752,572" stroke="#ef6c00"/>
+<polyline points="752,572 752,636" stroke="#ef6c00"/>
 <polyline points="640,368 692,368" stroke="#ad1457"/>
 <polyline points="692,368 692,312" stroke="#ad1457"/>
 <polyline points="692,312 640,312" stroke="#ad1457"/>
@@ -226,11 +226,11 @@
   <text x="660" y="188" font-size="10" fill="#607d8b" text-anchor="middle">31,7 × 26,7 × 21,8 / arka yüz</text>
   <text x="660" y="202" font-size="10" fill="#607d8b" text-anchor="middle">sol 5 V ikincil / sağ 230 V birincil</text>
   <text x="600" y="112" font-size="10" fill="#607d8b">+5V / GND</text>
-  <text x="840" y="112" font-size="10" fill="#607d8b" text-anchor="end">L / N</text>
+  <text x="840" y="112" font-size="10" fill="#607d8b" text-anchor="end">L / N / PE</text>
   <text x="808" y="481.2" font-size="10" fill="#607d8b" text-anchor="middle">F1 (SMD)</text>
   <text x="880" y="496" font-size="10" fill="#607d8b" text-anchor="middle">MOV Ø7</text>
-  <text x="832.8" y="562" font-size="11" fill="#37474f" text-anchor="middle">230 V klemens</text>
-  <text x="832.8" y="547" font-size="10" fill="#607d8b" text-anchor="middle">2 kutup, 5,08 mm</text>
+  <text x="812.8" y="562" font-size="11" fill="#37474f" text-anchor="middle">230 V klemens</text>
+  <text x="812.8" y="547" font-size="10" fill="#607d8b" text-anchor="middle">3 kutup L/N/PE, 5,08 mm</text>
   <text x="666" y="338" font-size="9" fill="#607d8b" text-anchor="middle">LDO</text>
   <text x="666" y="349" font-size="9" fill="#607d8b" text-anchor="middle">3,3 V</text>
   <text x="711.2" y="303.6" font-size="10" fill="#607d8b" text-anchor="middle">D1 (OR)</text>
