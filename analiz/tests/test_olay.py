@@ -28,6 +28,16 @@ def _bulgu(zaman, seviye=Seviye.UYARI, skor=0.6, tip=Tip.SICAK_NOKTA, gerekce=No
     )
 
 
+# D2 (post-review) added a delay-on: a non-exempt finding no longer opens an
+# episode on its very first appearance, it has to persist `bekleme_sn` first
+# (see `test_bekleme_suresi_dolmadan_olay_acilmaz` below, which is the test
+# for that behaviour specifically). Every OTHER test in this file is about
+# something else entirely — hysteresis, the journal, episode identity — and
+# used "one `uygula()` call opens an episode" only as a convenient way to get
+# an open episode to then test that other thing against. Rather than thread a
+# 15-minute wait through every one of them, they override `bekleme_sn` to 0,
+# which is the smallest change that keeps each test about what it was written
+# to test.
 def _olaylar(baglanti, modul_id=None):
     with baglanti.cursor() as imlec:
         if modul_id:
@@ -60,7 +70,7 @@ def test_olay_bir_kez_acilir_sonra_guncellenir(baglanti, fikstur, ayar, an):
     """
     modul_id = fikstur.modul("TR041-P01-M1")
     fikstur.yaz()
-    depo = OlayDeposu(baglanti, ayar)
+    depo = OlayDeposu(baglanti, ayar.ile(olay={"bekleme_sn": 0.0}))
 
     for i in range(50):
         zaman = an + timedelta(seconds=10 * i)
@@ -84,7 +94,7 @@ def test_her_gecis_icin_journal_satiri_vardir(baglanti, fikstur, ayar, an):
     """
     modul_id = fikstur.modul("TR041-P01-M1")
     fikstur.yaz()
-    depo = OlayDeposu(baglanti, ayar)
+    depo = OlayDeposu(baglanti, ayar.ile(olay={"bekleme_sn": 0.0}))
 
     # open at izle
     depo.uygula(modul_id, [_bulgu(an, Seviye.IZLE, 0.35)], an)
@@ -127,7 +137,7 @@ def test_histerezis_olayin_acilip_kapanmasini_onler(baglanti, fikstur, ayar, an)
     """
     modul_id = fikstur.modul("TR041-P01-M1")
     fikstur.yaz()
-    depo = OlayDeposu(baglanti, ayar)
+    depo = OlayDeposu(baglanti, ayar.ile(olay={"bekleme_sn": 0.0}))
     histerezis = timedelta(seconds=ayar.olay.histerezis_sn)
 
     depo.uygula(modul_id, [_bulgu(an)], an)
@@ -170,7 +180,7 @@ def test_kapanan_olaydan_sonra_yeni_olay_acilir(baglanti, fikstur, ayar, an):
     """
     modul_id = fikstur.modul("TR041-P01-M1")
     fikstur.yaz()
-    depo = OlayDeposu(baglanti, ayar)
+    depo = OlayDeposu(baglanti, ayar.ile(olay={"bekleme_sn": 0.0}))
 
     depo.uygula(modul_id, [_bulgu(an)], an)
     depo.kapat_sureli(an + timedelta(seconds=ayar.olay.histerezis_sn + 60))
@@ -191,7 +201,7 @@ def test_farkli_tipler_ayri_olaylardir(baglanti, fikstur, ayar, an):
     """Episode identity is (modul_id, tip): two fault types are two episodes."""
     modul_id = fikstur.modul("TR041-P01-M1")
     fikstur.yaz()
-    depo = OlayDeposu(baglanti, ayar)
+    depo = OlayDeposu(baglanti, ayar.ile(olay={"bekleme_sn": 0.0}))
 
     depo.uygula(
         modul_id,
@@ -216,7 +226,7 @@ def test_operator_onayi_journala_kim_ve_ne_zaman_yazar(baglanti, fikstur, ayar, 
     """
     modul_id = fikstur.modul("TR041-P01-M1")
     fikstur.yaz()
-    depo = OlayDeposu(baglanti, ayar)
+    depo = OlayDeposu(baglanti, ayar.ile(olay={"bekleme_sn": 0.0}))
     depo.uygula(modul_id, [_bulgu(an)], an)
     baglanti.commit()
 
@@ -248,7 +258,7 @@ def test_kimlik_ve_sira_birlikte_artar(baglanti, fikstur, ayar, an):
     fikstur.modul("TR041-P01-M1")
     fikstur.modul("TR041-P01-M2")
     fikstur.yaz()
-    depo = OlayDeposu(baglanti, ayar)
+    depo = OlayDeposu(baglanti, ayar.ile(olay={"bekleme_sn": 0.0}))
     depo.uygula("TR041-P01-M1", [_bulgu(an)], an)
     depo.uygula("TR041-P01-M2", [_bulgu(an)], an)
     baglanti.commit()
@@ -275,7 +285,7 @@ def test_gecmiste_kalan_kosul_her_turda_yeni_olay_acmaz(baglanti, fikstur, ayar,
     """
     modul_id = fikstur.modul("TR052-P02-M1")
     fikstur.yaz()
-    depo = OlayDeposu(baglanti, ayar)
+    depo = OlayDeposu(baglanti, ayar.ile(olay={"bekleme_sn": 0.0}))
 
     # The event itself is well outside the hysteresis window...
     olay_zamani = an - timedelta(minutes=40)
@@ -309,3 +319,78 @@ def test_gecmiste_kalan_kosul_her_turda_yeni_olay_acmaz(baglanti, fikstur, ayar,
     depo.kapat_sureli(son_tur + timedelta(seconds=ayar.olay.histerezis_sn + 60))
     baglanti.commit()
     assert _olaylar(baglanti, modul_id)[0]["durum"] == Durum.KAPANDI.value
+
+
+def test_bekleme_suresi_dolmadan_olay_acilmaz(baglanti, fikstur, ayar, an):
+    """D2's delay-on: a condition must persist before a NEW episode opens.
+
+    Severity is meant to be an action taken on the present condition, and
+    opening an episode from one turn's one qualifying window is the same
+    single-data-point problem just moved from severity into existence. So a
+    first sighting is recorded but produces no row; only once the SAME finding
+    type is still present `bekleme_sn` later does the episode actually open —
+    at that point immediately, backdated to nothing: `ilk_gorulme` is the
+    onset turn's own measurement time, not the later confirming one, because
+    the condition really did start there.
+    """
+    modul_id = fikstur.modul("TR041-P01-M1")
+    fikstur.yaz()
+    depo = OlayDeposu(baglanti, ayar)  # production bekleme_sn, deliberately
+    bekleme = timedelta(seconds=ayar.olay.bekleme_sn)
+
+    ilk = an
+    depo.uygula(modul_id, [_bulgu(ilk)], ilk)
+    baglanti.commit()
+    assert _olaylar(baglanti, modul_id) == [], "one sighting must not open an episode yet"
+
+    # Still short of the delay: stays pending, still no row.
+    orta = ilk + bekleme / 2
+    depo.uygula(modul_id, [_bulgu(orta)], orta)
+    baglanti.commit()
+    assert _olaylar(baglanti, modul_id) == [], "short of bekleme_sn, still no episode"
+
+    # Persisted for the full delay: opens now, immediately, no further wait.
+    gec = ilk + bekleme
+    depo.uygula(modul_id, [_bulgu(gec)], gec)
+    baglanti.commit()
+    olaylar = _olaylar(baglanti, modul_id)
+    assert len(olaylar) == 1, "condition persisted the full delay; must open now"
+    assert olaylar[0]["ilk_gorulme"] == ilk, "onset is the first sighting, not the confirming one"
+
+    # A condition that stops recurring drops its pending state rather than
+    # combining with an unrelated later occurrence of the same type.
+    modul_id2 = fikstur.modul("TR041-P01-M2")
+    fikstur.yaz()
+    depo.uygula(modul_id2, [_bulgu(an)], an)
+    baglanti.commit()
+    depo.uygula(modul_id2, [], an + timedelta(minutes=1))  # the condition vanished
+    baglanti.commit()
+    cok_gec = an + bekleme + timedelta(minutes=5)
+    depo.uygula(modul_id2, [_bulgu(cok_gec)], cok_gec)
+    baglanti.commit()
+    assert _olaylar(baglanti, modul_id2) == [], (
+        "a condition that lapsed must restart its own persistence clock"
+    )
+
+
+def test_ark_bekleme_muaf_aninda_acilir(baglanti, fikstur, ayar, an):
+    """The arc is exempt from delay-on: it still opens on the very first turn.
+
+    Section 3.5, unchanged by D2: the TVOC-2 is SIL-2 and has already decided
+    by the time its row exists, so an extra wait before its own episode opens
+    would be pure added latency for a device this system does not re-decide.
+    """
+    modul_id = fikstur.modul("TR052-P02-M1")
+    fikstur.yaz()
+    depo = OlayDeposu(baglanti, ayar)  # production bekleme_sn
+    assert ayar.olay.bekleme_sn > 0
+
+    depo.uygula(
+        modul_id,
+        [_bulgu(an, Seviye.KRITIK, 1.0, tip=Tip.ARK, gerekce="Ark koruma cihazı 1 olay kaydetti.")],
+        an,
+    )
+    baglanti.commit()
+    olaylar = _olaylar(baglanti, modul_id)
+    assert len(olaylar) == 1, "an arc must open on the very first turn, delay-on or not"
+    assert olaylar[0]["tip"] == Tip.ARK.value

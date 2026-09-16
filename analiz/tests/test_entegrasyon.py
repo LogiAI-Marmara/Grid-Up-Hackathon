@@ -63,7 +63,14 @@ def _olaylar(baglanti, modul_id):
 
 
 def _tur(baglanti, ayar, an, geri_saat=3.0):
-    tarayici = Tarayici(baglanti, ayar)
+    # bekleme_sn (D2's delay-on) forced to 0: every test in this file drives
+    # exactly ONE scan turn to check what that turn found, which is the
+    # single-turn case delay-on exists specifically to hold back — a
+    # condition seen on turn one alone never opens on production defaults.
+    # That is the correct production behaviour and is covered on its own
+    # terms in tests/test_olay.py; these tests are about what item 8/9/10's
+    # wiring finds once persistence is not the thing being measured.
+    tarayici = Tarayici(baglanti, ayar.ile(olay={"bekleme_sn": 0.0}))
     tarayici.imlecler.geri_al(ayar.tarama.imlec_adi, an - timedelta(hours=geri_saat))
     return tarayici.tur(simdi=an + timedelta(seconds=5))
 
@@ -166,7 +173,7 @@ def test_8_yalnizca_durum_gonderen_modul_yeniden_degerlendirilir(baglanti, fikst
         zaman += timedelta(minutes=1)
     fikstur.yaz()
 
-    tarayici = Tarayici(baglanti, ayar)
+    tarayici = Tarayici(baglanti, ayar.ile(olay={"bekleme_sn": 0.0}))  # single turn; see `_tur`
     # Cursor sits after the last measurement's arrival; only status rows are new.
     tarayici.imlecler.geri_al(ayar.tarama.imlec_adi, eski + timedelta(seconds=30))
     sonuc = tarayici.tur(simdi=an + timedelta(seconds=5))
@@ -321,7 +328,9 @@ def test_10_gecmis_yeniden_taramada_olayin_kendi_karesi_baglanir(baglanti, fikst
 
     # Rewind to noon (three hours in), run ONE turn covering the next half hour.
     ogle = bas + timedelta(hours=3)
-    yeniden = ayar.ile(tarama={"azami_aralik_sn": 30 * 60.0})
+    # bekleme_sn forced to 0: this drives one turn to check frame-linking on
+    # a historical re-scan, not delay-on persistence.
+    yeniden = ayar.ile(tarama={"azami_aralik_sn": 30 * 60.0}, olay={"bekleme_sn": 0.0})
     tarayici = Tarayici(baglanti, yeniden)
     tarayici.imlecler.geri_al(yeniden.tarama.imlec_adi, ogle)
     sonuc = tarayici.tur(simdi=an)

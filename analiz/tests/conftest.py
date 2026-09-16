@@ -27,7 +27,6 @@ be wrong, and a fake database would test none of them.
 from __future__ import annotations
 
 import os
-import subprocess
 from datetime import datetime, timedelta, timezone
 
 import psycopg
@@ -50,10 +49,26 @@ SABIT_AN = datetime(2026, 9, 15, 9, 40, 0, tzinfo=timezone.utc)
 
 
 def _veritabani_kur(dsn: str) -> None:
-    """Drop and recreate a database from scratch."""
+    """Drop and recreate a database from scratch.
+
+    Talks to the `postgres` maintenance database directly via psycopg rather
+    than shelling out to the `dropdb`/`createdb` client binaries. Same effect,
+    but it does not require the PostgreSQL client tools to be on PATH — only
+    `libpq`, which `psycopg[binary]` already vendors. This matters on a
+    from-scratch dev box or a minimal CI image that has a Postgres SERVER
+    (e.g. a `postgres` container) reachable but no client package installed.
+    """
     ad = dsn.rsplit("/", 1)[-1]
-    subprocess.run(["dropdb", "--if-exists", ad], check=True, capture_output=True)
-    subprocess.run(["createdb", ad], check=True, capture_output=True)
+    yonetim_dsn = dsn.rsplit("/", 1)[0] + "/postgres"
+    with psycopg.connect(yonetim_dsn, autocommit=True) as baglanti:
+        with baglanti.cursor() as imlec:
+            imlec.execute(
+                "SELECT pg_terminate_backend(pid) FROM pg_stat_activity "
+                "WHERE datname = %s AND pid <> pg_backend_pid()",
+                (ad,),
+            )
+            imlec.execute(f'DROP DATABASE IF EXISTS "{ad}"')
+            imlec.execute(f'CREATE DATABASE "{ad}"')
 
 
 @pytest.fixture(scope="session")
