@@ -9,6 +9,10 @@ tables.
 
 Authoritative specification: [`../docs/izb-karar-kaydi.md`](../docs/izb-karar-kaydi.md).
 Every design decision below is from it; section numbers in the code refer to it.
+The **integration-phase decisions** (episode model for contract ③, `modul_durum`,
+binary thermal frames at every instant, the clock-drift table, the global
+`/gecisler` feed) supersede the older documents where they differ; see
+[Entegrasyon aşaması](#entegrasyon-aşaması--neler-değişti) below.
 
 ---
 
@@ -24,12 +28,14 @@ Every design decision below is from it; section numbers in the code refer to it.
 | Score, severity, `gerekce` production |
 | Episode lifecycle and journal (K3) |
 | Fixtures: 7 scenarios + clean + hard negatives |
-| **Read API — contract ⑤, including `/gecisler`** |
+| **Read API — contract ⑤, including `/anomaliler/{id}/gecisler` and the global `/gecisler` feed** |
 | **Label file format** (a contract track A must satisfy) |
 | **Blind-test evaluation tool — four metrics** |
 | **Load test and resource report (T5)** |
+| **Smoke-test checks** (`analiz.duman`) — the entry point track C's runner calls |
 
-Track B is complete.
+Track B is complete; the integration-phase adaptation (items 6–14 of the
+integration task) is on this branch.
 
 ---
 
@@ -37,15 +43,36 @@ Track B is complete.
 
 ```bash
 cd analiz
-pip install -e '.[test]'
+pip install -e '.[api,test]'
 
 createdb gridup
 export GRIDUP_ANALIZ_VERITABANI_DSN=postgresql:///gridup
 
-python -m analiz sema          # apply migrations
+python -m analiz sema          # track A's migrations, then track B's
 python -m analiz tara          # run the scan loop
 python -m analiz durum         # cursor and episode state
 python -m analiz geri-al -24h  # rewind, re-scan the last day
+```
+
+**Where the shared schema and vocabularies come from.** Track B defines none of
+the shared tables and none of the shared enums. `python -m analiz sema` applies
+`toplama/migrations/*.sql` (track A's, in file-name order) and then
+`analiz/migrations/100_analiz.sql` (track B's own tables and indexes);
+`analiz.sozlesme` imports `sozlesmeler/enums.py`. Both are found relative to
+the repository root by default, and can be pointed elsewhere:
+
+| Variable | Meaning | Default |
+|---|---|---|
+| `GRIDUP_TOPLAMA_MIGRASYON_DIZINI` | directory holding track A's `*.sql` | `<repo>/toplama/migrations` |
+| `GRIDUP_SOZLESMELER_KOK` | directory that *contains* `sozlesmeler/` | `<repo>` |
+
+On a checkout without `toplama/` and `sozlesmeler/` (this branch, before track
+A's PR is on main), export them once — outside the repo — and point at the copy:
+
+```bash
+git archive origin/feature/track-a toplama/migrations sozlesmeler | tar -x -C /tmp/track-a
+export GRIDUP_TOPLAMA_MIGRASYON_DIZINI=/tmp/track-a/toplama/migrations
+export GRIDUP_SOZLESMELER_KOK=/tmp/track-a
 ```
 
 The read API, as its own process:
@@ -76,7 +103,14 @@ Load test (T5):
 python -m analiz.yuk --dsn postgresql:///gridup_yuk --moduller 10,50,100
 ```
 
-Tests (needs a PostgreSQL 14+ the current user can `createdb` on):
+Smoke-test checks against a live API (see [Duman testi](#duman-testi--iz-cnin-çağıracağı-giriş-noktası)):
+
+```bash
+python -m analiz.duman --api http://127.0.0.1:8080 --senaryolar duman.json
+```
+
+Tests (needs a PostgreSQL 14+ the current user can `createdb` on; the two
+variables above if `toplama/` is not in the checkout):
 
 ```bash
 python -m pytest -q
@@ -88,12 +122,12 @@ python -m pytest -q
 
 ```
 analiz/
-  sozlesme.py       shared vocabularies, restated standalone
+  sozlesme.py       re-exports sozlesmeler/enums.py; only B-specific helpers
+  termal.py         the binary frame: int16 LE, 0.1 °C, 1536 bytes <-> 768 °C
   ayar.py           every threshold and window — configuration, not constants
-  db.py             connection, migrations
+  db.py             connection; applies toplama/migrations/*.sql then 100
   migrations/
-    000_sozlesme.sql  the contract tables (track A's), so track B runs alone
-    100_analiz.sql    anomali, anomali_gecis, tarama_imleci
+    100_analiz.sql    anomali, anomali_gecis, tarama_imleci, B's indexes
   depo.py           the scan cursor                                     K1
   tarama.py         the scan loop                                       K1
   pencere.py        evaluation-window fetcher
@@ -114,6 +148,7 @@ analiz/
   fikstur.py        contract-shaped row writer
   senaryolar.py     the labelled set: 7 scenarios + clean + hard negatives
   dogrulama.py      end-to-end harness, and the turn-by-turn replay
+  duman.py          smoke-test checks against a live API (track C calls it)
 ```
 
 ---
@@ -152,7 +187,7 @@ Run in order; the order is not cosmetic.
 
 | | Looks at | Fires on |
 |---|---|---|
-| **0** sensor health | `kalite`, frozen values, impossible values, silence, clock drift | `sensor_arizasi`, `modul_saglik` |
+| **0** sensor health | `kalite`, frozen values, impossible values, silence, clock drift, backup power, weak signal | `sensor_arizasi`, `modul_saglik` |
 | **1** absolute limits | the value alone | `sicak_nokta`, `ortam_sicaklik_yuksek`, `nem_yuksek`, `faz_dengesizligi`, `ark` |
 | **2** baseline deviation | median + MAD, magnitude **and trend** | `sicak_nokta`, `ortam_sicaklik_yuksek` |
 | **3** relationships | current↔temperature, phase↔phase, pixel↔frame, module↔module | `akim_sicaklik_sapmasi`, `faz_dengesizligi`, `sicak_nokta` |
@@ -293,13 +328,50 @@ is looking for — a bucket averaging 46 °C may have touched 130.
 detector falling behind its scan period as the real scaling limit, so a green
 light over a stale anomaly table would be a lie. Watch `imlecler[].gecikme_sn`.
 
+**`/saglik` also reports the data-delay metric, `veri_gecikmesi`.** Late
+(backfilled) data is not an anomaly — see the clock-drift table below — so it is
+exposed here instead: over rows that arrived in the last
+`api.veri_gecikme_pencere_sn` (15 min), `azami_sn` / `p50_sn` / `p95_sn` of
+`alindi_zaman − zaman`, `geciken_satir` above `katman0.saat_kaymasi_sn`, and the
+modules responsible in `geciken_moduller[]`.
+
+**`GET /moduller/{id}` carries `besleme` and `sinyal`** — the newest
+`modul_durum` row's values (`sebeke | yedek`, dBm) and `durum_zaman`, when it
+was reported. All three `null` for a module that has never sent a status packet.
+
+**`GET /termal/kare/{id}` returns 768 °C numbers, as before.** Storage is
+binary now (`bytea`, int16 LE, 0.1 °C, 1536 bytes); the API decodes. `birim`
+is `"C"`.
+
+**`GET /gecisler?sonra=<id>&limit=<n>` is the global transition feed:**
+
+```json
+{
+  "veriler": [
+    {"id": 1841, "anomali_id": "an_00412", "zaman": "2026-09-09T06:40:00Z",
+     "alan": "seviye", "onceki": "izle", "yeni": "uyari", "aktor": "sistem"}
+  ],
+  "sonraki": 1841,
+  "limit": 100
+}
+```
+
+Keyset on the journal's own `id`, ascending, same pattern as `/anomaliler`:
+pass the last `id` you handled as `sonra` and nothing between two polls can be
+skipped. `alan` is only `durum` or `seviye`; `onceki` is `null` on an episode's
+first transition; `aktor` is `sistem` for the detector and the operator identity
+for an acknowledgement. One difference from `/anomaliler`, deliberate: `sonraki`
+is the `id` of the last row returned (or `null` only when the page is empty), so
+a poller stores it blindly and resumes from it — a feed has no last page.
+
 **Timestamps are always UTC ISO 8601 with a literal `Z`.** Offsets are never
 emitted.
 
-**The anomaly body carries `zaman` as an alias for `ilk_gorulme`**, alongside
-section 7.2's `ilk_gorulme` / `son_gorulme` / `maks_seviye`. It is a
-compatibility alias for the un-amended schema on track A's branch, not a third
-timestamp. See [Contract mismatches](#contract-mismatches-found-on-featuretrack-a).
+**The anomaly body is exactly contract ③'s episode shape:** `id, sira,
+modul_id, tip, seviye, maks_seviye, skor, ilk_gorulme, son_gorulme, durum,
+gerekce, kanit`. The single-`zaman` shape is invalid since the integration
+phase and the `zaman` alias this API used to emit is gone. Detector-internal
+extras (`katman`, `kapanma_zaman`) travel inside `kanit`.
 
 **Writes.** The API is read-only except `POST /anomaliler/{id}/onayla`, which
 requires `aktor` and goes through `OlayDeposu` rather than issuing its own
@@ -454,23 +526,133 @@ lead-time number produced without it is meaningless.
 
 ---
 
-## Running standalone
+## Entegrasyon aşaması — neler değişti
 
-`migrations/000_sozlesme.sql` restates track A's contract tables — column for
-column, constraint for constraint — and every statement is `IF NOT EXISTS`. Run
-track A's migrations first and this file is a no-op; run this first and track A's
-are. Neither clobbers the other, because they describe the same tables.
+Integration task items 6–14, in the order they touch the code. The question the
+phase answers is "does data flow end to end"; detector thresholds and trend
+logic were not changed.
 
-`tests/test_sozlesme.py` is what keeps that honest: it asserts the column names
-and types track B reads against the contract as track B understands it, so drift
-becomes a failing test rather than quietly wrong numbers weeks later.
+**No second copy of the contract (6, 6a, 7).** `migrations/000_sozlesme.sql` is
+gone; `sema_kur` applies track A's `toplama/migrations/*.sql` and then
+`100_analiz.sql`, which now also carries the three indexes track B needs on
+track A's tables (`olcum_alindi_zaman_idx`, `termal_ozet_alindi_zaman_idx`,
+`modul_durum_alindi_zaman_idx`). `sozlesme.py` imports `sozlesmeler/enums.py`
+and defines only `AKIM_FAZLARI`, `SICAKLIK_KANALLARI`, `en_yuksek_seviye`. It
+refuses to import if the shared `Tip` lacks `asiri_yuk`, naming the follow-up
+(the `ASIRI_YUK = "asiri_yuk"` line in `sozlesmeler/enums.py`, to be applied
+once main contains track A's PR). `asiri_yuk` is in the `anomali.tip` CHECK and
+in `etiket.SENARYO_TIPLERI["asiri_yuk"]`; the detector does not yet emit it.
+
+**Module status (8).** `gridup.modul_durum` (one row per packet: `besleme`,
+`sinyal`, `yazilim_surumu`, `alindi_zaman`) is read into the window as
+`Pencere.durumlar`. Layer 0 produces `modul_saglik` for:
+
+| Cause | Rule | Configuration (`katman0`) |
+|---|---|---|
+| `besleme` | newest `besleme_yedek_ardisik` rows say `yedek` | `besleme_yedek_ardisik=2`, `besleme_seviye=uyari` |
+| `sinyal` | median of newest `sinyal_ornek` rows below the floor | `sinyal_zayif_dbm=-100`, `sinyal_ornek=5`, `sinyal_seviye=izle` |
+
+`kanit.neden` names the cause (`sessizlik | saat_kaymasi | besleme | sinyal`);
+the engine keeps one episode per `tip`, so when several fire the worst wins and
+`neden` says which. A `modul_durum` arrival is a "re-evaluate this module"
+signal in the scan loop's range query, so a module sending only status is
+still evaluated (`test_8_yalnizca_durum_gonderen_modul_yeniden_degerlendirilir`).
+
+**Clock drift vs late data (9).** Per sample, gap = `alindi_zaman − zaman`:
+
+| Observed in the window | Meaning | Output |
+|---|---|---|
+| a gap below `−ileri_tarih_tolerans_sn` (5 s) — measured after it was received | certain drift, clock ahead | `modul_saglik`, `kanit.yon = ileri` |
+| **minimum** gap above `saat_kaymasi_sn` (120 s) — no reading is fresh | drift, clock behind | `modul_saglik`, `kanit.yon = geri` |
+| minimum near zero, maximum high | late (backfilled) data | nothing; `/saglik` → `veri_gecikmesi` |
+
+The previous rule judged the *maximum* gap and so called every backlog a broken
+clock, contradicting section 3.6's "late data is caught for free". The fixture
+set now has a backfilled hard negative (`gec_veri_01`) beside the drift scenario.
+
+**Evidence frame at the event's time (10).** `kanit.kare_id` is the newest
+frame at or before the module's evaluation instant, inside the detection
+window — never a frame later than the instant, including on a historical
+re-scan (`test_10_gecmis_yeniden_taramada_olayin_kendi_karesi_baglanir`). A
+module with no frame in its window gets no `kare_id` rather than a stale one.
+
+**Binary frame (11).** `termal_kare.piksel_verisi` is `bytea`: int16 signed,
+little-endian, 0.1 °C, row-major, 768 values, exactly 1536 bytes. `termal.py`
+is the codec; `GET /termal/kare/{id}` decodes; the fixtures encode. A full
+frame now arrives at every measurement instant (30 s), same period as
+`termal_ozet`; `/moduller/{id}/termal/son` reports the frame at the summary's
+instant.
+
+**Module detail (12), global feed (13).** See "API kararları" above.
+
+**Smoke-test checks (14).** Next section.
+
+---
+
+## Duman testi — İZ C'nin çağıracağı giriş noktası
+
+> **İZ C için.** The runner is yours: start the simulator, the collector, the
+> detector and this API, then call this. The checks are ours. Exit 0 means every
+> check passed; 1 means at least one failed (each failure is one line on
+> stdout); 2 means the input was bad or the API could not be reached.
+
+```bash
+pip install -e 'analiz'                       # no extra dependency: stdlib HTTP
+python -m analiz.duman --api http://127.0.0.1:8080 --senaryolar duman.json
+# options: --azami-imlec-gecikme-sn 600   fail if the scan cursor is further behind
+#          --json rapor.json              also write the report as JSON
+#          --zaman-asimi-sn 30            per-request timeout
+```
+
+**Input — which module carries which scenario.** JSON, UTF-8. This is the
+runner's knowledge (it told the simulator what to inject), so it is an input
+to the checks, not something they infer:
+
+```json
+{
+  "surum": 1,
+  "bas": "2026-09-16T06:00:00Z",
+  "moduller": {
+    "TR041-P01-M2": "temiz",
+    "TR041-P01-M1": ["gevsek_klemens", "seviye_gecisi"],
+    "TR063-P02-M3": "besleme_kaybi"
+  }
+}
+```
+
+| Field | Required | Meaning |
+|---|---|---|
+| `surum` | yes | Format version, `1`. |
+| `bas` | no | Only episodes with `ilk_gorulme ≥ bas` count. Set it to the run's start so a database that has seen earlier runs cannot pollute the result; omit for a fresh database. UTC, literal `Z`. |
+| `moduller` | yes | `modul_id` → one scenario name or a list. `temiz` cannot be combined with another. |
+
+**Scenario vocabulary and what each asserts** (everything through contract ⑤):
+
+| Name | Passes when |
+|---|---|
+| `temiz` | the module has **no** episode of any type (since `bas`) |
+| `gevsek_klemens`, `asiri_yuk`, `faz_dengesizligi`, `nem_yukselmesi`, `ark_olayi`, `sensor_arizasi`, `modul_saglik` | an episode whose `tip` is one the label format accepts for that scenario (`etiket.SENARYO_TIPLERI`). When it carries `kanit.kare_id`, `GET /termal/kare/{id}` must return 768 numbers — the frame decodes end to end |
+| `besleme_kaybi` | a `modul_saglik` episode with `kanit.neden = besleme`, or the module detail reporting `besleme = yedek` |
+| `sinyal_zayif` / `saat_kaymasi` / `sessiz` | a `modul_saglik` episode with `kanit.neden` = `sinyal` / `saat_kaymasi` / `sessizlik` |
+| `seviye_gecisi` | one of the module's episodes has a `seviye` transition between two non-normal severities (e.g. `izle → uyari`), in its own journal **and** reachable through `GET /gecisler?sonra=<id-1>` |
+
+Always run, regardless of input: `/saglik` answers with `durum = calisiyor`,
+at least one scan cursor exists and is no further behind than
+`--azami-imlec-gecikme-sn`, `veri_gecikmesi` is present, and `/gecisler`
+answers. Required coverage for the phase — one clean module, one loose
+terminal, one power loss, one severity transition, and the clean module having
+opened nothing — is the first four rows of the table plus the global checks.
+
+Scenario data comes from track A's simulator. The same checks pass on this
+package's own fixture set (`tests/test_duman.py::FIKSTUR_SENARYOLARI` is a
+complete example input), which is how they are tested here.
 
 ---
 
 ## Contract mismatches found on `feature/track-a`
 
-Read-only inspection of PR #1. Reported, not fixed — these are track A's and the
-lead's calls.
+Read-only inspection of PR #1, as found before the integration phase. Kept for
+the record; the status of each is noted.
 
 **1. `anomali.schema.json` has not caught up with the amendment in section 7.2 of
 the İZ B record.** The schema still lists `zaman` as required and sets
@@ -482,7 +664,8 @@ property, and three additional ones. Track B implements the amended shape,
 because the decision record is authoritative for this track. The schema needs the
 corresponding edit before the contract check can pass on both sides.
 
-**2. `modul_durum.besleme` and `modul_durum.sinyal` are accepted and then
+**2. (Resolved by the integration decisions: `gridup.modul_durum`, one row per
+packet. Track B reads it — item 8.) `modul_durum.besleme` and `modul_durum.sinyal` are accepted and then
 discarded.** Contract ② declares both, `modul_paketi.schema.json` requires them,
 and `toplama/toplama/kayit.py` persists only `yazilim_surumu` and `son_gorulme`
 into `gridup.modul`. There is no table holding either field, current or
@@ -493,7 +676,7 @@ section 7.3 describes as the entire reason the module carries a backup store —
 not visible to the detector. Wiring it up is a few lines in
 `katman0_sensor._modul_sagligi` once somewhere to read it from exists.
 
-**3. No index supports the scan loop's main query.** `gridup.olcum` is indexed on
+**3. (Still true on track A's side; the index now lives in `100_analiz.sql`.) No index supports the scan loop's main query.** `gridup.olcum` is indexed on
 `(modul_id, olcum_tipi, zaman)` and on `zaman DESC`; the scan loop's range query
 is on `alindi_zaman`, which track A never queries by. Without an index every turn
 is a sequential scan of the partition. Track B's migration adds
@@ -508,6 +691,10 @@ orderings cannot disagree) and `anomali_son_gorulme_idx`.
 Nothing else diverged. Column names, types, enum values, the `[sutun, satir]`
 pixel order, the 768-value row-major frame layout and the `kalite`/`deger`
 relationship all match what this layer was built against.
+
+**Since the integration phase** the schema and vocabularies are no longer
+restated here at all, so this list cannot grow the same way: a divergence now
+shows up as `tests/test_sozlesme.py` failing against track A's own files.
 
 ---
 

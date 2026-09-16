@@ -6,9 +6,10 @@ dashboard and the alarm service read.
 
 The layout follows the decision record (`docs/izb-karar-kaydi.md`):
 
-    sozlesme.py   the shared vocabularies, restated standalone
+    sozlesme.py   re-exports sozlesmeler/enums.py; B's own helpers only
+    termal.py     the binary thermal frame codec
     ayar.py       every threshold and window — configuration, not constants
-    db.py         connection and migrations
+    db.py         connection; track A's migrations, then track B's
     depo.py       the scan cursor                              (K1)
     tarama.py     the scan loop                                (K1)
     pencere.py    the evaluation window fetcher
@@ -16,6 +17,8 @@ The layout follows the decision record (`docs/izb-karar-kaydi.md`):
     skor.py       magnitude -> (severity, score)
     gerekce.py    the sentence the operator reads
     olay.py       episode lifecycle and the journal            (K3)
+    api.py        contract 5, the read API
+    duman.py      smoke-test checks against a live API (track C calls it)
 """
 
 from .ayar import Ayar

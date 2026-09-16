@@ -1,21 +1,19 @@
 """The contract, asserted rather than assumed.
 
-Track B restates the contract tables in `migrations/000_sozlesme.sql` and the
-contract vocabularies in `sozlesme.py`, because it has to run standalone against
-a database it creates itself. That restatement is a liability: if track A's
-definition moves and track B's does not, nothing crashes — the two produce
-quietly different numbers, which section "sozlesmeler/README" names as worse
-than a crash.
-
-This file is where that drift becomes a failing test instead of a silent wrong
-answer. It pins the column names and types track B reads, the vocabularies it
-writes, and the geometry it indexes frames by.
+Since the integration phase track B holds NO copy of the contract: the schema
+is track A's `toplama/migrations/`, the vocabularies are `sozlesmeler/enums.py`,
+and `analiz.sozlesme` only re-exports them. What this file pins is therefore
+track B's *reading* of the contract — the column names and types it queries,
+the values it writes, the frame geometry it indexes by — so that a change on
+track A's side shows up here as a failing test rather than as quietly wrong
+numbers weeks later.
 """
 
 from __future__ import annotations
 
 import pytest
 
+import analiz.sozlesme as sozlesme
 from analiz.sozlesme import (
     OLCUM_ARALIK,
     OLCUM_BIRIM,
@@ -45,8 +43,9 @@ BEKLENEN_OLCUM_TIPI = {
 BEKLENEN_SEVIYE = {"normal", "izle", "uyari", "kritik"}
 BEKLENEN_TIP = {
     "sicak_nokta", "akim_sicaklik_sapmasi", "faz_dengesizligi", "nem_yuksek",
-    "ortam_sicaklik_yuksek", "ark", "sensor_arizasi", "modul_saglik",
+    "ortam_sicaklik_yuksek", "asiri_yuk", "ark", "sensor_arizasi", "modul_saglik",
 }
+BEKLENEN_BESLEME = {"sebeke", "yedek"}
 BEKLENEN_KALITE = {"iyi", "supheli", "yok"}
 BEKLENEN_DURUM = {"acik", "onaylandi", "kapandi"}
 
@@ -57,6 +56,57 @@ def test_sozlukler_sozlesmedeki_gibidir():
     assert {e.value for e in Tip} == BEKLENEN_TIP
     assert {e.value for e in Kalite} == BEKLENEN_KALITE
     assert {e.value for e in Durum} == BEKLENEN_DURUM
+    assert {e.value for e in sozlesme.Besleme} == BEKLENEN_BESLEME
+
+
+def test_sozlukler_paylasilan_modulden_gelir_yeniden_tanimlanmaz():
+    """Item 6a: no shared vocabulary value is redefined inside /analiz.
+
+    Every vocabulary `analiz.sozlesme` exports must be the very object defined
+    in `sozlesmeler.enums` — identity, not equality — and the module's own
+    source must not contain an Enum class of its own.
+    """
+    import inspect
+    from enum import Enum
+
+    from sozlesmeler import enums
+
+    for ad in ("OlcumTipi", "Seviye", "Tip", "Kalite", "Durum", "Besleme", "Birim",
+               "OLCUM_BIRIM", "OLCUM_ARALIK", "SEVIYE_SIRA", "TERMAL_SATIR",
+               "TERMAL_SUTUN", "TERMAL_PIKSEL", "MODUL_ID_DESEN", "piksel_indeks",
+               "indeks_piksel", "seviye_karsilastir", "modul_id_ayristir", "zaman_yaz"):
+        assert getattr(sozlesme, ad) is getattr(enums, ad), f"{ad} is redefined in analiz"
+
+    yerel_enumlar = [
+        ad for ad, nesne in vars(sozlesme).items()
+        if inspect.isclass(nesne) and issubclass(nesne, Enum)
+        and nesne.__module__ == sozlesme.__name__
+    ]
+    assert yerel_enumlar == []
+
+
+def test_anomali_tip_kisiti_paylasilan_sozlukle_ayni(baglanti):
+    """Item 7: the anomali.tip CHECK accepts exactly the shared `Tip` set."""
+    from psycopg import errors
+
+    with baglanti.cursor() as imlec:
+        imlec.execute(
+            "INSERT INTO gridup.saha (saha_kodu, ad) VALUES ('TR041', 'x');"
+            "INSERT INTO gridup.pano (saha_kodu, pano_kodu) VALUES ('TR041', 'P01');"
+            "INSERT INTO gridup.modul (modul_id, saha_kodu, pano_kodu, modul_kodu) "
+            "VALUES ('TR041-P01-M1', 'TR041', 'P01', 'M1')"
+        )
+        ekle = (
+            "INSERT INTO gridup.anomali (id, modul_id, tip, seviye, maks_seviye, skor, "
+            "ilk_gorulme, son_gorulme, durum, gerekce, kapanma_zaman) VALUES "
+            "(%s, 'TR041-P01-M1', %s, 'uyari', 'uyari', 0.6, now(), now(), 'kapandi', 'x', now())"
+        )
+        # Closed rows, so the open-episode uniqueness index does not interfere.
+        for i, tip in enumerate(sorted(BEKLENEN_TIP)):
+            imlec.execute(ekle, (f"an_{i:05d}", tip))
+        with pytest.raises(errors.CheckViolation):
+            imlec.execute(ekle, ("an_99999", "uydurma_tip"))
+    baglanti.rollback()
 
 
 def test_seviye_siralamasi():
@@ -154,7 +204,7 @@ BEKLENEN_SUTUNLAR = {
         "kare_id": "text",
         "modul_id": "text",
         "zaman": "timestamp with time zone",
-        "piksel_verisi": "jsonb",
+        "piksel_verisi": "bytea",
         "satir_sayisi": "smallint",
         "sutun_sayisi": "smallint",
         "alindi_zaman": "timestamp with time zone",
@@ -167,7 +217,44 @@ BEKLENEN_SUTUNLAR = {
         "aktif": "boolean",
         "son_gorulme": "timestamp with time zone",
     },
+    "modul_durum": {
+        "modul_id": "text",
+        "zaman": "timestamp with time zone",
+        "besleme": "text",
+        "sinyal": "integer",
+        "yazilim_surumu": "text",
+        "alindi_zaman": "timestamp with time zone",
+    },
 }
+
+
+def test_sema_bu_pakette_tanimlanmaz():
+    """Item 6: track B ships no migration that creates a shared table."""
+    from pathlib import Path
+
+    from analiz.db import MIGRASYONLAR
+
+    dizin = Path(sozlesme.__file__).parent / "migrations"
+    dosyalar = sorted(p.name for p in dizin.glob("*.sql"))
+    assert dosyalar == list(MIGRASYONLAR) == ["100_analiz.sql"]
+    metin = (dizin / "100_analiz.sql").read_text(encoding="utf-8").lower()
+    for tablo in ("saha", "pano", "modul", "olcum", "termal_ozet", "termal_kare", "modul_durum"):
+        assert f"create table if not exists gridup.{tablo} " not in metin
+        assert f"create table gridup.{tablo} " not in metin
+
+
+def test_b_indeksleri_kendi_migrasyonundadir(baglanti):
+    """Item 6: the indexes track B needs on track A's tables come from 100_analiz.sql."""
+    with baglanti.cursor() as imlec:
+        imlec.execute(
+            "SELECT indexname FROM pg_indexes WHERE schemaname = 'gridup' "
+            "AND indexname IN ('olcum_alindi_zaman_idx', 'termal_ozet_alindi_zaman_idx', "
+            "'modul_durum_alindi_zaman_idx')"
+        )
+        var = {r["indexname"] for r in imlec.fetchall()}
+    assert var == {
+        "olcum_alindi_zaman_idx", "termal_ozet_alindi_zaman_idx", "modul_durum_alindi_zaman_idx"
+    }
 
 
 @pytest.mark.parametrize("tablo", sorted(BEKLENEN_SUTUNLAR))

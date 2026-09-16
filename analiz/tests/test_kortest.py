@@ -85,8 +85,8 @@ def test_fikstur_seti_gecerli_etiket_uretir(tmp_path):
     yol = E.yaz(etiket_uret(AN), tmp_path / "e.json")
     geri = E.oku(yol)
 
-    assert len(geri.senaryolar) == 9
-    assert len(geri.temiz_moduller) == 13
+    assert len(geri.senaryolar) == 11
+    assert len(geri.temiz_moduller) == 14
     assert {s.senaryo for s in geri.senaryolar} <= set(E.SENARYO_ADLARI)
     # Every scenario's accepted-tip set is non-empty, or it could never be detected.
     for s in geri.senaryolar:

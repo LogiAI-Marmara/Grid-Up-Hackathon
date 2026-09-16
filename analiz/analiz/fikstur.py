@@ -23,7 +23,6 @@ is labelled:
 
 from __future__ import annotations
 
-import json
 import math
 import random
 from dataclasses import dataclass, field
@@ -35,12 +34,14 @@ from .sozlesme import (
     OLCUM_BIRIM,
     TERMAL_PIKSEL,
     TERMAL_SUTUN,
+    Besleme,
     Kalite,
     OlcumTipi,
     modul_id_ayristir,
 )
+from .termal import kare_kodla
 
-__all__ = ["OlcumSatiri", "TermalSatiri", "Fikstur"]
+__all__ = ["OlcumSatiri", "TermalSatiri", "DurumSatiri", "Fikstur"]
 
 
 @dataclass(frozen=True, slots=True)
@@ -83,6 +84,22 @@ class TermalSatiri:
         return self.alindi_zaman or (self.zaman + timedelta(seconds=2))
 
 
+@dataclass(frozen=True, slots=True)
+class DurumSatiri:
+    """One row of `modul_durum` — the status half of contract 2, one per packet."""
+
+    modul_id: str
+    zaman: datetime
+    besleme: Besleme = Besleme.SEBEKE
+    sinyal: int = -72
+    yazilim_surumu: str = "1.0.3"
+    alindi_zaman: datetime | None = None
+
+    @property
+    def varis(self) -> datetime:
+        return self.alindi_zaman or (self.zaman + timedelta(seconds=2))
+
+
 class Fikstur:
     """Writes contract-shaped rows into a database.
 
@@ -95,6 +112,7 @@ class Fikstur:
         self._baglanti = baglanti
         self._olcumler: list[OlcumSatiri] = []
         self._termaller: list[TermalSatiri] = []
+        self._durumlar: list[DurumSatiri] = []
         self._moduller: set[str] = set()
 
     # -- reference tree ----------------------------------------------------
@@ -163,16 +181,59 @@ class Fikstur:
             )
         )
 
+    def durum(
+        self,
+        modul_id: str,
+        zaman: datetime,
+        besleme: Besleme = Besleme.SEBEKE,
+        sinyal: int = -72,
+        yazilim_surumu: str = "1.0.3",
+        alindi_zaman: datetime | None = None,
+    ) -> None:
+        self._durumlar.append(
+            DurumSatiri(modul_id, zaman, besleme, sinyal, yazilim_surumu, alindi_zaman)
+        )
+
     # -- writing -----------------------------------------------------------
 
     def yaz(self) -> tuple[int, int]:
-        """Flush everything buffered. Returns (measurement rows, thermal rows)."""
+        """Flush everything buffered. Returns (measurement rows, thermal rows).
+
+        Status rows are written too; they are not in the return value so the
+        many callers counting the two contract-1/2 halves need not change.
+        """
         olcum_sayisi = self._olcumleri_yaz()
         termal_sayisi = self._termalleri_yaz()
+        self._durumlari_yaz()
         self._baglanti.commit()
         self._olcumler.clear()
         self._termaller.clear()
+        self._durumlar.clear()
         return olcum_sayisi, termal_sayisi
+
+    def _durumlari_yaz(self) -> int:
+        if not self._durumlar:
+            return 0
+        benzersiz: dict[tuple[str, datetime], DurumSatiri] = {}
+        for satir in self._durumlar:
+            benzersiz[(satir.modul_id, satir.zaman)] = satir
+        with self._baglanti.cursor() as imlec:
+            with imlec.copy(
+                "COPY gridup.modul_durum "
+                "(modul_id, zaman, besleme, sinyal, yazilim_surumu, alindi_zaman) FROM STDIN"
+            ) as kopya:
+                for satir in benzersiz.values():
+                    kopya.write_row(
+                        (
+                            satir.modul_id,
+                            satir.zaman,
+                            satir.besleme.value,
+                            satir.sinyal,
+                            satir.yazilim_surumu,
+                            satir.varis,
+                        )
+                    )
+        return len(benzersiz)
 
     def _olcumleri_yaz(self) -> int:
         if not self._olcumler:
@@ -228,27 +289,31 @@ class Fikstur:
                             satir.varis,
                         )
                     )
-            # Full frames are rare by contract — written only when the module's
-            # own threshold logic fired — so they go in one at a time.
-            for satir in benzersiz.values():
-                if not satir.kare:
-                    continue
-                imlec.execute(
-                    "INSERT INTO gridup.termal_kare (modul_id, zaman, piksel_verisi) "
-                    "VALUES (%s, %s, %s) ON CONFLICT (modul_id, zaman) DO NOTHING",
-                    (
-                        satir.modul_id,
-                        satir.zaman,
-                        json.dumps(
-                            _kare_uret(
-                                satir.maks,
-                                satir.bolge_ort,
-                                satir.maks_sutun,
-                                satir.maks_satir,
+            # A full frame arrives at every measurement instant (integration
+            # decision), stored binary — int16 LE, 0.1 °C, 1536 bytes. COPY,
+            # because there can be one per summary now.
+            kareli = [s for s in benzersiz.values() if s.kare]
+            if kareli:
+                with imlec.copy(
+                    "COPY gridup.termal_kare (modul_id, zaman, piksel_verisi, alindi_zaman) "
+                    "FROM STDIN"
+                ) as kopya:
+                    for satir in kareli:
+                        kopya.write_row(
+                            (
+                                satir.modul_id,
+                                satir.zaman,
+                                kare_kodla(
+                                    _kare_uret(
+                                        satir.maks,
+                                        satir.bolge_ort,
+                                        satir.maks_sutun,
+                                        satir.maks_satir,
+                                    )
+                                ),
+                                satir.varis,
                             )
-                        ),
-                    ),
-                )
+                        )
         return len(benzersiz)
 
 
