@@ -681,11 +681,11 @@ def _uclari_bagla(uygulama: FastAPI, ayar: Ayar, havuzdan) -> None:
         "/moduller/{modul_id}/termal/son", tags=["termal"], summary="Son termal özet"
     )
     def termal_son(modul_id: str, baglanti=Depends(havuzdan)):
-        """The newest thermal summary, with the frame id if one was sent.
+        """The newest thermal summary, with the id of the frame at the same instant.
 
-        `kare_id` is only present when the module's own threshold logic fired and
-        attached a full frame — that is the data policy, not a gap. The
-        dashboard should treat its absence as normal operation.
+        Since the integration phase a full frame arrives at every measurement
+        instant (30 s period, same as the summary), so `kare_id` is normally
+        present; `null` means the frame for that instant has not been stored.
         """
         with baglanti.cursor() as imlec:
             imlec.execute("SELECT 1 FROM gridup.modul WHERE modul_id = %s", (modul_id,))
@@ -1048,15 +1048,18 @@ def _cok_nokta(api, aralik: str | None) -> ApiHatasi:
 
 
 def _anomali_govdesi(satir: dict) -> dict:
-    """Contract ③, as the API serves it.
+    """Contract ③ — the episode model, exactly the integration decision's fields.
 
-    Carries section 7.2's amended shape: `ilk_gorulme` / `son_gorulme` in place
-    of `zaman`, plus `maks_seviye`. `zaman` is also emitted, equal to
-    `ilk_gorulme`, because the schema on track A's branch still requires it and
-    the dashboard may have been written against either — see the contract
-    mismatch note in the README. It is a compatibility alias, not a third
-    timestamp.
+    `id, sira, modul_id, tip, seviye, maks_seviye, skor, ilk_gorulme,
+    son_gorulme, durum, gerekce, kanit`. The single-`zaman` shape is invalid
+    and the compatibility alias this body used to carry is gone with it. The
+    detector-internal `katman` and the closing time travel inside `kanit`
+    (`kanit.katman`, `kanit.kapanma_zaman`), where the contract leaves room
+    for detector-specific evidence.
     """
+    kanit = dict(satir["kanit"] or {})
+    kanit["katman"] = satir["katman"]
+    kanit["kapanma_zaman"] = zaman_yaz(satir["kapanma_zaman"])
     return {
         "id": satir["id"],
         "sira": int(satir["sira"]),
@@ -1067,12 +1070,9 @@ def _anomali_govdesi(satir: dict) -> dict:
         "skor": satir["skor"],
         "ilk_gorulme": zaman_yaz(satir["ilk_gorulme"]),
         "son_gorulme": zaman_yaz(satir["son_gorulme"]),
-        "zaman": zaman_yaz(satir["ilk_gorulme"]),
         "durum": satir["durum"],
         "gerekce": satir["gerekce"],
-        "kanit": satir["kanit"],
-        "katman": satir["katman"],
-        "kapanma_zaman": zaman_yaz(satir["kapanma_zaman"]),
+        "kanit": kanit,
     }
 
 

@@ -188,6 +188,11 @@ class Uretec:
         the detector takes to run — the statistics come out the same either way.
         """
         rng = random.Random(f"{modul_id}:{self.tohum}")
+        # Status rows draw from their own stream so adding them (integration
+        # phase) left every measurement byte-identical to the earlier sets: a
+        # different noise realisation on the hard negatives would look like a
+        # detector change when it is only a fixture change.
+        durum_rng = random.Random(f"{modul_id}:{self.tohum}:durum")
         p = self.profil
         self.fikstur.modul(modul_id)
 
@@ -247,7 +252,7 @@ class Uretec:
                 # Contract 2's status half, one row per packet. A healthy module
                 # is on mains with a comfortable link; a bozucu changes either.
                 "besleme": Besleme.SEBEKE,
-                "sinyal": int(rng.gauss(-72.0, 3.0)),
+                "sinyal": int(durum_rng.gauss(-72.0, 3.0)),
             }
             if bozucu is not None:
                 bozucu(an, ilerleme, olcumler, kaliteler, ek, rng)
@@ -406,8 +411,10 @@ def _bozucu_besleme_kaybi(an, ilerleme, olcumler, kaliteler, ek, rng):
 
 
 def _bozucu_sinyal_zayif(an, ilerleme, olcumler, kaliteler, ek, rng):
-    """Scenario 7d. The link fades over the stretch, from -72 to about -112 dBm."""
-    ek["sinyal"] = int(-72.0 - 40.0 * ilerleme + rng.gauss(0, 2.0))
+    """Scenario 7d. The link fades over the stretch, from -72 to about -112 dBm.
+    Deterministic wobble rather than `rng`, so the measurement stream stays
+    untouched (see `Uretec.uret`)."""
+    ek["sinyal"] = int(-72.0 - 40.0 * ilerleme + ((int(ilerleme * 1000) % 5) - 2))
 
 
 def _bozucu_gec_veri(an, ilerleme, olcumler, kaliteler, ek, rng):

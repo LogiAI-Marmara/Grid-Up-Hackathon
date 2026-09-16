@@ -369,8 +369,13 @@ def test_anomali_govdesi_sozlesme_alanlarini_tasir(bir_anomali):
     assert bir_anomali["gerekce"].strip()
     assert re.match(ZAMAN_DESENI, bir_anomali["ilk_gorulme"])
     assert re.match(ZAMAN_DESENI, bir_anomali["son_gorulme"])
-    # Compatibility alias for the un-amended schema on track A's branch.
-    assert bir_anomali["zaman"] == bir_anomali["ilk_gorulme"]
+    # Contract 3, integration decision: exactly these fields, and the
+    # single-`zaman` shape (and its alias) is gone.
+    assert set(bir_anomali) == {
+        "id", "sira", "modul_id", "tip", "seviye", "maks_seviye", "skor",
+        "ilk_gorulme", "son_gorulme", "durum", "gerekce", "kanit",
+    }
+    assert "katman" in bir_anomali["kanit"]
 
 
 def test_anomali_listesi_filtreleri(istemci):
