@@ -66,7 +66,7 @@ Endüstriyel sınıf seçimi bazı bileşenlerde **tedarik kısıtı** doğuruyo
 
 | Bileşen | Sorun | Çözüm |
 |---|---|---|
-| Standart 230 V AC/DC modüller | −25 °C'de başlıyor | 277 VAC serisi seçildi (−40…+90 °C) |
+| Standart 230 V AC/DC modüller | −25 °C'de başlıyor | 277 VAC serisi seçildi (−40…+90 °C; 5 V tam yükte +75 °C, +90 °C derating ile) |
 | 5,5 V süperkapasitörler | −25 °C'de başlıyor | Geniş aralıklı seri + gerilim derating |
 | MCU PSRAM'li varyant | −40…+65 °C | PSRAM'siz varyant (bedava kısıt) |
 

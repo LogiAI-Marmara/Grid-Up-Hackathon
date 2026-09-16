@@ -21,9 +21,9 @@
 | 1 | **Termal dizi** | `MLX90640ESF-BAA-000-TU` | 1 | 28,62 | 1.393 | 32×24 nokta sıcaklık; nokta bazında erken tespit | −40…+85 °C | Mouser |
 | 2 | **Mikrodenetleyici + radyo** | `ESP32-S3-WROOM-1U-N8` | 1 | 5,66 | 275 | Okuma, özet, eşik mantığı, Wi-Fi/BLE, harici anten | −40…+85 °C | DigiKey |
 | 3 | **Sıcaklık + nem** | `SHT31-DIS-B2.5KS` | 1 | 4,50 | 219 | Referans çizgisi + yoğuşma riski | −40…+125 °C | DigiKey |
-| 4 | **AC/DC güç modülü** | `RECOM RAC05-05SK/277` | 1 | 10,25 | 499 | 230 V → 5 V, izoleli | −40…+90 °C | Link Electronics |
+| 4 | **AC/DC güç modülü** | `RECOM RAC05-05SK/277` | 1 | 10,25 | 499 | 230 V → 5 V, izoleli | −40…+90 °C *(5 V tam yükte +75 °C; +90 °C derating ile — yükümüz %15–40, sınır içi)* | Link Electronics |
 | 5a | **Yedek depo — süperkapasitör** | `Eaton HV1030-2R7106-R` (10 F / 2,7 V) **×2 seri** | 2 | ~2,40 | ~117 | 5 F / 5,4 V (4,6 V derate) yedek depo; kesintide birkaç dk | −40…+65 °C; **−40…+85 °C** (2,3 V/hücre derate) | DigiKey / Mouser |
-| 5b | **Yedek depo — boost çevirici** | 0,3–5,5 V giriş → 3,3 V çıkış (TPS61200 sınıfı) | 1 | ~3,48 | ~169 | Süperkapı 1 V'a kadar sömürür → %74 daha fazla enerji | −40…+85 °C | DigiKey |
+| 5b | **Yedek depo — boost çevirici** | `TPS61099` (WSON-6, 0,7–5,5 V giriş → 4,6 V çıkış) | 1 | ~3,48 | ~169 | Süperkapı 1 V'a kadar sömürür; 4,6 V → D2 → +5 V rayı → LDO. Bobin: **2,2 µH** (datasheet §7.3: L 0,7/2,2/2,86 µH) | −40…+125 °C (TJ) | DigiKey |
 | 6 | **Anten + kablo** | Panel tipi harici anten + U.FL pigtail | 1 | ~5,00 | ~243 | Panodan dışarı sinyal | — | DigiKey / Data Alliance |
 | 7 | **RS-485 alıcı-verici** | Yarıçift yönlü 3,3 V transceiver (MAX3485 sınıfı) | 1 | ~1,50 | ~73 | Modbus hattı fiziksel katmanı | Endüstriyel sınıf seçilecek | — |
 | | | | | **63,81** | **3.105** | **Aktif bileşen ara toplamı** | | |
@@ -82,7 +82,7 @@ kutu koordinatı (55, 37,5), IR pencere (60, 42,5). Hatlar
 
 ### Baskın kalem ve neden savunulabilir
 
-**Termal sensör, aktif bileşen maliyetinin %47'si, toplam modül maliyetinin %35'idir.**
+**Termal sensör, aktif bileşen maliyetinin %45'i, toplam modül maliyetinin %33'üdür.**
 Bu, "tek pahalı parça" eleştirisinin hedefidir — ve cevabı şudur:
 
 | Yaklaşım | Maliyet | Sorun |
@@ -142,25 +142,33 @@ Karar kaydı §7.3 satır 268 seçimi izime bırakmıştır (*"süperkapasitör 
 E = ½C(V₁²−V₂²). Yedek modda (`dusuk_guc`) termal dizi ve radyo birlikte beslenemez; yalnızca
 *"besleme kaybı"* paketi gönderilir → ~50 mA @ 3,3 V ≈ 165 mW.
 
+> **Float gerilimi — devredeki gerçek değer.** Süperkap **5 V rayından**, `R_şarj = 22 Ω` üzerinden
+> şarj olur ve **gerilim sınırlayıcı yoktur**; bu yüzden float gerilimi raya yaklaşır:
+> 5 V − D1 (Schottky) ≈ **4,7 V**. Dolayısıyla **5,4 V (2S anma) ile hesaplanan 70 J devrede
+> ulaşılamaz** — gerçekçi üst sınır **≈4,7 V ≈ 52 J ≈ ~5 dk**'dır. Tablonun ikinci satırı
+> (+85 °C derate, 4,6 V → 50 J) bu gerçeğe zaten yakındır ve **kararın dayanağı odur**.
+
 | Senaryo | Kullanılabilir enerji | 50 mA'da süre |
 |---|---|---|
-| **HV 2×10 F (5 F / 5,4 V) + boost** | **70 J** | **~7 dk** |
-| HV 2×10 F, +85 °C derate (4,6 V) + boost | **50 J** | **~5 dk** |
-| HV 2×10 F + LDO (3,6 V'ta durur) | 40 J | ~4 dk |
+| ~~HV 2×10 F (5 F / 5,4 V) + boost~~ *(devrede ulaşılmaz — float 4,7 V)* | ~~70 J~~ | ~~~7 dk~~ |
+| **HV 2×10 F, 4,7 V float (D1 sonrası ray) + boost** | **≈53 J** | **~5,3 dk** |
+| **HV 2×10 F, +85 °C derate (4,6 V) + boost** | **50 J** | **~5 dk** |
+| HV 2×10 F + LDO (3,6 V'ta durur) | 23 J *(4,7 V float)* | ~2,3 dk |
 | Eaton PM 1 F + LDO | 8 J | ~50 sn |
 | **Eaton PM 1 F, +85 °C derate (3,9 V) + LDO** | **1 J** | **~7 sn** ✗ |
 
 **Üç sonuç:**
 1. **HV, PM'den ~8,7× fazla enerji verir** — hücre voltajı 2,7 V olduğu için seri bağlandığında
    tüm pencere kullanılır; PM'in 5,4 V'lik modülü 3,6 V LDO dropout'una kadar iner.
-2. **Boost şart:** LDO 3,6 V'ta dururken ~30 J (≈90 sn) çöpe gider; boost süperkapı **1 V'a kadar**
-   sömürür → **%74 daha fazla enerji**.
+2. **Boost şart:** LDO 3,6 V'ta dururken (~30 J, ≈90 sn) çöpe gider; boost süperkapı **1 V'a
+   kadar** sömürür → **%74 daha fazla enerji** (4,7 V float'ta 23 J → 53 J).
 3. **PM'in derating senaryosu çöker:** +85 °C'de PM 3,9 V'a derate olur, 3,6 V dropout'u kalır →
    pencere **0,3 V** → **~7 saniye.** Alarm paketini bile gönderemez. Bu, kararı tek başına verir.
 
 **Karar kaydı §7.3 uyumu:** *"besleme kesildiğinde birkaç dakika yaşayıp 'besleme kaybı' alarmını
-gönderebilmek"* — hedef 3–5 dk ≈ 30–50 J. HV + boost **70 J (20 °C) / 50 J (+85 °C ile karşılıyor)**;
-PM 1 F (**8 J / 1 J**) **karşılamıyor**.
+gönderebilmek"* — hedef 3–5 dk ≈ 30–50 J. Gerçek devre koşullarında (4,7 V float) HV + boost
+**≈53 J ≈ 5,3 dk**; +85 °C'de **50 J ≈ 5 dk** — **karşılıyor**. PM 1 F (**8 J / 1 J**)
+**karşılamıyor**.
 
 **Ömür notu:** Ömür sürekli çalışma üzerinden hesaplanmaz — *"yılda kaç kesinti × birkaç dakika"*
 üzerinden hesaplanır. Float durumda bekleyen depo, panonun bakım periyodundan uzun ömür verir
@@ -177,7 +185,7 @@ depo teknolojisinin kullanıldığı sözleşmeye yansımaz.
 | # | Kısıt | Sonuç |
 |---|---|---|
 | 1 | **MCU'nun PSRAM'li varyantı −40…+65 °C** — PSRAM'siz varyant −40…+85 °C | −40…+85 °C şartı için **PSRAM'siz N8 zorunlu**. Kısıt bedava: 768 değerlik kare ~3 KB, PSRAM gereksiz |
-| 2 | **Standart 230 V AC/DC modüller −25 °C'de başlıyor** (RECOM RAC02, Mornsun LD03, Hi-Link HLK-PM01) | −40 °C için **277 VAC serisi** (RAC05-K/277, −40…+90 °C) seçildi. Gerekçe dokümanda yazılır |
+| 2 | **Standart 230 V AC/DC modüller −25 °C'de başlıyor** (RECOM RAC02, Mornsun LD03, Hi-Link HLK-PM01) | −40 °C için **277 VAC serisi** (RAC05-K/277, −40…+90 °C — 5 V tam yükte +75 °C, +90 °C derating ile) seçildi. Gerekçe dokümanda yazılır |
 | 3 | **"5,5 V + −40…+85 °C" süperkapasitör yok** | Bkz. 2.5 — **HV serisi 2×10 F + boost** seçildi; enerji bütçesiyle gerekçelendi |
 | 4 | **Termal sensör −40…+85 °C hedef sıcaklık −40…+300 °C** | ✓ Şartı karşılıyor |
 | 5 | **Tedarik süresi:** MLX90640 Mouser'da *non-stocked*, **12–16 hafta** | Prototip üretimi planlanırsa erken sipariş gerekir. **Hackathon'u etkilemez** (fiziksel donanım üretilmiyor) |
@@ -191,7 +199,7 @@ depo teknolojisinin kullanıldığı sözleşmeye yansımaz.
 | **MLX90640 (110°×75°)** | Gerçek montaj derinliğinde (377 mm plaka / 155,5 mm NH yüzü) kapsama 1077 × 579 ve 444 × 239 mm; 32×24 = nokta başına ~3,4×2,4 cm (plaka) ve 1,4×1,0 cm (NH — klemens adımından küçük, nokta bazında tespit); −40…+85 °C | Dar açılı 55° varyant: 377 mm'de ~39×24 cm görür, klemens sırasını kapsamaz |
 | **ESP32-S3-WROOM-1U-N8** | Harici anten konnektörü (`1U`) + −40…+85 °C (`N8`, PSRAM'siz); Wi-Fi/BLE dahili; I²C/UART/ADC mevcut | PSRAM'li varyant: −40…+65 °C'de kalır. PCB antenli varyant: metal panoda çalışmaz |
 | **SHT31** | −40…+125 °C (ihtiyacın üzerinde), ±0,2 °C, I²C | — |
-| **RECOM RAC05-05SK/277** | −40…+90 °C şartını karşılayan tek makul modül; 4 kVAC izolasyon; encapsulated | Standart 230 V modüller −25 °C'de başlar |
+| **RECOM RAC05-05SK/277** | −40…+90 °C şartını karşılayan tek makul modül; 4,2 kVAC izolasyon; encapsulated | **5 V çıkışta tam yükte −40…+75 °C**; +90 °C'ye **yalnız derating grafiğiyle** (düşük yükte) çıkılır — bizim yük %15–40, sınır içinde. Standart 230 V modüller −25 °C'de başlar |
 | **Süperkapasitör** | Float şarjlı bekler, döngü yükü yok, bakım yükü ~0 | **Ana kaynak olarak pil:** reddedildi — bakım gerektirir, termal dizi tüketimi pil ömrünü aylara indirir (§7.3 satır 280) |
 | **Analizör okuma (varsa)** | Panoya yeni sensör/kablo eklemez — brief'in kablo kalabalığı şikâyetine cevap | Split-core CT: analizör yoksa kullanılır, pense tipi olduğu için kesintisiz takılır |
 | **TVOC-2 okuma** | Ark algılama SIL-2 sertifikasyonu gerektirir; ark erken uyarıya uygun değil | Kendi ark dedektörümüzü yapmak: sertifikasyon + milisaniye ölçeği nedeniyle mümkün değil |

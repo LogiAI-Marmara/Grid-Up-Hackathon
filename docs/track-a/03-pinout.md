@@ -58,8 +58,10 @@ atanmak zorundadır.
 - ✗ ADC2 kanalları — haberleşme aktifken güvenilir okunamaz, bu nedenle kullanılmaz
 
 Bu kısıt, "analizör yoksa 4 split-core CT" senaryosunda tasarımı doğrudan belirler.
-Alternatif: harici bir ADC çipi (I²C/SPI üzerinden) kullanmak — BOM'da opsiyonel kalem olarak
-listelenmiştir.
+**Not:** Bu senaryoda harici bir ADC çipi (I²C/SPI üzerinden) kullanmak **değerlendirilmiş bir
+alternatiftir**, ancak **BOM'da kalem olarak yer almaz** — seçilen tasarım ESP32-S3'ün dahili
+ADC1 kanallarını kullanır. Harici ADC, analizörsüz senaryoda ölçüm kalitesi yetersiz kalırsa
+başvurulacak yedek yoldur (prototip ölçümleriyle karar verilir).
 
 ### Kullanılmayan / kaçınılan pinler
 
@@ -151,20 +153,31 @@ adlandırılmaz (§7.1 satır 230).
    ┌────────────────┐  5 V   D1        5 V rayı                   3V3 rayı
    │ AC/DC modül    ├──────►|────────────┬──────┤ LDO 3.3 V ├────┬──► ESP32-S3
    │ RAC05-05SK/277 │                    │                       ├──► MLX90640 / SHT31
-   └────────────────┘                    │ R_şarj                └──► RS-485, CT bias
-                                         ├──/\/\──┤ Süperkap ├──►|── D2 ──┐
-                                         │         (float şarj)           │
-                                         └────────────────────────────────┘
-                                         kesintide: süperkap → D2 → LDO girişi
-                                         (D1 = OR diyotu, Schottky: süperkaptan şebekeye ters akışı keser; şebeke algılama D1 öncesinden)
+   └────────────────┘                    │ R_şarj 22 Ω           └──► RS-485, CT bias
+                                          │
+                                          ├──/\/\──┤ Süperkap ├─┐
+                                          │   (2S, float ≈4,7 V) │
+                                          │                      ▼
+                                          │                 ┌──────────┐
+                                          │                 │  BOOST   │
+                                          │                 │ TPS61099 │→ 4,6 V
+                                          │                 └────┬─────┘
+                                          │                      │ (bobin 2,2 µH)
+                                          └──────────────────────┤
+                                                                 ▼
+                                                              ►|── D2 ──► 5 V rayı
+
+   kesintide: süperkap → BOOST (4,6 V) → D2 → 5 V rayı (→ LDO → 3V3)
+   D1 = OR diyotu (Schottky): süperkaptan şebekeye ters akışı keser;
+        şebeke algılama (GPIO1) D1 ÖNCESİNDEN ölçülür
 ```
 
 | Hat | Kaynak | Hedef | Not |
 |---|---|---|---|
 | 230 V AC | Pano iç ihtiyaç devresi | AC/DC modül girişi | Yalnız ilgili yardımcı devrenin sigortası çekilir; abonelere giden elektrik kesilmez (§7.3) |
-| 5 V DC | AC/DC modül | Kart rayı / süperkapasitör float şarjı | |
+| 5 V DC | AC/DC modül | Kart rayı / süperkapasitör float şarjı | Şarj `R_şarj 22 Ω` üzerinden; float gerilimi ≈4,7 V (D1 sonrası ray) |
 | 3V3 | Kart LDO regülatörü (BOM #12) | ESP32, sensörler, RS-485 | |
-| Kesinti hattı | Süperkapasitör | ESP32 beslemesi | Yalnız besleme kesildiğinde devreye girer |
+| Kesinti hattı | Süperkapasitör → **boost (TPS61099, 4,6 V)** → D2 | 5 V rayı (→ LDO) | Boost, süperkapı 1 V'a kadar sömürür; D2 yönü rayı besler |
 
 **Kaçınılacak bağlantı:** Enerji hasadı (CT'den enerji çekme) **varyanttır**, ana tasarım değildir.
 §7.3 satır 279'daki red gerekçeleri: akım yokken modül tamamen susar (tam da izlenmesi gereken

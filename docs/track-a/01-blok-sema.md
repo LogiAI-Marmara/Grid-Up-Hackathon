@@ -27,7 +27,7 @@ flowchart TB
         RX["RS-485 alıcı-verici<br/>(Modbus)"]
 
         subgraph GUC["Besleme"]
-            PSU["AC/DC modül<br/>RECOM RAC05-05SK/277<br/>230 V → 5 V · −40…+90 °C"]
+            PSU["AC/DC modül<br/>RECOM RAC05-05SK/277<br/>230 V → 5 V · −40…+90 °C*"]
             SC["Yedek depo<br/>Süperkapasitör<br/>(float şarjlı)"]
             LDO["3.3 V regülatör<br/>(LDO — MCU ve sensörler)"]
         end
@@ -73,6 +73,11 @@ flowchart TB
 > olarak alınır. Mikrodenetleyici veriyi işler ve panonun dışına çıkarılan anten üzerinden saha
 > gateway'ine gönderir. Modül, 230 V iç ihtiyaç devresinden beslenir; süperkapasitör float
 > durumda şarjlı bekler ve yalnızca besleme kesildiğinde devreye girer.
+
+> **\\* AC/DC modülün sıcaklık sınıfı — dipnot.** Datasheet 5 V çıkış için **tam yükte
+> −40…+75 °C** verir; **+90 °C** yalnız **derating grafiğiyle** (düşük yükte) ulaşılır. Modülümüzün
+> çekişi 5 W anma gücünün ~%15–40'ı olduğundan derating eğrisinde +85…+90 °C bölgesi
+> kullanılabilir — şartname karşılanır. Bkz. [KAYNAKÇA.md §1.5](KAYNAKCA.md).
 
 ---
 

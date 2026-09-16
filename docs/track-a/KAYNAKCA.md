@@ -80,9 +80,17 @@ tek adımda cevaplanması.
 | **Kaynak** | RECOM *RAC05-K/277* serisi veri sayfası, REV. 5/2022 |
 | **URL** | `recom-power.com/pdf/Powerline_AC-DC/RAC05-K_277.pdf` |
 | **Yer** | "DIMENSION AND PHYSICAL CHARACTERISTICS" |
-| **Alınan değerler** | **31,7 × 26,7 × 21,8 mm** (THT/wired), 31,5 g; giriş 85–305 VAC; 5 V / 1000 mA; **−40…+90 °C** (5 V çıkış, derating grafiği ile) |
+| **Alınan değerler** | **31,7 × 26,7 × 21,8 mm** (THT/wired), 31,5 g; giriş 85–305 VAC; 5 V / 1000 mA; **izolasyon 4,2 kVAC** (I/P→O/P, 1 dk); **çalışma sıcaklığı −40…+90 °C** — *5 V çıkışta tam yükte −40…+75 °C; +90 °C yalnız derating grafiğiyle (düşük yükte)* |
 | **Durum** | **OKUNDU** — PDF metin katmanından birebir |
-| **Kullanıldığı yer** | §2.1 (4), §2.6 (2), §4.6 |
+| **Kullanıldığı yer** | §2.1 (4), §2.6 (2), §4.6, 01 blok şema dipnotu, 05 |
+
+> **Sıcaklık sınıfı — dipnot gerekli:** Veri sayfası "Operating Temperature Range @ natural
+> convection, full load" altında **5 V çıkış için −40…+75 °C** verir; tablonun altındaki satır
+> "refer to Derating Graph" ile **all others −40…+90 °C** der. Yani +90 °C'ye **tam yükte değil,
+> derating eğrisiyle** çıkılır. Modülümüzün çekişi 5 W anma gücünün **~%15–40**'ı olduğundan
+> eğride +85…+90 °C bölgesi kullanılabilir → **şartname karşılanır**. Dokümanlarda uç değer
+> **dipnotla** yazılır ("+90 °C derating ile"), çıplak "−40…+90 °C" yanıltıcıdır.
+> Ayrıca izolasyon **4,2 kVAC** (önce "4 kVAC" yazılmıştı).
 
 ### 1.6 Termal dizi — Melexis MLX90640ESF-BAA-000-TU
 
@@ -125,19 +133,35 @@ tek adımda cevaplanması.
 
 | | |
 |---|---|
-| **Kaynak** | Diodes *AP7361C* veri sayfası (`diodes.com/assets/Datasheets/AP7361C.pdf`) |
-| **Alınan değerler** | 3,3 V / 1 A; **dropout ≈ 0,3 V** |
-| **Durum** | **ATIF** — dropout değeri seçim gerekçesinde kullanıldı (yedekte ray 4,3 V) |
-| **Kullanıldığı yer** | 03 şema (U6), `eda/README.md` |
+| **Kaynak** | Diodes *AP7361C* veri sayfası, DS37274 Rev. 5-2 (Ekim 2020) |
+| **URL** | `diodes.com/assets/Datasheets/AP7361C.pdf` |
+| **Alınan değerler** | 3,3 V / 1 A; **dropout ≈ 0,3 V**; paketler: U-DFN3030-8, SOT89-5, **SOT223**, TO252 (DPAK), SO-8EP; **θJA: U-DFN3030-8 70 / DPAK 95 / SOT223 110 / SO-8EP 100 / SOT89-5 150 °C/W**; **TJ −40…+150 °C**, termal kapanma +150 °C |
+| **Durum** | **OKUNDU** (θJA tablosu birebir; dropout seçim gerekçesinde kullanıldı) |
+| **Kullanıldığı yer** | 03 şema (U6), §2.4 termal notu, `eda/README.md` |
+
+> **Termal değerlendirme (SOT-223):** θJA = 110 °C/W, termal kapanma +150 °C. Akım bütçesi
+> (Wi-Fi tepe ~350 mA + MLX 23 + SHT31 ~2 + RS-485 ~10 ≈ **385 mA**) ve 5 V rayı ≈4,7 V iken
+> LDO kaybı **P = (4,7 − 3,3) × 0,385 ≈ 0,54 W** → +85 °C ortamda **TJ ≈ 85 + 110 × 0,54 ≈ 144 °C**,
+> yani kapanma sınırına **~6 °C** kalır. **Ortalama akımda güvenlidir**, ancak tepe yükte pay
+> dardır. **Öneri:** seri üretimde **TO252 (DPAK, θJA 95 °C/W → TJ ≈ 136 °C)** veya SOT-223'te
+> **genişletilmiş bakır alan + termal via** kullanılmalı; prototipte TJ ölçülerek doğrulanır.
+> 3V3 rayının yedek modda (4,7 V float) çalışması bu kaybı bir miktar artırır — ölçüm önemli.
 
 ### 1.11 Boost çevirici — TI TPS61099
 
 | | |
 |---|---|
-| **Kaynak** | Texas Instruments TPS61099 veri sayfası |
-| **Alınan değerler** | 0,7 V'a kadar giriş, 4,6 V çıkış (FB bölücü), WSON-6; L1 4,7 µH |
-| **Durum** | **ATIF** |
-| **Kullanıldığı yer** | 03 şema (U7), `eda/README.md` |
+| **Kaynak** | Texas Instruments *TPS61099x Synchronous Boost Converter with Ultra-Low Quiescent Current* veri sayfası |
+| **URL** | `ti.com/lit/ds/symlink/tps61099.pdf` |
+| **Yer** | §7.3 Recommended Operating Conditions |
+| **Alınan değerler** | VIN **0,7–5,5 V**; VOUT 1,8–5,5 V; **L (bobin) MIN 0,7 / NOM 2,2 / MAX 2,86 µH**; CIN 1,0/10 µF; COUT 10/20/100 µF; **TJ −40…+125 °C**; WSON-6 |
+| **Dokümandaki değer** | Çıkış **4,6 V** (FB bölücü), bobin **2,2 µH** |
+| **Durum** | **OKUNDU** (§7.3 tablosu birebir; ilk yazılan 4,7 µH spesifikasyon dışıydı → 2,2 µH'ye düzeltildi) |
+| **Kullanıldığı yer** | §2.1 (5b), §2.5, 03 §3.4, `eda/gen_sch.py` (U7 + L1) |
+
+> **Düzeltme kaydı:** İlk taslakta bobin **4,7 µH** yazılmıştı; veri sayfasının §7.3 tablosu
+> üst sınırı **2,86 µH** verir, yani 4,7 µH **spesifikasyon dışıdır**. Tipik değer **2,2 µH**'ye
+> çekildi (şema `gen_sch.py` + bu künye).
 
 ---
 
