@@ -8,7 +8,7 @@ elle çizilmez; **Fusion 360 modellerinden** üretilir. Bu klasör kaynak modell
 | Dosya | İçerik | Koordinat |
 |---|---|---|
 | `GridUp-Kutu.f3d` / `.step` | Modül kutusu 120 × 80 × 50: gövde (2 mm duvar, R4), kapak 4 mm, IR yuva Ø23 / pencere Ø15, vent M6, LED, 4 × M3 köşe direği Ø7, 4 × PCB dikmesi Ø6, alt yüz soldan sağa RS-485 PG7 / SMA / CT PG7 / 230 V PG7 (PCB klemens sırasıyla hizalı), DIN klips, oval M5 yuvalar, mıknatıs cepleri | X sağ, Y yukarı, Z ön yüz normali (kapak Z 46–50) |
-| `GridUp-PCB.f3d` / `.step` | Kart 110 × 70 × 1,6 + 36 parça gövdesi (ön: MLX90640 TO-39, SHT31, LED, pasifler / arka: ESP32, RAC05 31,7 × 26,7 × 21,8, 2× süperkap HV1030 Ø10,5 × 31,5 yatık, boost + L, klemensler, MAX3485, …); M3 delikler (7,7) vb.; köşelerde Ø8 direk boşluğu; 1 mm izolasyon yarığı | kart köşesi orijin; **PCB koordinatı = kutu koordinatı − 5 mm** |
+| `GridUp-PCB.f3d` / `.step` | Kart 110 × 70 × 1,6 + 36 parça gövdesi (ön: MLX90640 TO-39, SHT31, LED, pasifler / arka: ESP32, RAC05 31,7 × 26,7 × 21,8, 2× süperkap HV1030 Ø10,5 × 31,5 yatık, boost + L, klemensler — **230 V giriş klemensi 3 kutup L/N/PE 5,08 = 15,24 mm**, MAX3485, …); M3 delikler (7,7) vb.; köşelerde Ø8 direk boşluğu; 1 mm izolasyon yarığı | kart köşesi orijin; **PCB koordinatı = kutu koordinatı − 5 mm** |
 | `GridUp-Kutu-Montaj.f3d` / `.step` | Kutu + PCB (PCB kutuda (5, 5, 39,4)); yan kesit ve iç görünüş buradan | kutu koordinatı |
 | `GridUp-Pano.f3d` / `.step` | 1600 kVA AG pano 1600 × 1500 × 450 (2 mm sac, 20 mm montaj plakası, 22 mm kapak), 36 NH ayırıcı + klemens + T1/kontrol/kumanda/modem blokları, montaj kapak iç yüzünde (IR merkezi 650, 692,5) | X sağ, Y yukarı, Z öne; kapak iç yüzü Z = 0, plaka Z = −430 |
 
