@@ -13,9 +13,9 @@ hour — and this module only does the arithmetic of comparing against them.
 
 from __future__ import annotations
 
-from .sozlesme import Seviye
+from .sozlesme import SEVIYE_SIRA, Seviye
 
-__all__ = ["esikle", "skor_birlestir", "SEVIYE_SKOR_TABANI"]
+__all__ = ["esikle", "esikle_tavanli", "skor_birlestir", "SEVIYE_SKOR_TABANI"]
 
 #: Score band each severity starts in. The bands are ordered and do not overlap,
 #: so sorting a queue by score never puts an `izle` above a `uyari` — an operator
@@ -71,6 +71,32 @@ def esikle(
 
     alt, ust = SEVIYE_SKOR_TABANI[seviye]
     return seviye, round(alt + oran * (ust - alt), 4)
+
+
+def esikle_tavanli(
+    deger: float, izle: float, uyari: float, kritik: float, tavan: Seviye
+) -> tuple[Seviye, float]:
+    """`esikle`, with the resulting severity capped at `tavan`.
+
+    Decision D2 (post-review): a deviation from a module's own normal (layer
+    2's robust z) may inform how notable a reading is, but may no longer, on
+    its own, produce more than `izle` — severity is meant to read off the
+    PRESENT, load-normalized physical condition, and "unusual for this
+    module" is not that; see `Katman2Ayari.z_uyari`'s docstring. Rather than
+    deleting `uyari`/`kritik` from `ayar.py` (which would also flatten the
+    score curve — everything past `izle` would score identically), the
+    underlying `esikle` call still runs against all three thresholds so the
+    score keeps climbing smoothly with the deviation, and only the SEVERITY is
+    pinned at the cap. A capped severity's score is pinned to the top of its
+    own band, since "this crossed into land that would have been uyari or
+    kritik" is still worth ranking above a `izle` reading that barely crossed
+    its own threshold, within the ordering `izle` itself is allowed to express.
+    """
+    seviye, skor = esikle(deger, izle, uyari, kritik)
+    if SEVIYE_SIRA[seviye] <= SEVIYE_SIRA[tavan]:
+        return seviye, skor
+    alt, ust = SEVIYE_SKOR_TABANI[tavan]
+    return tavan, ust
 
 
 def skor_birlestir(skorlar: "list[float] | tuple[float, ...]") -> float:

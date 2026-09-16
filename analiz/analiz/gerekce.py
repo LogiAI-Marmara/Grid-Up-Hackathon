@@ -39,6 +39,7 @@ __all__ = [
     "ark_olayi",
     "taban_sapmasi",
     "taban_egilimi",
+    "yavas_isinma",
     "akim_sicaklik",
     "faz_faz",
     "komsu_piksel",
@@ -232,15 +233,22 @@ def taban_sapmasi(
     z: float,
     ornek: int,
     gun: float,
+    egilim_bilgisi: str | None = None,
 ) -> str:
     birim = _birim(olcum_tipi)
-    return (
+    cumle = (
         f"{_kanal(olcum_tipi).capitalize()} {sayi(deger)} {birim}; bu modülün son "
         f"{sayi(gun, 0)} günlük normali medyan {sayi(medyan)} {birim}, MAD "
         f"{sayi(mad, 2)} {birim} ({ornek} ölçüm). Değer taban çizgisinin "
         f"{sayi(abs(z))} robust sapma dışında. Sabit bir eşik değil, bu modülün "
-        f"kendi geçmişine göre sapma."
+        f"kendi geçmişine göre sapma; bu tek başına en fazla 'izle' seviyesi üretir. "
     )
+    if egilim_bilgisi:
+        # D2: a trend/slope never sets severity — only the present magnitude
+        # above does that. When a rise is also happening, it is added here as
+        # information only, never as the reason this finding exists.
+        cumle += egilim_bilgisi
+    return cumle
 
 
 def taban_egilimi(
@@ -262,9 +270,48 @@ def taban_egilimi(
     if medyan is not None:
         cumle += f"Modülün taban çizgisi medyanı {sayi(medyan)} {birim}. "
     cumle += (
-        "Şu anki değer tek başına sınır aşmıyor; bozulma eğilimi sürerse sınıra "
-        "ulaşacak. Erken uyarı kaydıdır."
+        "Bu, ek bilgi cümlesidir; kendi başına bir bulgu ya da seviye üretmez "
+        "(D2: eğilim/eğim şiddeti belirlemez, yalnızca şu anki ölçülen büyüklük belirler)."
     )
+    return cumle
+
+
+def yavas_isinma(
+    gun_sayisi: int,
+    akim_guncel: float,
+    yuk_ustel: float,
+    asiri_isinma: float,
+    esik: float,
+    egilim_gunluk: float,
+    gun_tahmini: float | None,
+) -> str:
+    """Decision D1's slow path, days-to-weeks normalized heating.
+
+    Same accounting shape as `akim_sicaklik`, at a longer time scale and
+    against fixed bands instead of a sliding baseline: the reader gets the
+    present, load-normalized excess-heating number that set the severity, and
+    — separately, and explicitly labelled as not doing that — how fast it has
+    been getting there.
+    """
+    cumle = (
+        f"Son {gun_sayisi} günlük yük-normalize edilmiş ısınma eğiliminde "
+        f"((sıcak nokta − ortam) / akım^{sayi(yuk_ustel, 1)}), şu anki yükte "
+        f"({sayi(akim_guncel, 0)} A) beklenen fazla ısınma {sayi(asiri_isinma)} °C "
+        f"(FIST 4-13 bandı: eşik {sayi(esik, 0)} °C). Bu, kayan bir taban çizgisine "
+        f"değil sabit mühendislik bandına karşı değerlendirilmiştir; yavaş gelişen "
+        f"bir arıza kendi tabanını kirletemez. "
+    )
+    if egilim_gunluk > 0:
+        cumle += (
+            f"Normalize ısınma günde +{sayi(egilim_gunluk, 5)} birim artıyor "
+            f"(Theil-Sen, aykırı günlere dayanıklı). "
+        )
+        if gun_tahmini is not None:
+            cumle += (
+                f"Bu hızda ve şu anki yükte yaklaşık {sayi(gun_tahmini, 0)} günde "
+                f"kritik banda ulaşır — bilgi amaçlıdır, seviyeyi belirlemez; "
+                f"seviyeyi yalnızca şu anki ölçülen fazla ısınma belirledi."
+            )
     return cumle
 
 

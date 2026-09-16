@@ -10,10 +10,11 @@ pure functions of it, which is what makes them testable without a database and
 re-runnable over the same history as often as an algorithm change demands
 (section 3.4).
 
-Cost: one turn is a fixed number of queries — seven — no matter how many modules
-it touches. Per-module queries would make a 100-module turn 600 round trips and
-section 8's scale target unreachable for reasons that have nothing to do with
-detection.
+Cost: one turn is a fixed number of queries — eight, since decision D1 added the
+slow path's own daily-aggregate query (`_yavas_ozetler`) alongside the original
+seven — no matter how many modules it touches. Per-module queries would make a
+100-module turn 800 round trips and section 8's scale target unreachable for
+reasons that have nothing to do with detection.
 """
 
 from __future__ import annotations
@@ -54,10 +55,23 @@ __all__ = [
     "TermalOzet",
     "ModulDurumu",
     "TabanCizgisi",
+    "GunlukOzet",
     "Pencere",
     "PencereGetirici",
     "KANAL_TIPLERI",
+    "YAVAS_KANALLARI",
 ]
+
+#: Channels the slow path (decision D1) reads its daily SQL aggregate for: the
+#: hot spot, the ambient, and every current phase (normalized heating needs the
+#: dominant phase, and which phase is dominant is only known after looking).
+YAVAS_KANALLARI: tuple[OlcumTipi, ...] = (
+    OlcumTipi.TERMAL_MAKS,
+    OlcumTipi.ORTAM_SICAKLIK,
+    OlcumTipi.AKIM_L1,
+    OlcumTipi.AKIM_L2,
+    OlcumTipi.AKIM_L3,
+)
 
 
 #: Which anomaly types a channel can produce. Used by the baseline poisoning
@@ -265,6 +279,28 @@ class TabanCizgisi:
 
 
 @dataclass(frozen=True, slots=True)
+class GunlukOzet:
+    """One SQL-computed daily bucket for one module-channel — the slow path's
+    only data structure (decision D1).
+
+    Built by `PencereGetirici._yavas_ozetler` via `date_trunc` + avg/max, never
+    by aggregating raw samples in Python: a 21-day window at the contract's
+    cadence is on the order of 60k rows per channel per module, and the slow
+    path only ever needs the handful of daily numbers this reduces it to. See
+    `Katman2YavasAyari` for why a daily bucket and not an hourly one.
+
+    Both `ortalama` and `maksimum` travel together because which one is the
+    representative value differs by channel: a hot spot's day is defined by its
+    peak, a current or ambient channel by its typical level. The caller picks.
+    """
+
+    gun: datetime
+    ortalama: float
+    maksimum: float
+    ornek: int
+
+
+@dataclass(frozen=True, slots=True)
 class Pencere:
     """Everything the four layers get to see about one module at one instant."""
 
@@ -286,6 +322,12 @@ class Pencere:
     durumlar: tuple[ModulDurumu, ...] = ()
     #: Peer modules' detection-window series, keyed by modul_id.
     komsular: dict[str, dict[OlcumTipi, Seri]] = field(default_factory=dict)
+
+    #: Slow-path daily aggregates (decision D1), keyed by measurement type,
+    #: oldest first. Covers `Katman2YavasAyari.pencere_sn`, computed in SQL —
+    #: see `GunlukOzet`. Empty for a channel the slow path does not read
+    #: (`YAVAS_KANALLARI`) or a module too new to have any daily buckets yet.
+    yavas: dict[OlcumTipi, tuple[GunlukOzet, ...]] = field(default_factory=dict)
 
     #: The evidence frame belonging to this evaluation instant: the newest
     #: frame at or before `simdi`, inside the detection window. Never a frame
@@ -310,6 +352,11 @@ class Pencere:
 
     def taban(self, olcum_tipi: OlcumTipi) -> TabanCizgisi | None:
         return self.tabanlar.get(olcum_tipi)
+
+    def yavas_seri(self, olcum_tipi: OlcumTipi) -> tuple[GunlukOzet, ...]:
+        """The slow path's daily buckets for one channel, oldest first. Never
+        raises: no buckets yet is cold start, not an error."""
+        return self.yavas.get(olcum_tipi, ())
 
     @property
     def bos(self) -> bool:
@@ -342,6 +389,17 @@ class PencereGetirici:
     def __init__(self, baglanti: psycopg.Connection, ayar: Ayar) -> None:
         self._baglanti = baglanti
         self._ayar = ayar
+        # Slow-path cache (decision D1, perf follow-up from T5): the daily
+        # aggregate the slow path reads does not change meaningfully between
+        # one 30 s turn and the next, and re-running it every turn for every
+        # module measurably broke the T5 scale budget — see
+        # `Katman2YavasAyari.yenileme_sn`'s docstring. Keyed by modul_id,
+        # holding (when it was computed, at which instant it was computed,
+        # the result). Process memory, same as `OlayDeposu._bekleyen`: a
+        # restart loses it and the next turn simply recomputes.
+        self._yavas_onbellek: dict[
+            str, tuple[datetime, dict[OlcumTipi, tuple[GunlukOzet, ...]]]
+        ] = {}
 
     # -- public ------------------------------------------------------------
 
@@ -395,6 +453,7 @@ class PencereGetirici:
         kareler = self._olay_kareleri(hedef_araliklari)
         sonlar = self._son_olcumler(hedefler)
         tabanlar = self._tabanlar(zamanlar, acik)
+        yavaslar = self._yavas_ozetler(zamanlar)
 
         pencereler: dict[str, Pencere] = {}
         for modul_id, an in zamanlar.items():
@@ -420,6 +479,7 @@ class PencereGetirici:
                 acik_tipler=acik.get(modul_id, frozenset()),
                 son_olcum_zaman=son_zaman,
                 son_olcum_alindi=son_alindi,
+                yavas=yavaslar.get(modul_id, {}),
             )
         return pencereler
 
@@ -840,3 +900,112 @@ class PencereGetirici:
                 if mevcut is None or satir["ilk_gorulme"] < mevcut:
                     dondurma[anahtar] = satir["ilk_gorulme"]
         return dondurma
+
+    def _yavas_ozetler(
+        self, zamanlar: dict[str, datetime]
+    ) -> dict[str, dict[OlcumTipi, tuple[GunlukOzet, ...]]]:
+        """The slow path's daily aggregates (decision D1), one query for every
+        module in the turn.
+
+        Follows `_tabanlar`'s own pattern for doing statistics in SQL rather
+        than in Python: `date_trunc('day', zaman)` buckets the samples, and
+        `avg`/`max` are computed inside PostgreSQL so what crosses the wire is
+        a handful of daily numbers per module-channel, not the 21-day raw
+        series (tens of thousands of rows per channel per module) that
+        producing those same numbers in Python would require pulling over.
+
+        UNLIKE `_tabanlar`, there is no poisoning guard here — see
+        `Katman2YavasAyari`'s docstring for why one is not needed: the slow
+        path never compares this window's own statistics against itself, so
+        there is nothing here for a developing fault to poison. The window
+        simply runs up to each module's own evaluation instant.
+
+        `avg` and `max` are both computed for every channel in one pass rather
+        than choosing per channel in SQL (which would need either a second
+        query or a CASE-driven conditional aggregate per group) — cheap either
+        way at this scale, and it lets the caller (`katman2_taban._yavas_isinma`)
+        decide per channel which one is the representative value.
+        """
+        k2y = self._ayar.katman2_yavas
+        if not zamanlar:
+            return {}
+
+        # The cache split: modules whose last computed result is still fresh
+        # enough (within `yenileme_sn` of THIS turn's own instant) are served
+        # from it and never touch the query below at all.
+        sonuc: dict[str, dict[OlcumTipi, tuple[GunlukOzet, ...]]] = {}
+        sorgulanacak: dict[str, datetime] = {}
+        for modul_id, an in zamanlar.items():
+            onbellek = self._yavas_onbellek.get(modul_id)
+            if onbellek is not None:
+                hesaplama_an, deger = onbellek
+                if (an - hesaplama_an).total_seconds() < k2y.yenileme_sn:
+                    sonuc[modul_id] = deger
+                    continue
+            sorgulanacak[modul_id] = an
+
+        if not sorgulanacak:
+            return sonuc
+
+        modul_idler = list(sorgulanacak)
+        araliklar = [
+            (m, sorgulanacak[m] - timedelta(seconds=k2y.pencere_sn), sorgulanacak[m])
+            for m in modul_idler
+        ]
+
+        with self._baglanti.cursor() as imlec:
+            imlec.execute(
+                """
+                WITH istek(modul_id, bas, bit) AS (
+                    SELECT * FROM unnest(%s::text[], %s::timestamptz[], %s::timestamptz[])
+                )
+                SELECT o.modul_id, o.olcum_tipi,
+                       date_trunc('day', o.zaman) AS gun,
+                       avg(o.deger) AS ort, max(o.deger) AS maks, count(*) AS ornek
+                FROM istek i
+                JOIN gridup.olcum o
+                  ON o.modul_id = i.modul_id
+                 AND o.olcum_tipi = ANY(%s)
+                 AND o.zaman > i.bas
+                 AND o.zaman <= i.bit
+                WHERE o.kalite = 'iyi' AND o.deger IS NOT NULL
+                GROUP BY o.modul_id, o.olcum_tipi, date_trunc('day', o.zaman)
+                ORDER BY o.modul_id, o.olcum_tipi, gun
+                """,
+                (
+                    [a[0] for a in araliklar],
+                    [a[1] for a in araliklar],
+                    [a[2] for a in araliklar],
+                    [k.value for k in YAVAS_KANALLARI],
+                ),
+            )
+            satirlar = imlec.fetchall()
+
+        biriken: dict[str, dict[OlcumTipi, list[GunlukOzet]]] = {}
+        for satir in satirlar:
+            try:
+                tip = OlcumTipi(satir["olcum_tipi"])
+            except ValueError:
+                continue
+            biriken.setdefault(satir["modul_id"], {}).setdefault(tip, []).append(
+                GunlukOzet(
+                    gun=satir["gun"],
+                    ortalama=float(satir["ort"]),
+                    maksimum=float(satir["maks"]),
+                    ornek=int(satir["ornek"]),
+                )
+            )
+        yeni_sonuclar = {
+            modul_id: {tip: tuple(gunler) for tip, gunler in kanallar.items()}
+            for modul_id, kanallar in biriken.items()
+        }
+
+        # Every module that was actually queried gets a cache entry, even one
+        # with no rows at all (an empty dict) — a module too new to have any
+        # daily buckets yet is a real, cacheable answer, not a miss to retry
+        # every turn until it eventually has data.
+        for modul_id, an in sorgulanacak.items():
+            deger = yeni_sonuclar.get(modul_id, {})
+            self._yavas_onbellek[modul_id] = (an, deger)
+            sonuc[modul_id] = deger
+        return sonuc

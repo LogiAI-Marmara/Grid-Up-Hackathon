@@ -23,7 +23,7 @@ import os
 from dataclasses import dataclass, field, fields, replace
 from typing import Any
 
-from .sozlesme import OlcumTipi, Seviye
+from .sozlesme import OlcumTipi, Seviye, Tip
 
 __all__ = [
     "VeritabaniAyari",
@@ -32,6 +32,7 @@ __all__ = [
     "Katman0Ayari",
     "Katman1Ayari",
     "Katman2Ayari",
+    "Katman2YavasAyari",
     "Katman3Ayari",
     "OlayAyari",
     "ApiAyari",
@@ -124,6 +125,17 @@ class PencereAyari:
 
     #: Detection window — how far back a layer looks to decide "what is happening
     #: now". The worked example in section 5 uses six hours.
+    #:
+    #: D1 (post-review): this is the FAST path only. Six hours is right for
+    #: catching a sudden rise but structurally cannot see a fault that grows
+    #: slower than it can accumulate `Katman2Ayari.asgari_delta` worth of rise
+    #: inside a six-hour window — a terminal going 45 -> 60 C over ten days
+    #: moves about 0.06 C inside any given six hours, which never clears the
+    #: total-rise gate no matter how far the fault has actually come. That is
+    #: exactly section 2.3's day-10 example, and it is why `Katman2YavasAyari`
+    #: exists: a second, days-to-weeks window computed on daily SQL aggregates
+    #: rather than by widening this one (a 21-day 30 s-cadence window would be
+    #: 60k rows per channel per module pulled into Python every turn).
     tespit_sn: float = 6 * 3600.0
 
     #: Baseline window — what "normal for this module-channel" is computed from.
@@ -290,6 +302,19 @@ class Katman2Ayari:
     #: Robust z thresholds. z = 0.6745 * (x - median) / MAD, so z is comparable to
     #: a standard-deviation count for normally distributed data but does not move
     #: when one reading is absurd.
+    #:
+    #: D2 (post-review): deviation from a module's OWN normal, alone, is capped
+    #: at `izle`. Severity is meant to read off the PRESENT, load-normalized
+    #: physical condition (section D2's excess-heating and difference-vs-peer
+    #: criteria, both mapped to the FIST 4-13 bands), and a robust z-score is
+    #: neither of those — it is "unusual for this module", which says nothing
+    #: about whether the value is a routine maintenance note or a today problem.
+    #: A previously-cold module having a routine 20 A load applied for the first
+    #: time could show a huge z on a channel that never moved before, with
+    #: nothing physically wrong. `z_uyari`/`z_kritik` are KEPT — not deleted —
+    #: because they still shape the SCORE curve inside the capped `izle` band
+    #: (see `katman2_taban._sapma`); they can no longer promote the resulting
+    #: Bulgu's severity past `izle`. See `skor.esikle_tavanli`.
     z_izle: float = 3.5
     z_uyari: float = 6.0
     z_kritik: float = 10.0
@@ -299,19 +324,134 @@ class Katman2Ayari:
     #: sensor quantisation step.
     asgari_mad: float = 0.3
 
-    #: Trend, in units per hour over the detection window. This is the half of
-    #: layer 2 that produces a warning while the value is still harmless: +1.5
-    #: C/h on a terminal is nothing now and 130 C in three days.
+    #: Trend, in units per hour over the detection window.
+    #:
+    #: D2 (post-review): these no longer set a Bulgu's severity. Severity means
+    #: an action, and a slope is a forecast, not a present condition — "it is
+    #: climbing" says nothing about whether to watch, schedule, or act right
+    #: now, only about when it might. `egilim_izle` is kept as the minimum rate
+    #: worth mentioning in `gerekce` at all (below it the slope disappears into
+    #: measurement noise and saying anything is false precision); `egilim_uyari`
+    #: / `egilim_kritik` are kept only to word the informational sentence's own
+    #: "how fast is fast" framing — see `katman2_taban._egilim_bilgisi` — and
+    #: play no further part in the severity `esikle` produces.
     egilim_izle: float = 0.5
     egilim_uyari: float = 1.5
     egilim_kritik: float = 4.0
 
-    #: A trend is only reported if the window's total rise also clears this, so a
-    #: steep slope fitted through ten minutes of noise stays quiet.
+    #: A trend is only mentioned if the window's total rise also clears this, so
+    #: a steep slope fitted through ten minutes of noise stays quiet.
     asgari_delta: float = 5.0
 
     #: Minimum samples in the detection window before a slope is fitted.
     asgari_egilim_ornek: int = 8
+
+
+@dataclass(frozen=True)
+class Katman2YavasAyari:
+    """Layer 2's SLOW path — decision D1.
+
+    Days-to-weeks degradation the fast 6-hour window (`PencereAyari.tespit_sn`)
+    structurally cannot see: see that field's docstring for why. Computed on
+    SQL daily aggregates (`PencereGetirici._yavas_ozetler`), never on raw
+    30 s-cadence rows — the whole point is a multi-week window, and pulling
+    weeks of raw samples per channel per module into Python is the mistake
+    `_tabanlar`'s own docstring already explains for the fast baseline.
+
+    THE REFERENCE PROBLEM, AND WHY THIS DOES NOT USE A SLIDING BASELINE. D1's
+    hardest requirement: the slow path must not judge a slow fault against a
+    baseline the fault itself can drift. Verified failure mode of the naive
+    approach (see tests/test_zaman_olcekleri.py
+    ::test_yavas_isinma_taban_cizgisi_yutulur — kept as a regression so nobody
+    "fixes" this back in later): feed `Katman2Ayari`'s existing 14-day sliding
+    median/MAD a 10-day linear drift from 45 to 60 C, and the baseline ends up
+    close to the drifting value's own recent median with a MAD wide enough to
+    swallow it — no finding, from a detector whose entire selling point is
+    catching exactly this.
+
+    So the slow path's severity does NOT compare against a SLIDING statistic
+    of its own recent history. It compares the module's CURRENT
+    normalized-heating level — (hot spot - ambient) / current^n, robustly
+    smoothed over the newest few daily buckets — against that SAME module's
+    OWN normalized-heating level from the EARLIEST few qualifying buckets in
+    the current (up to `pencere_sn`-long) window: an early-anchored reference
+    rather than a sliding one, per D1's own list of acceptable alternatives.
+    That excess is then mapped onto the same fixed, physical/engineering bands
+    D2 assigns to the fast path's unexplained-heat check
+    (`Katman3Ayari.aciklanamayan_*`, itself FIST 4-13's "excess heating over
+    ambient" table) — see `dedektor.katman2_taban._yavas_isinma`'s "THE
+    REFERENCE" comment for the full reasoning, including why raw (unreferenced)
+    normalized heating cannot be used directly (a healthy bolted connection
+    legitimately runs hot above ambient at rated current, and D2 is explicit
+    that this "load-expected heating" is not itself a fault). The early
+    reference is recomputed fresh on every evaluation from that evaluation's
+    own window and never carried or updated turn to turn, so nothing here
+    slides forward to re-absorb a fault that develops WITHIN the window —
+    which is exactly the poisoning failure mode a sliding baseline has.
+    """
+
+    #: How far back the slow path looks. D1 asks for "at least 14 days"; 21 is
+    #: used so a fault already weeks old, or a slow path started mid-fault,
+    #: still leaves the Theil-Sen fit (see `dedektor.istatistik.theil_sen`)
+    #: enough daily points on both sides of "now" to be a fit rather than a
+    #: two-point line. Engineering default, unverified.
+    pencere_sn: float = 21 * 24 * 3600.0
+
+    #: SQL aggregation bucket width. Daily, not hourly: a switchgear joint's own
+    #: thermal lag is itself hours long, so an hourly bucket mostly re-measures
+    #: that lag with extra sampling noise, while a daily bucket averages it out
+    #: and keeps the point count the trend fit considers small. Configurable for
+    #: a site that wants tighter buckets once it has the data to justify it.
+    kova_sn: float = 24 * 3600.0
+
+    #: Minimum current, amperes, before a bucket contributes to the normalized
+    #: series. Mirrors `Katman3Ayari.akim_asgari` — near no load, I^n is small
+    #: and noisy and the ratio it feeds can mean anything.
+    asgari_akim: float = 5.0
+
+    #: Load-normalization exponent in (deger - ortam) / akim^n. 2 is the I^2 R
+    #: model layer 3 also uses, and it is the physics-derived default here.
+    #: NOTE, for the README's threshold table and honesty about sourcing: ABB
+    #: publishes a vendor thermal model using n=1.6 for some busbar/connector
+    #: geometries. That is a vendor example, not a standard, and this default
+    #: is not it — it is recorded as an alternative in the README, not adopted.
+    yuk_ustel: float = 2.0
+
+    #: Daily buckets needed (after the current-floor filter) before the slow
+    #: path evaluates a module at all. Below this there is not yet a "trend"
+    #: to distinguish from bucket-to-bucket noise; cold start declines to fire,
+    #: same policy as the fast baseline's `PencereAyari.asgari_taban_ornek`.
+    asgari_kova: int = 10
+
+    #: How many of the newest qualifying buckets the module's CURRENT
+    #: normalized-heating level is a median of. Mirrors
+    #: `PencereAyari.temsil_ornek` for the daily series.
+    temsil_kova: int = 3
+
+    #: D2's excess-heating-over-ambient bands, FIST 4-13 (Bureau of Reclamation
+    #: FIST 4-13, delta-T over ambient): 1-10 K not reported, 11-20 -> izle,
+    #: 21-40 -> uyari, >40 -> kritik. Identical criterion and identical bands to
+    #: `Katman3Ayari.aciklanamayan_*` — same physical question, two time scales.
+    asiri_isinma_izle: float = 11.0
+    asiri_isinma_uyari: float = 21.0
+    asiri_isinma_kritik: float = 40.0
+
+    #: How often, at most, `PencereGetirici` re-runs the slow path's daily
+    #: aggregate query for a given module, seconds. Measured against T5's own
+    #: methodology (see `analiz/README.md`'s T5 section): re-running an
+    #: unbounded 21-day aggregate over every channel for every module on
+    #: EVERY 30 s scan turn nearly doubled the measured 100-module turn cost
+    #: and pushed it back over the scan period (p95 ~49.6 s against a 30 s
+    #: budget — see the README's "after" T5 row). A days-to-weeks trend cannot
+    #: meaningfully change inside 30 s, so recomputing it every turn buys
+    #: nothing: `PencereGetirici` caches the last result per module and only
+    #: re-queries once `yenileme_sn` has passed since that module's last
+    #: refresh, in its own process memory (same pattern, and the same
+    #: restart-loses-it limitation, as `OlayDeposu._bekleyen`). 1 hour is an
+    #: engineering default, unverified: comfortably below the days-scale
+    #: resolution the slow path is built around, comfortably above the 30 s
+    #: scan period.
+    yenileme_sn: float = 3600.0
 
 
 @dataclass(frozen=True)
@@ -322,7 +462,10 @@ class Katman3Ayari:
     # --- current vs temperature ---------------------------------------------
     #: Minimum temperature rise over the detection window before the comparison
     #: is worth making at all, Celsius. Below this there is nothing to explain.
-    sicaklik_artis_esigi: float = 8.0
+    #: Aligned to FIST 4-13's own floor for `aciklanamayan_*` below: under 10 K
+    #: excess is "not reported" there regardless, so there is no point running
+    #: the accounting for less rise than that.
+    sicaklik_artis_esigi: float = 10.0
 
     #: Unexplained temperature rise, in Celsius, after the load and the ambient
     #: have each been given credit for the share they account for.
@@ -331,9 +474,16 @@ class Katman3Ayari:
     #: window, the rise the load explains is computable rather than guessable,
     #: and what is left over is the part R must account for — which is the
     #: definition of a connection going bad. See `_akim_sicaklik`.
-    aciklanamayan_izle: float = 8.0
-    aciklanamayan_uyari: float = 15.0
-    aciklanamayan_kritik: float = 30.0
+    #:
+    #: D2 (post-review): these ARE the FIST 4-13 "excess heating over ambient"
+    #: bands (U.S. Bureau of Reclamation FIST 4-13, delta-T over ambient rise):
+    #: 1-10 K not reported, 11-20 K -> izle, 21-40 K -> uyari, >40 K -> kritik.
+    #: The previous values (8 / 15 / 30) were an earlier, unsourced choice;
+    #: these replace them and are the same bands `Katman2YavasAyari` uses for
+    #: the slow path's identical criterion at a longer time scale.
+    aciklanamayan_izle: float = 11.0
+    aciklanamayan_uyari: float = 21.0
+    aciklanamayan_kritik: float = 40.0
 
     #: Current below which the I^2 ratio is not trustworthy, amperes. Near zero
     #: load the ratio of two small noisy numbers explains anything at all.
@@ -343,6 +493,16 @@ class Katman3Ayari:
     #: One phase's deviation from the median of the three, as a fraction. More
     #: sensitive than layer 1's absolute imbalance percentage, and it names the
     #: phase. A common-mode load change moves all three and cancels here.
+    #:
+    #: D2/D4 SOURCING NOTE: this is "difference vs a similar component" in
+    #: spirit — the category FIST 4-13 gives bands of 1-3 K / 4-15 K / >15 K
+    #: for — but the quantity here is a CURRENT fraction, not a Kelvin
+    #: difference, and there is no physically honest way to convert one to the
+    #: other without assuming a resistance and a load that this comparison does
+    #: not have. Converting anyway would launder an engineering default as a
+    #: standard citation, which is worse than admitting it is one. These three
+    #: values are therefore left as an engineering default, unverified — not
+    #: FIST-sourced — and documented as such in the README threshold table.
     faz_sapma_izle: float = 0.08
     faz_sapma_uyari: float = 0.15
     faz_sapma_kritik: float = 0.25
@@ -352,17 +512,47 @@ class Katman3Ayari:
     # --- neighbouring pixel --------------------------------------------------
     #: Hot pixel minus the mean of the four quadrant means, Celsius. A whole
     #: frame that rose together is ambient; one pixel pulling away is a terminal.
-    piksel_ayrisma_izle: float = 8.0
-    piksel_ayrisma_uyari: float = 15.0
-    piksel_ayrisma_kritik: float = 25.0
+    #:
+    #: D2 (post-review): this quantity IS a Kelvin difference against a similar
+    #: reference (the pixel's own frame), so FIST 4-13's "difference vs a
+    #: similar component" bands are the right SHAPE for it: 1-3 K not reported,
+    #: 4-15 K -> uyari, >15 K -> kritik, with no separate izle tier in the
+    #: source table at all.
+    #:
+    #: `piksel_ayrisma_izle` below is NOT set to FIST's literal 4 K, though —
+    #: and that is a deliberate, documented deviation, not an oversight. A
+    #: real (and this project's synthetic) thermal comparison carries its own
+    #: measurement noise: quantisation, a few tenths of a degree of frame-to-
+    #: frame jitter, and a small structural gap between a hot spot and its own
+    #: quadrant means even on a module with nothing wrong. Section 2.6's own
+    #: argument against a system that cries wolf applies here as directly as
+    #: anywhere else in this file: pinning izle to literal-FIST's 4 K, with no
+    #: buffer at all above the noise floor, reclassifies ordinary sensor noise
+    #: as "uyari" on a schedule (verified against this project's own noisy-
+    #: healthy fixture, `senaryolar._bozucu_gurultulu`, during validation —
+    #: see the README's threshold table). 6 K keeps FIST's uyari onset (still
+    #: well under it) while giving genuine noise room to not cross the line;
+    #: kritik stays at FIST's literal 15 K, where the margin above realistic
+    #: noise is already comfortable. The previous values here (8 / 15 / 25)
+    #: predate this sourcing entirely; corrected toward FIST, not fully onto
+    #: it, for the reason above.
+    piksel_ayrisma_izle: float = 6.0
+    piksel_ayrisma_uyari: float = 8.0
+    piksel_ayrisma_kritik: float = 15.0
     #: How long the hot spot must stay on the same pixel to count as localised.
     piksel_kararlilik_orani: float = 0.6
 
     # --- module vs module ----------------------------------------------------
-    #: This module's rise minus the median rise of its peers, Celsius.
+    #: This module's rise minus the median rise of its peers, Celsius. Same
+    #: "difference vs a similar component" category, same FIST 4-13 bands, and
+    #: the same noise-floor caveat as `piksel_ayrisma_*` above — a peer module
+    #: is the similar component here instead of a peer pixel, and cross-module
+    #: comparison over a live window carries its own noise for the same
+    #: reason. Corrected from the previous unsourced 6 / 12 / 20 toward, but
+    #: not onto, FIST's literal 4 K izle-equivalent boundary.
     modul_ayrisma_izle: float = 6.0
-    modul_ayrisma_uyari: float = 12.0
-    modul_ayrisma_kritik: float = 20.0
+    modul_ayrisma_uyari: float = 8.0
+    modul_ayrisma_kritik: float = 15.0
     #: Peers needed before a cross-module comparison means anything.
     asgari_komsu: int = 2
     #: Compare against modules in the same `saha`, or only the same `pano`.
@@ -432,6 +622,38 @@ class OlayAyari:
     #: Who the journal records as the actor for transitions the detector makes.
     sistem_aktoru: str = "sistem"
 
+    #: Delay-on (D2, post-review): how long a qualifying condition must persist,
+    #: continuously, before a NEW episode is allowed to open. Severity is meant
+    #: to be an action taken on the present condition, not a forecast — but
+    #: opening an episode itself from a single turn's single qualifying window
+    #: is the same "one data point, one work order" failure just moved from
+    #: severity into existence. A condition still present `bekleme_sn` later
+    #: opens immediately at that point, with no further delay — this gates the
+    #: opening moment only, never how long an already-open episode takes to
+    #: reflect a new reading. Unrelated to `histerezis_sn`, which gates CLOSING
+    #: and is unchanged.
+    #:
+    #: Engineering default, unverified: chosen to be comfortably shorter than
+    #: the timescale of every fault this system targets (hours to weeks) and
+    #: comfortably longer than the scan period, so it filters single-turn
+    #: noise without meaningfully delaying a real detection.
+    #:
+    #: IMPLEMENTATION NOTE: tracked in `OlayDeposu`'s own process memory
+    #: (`_bekleyen`), not in the database — see its docstring. A detector
+    #: restart mid-persistence starts that condition's clock over, same as a
+    #: cold start losing a baseline; this is judged an acceptable, documented
+    #: limitation rather than a reason to add a persistent-pending table to a
+    #: schema the review asked not be touched without strict need.
+    bekleme_sn: float = 15 * 60.0
+
+    #: Finding types exempt from the opening delay — they open on the very turn
+    #: that finds them, as every finding did before this decision. The arc is
+    #: the canonical, and so far only, case: the TVOC-2 is SIL-2 certified and
+    #: has already decided by the time its row exists (section 3.5); delaying
+    #: its own episode by `bekleme_sn` on top of that would add pure latency
+    #: for a device this system is explicitly not re-deciding.
+    bekleme_muaf: tuple[Tip, ...] = (Tip.ARK,)
+
 
 @dataclass(frozen=True)
 class Ayar:
@@ -443,6 +665,7 @@ class Ayar:
     katman0: Katman0Ayari = field(default_factory=Katman0Ayari)
     katman1: Katman1Ayari = field(default_factory=Katman1Ayari)
     katman2: Katman2Ayari = field(default_factory=Katman2Ayari)
+    katman2_yavas: Katman2YavasAyari = field(default_factory=Katman2YavasAyari)
     katman3: Katman3Ayari = field(default_factory=Katman3Ayari)
     olay: OlayAyari = field(default_factory=OlayAyari)
     api: ApiAyari = field(default_factory=ApiAyari)
