@@ -550,7 +550,7 @@ def build():
     vi, en, sw, vb, fb = U7.p('VI'), U7.p('EN'), U7.p('SW'), U7.p('VOUT'), U7.p('FB')
     S.wire(nC, vi); S.junction(vi); S.wire(vi, en)                       # EN = VI (hep açık; Vin < Vout iken yükseltir)
     S.flag((vi[0] - 3.81, vi[1])); S.junction((vi[0] - 3.81, vi[1]))     # süperkap düğümü: dış kaynak (ERC)
-    L1 = S.part(IND, 'L1', '4,7 µH', (154.94, ry + 8.89), rot=90, ref_at=(149.86, ry + 7.0), val_at=(153.0, ry + 7.0))
+    L1 = S.part(IND, 'L1', '2,2 µH', (154.94, ry + 8.89), rot=90, ref_at=(149.86, ry + 7.0), val_at=(153.0, ry + 7.0))
     S.wire(vi, (vi[0], ry + 8.89), L1.p('1')); S.wire(L1.p('2'), (sw[0], ry + 8.89), sw)
     S.flag((sw[0], ry + 8.89)); S.junction((sw[0], ry + 8.89))                # SW kütüphanede power_in tanımlı → ERC için bayrak
     S.pin_power(U7, '1', 'GND')

@@ -1334,7 +1334,7 @@
 		)
 		(comp
 			(ref "L1")
-			(value "4,7 µH")
+			(value "2,2 µH")
 			(fields
 				(field
 					(name "Footprint")
