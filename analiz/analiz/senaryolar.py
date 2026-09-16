@@ -175,6 +175,7 @@ class Uretec:
         gecmis_gun: float = 15.0,
         tespit_saat: float = 7.0,
         bozucu=None,
+        yavas_bozucu=None,
         sessiz_dakika: float = 0.0,
         gecikme_sn: float = 2.0,
         termal_kare: bool = False,
@@ -186,6 +187,13 @@ class Uretec:
         do report at one rate, but a fortnight of 10-second samples is ~120k rows
         per channel per module and the fixture would take longer to write than
         the detector takes to run — the statistics come out the same either way.
+
+        `yavas_bozucu(an, ilerleme_g, ortam, akim, termal, rng) -> (ortam, akim,
+        termal)` is decision D1's hook: called for every point in BOTH stretches
+        (`bozucu` only ever touched the dense one), with `ilerleme_g` the
+        fraction of the way through the WHOLE `gecmis_gun`-to-`simdi` span. A
+        days-to-weeks fault has to be visible in the sparse stretch too, or the
+        slow path's own daily aggregate query has nothing to aggregate.
         """
         rng = random.Random(f"{modul_id}:{self.tohum}")
         # Status rows draw from their own stream so adding them (integration
@@ -199,17 +207,28 @@ class Uretec:
         son = self.simdi - timedelta(minutes=sessiz_dakika)
         tespit_bas = son - timedelta(hours=tespit_saat)
         gecmis_bas = self.simdi - timedelta(days=gecmis_gun)
+        tum_sure_sn = max((self.simdi - gecmis_bas).total_seconds(), 1.0)
 
-        # --- baseline stretch: sparse, and only the channels that get a baseline
+        # --- baseline stretch: sparse. Carries the currents too (decision D1
+        # post-review fix — see this method's own docstring): the slow path's
+        # daily aggregate needs a current reading on every day it looks at, not
+        # only inside the last few hours of the dense stretch, or it can never
+        # accumulate `Katman2YavasAyari.asgari_kova` qualifying buckets.
         an = gecmis_bas
         while an < tespit_bas:
+            ilerleme_g = (an - gecmis_bas).total_seconds() / tum_sure_sn
             ortam = _ortam(an, p, rng)
             akim = _akim(an, p, rng)
             termal = _termal(ortam, akim, p, rng)
+            if yavas_bozucu is not None:
+                ortam, akim, termal = yavas_bozucu(an, ilerleme_g, ortam, akim, termal, rng)
             self._yaz(modul_id, an, OlcumTipi.ORTAM_SICAKLIK, ortam, gecikme_sn)
             self._yaz(modul_id, an, OlcumTipi.NEM, _nem(an, p, rng), gecikme_sn)
             self._yaz(modul_id, an, OlcumTipi.TERMAL_MAKS, termal, gecikme_sn)
             self._yaz(modul_id, an, OlcumTipi.TERMAL_ORT, termal - 9.0, gecikme_sn)
+            self._yaz(modul_id, an, OlcumTipi.AKIM_L1, akim, gecikme_sn)
+            self._yaz(modul_id, an, OlcumTipi.AKIM_L2, akim * rng.uniform(0.99, 1.01), gecikme_sn)
+            self._yaz(modul_id, an, OlcumTipi.AKIM_L3, akim * rng.uniform(0.99, 1.01), gecikme_sn)
             an += timedelta(seconds=p.seyrek_sn)
 
         # --- detection stretch: dense, every channel -------------------------
@@ -220,6 +239,12 @@ class Uretec:
             )
             ortam = _ortam(an, p, rng)
             akim = _akim(an, p, rng)
+            saglikli_termal = _termal(ortam, akim, p, rng)
+            if yavas_bozucu is not None:
+                ilerleme_g = (an - gecmis_bas).total_seconds() / tum_sure_sn
+                ortam, akim, saglikli_termal = yavas_bozucu(
+                    an, ilerleme_g, ortam, akim, saglikli_termal, rng
+                )
             olcumler: dict[OlcumTipi, float | None] = {
                 OlcumTipi.ORTAM_SICAKLIK: ortam,
                 OlcumTipi.NEM: _nem(an, p, rng),
@@ -228,7 +253,6 @@ class Uretec:
                 OlcumTipi.AKIM_L3: akim * rng.uniform(0.99, 1.01),
                 OlcumTipi.AKIM_NOTR: abs(rng.gauss(4.0, 1.5)),
             }
-            saglikli_termal = _termal(ortam, akim, p, rng)
             olcumler[OlcumTipi.TERMAL_MAKS] = saglikli_termal
             olcumler[OlcumTipi.TERMAL_ORT] = saglikli_termal - 9.0
 
@@ -442,6 +466,45 @@ def _bozucu_gurultulu(an, ilerleme, olcumler, kaliteler, ek, rng):
         olcumler[OlcumTipi.TERMAL_MAKS] += rng.uniform(9.0, 14.0)
 
 
+def _yavas_gevsek_klemens(an, ilerleme_g, ortam, akim, termal, rng):
+    """D5. Scenario 1's fault, this time developing over the WHOLE gecmis_gun
+    span rather than injected only into the last few hours: a loose terminal
+    that a technician has been driving past for two weeks, not two hours.
+
+    Current and ambient are untouched — same signature as the fast injection,
+    just stretched. By the end of a 15-day fixture run this reaches roughly
+    +35 K of unexplained heat, which decision D1's slow path (and nothing
+    faster) is supposed to catch; see
+    tests/test_zaman_olcekleri.py::test_yavas_gevsek_klemens_senaryosu.
+    """
+    return ortam, akim, termal + 35.0 * ilerleme_g**1.3
+
+
+def _yavas_ortam_yukselisi(an, ilerleme_g, ortam, akim, termal, rng):
+    """D5 HARD NEGATIVE. Ambient climbs over days; the surface follows it
+    exactly, so load-normalized heating (what the slow path actually judges)
+    stays flat. A detector that watched raw temperature alone would see the
+    same +8 K rise `_bozucu_ortak_isinma` produces in six hours, stretched
+    over two weeks instead — and must stay just as silent.
+    """
+    yeni_ortam = ortam + 8.0 * ilerleme_g
+    return yeni_ortam, akim, termal + (yeni_ortam - ortam)
+
+
+def _yavas_asiri_yuk(an, ilerleme_g, ortam, akim, termal, rng):
+    """D5 HARD NEGATIVE. Load climbs +40% over days; the extra heat is exactly
+    what I^2 predicts, so this is `asiri_yuk`'s own fault category at a slow
+    time scale, not a loose terminal — and must not be reported as one
+    (`Tip.AKIM_SICAKLIK_SAPMASI`/`gevsek_klemens`). Kept modest enough in
+    magnitude that it also stays under layer 1's absolute limits, so the
+    correct output is no episode at all, like every other hard negative in
+    this file.
+    """
+    carpan = 1.0 + 0.4 * ilerleme_g
+    yukselme = max(termal - ortam, 0.0)
+    return ortam, akim * carpan, ortam + yukselme * carpan**2
+
+
 def _bozucu_ortak_isinma(an, ilerleme, olcumler, kaliteler, ek, rng):
     """HARD NEGATIVE. A hot afternoon: the whole site warms together.
 
@@ -578,6 +641,34 @@ SENARYOLAR: tuple[Senaryo, ...] = (
     Senaryo("TR085-P01-M3", "ortak_isinma_03", "Sıcak öğleden sonra; tüm saha birlikte ısınıyor."),
     Senaryo("TR085-P02-M1", "ortak_isinma_04", "Sıcak öğleden sonra; tüm saha birlikte ısınıyor."),
     Senaryo("TR096-P01-M1", "gec_veri_01", "Bağlantı kesildi, birikmiş veri sonradan geldi. Saat doğru."),
+    # --- D1/D5 (post-review): the slow path, and its own hard negatives -----
+    Senaryo(
+        "TR041-P03-M1",
+        "senaryo_08_gevsek_klemens_yavas",
+        "Günler içinde yavaşça ısınan tek nokta; akım ve ortam sabit. "
+        "Yalnızca yavaş yol (D1) yakalar.",
+        beklenen=frozenset({Tip.AKIM_SICAKLIK_SAPMASI}),
+        senaryo="gevsek_klemens",
+        # Approximation, documented (see analiz/senaryolar.py's kur() note):
+        # the fault actually develops across the whole gecmis_gun span, not
+        # only the narrow detection window baslangic_oran/kritik_oran scale
+        # against. Treating the visible detection window as "already in the
+        # fault, critical by its end" is the closest fit without extending
+        # the label onset format's semantics to a second timescale.
+        baslangic_oran=0.0,
+        kritik_oran=1.0,
+    ),
+    Senaryo(
+        "TR041-P03-M2",
+        "hn_09_ortam_yukselisi_yavas",
+        "Ortam sıcaklığı günler içinde yükseliyor; yüzey onu takip ediyor, "
+        "yük-normalize ısınma sabit.",
+    ),
+    Senaryo(
+        "TR041-P03-M3",
+        "hn_10_asiri_yuk_yavas",
+        "Yük günler içinde %40 artıyor; ısınma I^2 ile tutarlı, gevşek klemens değil.",
+    ),
 )
 
 #: How long the detection stretch is, and which module goes dark for how long.
@@ -611,6 +702,15 @@ _BOZUCULAR = {
     "TR085-P02-M1": _bozucu_ortak_isinma,
 }
 
+#: modul_id -> the SLOW (days-to-weeks, decision D1/D5) injection to apply,
+#: separate from `_BOZUCULAR` because it modifies the sparse baseline stretch
+#: as well as the dense one — see `Uretec.uret`'s `yavas_bozucu` parameter.
+_YAVAS_BOZUCULAR = {
+    "TR041-P03-M1": _yavas_gevsek_klemens,
+    "TR041-P03-M2": _yavas_ortam_yukselisi,
+    "TR041-P03-M3": _yavas_asiri_yuk,
+}
+
 #: Modules that carry a full frame at every instant, so `kanit.kare_id` has
 #: something to point at. Every real module does (integration decision); the
 #: fixture set limits it to the thermal scenarios to keep the suite's write
@@ -639,6 +739,7 @@ def kur(
             senaryo.modul_id,
             gecmis_gun=gecmis_gun,
             bozucu=_BOZUCULAR.get(senaryo.modul_id),
+            yavas_bozucu=_YAVAS_BOZUCULAR.get(senaryo.modul_id),
             tespit_saat=TESPIT_SAAT,
             sessiz_dakika=SESSIZ_DAKIKA.get(senaryo.modul_id, 0.0),
             termal_kare=senaryo.modul_id in _KARELI,
