@@ -223,6 +223,15 @@ sıra: soldan sağa);
 **F** izometrik. PCB kutu içinde (5, 5, 39,4) mm; kart üstü konumlar
 [02-pcb-yerlesimi.svg](02-pcb-yerlesimi.svg)'de PCB koordinatıyla verilir. Üretim çizimi değildir — §1.4.)*
 
+### PCB termal notu — 3,3 V LDO (U6, AP7361C-33E, SOT-223)
+
+En kötü durumda (+85 °C ortam, Wi-Fi tepe ≈385 mA, ray 4,7 V) LDO kaybı ≈0,54 W; datasheet
+θJA 110 °C/W (minimum pad) ile TJ ≈144 °C, kapanma eşiği 150 °C — pay dar. **Layout kuralı
+(şema/model değişmez):** tab (pin 2, GND) altında **≥ 1 cm² bakır alan**, **termal via dizisi**
+(≥ 3×3, Ø0,3 mm) ve arka yüz GND dolgusu; hedef θJA 85–95 °C/W → TJ ≈131–136 °C. Kart yerleşiminde
+LDO penceresi (X 70–76,5 / Y 34–41; süperkap üstü ile RAC05 altı arası 8,5 mm) buna yeter; DPAK
+dik sığmadığı için paket değiştirilmemiştir. Kaynak ve hesap: [KAYNAKÇA.md §1.10](KAYNAKCA.md).
+
 **Dokümana yazılacak ifade:**
 > Kutunun ölçüsü **120 × 80 × 50 mm** olarak belirlenmiştir. Karar kaydındaki "~10 × 7 × 3,5 cm"
 > ifadesi tasarım hedefidir; seçilen AC/DC modülün (31,7 × 26,7 × 21,8 mm) ve yedek depo

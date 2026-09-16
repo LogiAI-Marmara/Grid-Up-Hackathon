@@ -143,9 +143,17 @@ tek adımda cevaplanması.
 > (Wi-Fi tepe ~350 mA + MLX 23 + SHT31 ~2 + RS-485 ~10 ≈ **385 mA**) ve 5 V rayı ≈4,7 V iken
 > LDO kaybı **P = (4,7 − 3,3) × 0,385 ≈ 0,54 W** → +85 °C ortamda **TJ ≈ 85 + 110 × 0,54 ≈ 144 °C**,
 > yani kapanma sınırına **~6 °C** kalır. **Ortalama akımda güvenlidir**, ancak tepe yükte pay
-> dardır. **Öneri:** seri üretimde **TO252 (DPAK, θJA 95 °C/W → TJ ≈ 136 °C)** veya SOT-223'te
-> **genişletilmiş bakır alan + termal via** kullanılmalı; prototipte TJ ölçülerek doğrulanır.
-> 3V3 rayının yedek modda (4,7 V float) çalışması bu kaybı bir miktar artırır — ölçüm önemli.
+> dardır.
+>
+> **Karar: SOT-223 kalır; layout ile telafi.** Datasheet θJA'sı (110 °C/W, Note 9) minimum pad
+> ile ölçülmüştür; tab (pin 2, GND) altında **≥ 1 cm² bakır alan + termal via dizisi** ve arka yüz
+> GND dolgusuyla gerçek θJA **85–95 °C/W** bandına iner → **TJ ≈ 131–136 °C**, pay 14–19 °C. Tepe
+> yük kısa sürelidir (Wi-Fi paket başına ms mertebesi); ortalama ~100 mA'da TJ ≈ 100 °C. 150 °C
+> arıza değil koruma eşiğidir. Yedek modda ray 4,3 V ve yük ~50 mA olduğundan kayıp düşer.
+> **Paket alternatifleri neden seçilmedi:** TO252 (DPAK, 95 °C/W) PCB'de LDO penceresine (Y 33,5–42,
+> 8,5 mm) dik sığmaz — yatay (90°) konumda X 62–76,75 boşluğuna sığar, gerekirse `model_pcb.py`'de
+> yapılır; U-DFN3030-8 (70 °C/W) ve SO-8EP (100 °C/W) 8 pinlidir → şema/netlist revizyonu gerekir.
+> Layout notu: [04-mekanik-yerlesim.md §4.6](04-mekanik-yerlesim.md).
 
 ### 1.11 Boost çevirici — TI TPS61099
 

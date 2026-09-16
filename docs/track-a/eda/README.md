@@ -37,7 +37,7 @@ python build.py                    # KiCad 10 (winget KiCad.KiCad) varsayılan y
 - **CT ön ucu ×4**: klemens → R_burden + V_bias (2× 100 k + 10 µF) → 1 kΩ / 100 nF RC → CT_L1…CT_N.
 - **U4 MAX3485**: RO/DI ↔ UART1, RE+DE ↔ GPIO21, A/B → klemens + 120 Ω.
 - **Besleme**: L/N/PE → F1 + MOV → **U5 RAC05-05SK/277** → 5V_RAW (100 k / 47 k → VSENSE) → **D1** Schottky (OR) → +5V rayı
-  → **U6 AP7361C-33E** (1 A, dropout ≈0,3 V) → +3V3; yedek yolu **R_şarj → C32 + C33 (2× Eaton HV1030 10 F / 2,7 V seri, R53/R54 dengeleme) → U7 TPS61099 boost 4,6 V → D2 → +5V**
+  → **U6 AP7361C-33E** (1 A, dropout ≈0,3 V; SOT-223, layout: tab altı ≥ 1 cm² bakır + termal via — 04 §4.6) → +3V3; yedek yolu **R_şarj → C32 + C33 (2× Eaton HV1030 10 F / 2,7 V seri, R53/R54 dengeleme) → U7 TPS61099 boost 4,6 V → D2 → +5V**
   (float 4,6 V: +85 °C'de 2,3 V/hücre; ~50 J → ~5 dk @ 50 mA). PWR_FLAG'ler yalnız ERC için (dış kaynaklar; SW pini kütüphanede power_in).
 - Anten: SMA panel konnektörü (U.FL pigtail RF, şemada net değil). Genişleme 2×5: 3V3 / 5V / GND / SDA / SCL / GPIO10 / 11.
 
