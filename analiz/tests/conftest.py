@@ -1,5 +1,12 @@
 """Shared test fixtures.
 
+THE SCHEMA COMES FROM TRACK A. `sema_kur` applies `toplama/migrations/*.sql`
+and then track B's own `100_analiz.sql`; nothing in this package defines a
+shared table. On a checkout without `toplama/` (this branch, before track A's
+PR is on main) point `GRIDUP_TOPLAMA_MIGRASYON_DIZINI` at an exported copy —
+`git archive origin/feature/track-a toplama/migrations sozlesmeler` — and
+`GRIDUP_SOZLESMELER_KOK` at the directory containing `sozlesmeler/`.
+
 Two databases, on purpose:
 
   `baglanti`        function-scoped, truncated between tests. Small, explicit
@@ -75,7 +82,7 @@ def baglanti(ayar: Ayar):
         with b.cursor() as imlec:
             imlec.execute(
                 "TRUNCATE gridup.anomali_gecis, gridup.anomali, gridup.tarama_imleci, "
-                "gridup.olcum, gridup.termal_kare, gridup.termal_ozet, "
+                "gridup.olcum, gridup.termal_kare, gridup.termal_ozet, gridup.modul_durum, "
                 "gridup.modul, gridup.pano, gridup.saha RESTART IDENTITY CASCADE"
             )
             imlec.execute("ALTER SEQUENCE gridup.anomali_sira RESTART WITH 1")

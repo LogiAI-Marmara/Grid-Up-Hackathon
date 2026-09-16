@@ -90,7 +90,10 @@ SENARYO_ADLARI: tuple[str, ...] = (
 #: testing one specific classification.
 SENARYO_TIPLERI: dict[str, frozenset[Tip]] = {
     "gevsek_klemens": frozenset({Tip.AKIM_SICAKLIK_SAPMASI, Tip.SICAK_NOKTA}),
-    "asiri_yuk": frozenset({Tip.SICAK_NOKTA, Tip.ORTAM_SICAKLIK_YUKSEK}),
+    # `asiri_yuk` is the diagnosis (integration phase); the two observations it
+    # surfaces as today remain accepted, for the same reason a loose terminal
+    # accepts both its diagnosis and its observation.
+    "asiri_yuk": frozenset({Tip.ASIRI_YUK, Tip.SICAK_NOKTA, Tip.ORTAM_SICAKLIK_YUKSEK}),
     "faz_dengesizligi": frozenset({Tip.FAZ_DENGESIZLIGI}),
     "nem_yukselmesi": frozenset({Tip.NEM_YUKSEK}),
     "ark_olayi": frozenset({Tip.ARK}),

@@ -1,7 +1,9 @@
 -- 100 — track B's own tables: the anomaly event, its journal, and the scan cursor.
 --
 -- Numbered from 100 so track A can keep adding 004, 005 ... without either
--- track having to ask the other what number is free.
+-- track having to ask the other what number is free. Applied AFTER track A's
+-- `toplama/migrations/*.sql`, which define every shared table; this file
+-- defines none of them and only adds the indexes track B needs on them.
 --
 -- Fields follow section 7.2 of the track B decision record, which amends
 -- contract 3: `zaman` is replaced by the pair `ilk_gorulme` / `son_gorulme`,
@@ -78,9 +80,11 @@ CREATE TABLE IF NOT EXISTS gridup.anomali (
 
     CONSTRAINT anomali_id_bicim CHECK (id ~ '^[A-Za-z0-9_-]{1,64}$'),
 
+    -- The `tip` vocabulary of sozlesmeler/enums.py, verbatim. `asiri_yuk` was
+    -- added in the integration phase.
     CONSTRAINT anomali_tip_gecerli CHECK (tip IN (
         'sicak_nokta', 'akim_sicaklik_sapmasi', 'faz_dengesizligi',
-        'nem_yuksek', 'ortam_sicaklik_yuksek', 'ark',
+        'nem_yuksek', 'ortam_sicaklik_yuksek', 'asiri_yuk', 'ark',
         'sensor_arizasi', 'modul_saglik'
     )),
 
@@ -209,6 +213,34 @@ COMMENT ON TABLE gridup.tarama_imleci IS
     'Scan cursor. Persisted so a restart resumes where it stopped, and rewindable by hand so history can be re-scanned after an algorithm change.';
 COMMENT ON COLUMN gridup.tarama_imleci.son_islenen IS
     'Last processed alindi_zaman (arrival time), exclusive lower bound of the next turn''s range.';
+
+-- ---------------------------------------------------------------------------
+-- Track B's indexes on track A's tables. Additive only: no column, no
+-- constraint, no table is changed here.
+-- ---------------------------------------------------------------------------
+--
+-- The scan loop's range query is `alindi_zaman > cursor ORDER BY alindi_zaman`
+-- on every table an arrival can come from. Track A never asks that question and
+-- has no index for it; without one every turn is a sequential scan of the
+-- partition (README, T5: 4.8 ms with the index against 3.1 million rows).
+
+CREATE INDEX IF NOT EXISTS olcum_alindi_zaman_idx
+    ON gridup.olcum (alindi_zaman);
+
+CREATE INDEX IF NOT EXISTS termal_ozet_alindi_zaman_idx
+    ON gridup.termal_ozet (alindi_zaman);
+
+-- `modul_durum` arrivals are a "re-evaluate this module" signal too (a module
+-- that has fallen back to backup power may send nothing but status). Guarded,
+-- so this file still applies against a track A schema that predates the table;
+-- the scan loop itself requires it.
+DO $$
+BEGIN
+    IF to_regclass('gridup.modul_durum') IS NOT NULL THEN
+        CREATE INDEX IF NOT EXISTS modul_durum_alindi_zaman_idx
+            ON gridup.modul_durum (alindi_zaman);
+    END IF;
+END $$;
 
 INSERT INTO gridup.sema_surum (surum, ad)
 VALUES (100, '100_analiz')
