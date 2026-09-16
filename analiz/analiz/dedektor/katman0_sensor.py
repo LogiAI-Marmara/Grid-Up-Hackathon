@@ -17,18 +17,29 @@ Three independent tests, because the three failure modes look different:
                   do not hold still to six decimal places
   - out of range  the value is not a measurement at all
 
-Plus the module's own health (scenario 7): silence, and clock drift.
+Plus the module's own health (scenario 7): silence, clock drift, and — since
+the integration phase gave `modul_durum` a table — loss of mains supply and a
+fading radio link.
 """
 
 from __future__ import annotations
 
-from datetime import timedelta
+from datetime import datetime
 
 from ..ayar import Ayar
-from ..gerekce import aralik_disi, donuk_sensor, kalite_bozuk, modul_sessiz, saat_kaymasi
+from ..gerekce import (
+    aralik_disi,
+    besleme_kaybi,
+    donuk_sensor,
+    ileri_tarihli,
+    kalite_bozuk,
+    modul_sessiz,
+    saat_kaymasi,
+    sinyal_zayif,
+)
 from ..pencere import Pencere, Seri
 from ..skor import SEVIYE_SKOR_TABANI
-from ..sozlesme import OLCUM_ARALIK, Kalite, OlcumTipi, Seviye, Tip
+from ..sozlesme import OLCUM_ARALIK, Besleme, Kalite, OlcumTipi, Seviye, Tip
 from .taban import Bulgu, KanalDurumu
 
 __all__ = ["calistir"]
@@ -187,15 +198,13 @@ def _donuk_kuyruk(seri: Seri, tolerans: float) -> tuple[int, float, float] | Non
 
 
 def _modul_sagligi(pencere: Pencere, ayar: Ayar) -> list[Bulgu]:
-    """Scenario 7 — the module's own health, as far as the database can show it.
+    """Scenario 7 — the module's own health.
 
-    Two signals are available: silence, and the gap between `zaman` and
-    `alindi_zaman`. The contract's `modul_durum` also carries `besleme` and
-    `sinyal`, which would make this layer considerably stronger — but the
-    collector on track A's branch drops both on the floor (it persists only
-    `yazilim_surumu` and `son_gorulme` into `gridup.modul`), so there is nowhere
-    to read them from. Recorded in the README under "Contract mismatches";
-    wiring them up here is a few lines once a table exists.
+    Four signals, all `modul_saglik`: silence, clock drift, loss of mains
+    supply, and a weak link. The engine keeps one finding per `tip`, so when
+    several fire at once the worst survives and `kanit.neden` says which. Each
+    test is independent — a module on backup power with a good clock is a
+    power finding and nothing else.
     """
     k0 = ayar.katman0
     bulgular: list[Bulgu] = []
@@ -215,6 +224,7 @@ def _modul_sagligi(pencere: Pencere, ayar: Ayar) -> list[Bulgu]:
                     ),
                     zaman=pencere.son_olcum_zaman,
                     kanit={
+                        "neden": "sessizlik",
                         "pencere": _pencere_kaniti(pencere),
                         "esik": k0.sessizlik_sn,
                         "olculen": round(sessizlik, 1),
@@ -222,43 +232,163 @@ def _modul_sagligi(pencere: Pencere, ayar: Ayar) -> list[Bulgu]:
                 )
             )
 
-    kayma = _azami_saat_kaymasi(pencere)
-    if kayma is not None and abs(kayma[0]) > k0.saat_kaymasi_sn:
-        kayma_sn, kayma_zaman = kayma
+    kayma = _saat_kaymasi(pencere, ayar)
+    if kayma is not None:
+        bulgular.append(kayma)
+
+    bulgular.extend(_durum_sagligi(pencere, ayar))
+    return bulgular
+
+
+def _saat_kaymasi(pencere: Pencere, ayar: Ayar) -> Bulgu | None:
+    """Clock drift, per the integration-phase table — distinguished from late data.
+
+    Per sample the gap is `alindi_zaman - zaman`. Three cases:
+
+      gap < -tolerance anywhere    future-dated: measured after it was received.
+                                   Certain drift; the module's clock is ahead.
+      min(gap) > threshold         nothing in the window was fresh, so the
+                                   offset is in the clock, not the network.
+      min(gap) ~ 0, max(gap) high  late (backfilled) data — a module that lost
+                                   its uplink and then sent the backlog. Not an
+                                   anomaly. `/saglik` reports it as data delay.
+
+    The previous rule judged the *maximum* gap and therefore alarmed on every
+    backlog, which contradicted section 3.6's promise that late data is caught
+    for free. Status rows count too: they ride in the same packet as the
+    measurements, so they carry the same clock.
+    """
+    k0 = ayar.katman0
+    en_kucuk: tuple[float, datetime] | None = None
+    en_ileri: tuple[float, datetime] | None = None
+
+    def bak(gecikme: float, zaman: datetime) -> None:
+        nonlocal en_kucuk, en_ileri
+        if en_kucuk is None or gecikme < en_kucuk[0]:
+            en_kucuk = (gecikme, zaman)
+        if gecikme < -k0.ileri_tarih_tolerans_sn and (
+            en_ileri is None or gecikme < en_ileri[0]
+        ):
+            en_ileri = (gecikme, zaman)
+
+    for seri in pencere.seriler.values():
+        for nokta in seri.noktalar:
+            bak(nokta.gecikme_sn, nokta.zaman)
+    for durum in pencere.durumlar:
+        bak(durum.gecikme_sn, durum.zaman)
+
+    if en_ileri is not None:
+        kayma_sn, kayma_zaman = en_ileri
+        return Bulgu(
+            tip=Tip.MODUL_SAGLIK,
+            seviye=k0.saat_kaymasi_seviye,
+            skor=_skor(k0.saat_kaymasi_seviye),
+            katman=0,
+            gerekce=ileri_tarihli(kayma_sn, kayma_zaman.strftime("%Y-%m-%dT%H:%M:%SZ")),
+            zaman=kayma_zaman,
+            kanit={
+                "neden": "saat_kaymasi",
+                "yon": "ileri",
+                "pencere": _pencere_kaniti(pencere),
+                "esik": -k0.ileri_tarih_tolerans_sn,
+                "olculen": round(kayma_sn, 1),
+            },
+        )
+
+    if en_kucuk is not None and en_kucuk[0] > k0.saat_kaymasi_sn:
+        kayma_sn, kayma_zaman = en_kucuk
+        return Bulgu(
+            tip=Tip.MODUL_SAGLIK,
+            seviye=k0.saat_kaymasi_seviye,
+            skor=_skor(k0.saat_kaymasi_seviye),
+            katman=0,
+            gerekce=saat_kaymasi(kayma_sn, k0.saat_kaymasi_sn),
+            zaman=kayma_zaman,
+            kanit={
+                "neden": "saat_kaymasi",
+                "yon": "geri",
+                "pencere": _pencere_kaniti(pencere),
+                "esik": k0.saat_kaymasi_sn,
+                "olculen": round(kayma_sn, 1),
+            },
+        )
+    return None
+
+
+def _durum_sagligi(pencere: Pencere, ayar: Ayar) -> list[Bulgu]:
+    """Power loss and weak signal, from the module's own status rows.
+
+    `besleme = yedek` on the newest `besleme_yedek_ardisik` rows is a power
+    finding; the median `sinyal` over the newest `sinyal_ornek` rows below the
+    dBm threshold is a link finding. Both take a few rows rather than one, for
+    the same reason no layer judges a single sample — but a run of packets
+    saying "I am on the capacitor" is the module's own statement, and it is
+    reported without waiting for the silence that would otherwise follow.
+    """
+    k0 = ayar.katman0
+    durumlar = pencere.durumlar
+    bulgular: list[Bulgu] = []
+    if len(durumlar) < k0.asgari_durum_ornek:
+        return bulgular
+
+    # --- supply ------------------------------------------------------------
+    ardisik = 0
+    for durum in reversed(durumlar):
+        if durum.besleme is not Besleme.YEDEK:
+            break
+        ardisik += 1
+    if ardisik >= max(1, k0.besleme_yedek_ardisik):
+        ilk_yedek = durumlar[len(durumlar) - ardisik]
+        dakika = (durumlar[-1].zaman - ilk_yedek.zaman).total_seconds() / 60.0
         bulgular.append(
             Bulgu(
                 tip=Tip.MODUL_SAGLIK,
-                seviye=k0.saat_kaymasi_seviye,
-                skor=_skor(k0.saat_kaymasi_seviye),
+                seviye=k0.besleme_seviye,
+                skor=_skor(k0.besleme_seviye),
                 katman=0,
-                gerekce=saat_kaymasi(kayma_sn, k0.saat_kaymasi_sn),
-                zaman=kayma_zaman,
+                gerekce=besleme_kaybi(
+                    ardisik, dakika, ilk_yedek.zaman.strftime("%Y-%m-%dT%H:%M:%SZ")
+                ),
+                zaman=durumlar[-1].zaman,
                 kanit={
+                    "neden": "besleme",
                     "pencere": _pencere_kaniti(pencere),
-                    "esik": k0.saat_kaymasi_sn,
-                    "olculen": round(kayma_sn, 1),
+                    "esik": k0.besleme_yedek_ardisik,
+                    "olculen": ardisik,
+                    "besleme": Besleme.YEDEK.value,
+                    "ilk_yedek": ilk_yedek.zaman.strftime("%Y-%m-%dT%H:%M:%SZ"),
                 },
             )
         )
 
+    # --- link --------------------------------------------------------------
+    sonuncular = durumlar[-max(1, k0.sinyal_ornek):]
+    sinyaller = sorted(d.sinyal for d in sonuncular)
+    n = len(sinyaller)
+    medyan = (
+        float(sinyaller[n // 2])
+        if n % 2
+        else (sinyaller[n // 2 - 1] + sinyaller[n // 2]) / 2.0
+    )
+    if medyan < k0.sinyal_zayif_dbm:
+        bulgular.append(
+            Bulgu(
+                tip=Tip.MODUL_SAGLIK,
+                seviye=k0.sinyal_seviye,
+                skor=_skor(k0.sinyal_seviye),
+                katman=0,
+                gerekce=sinyal_zayif(medyan, k0.sinyal_zayif_dbm, n),
+                zaman=durumlar[-1].zaman,
+                kanit={
+                    "neden": "sinyal",
+                    "pencere": _pencere_kaniti(pencere),
+                    "esik": k0.sinyal_zayif_dbm,
+                    "olculen": round(medyan, 1),
+                    "ornek": n,
+                },
+            )
+        )
     return bulgular
-
-
-def _azami_saat_kaymasi(pencere: Pencere):
-    """Largest |arrival - measurement| gap in the window, with its timestamp.
-
-    A positive gap is ordinary network latency; the threshold in `ayar.py` is
-    what separates "the radio was slow" from "the module's clock is wrong". A
-    *negative* gap — measured in the future relative to its own arrival — can
-    only be a wrong clock.
-    """
-    en_buyuk = None
-    for seri in pencere.seriler.values():
-        for nokta in seri.noktalar:
-            gecikme = nokta.gecikme_sn
-            if en_buyuk is None or abs(gecikme) > abs(en_buyuk[0]):
-                en_buyuk = (gecikme, nokta.zaman)
-    return en_buyuk
 
 
 def _pencere_kaniti(pencere: Pencere) -> list[str]:

@@ -267,8 +267,11 @@ class Tarayici:
         than on the present.
 
         The bound is on `alindi_zaman`, not on `zaman`; see `TaramaAyari.imlec_alani`.
-        Both measurement and thermal-summary arrivals count, because a thermal
-        summary alone is enough to change what the detector would conclude.
+        Measurement, thermal-summary and module-status arrivals all count: a
+        thermal summary alone is enough to change what the detector would
+        conclude, and a module that has fallen back to backup power may be
+        sending nothing but its status — that is precisely when it must be
+        looked at.
         """
         with self._baglanti.cursor() as imlec:
             imlec.execute(
@@ -281,6 +284,10 @@ class Tarayici:
                     UNION ALL
                     SELECT modul_id, zaman, 1 AS sayi
                     FROM gridup.termal_ozet
+                    WHERE alindi_zaman > %(bas)s AND alindi_zaman <= %(bit)s
+                    UNION ALL
+                    SELECT modul_id, zaman, 1 AS sayi
+                    FROM gridup.modul_durum
                     WHERE alindi_zaman > %(bas)s AND alindi_zaman <= %(bit)s
                 ) g
                 GROUP BY modul_id

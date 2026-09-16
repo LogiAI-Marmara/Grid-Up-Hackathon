@@ -10,7 +10,7 @@ can be run against:
     4  nem yukselmesi       humidity threshold, condensation risk
     5  ark olayi            TVOC-2 trip record
     6  sensor arizasi       the measurement freezes or talks nonsense
-    7  modul sagligi        silence, clock drift
+    7  modul sagligi        silence, clock drift, power loss, weak signal
 
 Scenarios 6 and 7 are not grid faults — they are the system's own health, and
 section 7.6 is explicit that they are there so we can claim the system does not
@@ -45,7 +45,7 @@ from datetime import datetime, timedelta
 
 from .etiket import EtiketDosyasi, EtiketSenaryosu, SURUM
 from .fikstur import Fikstur
-from .sozlesme import Kalite, OlcumTipi, Tip
+from .sozlesme import Besleme, Kalite, OlcumTipi, Tip
 
 __all__ = [
     "Senaryo",
@@ -244,9 +244,21 @@ class Uretec:
                 "gecikme_sn": gecikme_sn,
                 "piksel": (18, 11),
                 "bolge_taban": saglikli_termal - 3.0,
+                # Contract 2's status half, one row per packet. A healthy module
+                # is on mains with a comfortable link; a bozucu changes either.
+                "besleme": Besleme.SEBEKE,
+                "sinyal": int(rng.gauss(-72.0, 3.0)),
             }
             if bozucu is not None:
                 bozucu(an, ilerleme, olcumler, kaliteler, ek, rng)
+
+            self.fikstur.durum(
+                modul_id,
+                an,
+                besleme=ek["besleme"],
+                sinyal=ek["sinyal"],
+                alindi_zaman=an + timedelta(seconds=ek["gecikme_sn"]),
+            )
 
             for olcum_tipi, deger in olcumler.items():
                 self._yaz(
@@ -269,7 +281,9 @@ class Uretec:
                     maks_sutun=sutun,
                     maks_satir=satir,
                     bolge_ort=(taban - 1.2, taban + 0.8, taban - 0.6, taban + 1.0),
-                    kare=termal_kare and ilerleme > 0.98,
+                    # A full frame at every instant (integration decision), for
+                    # the modules that carry frames in this set.
+                    kare=termal_kare,
                     alindi_zaman=an + timedelta(seconds=ek["gecikme_sn"]),
                 )
             an += timedelta(seconds=p.sik_sn)
@@ -376,8 +390,35 @@ def _bozucu_sensor_donuk(an, ilerleme, olcumler, kaliteler, ek, rng):
 
 
 def _bozucu_saat_kaymasi(an, ilerleme, olcumler, kaliteler, ek, rng):
-    """Scenario 7b. The module's clock has drifted; its rows arrive late by the drift."""
+    """Scenario 7b. The module's clock is behind: EVERY row arrives 15 min after
+    its own timestamp, so the minimum gap in the window is 15 min — the
+    integration-phase rule's "no reading is fresh" case. (A backlog would have a
+    minimum near zero; see `_bozucu_gec_veri`.)"""
     ek["gecikme_sn"] = 900.0
+
+
+def _bozucu_besleme_kaybi(an, ilerleme, olcumler, kaliteler, ek, rng):
+    """Scenario 7c. Mains lost at 80% of the stretch; the supercapacitor carries
+    the module and every packet since says so. Measurements stay healthy — the
+    finding must come from the status rows alone."""
+    if ilerleme >= 0.8:
+        ek["besleme"] = Besleme.YEDEK
+
+
+def _bozucu_sinyal_zayif(an, ilerleme, olcumler, kaliteler, ek, rng):
+    """Scenario 7d. The link fades over the stretch, from -72 to about -112 dBm."""
+    ek["sinyal"] = int(-72.0 - 40.0 * ilerleme + rng.gauss(0, 2.0))
+
+
+def _bozucu_gec_veri(an, ilerleme, olcumler, kaliteler, ek, rng):
+    """HARD NEGATIVE. Late data: the uplink was down for the first 60% of the
+    stretch and the backlog arrived all at once when it came back. Measurement
+    times are right, arrival times are late — the *maximum* gap is hours, the
+    *minimum* is the usual two seconds. Not a clock fault; the old rule alarmed
+    on it, the integration-phase rule must not."""
+    if ilerleme < 0.6:
+        # Everything measured before 60% arrives at the 60% mark.
+        ek["gecikme_sn"] = 2.0 + (0.6 - ilerleme) * TESPIT_SAAT * 3600.0
 
 
 def _bozucu_gurultulu(an, ilerleme, olcumler, kaliteler, ek, rng):
@@ -496,6 +537,24 @@ SENARYOLAR: tuple[Senaryo, ...] = (
         senaryo="modul_saglik",
         # Drift is present from the first sample and does not escalate.
     ),
+    Senaryo(
+        "TR063-P02-M3",
+        "senaryo_07c_besleme_kaybi",
+        "Şebeke beslemesi kesildi; modül yedek (süperkapasitör) beslemede.",
+        beklenen=frozenset({Tip.MODUL_SAGLIK}),
+        senaryo="modul_saglik",
+        # Instantaneous at the moment mains went: onset and critical coincide.
+        baslangic_oran=0.8,
+        kritik_oran=0.8,
+    ),
+    Senaryo(
+        "TR063-P02-M4",
+        "senaryo_07d_sinyal_zayif",
+        "Alınan sinyal gücü -72'den -112 dBm'e düşüyor.",
+        beklenen=frozenset({Tip.MODUL_SAGLIK}),
+        senaryo="modul_saglik",
+        # A fading link has no critical moment of its own; it ends in silence.
+    ),
     # --- clean modules: the set is worthless without them -------------------
     Senaryo("TR041-P01-M2", "temiz_01", "Hiçbir şey enjekte edilmedi."),
     Senaryo("TR041-P01-M3", "temiz_02", "Hiçbir şey enjekte edilmedi."),
@@ -511,6 +570,7 @@ SENARYOLAR: tuple[Senaryo, ...] = (
     Senaryo("TR085-P01-M2", "ortak_isinma_02", "Sıcak öğleden sonra; tüm saha birlikte ısınıyor."),
     Senaryo("TR085-P01-M3", "ortak_isinma_03", "Sıcak öğleden sonra; tüm saha birlikte ısınıyor."),
     Senaryo("TR085-P02-M1", "ortak_isinma_04", "Sıcak öğleden sonra; tüm saha birlikte ısınıyor."),
+    Senaryo("TR096-P01-M1", "gec_veri_01", "Bağlantı kesildi, birikmiş veri sonradan geldi. Saat doğru."),
 )
 
 #: How long the detection stretch is, and which module goes dark for how long.
@@ -531,6 +591,9 @@ _BOZUCULAR = {
     "TR063-P01-M1": _bozucu_sensor_kalite,
     "TR063-P01-M2": _bozucu_sensor_donuk,
     "TR063-P02-M2": _bozucu_saat_kaymasi,
+    "TR063-P02-M3": _bozucu_besleme_kaybi,
+    "TR063-P02-M4": _bozucu_sinyal_zayif,
+    "TR096-P01-M1": _bozucu_gec_veri,
     "TR074-P01-M1": _bozucu_gurultulu,
     "TR074-P01-M2": _bozucu_gurultulu,
     "TR074-P01-M3": _bozucu_gurultulu,
@@ -541,9 +604,10 @@ _BOZUCULAR = {
     "TR085-P02-M1": _bozucu_ortak_isinma,
 }
 
-#: Modules that carry a full evidence frame, so `kanit.kare_id` has something to
-#: point at. Contract: frames are written only when the module's own threshold
-#: logic fires, so only the thermal scenarios get one.
+#: Modules that carry a full frame at every instant, so `kanit.kare_id` has
+#: something to point at. Every real module does (integration decision); the
+#: fixture set limits it to the thermal scenarios to keep the suite's write
+#: volume down — a frame per instant per module is 1.5 KB × 420 × 29 modules.
 _KARELI = {"TR041-P01-M1", "TR041-P02-M1"}
 
 

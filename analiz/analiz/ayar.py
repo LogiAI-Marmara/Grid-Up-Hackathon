@@ -186,9 +186,42 @@ class Katman0Ayari:
     #: Silence longer than this makes the module itself the finding (`modul_saglik`).
     sessizlik_sn: float = 900.0
 
-    #: |zaman - alindi_zaman| above this is module clock drift — scenario 7.
-    #: The two fields exist precisely so this is visible; conflating them hides it.
+    #: Clock drift, integration-phase rule. Over the detection window the gap
+    #: `alindi_zaman - zaman` is taken per sample, and:
+    #:
+    #:   - any sample measured AFTER it was received (gap below
+    #:     `-ileri_tarih_tolerans_sn`) is certain drift — a module cannot
+    #:     measure in the collector's future;
+    #:   - the MINIMUM gap above `saat_kaymasi_sn` is drift: not one reading in
+    #:     the window was fresh, so the offset is in the module's clock;
+    #:   - minimum near zero with a large maximum is late (backfilled) data. Not
+    #:     an anomaly — that is the uplink, not the clock — and it is exposed as
+    #:     the data-delay metric under `/saglik` instead.
+    #:
+    #: The old rule judged the maximum gap and so called every backlog a broken
+    #: clock; section 3.6 promises that a backlog is caught for free, not
+    #: alarmed on.
     saat_kaymasi_sn: float = 120.0
+
+    #: How far into the future a measurement may be stamped before it counts as
+    #: future-dated. Not zero: `alindi_zaman` is the collector's transaction
+    #: start and a module a second ahead of it is ordinary NTP scatter.
+    ileri_tarih_tolerans_sn: float = 5.0
+
+    # --- module status (contract 2's `modul_durum`, scenario 7) -------------
+    #: The module reports `besleme = yedek` when the supercapacitor is carrying
+    #: it. This many newest status rows on backup power is a power-loss finding;
+    #: 2 rather than 1 for the same reason no layer judges a single sample.
+    besleme_yedek_ardisik: int = 2
+
+    #: Median received signal strength over the newest `sinyal_ornek` status
+    #: rows below this, dBm, is a weak-signal finding. -100 dBm is where LoRa /
+    #: NB-IoT links start dropping packets; tune per site.
+    sinyal_zayif_dbm: float = -100.0
+    sinyal_ornek: int = 5
+
+    #: Status rows needed before either status test is applied at all.
+    asgari_durum_ornek: int = 2
 
     #: Severity for each layer-0 finding. Sensor faults are never `kritik`: a
     #: broken sensor is a maintenance ticket, not a grid emergency, and letting
@@ -198,6 +231,8 @@ class Katman0Ayari:
     aralik_disi_seviye: Seviye = Seviye.UYARI
     sessizlik_seviye: Seviye = Seviye.UYARI
     saat_kaymasi_seviye: Seviye = Seviye.IZLE
+    besleme_seviye: Seviye = Seviye.UYARI
+    sinyal_seviye: Seviye = Seviye.IZLE
 
 
 @dataclass(frozen=True)
@@ -369,6 +404,11 @@ class ApiAyari:
     #: Connection pool bounds for the API process.
     havuz_asgari: int = 1
     havuz_azami: int = 8
+
+    #: `/saglik`'s data-delay metric is computed over rows that ARRIVED in this
+    #: many seconds before now. Late (backfilled) data is not an anomaly — the
+    #: clock-drift rule in `Katman0Ayari` says why — so this is where it shows.
+    veri_gecikme_pencere_sn: float = 15 * 60.0
 
     #: Allowed CORS origins for the dashboard. Empty disables CORS entirely,
     #: which is the right default for an on-prem deployment serving the UI from

@@ -29,6 +29,7 @@ SOZLESME_UCLARI = {
     ("GET", "/anomaliler"),
     ("GET", "/anomaliler/{anomali_id}"),
     ("GET", "/anomaliler/{anomali_id}/gecisler"),
+    ("GET", "/gecisler"),
     ("POST", "/anomaliler/{anomali_id}/onayla"),
     ("GET", "/saglik"),
 }
@@ -87,6 +88,45 @@ def test_saglik_gecikmeyi_bildirir(istemci):
         assert imlec["son_islenen"] is not None
 
 
+def test_9_saglik_veri_gecikmesi_metrigini_bildirir(istemci, senaryo_vt):
+    """Item 9: late data is a `/saglik` metric, not an anomaly.
+
+    The scenario database was written at a fixed instant in the past, so the
+    live window is empty here; a row arriving now with an old measurement time
+    is late data and must show up in the metric, per module.
+    """
+    from datetime import datetime, timedelta, timezone
+
+    baglanti, _, _ = senaryo_vt
+    govde = istemci.get("/saglik").json()
+    metrik = govde["veri_gecikmesi"]
+    for alan in ("pencere_sn", "esik_sn", "satir", "azami_sn", "p50_sn", "p95_sn",
+                 "geciken_satir", "geciken_moduller"):
+        assert alan in metrik
+
+    simdi = datetime.now(timezone.utc)
+    eski = simdi - timedelta(hours=3)
+    with baglanti.cursor() as imlec:
+        imlec.execute(
+            "INSERT INTO gridup.olcum (modul_id, olcum_tipi, zaman, deger, birim, kalite, alindi_zaman) "
+            "VALUES ('TR041-P01-M2', 'nem', %s, 44.0, '%%', 'iyi', %s)",
+            (eski, simdi),
+        )
+    baglanti.commit()
+    try:
+        metrik = istemci.get("/saglik").json()["veri_gecikmesi"]
+        assert metrik["satir"] >= 1
+        assert metrik["azami_sn"] >= 3 * 3600 - 5
+        assert metrik["geciken_satir"] >= 1
+        assert any(m["modul_id"] == "TR041-P01-M2" for m in metrik["geciken_moduller"])
+    finally:
+        with baglanti.cursor() as imlec:
+            imlec.execute(
+                "DELETE FROM gridup.olcum WHERE modul_id = 'TR041-P01-M2' AND zaman = %s", (eski,)
+            )
+        baglanti.commit()
+
+
 def test_sahalar_agaci_hiyerarsiyi_ve_seviyeyi_tasir(istemci):
     govde = istemci.get("/sahalar").json()
     sahalar = govde["sahalar"]
@@ -129,6 +169,31 @@ def test_moduller_listesi_ve_filtreleri(istemci):
     kritik = istemci.get("/moduller", params={"seviye": "kritik"}).json()["veriler"]
     assert all(m["seviye"] == "kritik" for m in kritik)
     assert kritik, "the scenario set contains critical episodes"
+
+
+def test_12_modul_detayi_besleme_ve_sinyali_verir(istemci, senaryo_vt):
+    """Item 12: `GET /moduller/{id}` returns the newest status row's values."""
+    baglanti, _, _ = senaryo_vt
+
+    yedek = istemci.get("/moduller/TR063-P02-M3").json()
+    assert yedek["besleme"] == "yedek"
+    assert isinstance(yedek["sinyal"], int) and yedek["sinyal"] < 0
+    assert yedek["durum_zaman"]
+
+    saglam = istemci.get("/moduller/TR041-P01-M2").json()
+    assert saglam["besleme"] == "sebeke"
+    assert -90 < saglam["sinyal"] < -50
+
+    # The values are the NEWEST row's, checked against the table directly.
+    with baglanti.cursor() as imlec:
+        imlec.execute(
+            "SELECT besleme, sinyal FROM gridup.modul_durum WHERE modul_id = 'TR063-P02-M4' "
+            "ORDER BY zaman DESC LIMIT 1"
+        )
+        son = imlec.fetchone()
+    zayif = istemci.get("/moduller/TR063-P02-M4").json()
+    assert (zayif["besleme"], zayif["sinyal"]) == (son["besleme"], son["sinyal"])
+    assert zayif["sinyal"] < -100
 
 
 def test_modul_detayi_her_kanalin_son_degerini_verir(istemci):
@@ -259,6 +324,30 @@ def test_termal_son_ve_tam_kare(istemci):
     assert istemci.get("/termal/kare/kr_999999").status_code == 404
 
 
+def test_11_tam_kare_ikili_veriden_cozulur(istemci, senaryo_vt):
+    """Item 11: the stored bytes are int16 LE 0.1 °C; the consumer sees 768 °C numbers."""
+    import struct
+
+    baglanti, _, _ = senaryo_vt
+    with baglanti.cursor() as imlec:
+        imlec.execute(
+            "SELECT kare_id, piksel_verisi, octet_length(piksel_verisi) AS n "
+            "FROM gridup.termal_kare ORDER BY zaman DESC LIMIT 1"
+        )
+        satir = imlec.fetchone()
+    assert satir["n"] == 1536
+
+    kare = istemci.get(f"/termal/kare/{satir['kare_id']}").json()
+    pikseller = kare["piksel_verisi"]
+    assert len(pikseller) == 768
+    assert all(isinstance(p, (int, float)) for p in pikseller)
+    assert kare["birim"] == "C"
+
+    ham = struct.unpack("<768h", bytes(satir["piksel_verisi"]))
+    assert pikseller == [v / 10 for v in ham]
+    assert -40.0 <= min(pikseller) and max(pikseller) <= 300.0
+
+
 # --------------------------------------------------------------------------
 # Anomalies
 # --------------------------------------------------------------------------
@@ -353,6 +442,69 @@ def test_gecisler_journali_sirayla_verir(istemci, bir_anomali):
     assert all(g["alan"] in {"durum", "seviye"} for g in gecisler)
 
     assert istemci.get("/anomaliler/an_yok/gecisler").status_code == 404
+
+
+def test_13_gecisler_akisi_her_gecisi_sirayla_verir(istemci, senaryo_vt):
+    """Item 13: given an id, every durum/seviye transition after it, in order."""
+    baglanti, _, _ = senaryo_vt
+
+    ilk = istemci.get("/gecisler", params={"limit": 5}).json()
+    assert set(ilk) == {"veriler", "sonraki", "limit"}
+    assert ilk["limit"] == 5
+    assert len(ilk["veriler"]) == 5
+    for g in ilk["veriler"]:
+        assert set(g) == {"id", "anomali_id", "zaman", "alan", "onceki", "yeni", "aktor"}
+        assert g["alan"] in {"durum", "seviye"}
+        assert g["aktor"] == "sistem"
+    assert ilk["sonraki"] == ilk["veriler"][-1]["id"]
+
+    # Walk the feed by keyset and compare with the journal itself.
+    with baglanti.cursor() as imlec:
+        imlec.execute("SELECT id FROM gridup.anomali_gecis ORDER BY id")
+        hepsi = [int(r["id"]) for r in imlec.fetchall()]
+    assert len(hepsi) >= 10
+
+    gorulen: list[int] = []
+    sonra = None
+    while True:
+        params = {"limit": 7}
+        if sonra is not None:
+            params["sonra"] = sonra
+        sayfa = istemci.get("/gecisler", params=params).json()
+        if not sayfa["veriler"]:
+            assert sayfa["sonraki"] is None
+            break
+        gorulen.extend(g["id"] for g in sayfa["veriler"])
+        assert all(g["id"] > (sonra or 0) for g in sayfa["veriler"])
+        sonra = sayfa["sonraki"]
+    assert gorulen == hepsi, "the feed must yield every transition exactly once, in id order"
+
+    # "After this id" is strict, and the first transition of an episode has onceki null.
+    orta = hepsi[len(hepsi) // 2]
+    sonrakiler = istemci.get("/gecisler", params={"sonra": orta, "limit": 500}).json()["veriler"]
+    assert [g["id"] for g in sonrakiler] == [i for i in hepsi if i > orta]
+    acilislar = [g for g in ilk["veriler"] if g["alan"] == "durum" and g["yeni"] == "acik"]
+    assert acilislar and all(g["onceki"] is None for g in acilislar)
+
+
+def test_13_gecisler_akisi_onayi_aktorle_verir(istemci):
+    """An acknowledgement appears in the feed with the operator as `aktor`."""
+    acik = istemci.get("/anomaliler", params={"durum": "acik", "limit": 500}).json()["veriler"]
+    hedef = acik[-1]["id"]
+    son = istemci.get("/gecisler", params={"limit": 500}).json()
+    son_id = max(g["id"] for g in son["veriler"]) if son["veriler"] else 0
+    while son["sonraki"] is not None and len(son["veriler"]) == 500:
+        son = istemci.get("/gecisler", params={"sonra": son["sonraki"], "limit": 500}).json()
+        if son["veriler"]:
+            son_id = max(g["id"] for g in son["veriler"])
+
+    assert istemci.post(f"/anomaliler/{hedef}/onayla", params={"aktor": "op.kaya"}).status_code == 200
+
+    yeni = istemci.get("/gecisler", params={"sonra": son_id}).json()["veriler"]
+    onay = [g for g in yeni if g["anomali_id"] == hedef and g["yeni"] == "onaylandi"]
+    assert len(onay) == 1
+    assert onay[0]["aktor"] == "op.kaya"
+    assert onay[0]["alan"] == "durum" and onay[0]["onceki"] == "acik"
 
 
 def test_onay_journala_kim_ve_ne_zaman_yazar(istemci):

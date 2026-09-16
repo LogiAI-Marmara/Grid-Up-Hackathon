@@ -29,6 +29,9 @@ __all__ = [
     "aralik_disi",
     "modul_sessiz",
     "saat_kaymasi",
+    "ileri_tarihli",
+    "besleme_kaybi",
+    "sinyal_zayif",
     "mutlak_sicaklik",
     "mutlak_ortam",
     "mutlak_nem",
@@ -129,12 +132,39 @@ def modul_sessiz(dakika: float, son_zaman: str) -> str:
 
 
 def saat_kaymasi(kayma_sn: float, esik_sn: float) -> str:
-    yon = "ileri" if kayma_sn < 0 else "geri"
+    """Every reading in the window arrived at least `kayma_sn` after its own timestamp."""
     return (
-        f"Modülün ölçüm zamanı ile toplama zamanı arasında {sayi(abs(kayma_sn), 0)} "
-        f"saniye fark var (eşik {sayi(esik_sn, 0)} saniye); modül saati {yon} kaymış "
-        f"görünüyor. Zaman damgası bozuk olan veri üzerinde eğilim hesabı güvenilmez "
-        f"olur, saat senkronu kontrol edilmeli."
+        f"Penceredeki hiçbir ölçüm taze değil: ölçüm zamanı ile toplama zamanı arasındaki "
+        f"fark en az {sayi(kayma_sn, 0)} saniye (eşik {sayi(esik_sn, 0)} saniye); modül "
+        f"saati geri kaymış görünüyor. Gecikmeli gelen eski veri olsaydı en az bir ölçüm "
+        f"taze olurdu. Zaman damgası bozuk veri üzerinde eğilim hesabı güvenilmez olur, "
+        f"saat senkronu kontrol edilmeli."
+    )
+
+
+def ileri_tarihli(kayma_sn: float, zaman: str) -> str:
+    """A reading was measured after the collector received it — certain drift."""
+    return (
+        f"Ölçüm zamanı toplama zamanından {sayi(abs(kayma_sn), 0)} saniye ileride "
+        f"({zaman}); bir modül toplayıcının geleceğinde ölçüm yapamaz, modül saati ileri "
+        f"kaymış. Zaman damgası bozuk veri üzerinde eğilim hesabı güvenilmez olur, saat "
+        f"senkronu kontrol edilmeli."
+    )
+
+
+def besleme_kaybi(ardisik: int, dakika: float, ilk_zaman: str) -> str:
+    return (
+        f"Modül {sayi(dakika, 0)} dakikadır ({ardisik} pakettir, {ilk_zaman} itibarıyla) "
+        f"yedek beslemede; şebeke beslemesi kesilmiş. Süperkapasitör sınırlı süre dayanır "
+        f"— pano beslemesi ve modül sigortası kontrol edilmeli."
+    )
+
+
+def sinyal_zayif(medyan_dbm: float, esik_dbm: float, ornek: int) -> str:
+    return (
+        f"Alınan sinyal gücü son {ornek} pakette medyan {sayi(medyan_dbm, 0)} dBm "
+        f"(eşik {sayi(esik_dbm, 0)} dBm); bağlantı zayıflıyor, paket kaybı ve sessizlik "
+        f"başlayabilir. Anten ve konum kontrol edilmeli."
     )
 
 

@@ -1,7 +1,8 @@
 """Contract ⑤ — the read API. Track B serves it, track C consumes it.
 
-Every endpoint in section 7.3 of the parent record, plus the `/gecisler` one the
-İZ B record adds. Paths, query parameter names and field names come from the
+Every endpoint in section 7.3 of the parent record, plus the per-episode
+`/anomaliler/{id}/gecisler` the İZ B record adds and the global `/gecisler`
+feed the integration phase adds. Paths, query parameter names and field names come from the
 contract and are not this module's to improve: track C builds against them, and
 a helpful rename here is a silent breakage there.
 
@@ -38,6 +39,7 @@ from psycopg_pool import ConnectionPool
 from .ayar import Ayar
 from .olay import OlayDeposu
 from .sozlesme import Durum, OlcumTipi, Seviye, Tip
+from .termal import KareHatasi, kare_coz
 
 __all__ = ["olustur", "zaman_yaz"]
 
@@ -188,7 +190,16 @@ def _uclari_bagla(uygulama: FastAPI, ayar: Ayar, havuzdan) -> None:
         is how stale the anomaly table is, and section 8 names a detector
         falling behind its scan period as the real scaling limit. A dashboard
         showing green while the detector is an hour behind is lying.
+
+        `veri_gecikmesi` is the DATA-DELAY metric of the integration-phase
+        clock-drift rule: over rows that arrived in the last
+        `veri_gecikme_pencere_sn`, how late (arrival − measurement) they were.
+        Late data is not an anomaly — a module that lost its uplink and then
+        sent the backlog has a correct clock — so it is reported here, per
+        module, instead of as `modul_saglik` episodes.
         """
+        pencere_sn = api.veri_gecikme_pencere_sn
+        esik_sn = ayar.katman0.saat_kaymasi_sn
         try:
             with uygulama.state.havuz.connection() as baglanti:
                 with baglanti.cursor() as imlec:
@@ -203,6 +214,41 @@ def _uclari_bagla(uygulama: FastAPI, ayar: Ayar, havuzdan) -> None:
                         "SELECT count(*) AS n FROM gridup.anomali WHERE durum <> 'kapandi'"
                     )
                     acik = int(imlec.fetchone()["n"])
+                    imlec.execute(
+                        """
+                        WITH son AS (
+                            SELECT modul_id,
+                                   extract(epoch FROM (alindi_zaman - zaman)) AS gecikme
+                            FROM gridup.olcum
+                            WHERE alindi_zaman > now() - make_interval(secs => %(p)s)
+                        )
+                        SELECT count(*) AS satir,
+                               coalesce(max(gecikme), 0) AS azami,
+                               coalesce(percentile_cont(0.5) WITHIN GROUP (ORDER BY gecikme), 0)
+                                   AS p50,
+                               coalesce(percentile_cont(0.95) WITHIN GROUP (ORDER BY gecikme), 0)
+                                   AS p95,
+                               count(*) FILTER (WHERE gecikme > %(e)s) AS geciken
+                        FROM son
+                        """,
+                        {"p": pencere_sn, "e": esik_sn},
+                    )
+                    gecikme = imlec.fetchone()
+                    imlec.execute(
+                        """
+                        SELECT modul_id,
+                               max(extract(epoch FROM (alindi_zaman - zaman))) AS azami,
+                               count(*) AS satir
+                        FROM gridup.olcum
+                        WHERE alindi_zaman > now() - make_interval(secs => %(p)s)
+                        GROUP BY modul_id
+                        HAVING max(extract(epoch FROM (alindi_zaman - zaman))) > %(e)s
+                        ORDER BY azami DESC
+                        LIMIT 50
+                        """,
+                        {"p": pencere_sn, "e": esik_sn},
+                    )
+                    geciken_moduller = imlec.fetchall()
         except Exception as hata:  # noqa: BLE001 - health must report, not raise
             _gunluk.exception("health check failed")
             raise ApiHatasi(
@@ -223,6 +269,23 @@ def _uclari_bagla(uygulama: FastAPI, ayar: Ayar, havuzdan) -> None:
                 }
                 for i in imlecler
             ],
+            "veri_gecikmesi": {
+                "pencere_sn": pencere_sn,
+                "esik_sn": esik_sn,
+                "satir": int(gecikme["satir"]),
+                "azami_sn": round(float(gecikme["azami"]), 1),
+                "p50_sn": round(float(gecikme["p50"]), 1),
+                "p95_sn": round(float(gecikme["p95"]), 1),
+                "geciken_satir": int(gecikme["geciken"]),
+                "geciken_moduller": [
+                    {
+                        "modul_id": m["modul_id"],
+                        "azami_sn": round(float(m["azami"]), 1),
+                        "satir": int(m["satir"]),
+                    }
+                    for m in geciken_moduller
+                ],
+            },
             "zaman": zaman_yaz(simdi),
         }
 
@@ -412,6 +475,10 @@ def _uclari_bagla(uygulama: FastAPI, ayar: Ayar, havuzdan) -> None:
         `DISTINCT ON` rather than a max/join: the primary key is
         (modul_id, olcum_tipi, zaman), so this walks the index backwards once per
         channel instead of scanning the module's history.
+
+        `besleme` and `sinyal` are the newest `modul_durum` row's values
+        (integration decision); both `null` for a module that has never sent a
+        status packet. `durum_zaman` says when they were reported.
         """
         with baglanti.cursor() as imlec:
             imlec.execute(
@@ -444,6 +511,13 @@ def _uclari_bagla(uygulama: FastAPI, ayar: Ayar, havuzdan) -> None:
             )
             anomaliler = imlec.fetchall()
 
+            imlec.execute(
+                "SELECT zaman, besleme, sinyal, yazilim_surumu FROM gridup.modul_durum "
+                "WHERE modul_id = %s ORDER BY zaman DESC LIMIT 1",
+                (modul_id,),
+            )
+            durum = imlec.fetchone()
+
         return {
             "modul_id": satir["modul_id"],
             "saha_kodu": satir["saha_kodu"],
@@ -451,9 +525,15 @@ def _uclari_bagla(uygulama: FastAPI, ayar: Ayar, havuzdan) -> None:
             "modul_kodu": satir["modul_kodu"],
             "aktif": satir["aktif"],
             "kurulum_zaman": zaman_yaz(satir["kurulum_zaman"]),
-            "yazilim_surumu": satir["yazilim_surumu"],
+            "yazilim_surumu": (
+                durum["yazilim_surumu"] if durum and durum["yazilim_surumu"]
+                else satir["yazilim_surumu"]
+            ),
             "son_gorulme": zaman_yaz(satir["son_gorulme"]),
             "konum_notu": satir["konum_notu"],
+            "besleme": durum["besleme"] if durum else None,
+            "sinyal": int(durum["sinyal"]) if durum else None,
+            "durum_zaman": zaman_yaz(durum["zaman"]) if durum else None,
             "son_olcumler": [
                 {
                     "olcum_tipi": o["olcum_tipi"],
@@ -644,12 +724,14 @@ def _uclari_bagla(uygulama: FastAPI, ayar: Ayar, havuzdan) -> None:
 
     @uygulama.get("/termal/kare/{kare_id}", tags=["termal"], summary="Tam termal kare")
     def termal_kare(kare_id: str, baglanti=Depends(havuzdan)):
-        """The full 768-value frame.
+        """The full 768-value frame, in °C.
 
-        Row-major: the index of pixel (sutun, satir) is `satir * 32 + sutun`.
-        Geometry is returned alongside the data rather than assumed, so a future
-        sensor with a different resolution is a data change and not a silent
-        reinterpretation of the array.
+        Stored as `bytea` (int16 LE, 0.1 °C, 1536 bytes — integration decision)
+        and decoded here, so the consumer's format is unchanged: an array of
+        768 numbers. Row-major: the index of pixel (sutun, satir) is
+        `satir * 32 + sutun`. Geometry is returned alongside the data rather
+        than assumed, so a future sensor with a different resolution is a data
+        change and not a silent reinterpretation of the array.
         """
         with baglanti.cursor() as imlec:
             imlec.execute(
@@ -661,6 +743,15 @@ def _uclari_bagla(uygulama: FastAPI, ayar: Ayar, havuzdan) -> None:
             if satir is None:
                 raise _bulunamadi("Termal kare", kare_id)
 
+        try:
+            pikseller = kare_coz(satir["piksel_verisi"])
+        except KareHatasi as hata:
+            # The database CHECK makes this unreachable for rows track A wrote;
+            # a 500 with a stable code beats a stack trace if it ever is not.
+            raise ApiHatasi(
+                500, "kare_cozulemedi", f"Termal kare çözülemedi: {hata}", kimlik=kare_id
+            ) from hata
+
         return {
             "kare_id": satir["kare_id"],
             "modul_id": satir["modul_id"],
@@ -668,7 +759,8 @@ def _uclari_bagla(uygulama: FastAPI, ayar: Ayar, havuzdan) -> None:
             "satir_sayisi": satir["satir_sayisi"],
             "sutun_sayisi": satir["sutun_sayisi"],
             "duzen": "satir_oncelikli",
-            "piksel_verisi": satir["piksel_verisi"],
+            "birim": "C",
+            "piksel_verisi": pikseller,
             "alindi_zaman": zaman_yaz(satir["alindi_zaman"]),
         }
 
@@ -821,6 +913,64 @@ def _uclari_bagla(uygulama: FastAPI, ayar: Ayar, havuzdan) -> None:
                 }
                 for r in satirlar
             ],
+        }
+
+    # ----------------------------------------------------------------------
+    # GET /gecisler   — the global transition feed (integration phase, ⑤)
+    # ----------------------------------------------------------------------
+
+    @uygulama.get("/gecisler", tags=["anomali"], summary="Tüm geçişler (küresel akış)")
+    def gecis_akisi(
+        baglanti=Depends(havuzdan),
+        sonra: int | None = Query(None, description="bu id'den sonrasını getir"),
+        limit: int = Query(None, ge=1),
+    ):
+        """Every `durum` and `seviye` transition across all episodes, in order.
+
+        The alarm service's feed. Keyset on the journal's own id, as
+        `/anomaliler` is on `sira`: the caller passes the last id it handled as
+        `sonra` and can be certain nothing between two polls was skipped. Each
+        row names its episode, so a consumer never has to join.
+
+        `sonraki` is the id of the last row returned, or null when the page is
+        empty — a resume cursor rather than `/anomaliler`'s "null on the last
+        page", because a feed has no last page: the next poll resumes from it.
+        """
+        boyut = min(limit or api.sayfa_boyutu, api.azami_sayfa_boyutu)
+        kosul = ["alan IN ('durum', 'seviye')"]
+        parametreler: list[Any] = []
+        if sonra is not None:
+            kosul.append("id > %s")
+            parametreler.append(sonra)
+
+        with baglanti.cursor() as imlec:
+            imlec.execute(
+                f"""
+                SELECT id, anomali_id, zaman, alan, onceki, yeni, aktor
+                FROM gridup.anomali_gecis
+                WHERE {' AND '.join(kosul)}
+                ORDER BY id
+                LIMIT %s
+                """,
+                (*parametreler, boyut),
+            )
+            satirlar = imlec.fetchall()
+
+        return {
+            "veriler": [
+                {
+                    "id": int(r["id"]),
+                    "anomali_id": r["anomali_id"],
+                    "zaman": zaman_yaz(r["zaman"]),
+                    "alan": r["alan"],
+                    "onceki": r["onceki"],
+                    "yeni": r["yeni"],
+                    "aktor": r["aktor"],
+                }
+                for r in satirlar
+            ],
+            "sonraki": int(satirlar[-1]["id"]) if satirlar else None,
+            "limit": boyut,
         }
 
     # ----------------------------------------------------------------------

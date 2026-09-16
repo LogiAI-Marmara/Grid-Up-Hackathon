@@ -150,7 +150,7 @@ def test_her_olayin_gerekcesi_gercek_sayilar_icerir(senaryo_vt):
             f"{olay['id']} ({olay['tip']}): gerekce must quote real numbers, got {gerekce!r}"
         )
         # A unit or a physical quantity, not just bare digits.
-        assert re.search(r"(°C|%|\bA\b|olay|saat|dakika|ölçüm)", gerekce), (
+        assert re.search(r"(°C|%|\bA\b|dBm|olay|saat|dakika|ölçüm)", gerekce), (
             f"{olay['id']} ({olay['tip']}): gerekce must name units — {gerekce!r}"
         )
 

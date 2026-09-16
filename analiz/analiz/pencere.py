@@ -10,7 +10,7 @@ pure functions of it, which is what makes them testable without a database and
 re-runnable over the same history as often as an algorithm change demands
 (section 3.4).
 
-Cost: one turn is a fixed number of queries — six — no matter how many modules
+Cost: one turn is a fixed number of queries — seven — no matter how many modules
 it touches. Per-module queries would make a 100-module turn 600 round trips and
 section 8's scale target unreachable for reasons that have nothing to do with
 detection.
@@ -25,7 +25,7 @@ from datetime import datetime, timedelta
 import psycopg
 
 from .ayar import Ayar
-from .sozlesme import Kalite, OlcumTipi, Tip
+from .sozlesme import Besleme, Kalite, OlcumTipi, Tip
 
 
 #: Default number of newest samples a representative value is taken over.
@@ -52,6 +52,7 @@ __all__ = [
     "Nokta",
     "Seri",
     "TermalOzet",
+    "ModulDurumu",
     "TabanCizgisi",
     "Pencere",
     "PencereGetirici",
@@ -225,6 +226,28 @@ class TermalOzet:
 
 
 @dataclass(frozen=True, slots=True)
+class ModulDurumu:
+    """One `modul_durum` row: the module's own report on itself, one per packet.
+
+    Contract 2's status half. `besleme` and `sinyal` are what scenario 7 is
+    mostly about — a module on backup power or a fading link is a maintenance
+    call before it is a silence — and they were not visible to the detector
+    until the integration phase gave them a table.
+    """
+
+    zaman: datetime
+    besleme: Besleme
+    sinyal: int
+    alindi_zaman: datetime
+    yazilim_surumu: str | None = None
+
+    @property
+    def gecikme_sn(self) -> float:
+        """Arrival minus packet time, seconds — same clock question as `Nokta`."""
+        return (self.alindi_zaman - self.zaman).total_seconds()
+
+
+@dataclass(frozen=True, slots=True)
 class TabanCizgisi:
     """Robust baseline for one module-channel: what normal is, numerically."""
 
@@ -259,10 +282,15 @@ class Pencere:
     tabanlar: dict[OlcumTipi, TabanCizgisi] = field(default_factory=dict)
     #: Thermal summaries in the detection window, oldest first.
     termal: tuple[TermalOzet, ...] = ()
+    #: Module status rows in the detection window, oldest first.
+    durumlar: tuple[ModulDurumu, ...] = ()
     #: Peer modules' detection-window series, keyed by modul_id.
     komsular: dict[str, dict[OlcumTipi, Seri]] = field(default_factory=dict)
 
-    #: Newest evidence frame for this module, if it sent one.
+    #: The evidence frame belonging to this evaluation instant: the newest
+    #: frame at or before `simdi`, inside the detection window. Never a frame
+    #: later than the instant being judged — a historical re-scan must link the
+    #: frame of the event's own time, not whatever the module sent since.
     kare_id: str | None = None
     kare_zaman: datetime | None = None
 
@@ -289,6 +317,10 @@ class Pencere:
         return all(s.bos for s in self.seriler.values()) and not self.termal
 
     @property
+    def son_durum(self) -> ModulDurumu | None:
+        return self.durumlar[-1] if self.durumlar else None
+
+    @property
     def tetikleyici_zaman(self) -> datetime:
         """Measurement time to stamp a finding with.
 
@@ -299,6 +331,8 @@ class Pencere:
         adaylar = [s.son.zaman for s in self.seriler.values() if s.son is not None]
         if self.termal:
             adaylar.append(self.termal[-1].zaman)
+        if self.durumlar:
+            adaylar.append(self.durumlar[-1].zaman)
         return max(adaylar) if adaylar else self.simdi
 
 
@@ -356,8 +390,9 @@ class PencereGetirici:
 
         seriler = self._seriler(araliklar)
         termaller = self._termal_ozetler(hedef_araliklari)
+        durumlar = self._modul_durumlari(hedef_araliklari)
         acik = self._acik_tipler(hedefler)
-        kareler = self._son_kareler(hedefler)
+        kareler = self._olay_kareleri(hedef_araliklari)
         sonlar = self._son_olcumler(hedefler)
         tabanlar = self._tabanlar(zamanlar, acik)
 
@@ -375,6 +410,7 @@ class PencereGetirici:
                 seriler=seriler.get(modul_id, {}),
                 tabanlar=tabanlar.get(modul_id, {}),
                 termal=termaller.get(modul_id, ()),
+                durumlar=durumlar.get(modul_id, ()),
                 komsular={
                     komsu: seriler.get(komsu, {})
                     for komsu in komsu_haritasi.get(modul_id, ())
@@ -539,6 +575,53 @@ class PencereGetirici:
             )
         return {m: tuple(v) for m, v in biriken.items()}
 
+    def _modul_durumlari(
+        self, araliklar: "list[tuple[str, datetime, datetime]]"
+    ) -> dict[str, tuple[ModulDurumu, ...]]:
+        """Status rows (`modul_durum`) inside each module's detection window."""
+        if not araliklar:
+            return {}
+        with self._baglanti.cursor() as imlec:
+            imlec.execute(
+                """
+                WITH istek(modul_id, bas, bit) AS (
+                    SELECT * FROM unnest(%s::text[], %s::timestamptz[], %s::timestamptz[])
+                )
+                SELECT d.modul_id, d.zaman, d.besleme, d.sinyal, d.yazilim_surumu, d.alindi_zaman
+                FROM istek i
+                JOIN gridup.modul_durum d
+                  ON d.modul_id = i.modul_id
+                 AND d.zaman > i.bas
+                 AND d.zaman <= i.bit
+                ORDER BY d.modul_id, d.zaman
+                """,
+                (
+                    [a[0] for a in araliklar],
+                    [a[1] for a in araliklar],
+                    [a[2] for a in araliklar],
+                ),
+            )
+            satirlar = imlec.fetchall()
+
+        biriken: dict[str, list[ModulDurumu]] = {}
+        for satir in satirlar:
+            try:
+                besleme = Besleme(satir["besleme"])
+            except ValueError:
+                # A supply state this build does not know. Skip the row rather
+                # than crash the turn; the vocabulary is track A's to extend.
+                continue
+            biriken.setdefault(satir["modul_id"], []).append(
+                ModulDurumu(
+                    zaman=satir["zaman"],
+                    besleme=besleme,
+                    sinyal=int(satir["sinyal"]),
+                    alindi_zaman=satir["alindi_zaman"],
+                    yazilim_surumu=satir["yazilim_surumu"],
+                )
+            )
+        return {m: tuple(v) for m, v in biriken.items()}
+
     def _acik_tipler(self, modul_idler: Sequence[str]) -> dict[str, frozenset[Tip]]:
         with self._baglanti.cursor() as imlec:
             imlec.execute(
@@ -552,19 +635,40 @@ class PencereGetirici:
             biriken.setdefault(satir["modul_id"], set()).add(Tip(satir["tip"]))
         return {m: frozenset(v) for m, v in biriken.items()}
 
-    def _son_kareler(
-        self, modul_idler: Sequence[str]
+    def _olay_kareleri(
+        self, araliklar: "list[tuple[str, datetime, datetime]]"
     ) -> dict[str, tuple[str | None, datetime | None]]:
-        """Newest evidence frame per module — what `kanit.kare_id` points at."""
+        """The evidence frame belonging to each module's evaluation instant.
+
+        The newest frame at or before the instant, and inside the detection
+        window — what `kanit.kare_id` points at. Bounded above by the instant
+        because a frame later than the moment being judged cannot be evidence
+        for it: with a full frame every 30 s, "the newest frame the module ever
+        sent" would make a historical re-scan cite tomorrow's picture for
+        yesterday's finding. Bounded below by the window so a module that has
+        sent nothing for days is not linked to a stale frame.
+        """
+        if not araliklar:
+            return {}
         with self._baglanti.cursor() as imlec:
             imlec.execute(
                 """
-                SELECT DISTINCT ON (modul_id) modul_id, kare_id, zaman
-                FROM gridup.termal_kare
-                WHERE modul_id = ANY(%s)
-                ORDER BY modul_id, zaman DESC
+                WITH istek(modul_id, bas, bit) AS (
+                    SELECT * FROM unnest(%s::text[], %s::timestamptz[], %s::timestamptz[])
+                )
+                SELECT DISTINCT ON (k.modul_id) k.modul_id, k.kare_id, k.zaman
+                FROM istek i
+                JOIN gridup.termal_kare k
+                  ON k.modul_id = i.modul_id
+                 AND k.zaman > i.bas
+                 AND k.zaman <= i.bit
+                ORDER BY k.modul_id, k.zaman DESC
                 """,
-                (list(modul_idler),),
+                (
+                    [a[0] for a in araliklar],
+                    [a[1] for a in araliklar],
+                    [a[2] for a in araliklar],
+                ),
             )
             return {r["modul_id"]: (r["kare_id"], r["zaman"]) for r in imlec.fetchall()}
 
