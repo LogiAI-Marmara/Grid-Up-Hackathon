@@ -481,7 +481,9 @@ def build():
     S.rect((222.0, 60.5), (322.0, 116.0), UART, title='RS-485 / Modbus RTU / MAX3485 3,3 V, yarıçift, 120 Ω sonlandırma')
     U4 = S.part(MAX, 'U4', 'MAX3485', (254.0, 87.63), mirror='x', ref_at=(236.22, 73.66), val_at=(236.22, 76.2),
                 footprint='Package_SO:SOIC-8_3.9x4.9mm_P1.27mm')
-    S.pin_power(U4, 'VCC', '+3V3', L=2.54, rot=90); S.pin_power(U4, 'GND', 'GND', L=2.54, rot=270)   # aynalı çip: güç sembolleri yatay
+    vcc4, gnd4 = U4.p('VCC'), U4.p('GND')   # aynalı çip: VCC altta, GND üstte → telle yana taşı, semboller normal yönde
+    S.wire(gnd4, (gnd4[0], gnd4[1] - 1.27), (267.97, gnd4[1] - 1.27), color=net_color('GND')); S.power('GND', (267.97, gnd4[1] - 1.27), 0)
+    S.wire(vcc4, (vcc4[0], vcc4[1] + 1.27), (240.03, vcc4[1] + 1.27), color=net_color('+3V3')); S.power('+3V3', (240.03, vcc4[1] + 1.27), 0)
     di, de, re_, ro = U4.p('DI'), U4.p('DE'), U4.p('~{RE}'), U4.p('RO')
     p17, p18, p21 = U1.p('IO17'), U1.p('IO18'), U1.p('IO21')
     S.wire(p17, di, color=UART)                                                     # IO17 (U1TXD) → DI, düz
@@ -491,14 +493,14 @@ def build():
     S.wire(p18, (232.41, p18[1]), (232.41, ro[1]), ro, color=UART)                  # IO18 (U1RXD) → RO
     S.label('U1TXD', (205.74, p17[1]), 0); S.label('DE_RE', (205.74, p21[1]), 0); S.label('U1RXD', (205.74, p18[1]), 0)
     A, B = U4.p('A'), U4.p('B')
-    J7 = S.part(C03, 'J7', 'RS-485 klemens B / GND / A', (287.02, (A[1] + B[1]) / 2), ref_at=(284.48, min(A[1], B[1]) - 6.35), val_at=(279.4, max(A[1], B[1]) + 5.08),
+    J7 = S.part(C03, 'J7', 'RS-485 klemens B / GND / A', (292.1, (A[1] + B[1]) / 2), ref_at=(289.56, min(A[1], B[1]) - 6.35), val_at=(284.48, max(A[1], B[1]) + 5.08),
                 footprint='TerminalBlock_Phoenix:TerminalBlock_Phoenix_MKDS-3-3-5.08_1x03_P5.08mm_Horizontal')
     pT, pG, pB = J7.p('1'), J7.p('2'), J7.p('3')       # üst / orta / alt
     top, bot = (B, A) if B[1] < A[1] else (A, B)
     S.wire(top, (pT[0], top[1]), pT, color=UART); S.wire(bot, (pB[0], bot[1]), pB, color=UART)
-    Rt = S.part(R, 'R40', '120 Ω', (271.78, (A[1] + B[1]) / 2), ref_at=(273.05, min(A[1], B[1]) - 0.5), val_at=(273.05, max(A[1], B[1]) + 0.5))
-    S.wire((271.78, top[1]), Rt.p('1')); S.wire((271.78, bot[1]), Rt.p('2')); S.junction((271.78, top[1])); S.junction((271.78, bot[1]))
-    S.pin_power(J7, '2', 'GND', L=7.62, rot=270)
+    Rt = S.part(R, 'R40', '120 Ω', (274.32, (A[1] + B[1]) / 2), ref_at=(267.5, min(A[1], B[1]) + 2.2), val_at=(270.5, max(A[1], B[1]) + 3.2))
+    S.wire((274.32, top[1]), Rt.p('1')); S.wire((274.32, bot[1]), Rt.p('2')); S.junction((274.32, top[1])); S.junction((274.32, bot[1]))
+    Pj = S.pin_power(J7, '2', 'GND', L=7.62, rot=270); Pj.val_at = (pG[0] - 7.62 + 0.8, pG[1] - 1.1); Pj.just = 'center'   # yatay GND: etiket B/A telleri arasında
     S.text('→ enerji analizörü (slave 1, akım) / TVOC-2 (slave 2, yalnız trip-diag.)', (236.22, 110.0), SZ_NOTE, italic=True)
     S.text('A/B bükümlü çift, ekranlı; son cihazda 2. 120 Ω', (236.22, 113.0), SZ_NOTE, italic=True)
     # anten
