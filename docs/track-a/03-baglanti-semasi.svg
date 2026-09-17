@@ -4127,7 +4127,7 @@ stroke-linecap:round; stroke-linejoin:round;">
 <g style="fill:none; 
 stroke:#E67800; stroke-width:0.4400; stroke-opacity:1; 
 stroke-linecap:round; stroke-linejoin:round;">
-<text fill="#E67800" x="29.4400" y="44.9500" font-size="2.9333" text-anchor="start" font-family="Arial,Helvetica,sans-serif" stroke="none">CT ×4 (analizör yoksa) — burden, V_bias, RC → ADC1</text>
+<text fill="#E67800" x="29.4400" y="44.9500" font-size="2.9333" text-anchor="start" font-family="Arial,Helvetica,sans-serif" stroke="none">CT ×4 (analizör yoksa) / burden, V_bias, RC → ADC1</text>
 </g>
 <g style="fill:none; 
 stroke:#464646; stroke-width:0.1524; stroke-opacity:1; 
@@ -4137,12 +4137,12 @@ stroke-linecap:round; stroke-linejoin:round;">
 <g style="fill:none; 
 stroke:#0000C2; stroke-width:0.6400; stroke-opacity:1; 
 stroke-linecap:round; stroke-linejoin:round;">
-<text fill="#0000C2" x="25.4000" y="32.7500" font-size="4.2666" text-anchor="start" font-family="Arial,Helvetica,sans-serif" stroke="none">Modül bağlantı şeması — ESP32-S3-WROOM-1U etrafında (03-pinout §3.1–3.6)</text>
+<text fill="#0000C2" x="25.4000" y="32.7500" font-size="4.2666" text-anchor="start" font-family="Arial,Helvetica,sans-serif" stroke="none">Modül bağlantı şeması / ESP32-S3-WROOM-1U etrafında (03-pinout §3.1–3.6)</text>
 </g>
 <g style="fill:none; 
 stroke:#0000C2; stroke-width:0.3600; stroke-opacity:1; 
 stroke-linecap:round; stroke-linejoin:round;">
-<text fill="#0000C2" x="222.0000" y="25.7500" font-size="2.4000" text-anchor="start" font-family="Arial,Helvetica,sans-serif" stroke="none">Lejant (tel / etiket rengi) — aynı adlı etiketler aynı nettir;</text>
+<text fill="#0000C2" x="222.0000" y="25.7500" font-size="2.4000" text-anchor="start" font-family="Arial,Helvetica,sans-serif" stroke="none">Lejant (tel / etiket rengi) / aynı adlı etiketler aynı nettir;</text>
 </g>
 <g style="fill:none; 
 stroke:#1565C0; stroke-width:0.1524; stroke-opacity:1; 
@@ -4157,7 +4157,7 @@ stroke-linecap:round; stroke-linejoin:round;">
 <g style="fill:none; 
 stroke:#1565C0; stroke-width:0.4400; stroke-opacity:1; 
 stroke-linecap:round; stroke-linejoin:round;">
-<text fill="#1565C0" x="29.4400" y="142.6500" font-size="2.9333" text-anchor="start" font-family="Arial,Helvetica,sans-serif" stroke="none">I²C — MLX90640 0x33 + SHT31 0x44, tek hat 400 kHz+</text>
+<text fill="#1565C0" x="29.4400" y="142.6500" font-size="2.9333" text-anchor="start" font-family="Arial,Helvetica,sans-serif" stroke="none">I²C / MLX90640 0x33 + SHT31 0x44, tek hat 400 kHz+</text>
 </g>
 <g style="fill:none; 
 stroke:#0000C2; stroke-width:0.1524; stroke-opacity:1; 
@@ -4202,12 +4202,12 @@ stroke-linecap:round; stroke-linejoin:round;">
 <g style="fill:none; 
 stroke:#0000C2; stroke-width:0.1524; stroke-opacity:1; 
 stroke-linecap:round; stroke-linejoin:round;">
-<text fill="#0000C2" x="25.4000" y="37.2500" font-size="2.4000" text-anchor="start" font-family="Arial,Helvetica,sans-serif" stroke="none">KiCad şematik (eda/GridUp-Modul.kicad_sch): ERC 0 hata / 0 uyarı, netlist §3.1 tablosuyla otomatik doğrulanmış. Kavramsal — üretim çizimi değildir (§1.4); pasif değerler tipik.</text>
+<text fill="#0000C2" x="25.4000" y="37.2500" font-size="2.4000" text-anchor="start" font-family="Arial,Helvetica,sans-serif" stroke="none">KiCad şematik (eda/GridUp-Modul.kicad_sch): ERC 0 hata / 0 uyarı, netlist §3.1 tablosuyla otomatik doğrulanmış. Kavramsal / üretim çizimi değildir (§1.4); pasif değerler tipik.</text>
 </g>
 <g style="fill:none; 
 stroke:#8C0000; stroke-width:0.4400; stroke-opacity:1; 
 stroke-linecap:round; stroke-linejoin:round;">
-<text fill="#8C0000" x="26.9000" y="219.3500" font-size="2.9333" text-anchor="start" font-family="Arial,Helvetica,sans-serif" stroke="none">Besleme — 230 V iç ihtiyaç → RAC05 5 V → D1 (OR) → 5 V rayı → LDO 3V3; yedek: 2× süperkap seri → boost 4,6 V → D2; algılama D1 öncesi (§3.4, §7.3)</text>
+<text fill="#8C0000" x="26.9000" y="219.3500" font-size="2.9333" text-anchor="start" font-family="Arial,Helvetica,sans-serif" stroke="none">Besleme / 230 V iç ihtiyaç → RAC05 5 V → D1 (OR) → 5 V rayı → LDO 3V3; yedek: 2× süperkap seri → boost 4,6 V → D2; algılama D1 öncesi (§3.4, §7.3)</text>
 </g>
 <g style="fill:none; 
 stroke:#0000C2; stroke-width:0.1524; stroke-opacity:1; 
@@ -4217,7 +4217,7 @@ stroke-linecap:round; stroke-linejoin:round;">
 <g style="fill:none; 
 stroke:#0000C2; stroke-width:0.1524; stroke-opacity:1; 
 stroke-linecap:round; stroke-linejoin:round;">
-<text fill="#0000C2" x="35.5600" y="275.7500" font-size="2.4000" text-anchor="start" font-family="Arial,Helvetica,sans-serif" stroke="none">Analizör varsa CT ön ucu boş kalır (hedef senaryo, 02-bom §2.3). Kavramsal şema — üretim çizimi değildir (§1.4). Üretim: eda/gen_sch.py → kicad-cli (ERC + SVG).</text>
+<text fill="#0000C2" x="35.5600" y="275.7500" font-size="2.4000" text-anchor="start" font-family="Arial,Helvetica,sans-serif" stroke="none">Analizör varsa CT ön ucu boş kalır (hedef senaryo, 02-bom §2.3). Kavramsal şema / üretim çizimi değildir (§1.4). Üretim: eda/gen_sch.py → kicad-cli (ERC + SVG).</text>
 </g>
 <g style="fill:none; 
 stroke:#0000C2; stroke-width:0.1524; stroke-opacity:1; 
@@ -4232,7 +4232,7 @@ stroke-linecap:round; stroke-linejoin:round;">
 <g style="fill:none; 
 stroke:#008400; stroke-width:0.4400; stroke-opacity:1; 
 stroke-linecap:round; stroke-linejoin:round;">
-<text fill="#008400" x="223.5000" y="121.9500" font-size="2.9333" text-anchor="start" font-family="Arial,Helvetica,sans-serif" stroke="none">Anten — U.FL pigtail → SMA panel → dış anten (pano dış yüzü)</text>
+<text fill="#008400" x="223.5000" y="121.9500" font-size="2.9333" text-anchor="start" font-family="Arial,Helvetica,sans-serif" stroke="none">Anten / U.FL pigtail → SMA panel → dış anten (pano dış yüzü)</text>
 </g>
 <g style="fill:none; 
 stroke:#0000C2; stroke-width:0.1524; stroke-opacity:1; 
@@ -4247,12 +4247,12 @@ stroke-linecap:round; stroke-linejoin:round;">
 <g style="fill:none; 
 stroke:#0000C2; stroke-width:0.1524; stroke-opacity:1; 
 stroke-linecap:round; stroke-linejoin:round;">
-<text fill="#0000C2" x="236.2200" y="147.2500" font-size="2.4000" text-anchor="start" font-family="Arial,Helvetica,sans-serif" stroke="none">U.FL pigtail (modül konnektörü) — RF, şemada net değil; mevcut kablo girişinden</text>
+<text fill="#0000C2" x="236.2200" y="147.2500" font-size="2.4000" text-anchor="start" font-family="Arial,Helvetica,sans-serif" stroke="none">U.FL pigtail (modül konnektörü) / RF, şemada net değil; mevcut kablo girişinden</text>
 </g>
 <g style="fill:none; 
 stroke:#008400; stroke-width:0.4400; stroke-opacity:1; 
 stroke-linecap:round; stroke-linejoin:round;">
-<text fill="#008400" x="223.5000" y="155.9500" font-size="2.9333" text-anchor="start" font-family="Arial,Helvetica,sans-serif" stroke="none">Genişleme 2×5 (boş) — PD / akustik için ayrılmış (§7.1); kör tapa</text>
+<text fill="#008400" x="223.5000" y="155.9500" font-size="2.9333" text-anchor="start" font-family="Arial,Helvetica,sans-serif" stroke="none">Genişleme 2×5 (boş) / PD / akustik için ayrılmış (§7.1); kör tapa</text>
 </g>
 <g style="fill:none; 
 stroke:#0000C2; stroke-width:0.1524; stroke-opacity:1; 
@@ -4272,7 +4272,7 @@ stroke-linecap:round; stroke-linejoin:round;">
 <g style="fill:none; 
 stroke:#0000C2; stroke-width:0.1524; stroke-opacity:1; 
 stroke-linecap:round; stroke-linejoin:round;">
-<text fill="#0000C2" x="132.0800" y="145.7500" font-size="2.4000" text-anchor="start" font-family="Arial,Helvetica,sans-serif" stroke="none">U.FL harici anten (1U) — sembolde pin yok, bkz. J8; GPIO10/11 → genişleme (J6)</text>
+<text fill="#0000C2" x="132.0800" y="145.7500" font-size="2.4000" text-anchor="start" font-family="Arial,Helvetica,sans-serif" stroke="none">U.FL harici anten (1U) / sembolde pin yok, bkz. J8; GPIO10/11 → genişleme (J6)</text>
 </g>
 <g style="fill:none; 
 stroke:#008400; stroke-width:0.1524; stroke-opacity:1; 
@@ -4287,7 +4287,7 @@ stroke-linecap:round; stroke-linejoin:round;">
 <g style="fill:none; 
 stroke:#6A1B9A; stroke-width:0.4400; stroke-opacity:1; 
 stroke-linecap:round; stroke-linejoin:round;">
-<text fill="#6A1B9A" x="223.5000" y="44.9500" font-size="2.9333" text-anchor="start" font-family="Arial,Helvetica,sans-serif" stroke="none">Servis başlığı — USB + UART0, sahada bağlı değil</text>
+<text fill="#6A1B9A" x="223.5000" y="44.9500" font-size="2.9333" text-anchor="start" font-family="Arial,Helvetica,sans-serif" stroke="none">Servis başlığı / USB + UART0, sahada bağlı değil</text>
 </g>
 <g style="fill:none; 
 stroke:#0000C2; stroke-width:0.1524; stroke-opacity:1; 
@@ -4307,7 +4307,7 @@ stroke-linecap:round; stroke-linejoin:round;">
 <g style="fill:none; 
 stroke:#6A1B9A; stroke-width:0.4400; stroke-opacity:1; 
 stroke-linecap:round; stroke-linejoin:round;">
-<text fill="#6A1B9A" x="223.5000" y="63.4500" font-size="2.9333" text-anchor="start" font-family="Arial,Helvetica,sans-serif" stroke="none">RS-485 / Modbus RTU — MAX3485 3,3 V, yarıçift, 120 Ω sonlandırma</text>
+<text fill="#6A1B9A" x="223.5000" y="63.4500" font-size="2.9333" text-anchor="start" font-family="Arial,Helvetica,sans-serif" stroke="none">RS-485 / Modbus RTU / MAX3485 3,3 V, yarıçift, 120 Ω sonlandırma</text>
 </g>
 <g style="fill:none; 
 stroke:#0000C2; stroke-width:0.1524; stroke-opacity:1; 
@@ -4317,7 +4317,7 @@ stroke-linecap:round; stroke-linejoin:round;">
 <g style="fill:none; 
 stroke:#008400; stroke-width:0.4400; stroke-opacity:1; 
 stroke-linecap:round; stroke-linejoin:round;">
-<text fill="#008400" x="131.5000" y="44.9500" font-size="2.9333" text-anchor="start" font-family="Arial,Helvetica,sans-serif" stroke="none">ESP32-S3-WROOM-1U-N8 — Wi-Fi/BLE, U.FL anten</text>
+<text fill="#008400" x="131.5000" y="44.9500" font-size="2.9333" text-anchor="start" font-family="Arial,Helvetica,sans-serif" stroke="none">ESP32-S3-WROOM-1U-N8 / Wi-Fi/BLE, U.FL anten</text>
 </g>
 <g style="fill:none; 
 stroke:#0000C2; stroke-width:0.1524; stroke-opacity:1; 

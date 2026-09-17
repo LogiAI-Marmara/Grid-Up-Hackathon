@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 640" width="100%" style="max-width:1200px;background:#fff;font-family:Arial,Helvetica,sans-serif;font-size:13px">
   <!--
-    Montaj adımları — 06-montaj-proseduru.md §6.1 (karar kaydı §7.5 satır 343–351, birebir 7 adım).
+    Montaj adımları / 06-montaj-proseduru.md §6.1 (karar kaydı §7.5 satır 343–351, birebir 7 adım).
     Adım 1 (kesintisizlik) ve adım 7 (sessiz körlük önleme) vurgulu. Süreler tahmini, toplam ~15–20 dk.
   -->
   <defs>
@@ -17,7 +17,7 @@
     .ico{fill:none;stroke:#455a64;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round}
   </style>
 
-  <text x="800" y="36" text-anchor="middle" font-size="24" font-weight="700" fill="#263238">Montaj prosedürü — 7 adım, tek teknisyen, kesinti yok</text>
+  <text x="800" y="36" text-anchor="middle" font-size="24" font-weight="700" fill="#263238">Montaj prosedürü / 7 adım, tek teknisyen, kesinti yok</text>
 
   <!-- rozetler -->
   <g transform="translate(560,54)">
@@ -28,7 +28,7 @@
     <rect x="0" y="0" width="260" height="36" rx="18" fill="#eceff1" stroke="#90a4ae" stroke-width="2"/>
     <text x="130" y="24" text-anchor="middle" font-size="15" font-weight="700" fill="#37474f">Tek teknisyen / ~15–20 dk</text>
   </g>
-  <text x="800" y="116" text-anchor="middle" class="r">Abonelere giden elektrik hiçbir adımda kesilmez — yalnızca panonun yardımcı (iç ihtiyaç) devresinin sigortası çekilir (§7.3, TEDAŞ şartnamesi: 20 A / 6 A / 2 A ayrı sigortalar)</text>
+  <text x="800" y="116" text-anchor="middle" class="r">Abonelere giden elektrik hiçbir adımda kesilmez; yalnızca panonun yardımcı (iç ihtiyaç) devresinin sigortası çekilir (§7.3, TEDAŞ şartnamesi: 20 A / 6 A / 2 A ayrı sigortalar)</text>
 
   <!-- ===== ÜST SIRA: adım 1–4 ===== -->
   <g transform="translate(40,140)">
@@ -71,7 +71,7 @@
       <text x="16" y="70" class="s">Kapak içine, çıkış klemens sırasına</text>
       <text x="16" y="88" class="s">DİK bakacak şekilde; mıknatısla kadraj,</text>
       <text x="16" y="106" class="s">DIN klips / mevcut cıvatayla sabitleme.</text>
-      <text x="16" y="140" class="r">Risk: görüş hattı — birkaç cm kayma = sessiz körlük</text>
+      <text x="16" y="140" class="r">Risk: görüş hattı, birkaç cm kayma = sessiz körlük</text>
       <text x="16" y="156" class="r">Yeni delik açılmaz (§7.5) · mıknatıs CT'den uzak</text>
       <text x="334" y="186" text-anchor="end" class="r">~4 dk</text>
     </g>
@@ -87,7 +87,7 @@
       <text x="16" y="88" class="s">koruma iletkenine. Kablo alt yüzden,</text>
       <text x="16" y="106" class="s">menteşeye doğru kıvrım payıyla.</text>
       <text x="16" y="140" class="r">Risk: enerji kaynağı (§7.3)</text>
-      <text x="16" y="156" class="r">Sigorta hâlâ çekili — hat enerjisiz</text>
+      <text x="16" y="156" class="r">Sigorta hâlâ çekili, hat enerjisiz</text>
       <text x="334" y="186" text-anchor="end" class="r">~3 dk</text>
     </g>
   </g>
@@ -107,7 +107,7 @@
       <text x="16" y="88" class="s">girişinden çıkarılır, panel anten pano</text>
       <text x="16" y="106" class="s">dış yüzüne (SMA) takılır.</text>
       <text x="16" y="140" class="r">Risk: metal pano radyoyu keser (sessiz arıza)</text>
-      <text x="16" y="156" class="r">Yeni delik yok — mevcut giriş kullanılır (§7.4)</text>
+      <text x="16" y="156" class="r">Yeni delik yok, mevcut giriş kullanılır (§7.4)</text>
       <text x="334" y="186" text-anchor="end" class="r">~4 dk</text>
     </g>
     <line x1="352" y1="100" x2="382" y2="100" stroke="#546e7a" stroke-width="2" marker-end="url(#arr)"/>
@@ -136,7 +136,7 @@
       <text x="16" y="70" class="s">Termal görüntü canlı izlenir: klemens</text>
       <text x="16" y="88" class="s">sırası kadraj içinde mi? Değilse modül</text>
       <text x="16" y="106" class="s">kaydırılır, tekrar bakılır.</text>
-      <text x="16" y="124" class="w">ZORUNLU — SESSİZ KÖRLÜĞÜ ÖNLER</text>
+      <text x="16" y="124" class="w">ZORUNLU: SESSİZ KÖRLÜĞÜ ÖNLER</text>
       <text x="16" y="146" class="r">Risk: montaj hatasının yakalanması (§6.3)</text>
       <text x="16" y="162" class="r">Sistem çalışır görünürken boş duvara bakmasın</text>
       <text x="334" y="186" text-anchor="end" class="r">~3 dk</text>

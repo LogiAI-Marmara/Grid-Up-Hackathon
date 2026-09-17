@@ -1,4 +1,4 @@
-# GridUp modül bağlantı şeması — KiCad .kicad_sch üreteci (elle çizim yok, kaynak model bu dosya).
+# GridUp modül bağlantı şeması / KiCad .kicad_sch üreteci (elle çizim yok, kaynak model bu dosya).
 # Semboller KiCad kütüphanesinden (share/kicad/symbols) okunup lib_symbols'a gömülür; pin uçları kütüphane
 # geometrisinden hesaplanır. Netler: 03-pinout.md §3.1–3.6 (I²C GPIO8/9, CT GPIO4–7 ADC1, UART1 GPIO17/18
 # + DE/RE GPIO21, besleme algılama GPIO1, genişleme GPIO10/11; RAC05 → D1 → 5 V → LDO 3V3; süperkap 2× HV seri + R_şarj → boost 4,6 V → D2).
@@ -111,7 +111,7 @@ def scale_pin_fonts(sym, name_sz, num_sz):
     return sym
 
 def pins_of(sym):
-    """[(number, name, x, y_up, angle, type)] — tüm birimlerden."""
+    """[(number, name, x, y_up, angle, type)] / tüm birimlerden."""
     out = []
     for unit in find(sym, 'symbol'):
         for p in find(unit, 'pin'):
@@ -120,7 +120,7 @@ def pins_of(sym):
     return out
 
 def mlx90640_symbol():
-    """Kütüphanede yok — TO-39 4 pinli özel sembol."""
+    """Kütüphanede yok / TO-39 4 pinli özel sembol."""
     def prop(k, v, y, hide=False):
         e = [Sym('property'), k, v, [Sym('at'), Sym('0'), Sym(str(y)), Sym('0')]]
         if hide: e.append([Sym('hide'), Sym('yes')])
@@ -227,7 +227,7 @@ class Sch:
             stroke = [Sym('stroke'), [Sym('width'), Sym('0')], [Sym('type'), Sym('default')]]
             if color: stroke.append(color_node(color))
             self.items.append([Sym('wire'), [Sym('pts'), [Sym('xy'), g(a[0]), g(a[1])], [Sym('xy'), g(b[0]), g(b[1])]], stroke, [Sym('uuid'), new_uuid()]])
-    def gline(self, a, b, color, width=0.5):   # grafik çizgi (elektriksel değil) — lejant için
+    def gline(self, a, b, color, width=0.5):   # grafik çizgi (elektriksel değil) / lejant için
         self.items.append([Sym('polyline'), [Sym('pts'), [Sym('xy'), g(a[0]), g(a[1])], [Sym('xy'), g(b[0]), g(b[1])]],
                            [Sym('stroke'), [Sym('width'), g(width)], [Sym('type'), Sym('solid')], color_node(color)], [Sym('uuid'), new_uuid()]])
     def junction(self, at):
@@ -277,7 +277,7 @@ class Sch:
         out = [Sym('kicad_sch'), [Sym('version'), Sym('20250610')], [Sym('generator'), 'gen_sch'], [Sym('generator_version'), '10.0'],
                [Sym('uuid'), ROOT_UUID], [Sym('paper'), 'User', Sym('340'), Sym('300')],
                [Sym('title_block'), [Sym('title'), title], [Sym('date'), '2026-09-14'], [Sym('rev'), '1'], [Sym('company'), 'Grid Up Hackathon / İZ A'],
-                [Sym('comment'), Sym('1'), 'Kavramsal şema — üretim çizimi değildir (karar kaydı §1.4). Pasif değerler tipik başlangıç değerleri.'],
+                [Sym('comment'), Sym('1'), 'Kavramsal şema / üretim çizimi değildir (karar kaydı §1.4). Pasif değerler tipik başlangıç değerleri.'],
                 [Sym('comment'), Sym('2'), 'Pin atamaları 03-pinout.md §3.1 ile aynı; kaynak: eda/gen_sch.py']],
                [Sym('lib_symbols')] + list(self.libsyms.values())]
         out += self.items
@@ -330,9 +330,9 @@ def build():
     I2C, ANA, UART = COL['I2C'], COL['ANA'], COL['UART']
 
     # ---------- başlık / lejant ----------
-    S.text('Modül bağlantı şeması — ESP32-S3-WROOM-1U etrafında (03-pinout §3.1–3.6)', (25.4, 33.0), SZ_TITLE, bold=True)
-    S.text('KiCad şematik (eda/GridUp-Modul.kicad_sch): ERC 0 hata / 0 uyarı, netlist §3.1 tablosuyla otomatik doğrulanmış. Kavramsal — üretim çizimi değildir (§1.4); pasif değerler tipik.', (25.4, 37.5), SZ_NOTE)
-    S.text('Lejant (tel / etiket rengi) — aynı adlı etiketler aynı nettir;', (222.0, 26.0), SZ_NOTE, bold=True)
+    S.text('Modül bağlantı şeması / ESP32-S3-WROOM-1U etrafında (03-pinout §3.1–3.6)', (25.4, 33.0), SZ_TITLE, bold=True)
+    S.text('KiCad şematik (eda/GridUp-Modul.kicad_sch): ERC 0 hata / 0 uyarı, netlist §3.1 tablosuyla otomatik doğrulanmış. Kavramsal / üretim çizimi değildir (§1.4); pasif değerler tipik.', (25.4, 37.5), SZ_NOTE)
+    S.text('Lejant (tel / etiket rengi) / aynı adlı etiketler aynı nettir;', (222.0, 26.0), SZ_NOTE, bold=True)
     S.text('tel kesişmeleri atlama yayıyla gösterilir (bağlantı yok):', (222.0, 28.5), SZ_NOTE, bold=True)
     legend = [('3V3', COL['3V3']), ('5 V / 230 V', COL['5V']), ('GND / PE', COL['GND']), ('I²C', I2C),
               ('UART / RS-485', UART), ('analog (CT, algılama)', ANA), ('diğer / bileşen içi', COL['DEF'])]
@@ -342,7 +342,7 @@ def build():
         S.gline((x, y - 0.7), (x + 5.0, y - 0.7), c); S.text(name, (x + 6.0, y), SZ_NOTE, color=c)
 
     # ================= ORTA: ESP32-S3 =================
-    S.rect((130.0, 42.0), (222.0, 150.0), COL['DEF'], title='ESP32-S3-WROOM-1U-N8 — Wi-Fi/BLE, U.FL anten')
+    S.rect((130.0, 42.0), (222.0, 150.0), COL['DEF'], title='ESP32-S3-WROOM-1U-N8 / Wi-Fi/BLE, U.FL anten')
     U1 = S.part(ESP, 'U1', 'ESP32-S3-WROOM-1U-N8', (185.42, 100.33), ref_at=(195.58, 132.08), val_at=(195.58, 134.62),
                 footprint='RF_Module:ESP32-S3-WROOM-1U')
     S.pin_power(U1, '3V3', '+3V3'); S.pin_power(U1, '40', 'GND')      # 3V3 üst, GND alt (1/40/41 aynı nokta)
@@ -353,7 +353,7 @@ def build():
         S.pin_nc(U1, k)
     S.text('ADC yalnız ADC1 (ADC2 Wi-Fi ile çalışmaz); strapping IO0/3/45/46 boş bırakılır', (132.08, 140.0), SZ_NOTE, italic=True)
     S.text('IO35–37: N8 modülünde serbest (R8/R16V PSRAM kullanır), gereksinim yok → NC', (132.08, 143.0), SZ_NOTE, italic=True)
-    S.text('U.FL harici anten (1U) — sembolde pin yok, bkz. J8; GPIO10/11 → genişleme (J6)', (132.08, 146.0), SZ_NOTE, italic=True)
+    S.text('U.FL harici anten (1U) / sembolde pin yok, bkz. J8; GPIO10/11 → genişleme (J6)', (132.08, 146.0), SZ_NOTE, italic=True)
     # EN: 10k → 3V3, 1 µF → GND, reset butonu
     en = U1.p('EN'); n_en = (149.86, en[1]); S.wire(en, n_en)
     Ren = S.part(R, 'R1', '10k', (149.86, en[1] - 3.81), ref_at=(151.13, en[1] - 6.35), val_at=(151.13, en[1] - 3.81))
@@ -366,7 +366,7 @@ def build():
     S.text('EN: RC + reset butonu', (132.08, en[1] - 11.43), SZ_NOTE, italic=True)
 
     # ================= SOL ÜST: CT ön ucu ×4 → IO4–IO7 =================
-    S.rect((27.94, 42.0), (121.0, 136.0), ANA, title='CT ×4 (analizör yoksa) — burden, V_bias, RC → ADC1')
+    S.rect((27.94, 42.0), (121.0, 136.0), ANA, title='CT ×4 (analizör yoksa) / burden, V_bias, RC → ADC1')
     trunk_x = [119.38, 116.84, 114.3, 111.76]           # satır 1 en sağ dikey → kesişmesiz merdiven
     for k, (nm, pin) in enumerate([('CT L1', 'IO4'), ('CT L2', 'IO5'), ('CT L3', 'IO6'), ('CT nötr', 'IO7')]):
         y0 = 54.61 + k * 15.24
@@ -400,7 +400,7 @@ def build():
     S.text('V_bias = 3V3/2 (CT ön yargı)', (66.04, 121.92), SZ_NOTE, italic=True)
 
     # ================= SOL ALT: I²C sensörler → IO8/IO9 (bus) =================
-    S.rect((27.94, 139.7), (121.0, 214.63), I2C, title='I²C — MLX90640 0x33 + SHT31 0x44, tek hat 400 kHz+')
+    S.rect((27.94, 139.7), (121.0, 214.63), I2C, title='I²C / MLX90640 0x33 + SHT31 0x44, tek hat 400 kHz+')
     BX_SDA, BX_SCL = 124.46, 127.0
     sda_pin, scl_pin = U1.p('IO8'), U1.p('IO9')
     U2 = S.part('GridUp:MLX90640', 'U2', 'MLX90640ESF-BAA', (69.85, 163.83), ref_at=(48.26, 163.83), val_at=(43.18, 166.37),
@@ -434,13 +434,13 @@ def build():
     S.text('2× 4,7 kΩ pull-up → 3V3', (88.9, 194.35), SZ_NOTE, italic=True)
 
     # ================= SAĞ SÜTUN =================
-    # servis başlığı (etiket — sahada bağlı değil)
-    S.rect((222.0, 42.0), (322.0, 58.0), UART, title='Servis başlığı — USB + UART0, sahada bağlı değil')
+    # servis başlığı (etiket / sahada bağlı değil)
+    S.rect((222.0, 42.0), (322.0, 58.0), UART, title='Servis başlığı / USB + UART0, sahada bağlı değil')
     J9 = S.part(C04, 'J9', 'Servis USB/UART0', (259.08, 50.8), ref_at=(263.0, 48.0), val_at=(263.0, 57.0),
                 footprint='Connector_PinHeader_2.54mm:PinHeader_1x04_P2.54mm_Vertical')
     for num, net in [('1', 'U0TXD'), ('2', 'U0RXD'), ('3', 'USB_DN'), ('4', 'USB_DP')]: S.pin_label(J9, num, net)
     # RS-485: MAX3485 aynalı (mirror x) → DI / DE / RE / RO sırası ESP IO17 / IO21 / IO18 ile kesişmesiz
-    S.rect((222.0, 60.5), (322.0, 116.0), UART, title='RS-485 / Modbus RTU — MAX3485 3,3 V, yarıçift, 120 Ω sonlandırma')
+    S.rect((222.0, 60.5), (322.0, 116.0), UART, title='RS-485 / Modbus RTU / MAX3485 3,3 V, yarıçift, 120 Ω sonlandırma')
     U4 = S.part(MAX, 'U4', 'MAX3485', (254.0, 87.63), mirror='x', ref_at=(236.22, 73.66), val_at=(236.22, 76.2),
                 footprint='Package_SO:SOIC-8_3.9x4.9mm_P1.27mm')
     S.pin_power(U4, 'VCC', '+3V3', L=2.54, rot=90); S.pin_power(U4, 'GND', 'GND', L=2.54, rot=270)   # aynalı çip: güç sembolleri yatay
@@ -464,12 +464,12 @@ def build():
     S.text('→ enerji analizörü (slave 1, akım) / TVOC-2 (slave 2, yalnız trip-diag.)', (236.22, 110.0), SZ_NOTE, italic=True)
     S.text('A/B bükümlü çift, ekranlı; son cihazda 2. 120 Ω', (236.22, 113.0), SZ_NOTE, italic=True)
     # anten
-    S.rect((222.0, 119.0), (322.0, 150.0), COL['DEF'], title='Anten — U.FL pigtail → SMA panel → dış anten (pano dış yüzü)')
+    S.rect((222.0, 119.0), (322.0, 150.0), COL['DEF'], title='Anten / U.FL pigtail → SMA panel → dış anten (pano dış yüzü)')
     J8 = S.part(COAX, 'J8', 'SMA panel', (259.08, 133.35), ref_at=(261.62, 128.27), val_at=(261.62, 138.43), footprint='Connector_Coaxial:SMA_Amphenol_132134_Vertical')
     S.pin_nc(J8, '1'); S.pin_power(J8, '2', 'GND')
-    S.text('U.FL pigtail (modül konnektörü) — RF, şemada net değil; mevcut kablo girişinden', (236.22, 147.5), SZ_NOTE, italic=True)
+    S.text('U.FL pigtail (modül konnektörü) / RF, şemada net değil; mevcut kablo girişinden', (236.22, 147.5), SZ_NOTE, italic=True)
     # genişleme
-    S.rect((222.0, 153.0), (322.0, 190.0), COL['DEF'], title='Genişleme 2×5 (boş) — PD / akustik için ayrılmış (§7.1); kör tapa')
+    S.rect((222.0, 153.0), (322.0, 190.0), COL['DEF'], title='Genişleme 2×5 (boş) / PD / akustik için ayrılmış (§7.1); kör tapa')
     J6 = S.part(C25, 'J6', 'Genişleme 2×5', (262.89, 173.99), ref_at=(264.16, 163.5), val_at=(257.81, 184.0), footprint='Connector_PinHeader_2.54mm:PinHeader_2x05_P2.54mm_Vertical')
     for num, name, dx in [('1', '+3V3', -3.81), ('2', '+5V', 3.81)]:
         a0 = J6.p(num); b0 = (a0[0] + dx, a0[1]); c0 = (b0[0], b0[1] - 5.08)
@@ -479,7 +479,7 @@ def build():
     S.pin_nc(J6, '9'); S.pin_nc(J6, '10')
 
     # ================= ALT: Besleme =================
-    S.rect((25.4, 216.4), (322.0, 280.0), COL['5V'], title='Besleme — 230 V iç ihtiyaç → RAC05 5 V → D1 (OR) → 5 V rayı → LDO 3V3; yedek: 2× süperkap seri → boost 4,6 V → D2; algılama D1 öncesi (§3.4, §7.3)')
+    S.rect((25.4, 216.4), (322.0, 280.0), COL['5V'], title='Besleme / 230 V iç ihtiyaç → RAC05 5 V → D1 (OR) → 5 V rayı → LDO 3V3; yedek: 2× süperkap seri → boost 4,6 V → D2; algılama D1 öncesi (§3.4, §7.3)')
     yL = 228.6
     J1 = S.part(C03, 'J1', 'İç ihtiyaç L / N / PE', (43.18, yL + 2.54), mirror='y', ref_at=(36.83, yL - 6.35), val_at=(46.99, yL - 3.81),
                 footprint='TerminalBlock_Phoenix:TerminalBlock_Phoenix_MKDS-3-3-5.08_1x03_P5.08mm_Horizontal')
@@ -569,7 +569,7 @@ def build():
 
     # ---------- notlar ----------
     S.text('Notlar: pin atamaları 03 §3.1 ile aynı; tabloda olmayan tek ekleme GPIO1 besleme algılama. Pasif değerler tipik başlangıç değerleridir.', (35.56, 273.0), SZ_NOTE)
-    S.text('Analizör varsa CT ön ucu boş kalır (hedef senaryo, 02-bom §2.3). Kavramsal şema — üretim çizimi değildir (§1.4). Üretim: eda/gen_sch.py → kicad-cli (ERC + SVG).', (35.56, 276.0), SZ_NOTE)
+    S.text('Analizör varsa CT ön ucu boş kalır (hedef senaryo, 02-bom §2.3). Kavramsal şema / üretim çizimi değildir (§1.4). Üretim: eda/gen_sch.py → kicad-cli (ERC + SVG).', (35.56, 276.0), SZ_NOTE)
     return S
 
 if __name__ == '__main__':
@@ -588,7 +588,7 @@ if __name__ == '__main__':
         for l in fps: fh.write('  (lib (name "%s")(type "KiCad")(uri "${KICAD10_FOOTPRINT_DIR}/%s.pretty")(options "")(descr ""))\n' % (l, l))
         fh.write(')\n')
     out = os.path.join(HERE, PROJECT + '.kicad_sch')
-    with open(out, 'w', encoding='utf-8', newline='') as fh: fh.write(S.emit('GridUp modül bağlantı şeması — ESP32-S3-WROOM-1U'))
+    with open(out, 'w', encoding='utf-8', newline='') as fh: fh.write(S.emit('GridUp modül bağlantı şeması / ESP32-S3-WROOM-1U'))
     pro = os.path.join(HERE, PROJECT + '.kicad_pro')
     if not os.path.exists(pro):
         with open(pro, 'w', encoding='utf-8', newline='') as fh:
