@@ -56,14 +56,15 @@ class EsikAyar:
 class OrneklemeAyar:
     """Sampling periods, seconds. Section 7.2 of the decision record.
 
-    The packet period is the current-averaging window: currents are read every
-    1-5 s and the 10 s mean is what gets recorded, so a packet every 10 s is one
-    record per averaging window and nothing is thrown away.
+    Integration item 2: packet cadence and thermal frame generation are aligned
+    at 30 seconds. The sensor reads faster (termal_okuma_s) and averages sub-samples
+    into one frame to lower temporal noise.
     """
 
-    paket_s: int = 10  # current mean, and the packet cadence
+    paket_s: int = 30  # 30 s cadence per integration item 2
     akim_okuma_s: int = 2  # sub-samples averaged into one recorded value
-    termal_s: int = 20  # thermal summary: 10-30 s
+    termal_okuma_s: int = 6  # sensor reads faster (5 sub-samples) and averages to reduce noise
+    termal_s: int = 30  # thermal summary and frame: 30 s
     cevre_s: int = 60  # ambient temperature and humidity: 30-60 s
     # Arc is event-driven; there is no period for it.
 

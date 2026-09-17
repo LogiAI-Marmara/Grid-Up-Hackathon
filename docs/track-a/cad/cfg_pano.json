@@ -1,0 +1,58 @@
+{
+ "out": "views/pano-views.json",
+ "views": [
+  {
+   "name": "on",
+   "d": [
+    0,
+    0,
+    -1
+   ],
+   "u": [
+    0,
+    1,
+    0
+   ],
+   "exclude": [
+    "Kapak"
+   ],
+   "exclude_prefix": [
+    "GridUp-"
+   ]
+  },
+  {
+   "name": "modul",
+   "d": [
+    0,
+    0,
+    -1
+   ],
+   "u": [
+    0,
+    1,
+    0
+   ],
+   "include_prefix": [
+    "GridUp-"
+   ]
+  },
+  {
+   "name": "kesit",
+   "d": [
+    -1,
+    0,
+    0
+   ],
+   "u": [
+    0,
+    1,
+    0
+   ],
+   "clip": {
+    "axis": 0,
+    "max": 650
+   },
+   "section": true
+  }
+ ]
+}

@@ -1,0 +1,158 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 640" width="100%" style="max-width:1200px;background:#fff;font-family:Arial,Helvetica,sans-serif;font-size:13px">
+  <!--
+    Montaj adımları / 06-montaj-proseduru.md §6.1 (karar kaydı §7.5 satır 343–351, birebir 7 adım).
+    Adım 1 (kesintisizlik) ve adım 7 (sessiz körlük önleme) vurgulu. Süreler tahmini, toplam ~15–20 dk.
+  -->
+  <defs>
+    <marker id="arr" markerWidth="10" markerHeight="10" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#546e7a"/></marker>
+  </defs>
+  <style>
+    .card{fill:#fafafa;stroke:#90a4ae;stroke-width:2}
+    .hi{fill:#fff8f0;stroke:#e65100;stroke-width:3}
+    .num{font-size:22px;font-weight:700;fill:#fff}
+    .t{font-size:14px;font-weight:700;fill:#263238}
+    .s{font-size:12px;fill:#37474f}
+    .r{font-size:11px;fill:#607d8b}
+    .w{font-size:11px;fill:#c62828;font-weight:700}
+    .ico{fill:none;stroke:#455a64;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round}
+  </style>
+
+  <text x="800" y="36" text-anchor="middle" font-size="24" font-weight="700" fill="#263238">Montaj prosedürü / 7 adım, tek teknisyen, kesinti yok</text>
+
+  <!-- rozetler -->
+  <g transform="translate(560,54)">
+    <rect x="0" y="0" width="200" height="36" rx="18" fill="#2e7d32"/>
+    <text x="100" y="24" text-anchor="middle" font-size="16" font-weight="700" fill="#fff">KESİNTİ YOK</text>
+  </g>
+  <g transform="translate(780,54)">
+    <rect x="0" y="0" width="260" height="36" rx="18" fill="#eceff1" stroke="#90a4ae" stroke-width="2"/>
+    <text x="130" y="24" text-anchor="middle" font-size="15" font-weight="700" fill="#37474f">Tek teknisyen / ~15–20 dk</text>
+  </g>
+  <text x="800" y="116" text-anchor="middle" class="r">Abonelere giden elektrik hiçbir adımda kesilmez; yalnızca panonun yardımcı (iç ihtiyaç) devresinin sigortası çekilir (§7.3, TEDAŞ şartnamesi: 20 A / 6 A / 2 A ayrı sigortalar)</text>
+
+  <!-- ===== ÜST SIRA: adım 1–4 ===== -->
+  <g transform="translate(40,140)">
+    <!-- 1 -->
+    <g>
+      <rect x="0" y="0" width="350" height="200" rx="10" class="hi"/>
+      <circle cx="30" cy="30" r="20" fill="#e65100"/><text x="30" y="38" text-anchor="middle" class="num">1</text>
+      <text x="62" y="36" class="t">Yardımcı devre sigortası çekilir</text>
+      <!-- ikon: sigorta -->
+      <g transform="translate(270,70)" class="ico"><rect x="0" y="0" width="60" height="24" rx="6"/><line x1="-14" y1="12" x2="0" y2="12"/><line x1="60" y1="12" x2="74" y2="12"/><line x1="18" y1="12" x2="42" y2="12" stroke-dasharray="4 3"/></g>
+      <text x="16" y="70" class="s">Pano iç ihtiyaç devresinin sigortası çekilir.</text>
+      <text x="16" y="88" class="s">Ana çıkışlar (abone besleme) dokunulmaz.</text>
+      <text x="16" y="118" class="w">ABONELERE ELEKTRİK KESİLMEZ</text>
+      <text x="16" y="140" class="r">Risk: iş güvenliği + müşteri kesintisi</text>
+      <text x="16" y="156" class="r">Emsal: panodaki Modem kutusu aynı devreden beslenir</text>
+      <text x="334" y="186" text-anchor="end" class="r">~2 dk</text>
+    </g>
+    <line x1="352" y1="100" x2="382" y2="100" stroke="#546e7a" stroke-width="2" marker-end="url(#arr)"/>
+
+    <!-- 2 -->
+    <g transform="translate(390,0)">
+      <rect x="0" y="0" width="350" height="200" rx="10" class="card"/>
+      <circle cx="30" cy="30" r="20" fill="#455a64"/><text x="30" y="38" text-anchor="middle" class="num">2</text>
+      <text x="62" y="36" class="t">Pano kapağı açılır</text>
+      <g transform="translate(262,60)" class="ico"><rect x="0" y="0" width="44" height="56"/><path d="M44 0 L78 -10 L78 46 L44 56"/><circle cx="66" cy="20" r="2"/></g>
+      <text x="16" y="70" class="s">Ön kapak açılır; klemens sıraları ve</text>
+      <text x="16" y="88" class="s">alt kablo boşluğu erişilebilir olur.</text>
+      <text x="16" y="140" class="r">Risk: fiziksel erişim</text>
+      <text x="16" y="156" class="r">Kapak içi montaj için kablo kıvrım payı hazırlanır</text>
+      <text x="334" y="186" text-anchor="end" class="r">~1 dk</text>
+    </g>
+    <line x1="742" y1="100" x2="772" y2="100" stroke="#546e7a" stroke-width="2" marker-end="url(#arr)"/>
+
+    <!-- 3 -->
+    <g transform="translate(780,0)">
+      <rect x="0" y="0" width="350" height="200" rx="10" class="card"/>
+      <circle cx="30" cy="30" r="20" fill="#455a64"/><text x="30" y="38" text-anchor="middle" class="num">3</text>
+      <text x="62" y="36" class="t">Modül konumlandırılır, hizalanır</text>
+      <g transform="translate(258,58)" class="ico"><rect x="0" y="0" width="30" height="20" rx="3" fill="#2e7d32" stroke="#1b5e20"/><path d="M30 10 L84 -12 M30 10 L84 32" stroke="#1565c0" stroke-dasharray="4 3"/><line x1="84" y1="-16" x2="84" y2="36" stroke="#e65100" stroke-width="4"/></g>
+      <text x="16" y="70" class="s">Kapak içine, çıkış klemens sırasına</text>
+      <text x="16" y="88" class="s">DİK bakacak şekilde; mıknatısla kadraj,</text>
+      <text x="16" y="106" class="s">DIN klips / mevcut cıvatayla sabitleme.</text>
+      <text x="16" y="140" class="r">Risk: görüş hattı, birkaç cm kayma = sessiz körlük</text>
+      <text x="16" y="156" class="r">Yeni delik açılmaz (§7.5) · mıknatıs CT'den uzak</text>
+      <text x="334" y="186" text-anchor="end" class="r">~4 dk</text>
+    </g>
+    <line x1="1132" y1="100" x2="1162" y2="100" stroke="#546e7a" stroke-width="2" marker-end="url(#arr)"/>
+
+    <!-- 4 -->
+    <g transform="translate(1170,0)">
+      <rect x="0" y="0" width="350" height="200" rx="10" class="card"/>
+      <circle cx="30" cy="30" r="20" fill="#455a64"/><text x="30" y="38" text-anchor="middle" class="num">4</text>
+      <text x="62" y="36" class="t">Besleme kablosu bağlanır</text>
+      <g transform="translate(262,58)" class="ico"><rect x="0" y="0" width="26" height="40" fill="#607d8b" stroke="#455a64"/><line x1="26" y1="10" x2="80" y2="10" stroke="#ef6c00"/><line x1="26" y1="30" x2="80" y2="30" stroke="#ef6c00"/><text x="40" y="52" font-size="10" fill="#455a64" stroke="none">230 V</text></g>
+      <text x="16" y="70" class="s">230 V, iç ihtiyaç klemensine; PE panonun</text>
+      <text x="16" y="88" class="s">koruma iletkenine. Kablo alt yüzden,</text>
+      <text x="16" y="106" class="s">menteşeye doğru kıvrım payıyla.</text>
+      <text x="16" y="140" class="r">Risk: enerji kaynağı (§7.3)</text>
+      <text x="16" y="156" class="r">Sigorta hâlâ çekili, hat enerjisiz</text>
+      <text x="334" y="186" text-anchor="end" class="r">~3 dk</text>
+    </g>
+  </g>
+
+  <!-- dönüş oku: 4 → 5 -->
+  <path d="M1520 350 L1520 372 L80 372 L80 394" fill="none" stroke="#546e7a" stroke-width="2" marker-end="url(#arr)"/>
+
+  <!-- ===== ALT SIRA: adım 5–7 + özet ===== -->
+  <g transform="translate(40,400)">
+    <!-- 5 -->
+    <g>
+      <rect x="0" y="0" width="350" height="200" rx="10" class="card"/>
+      <circle cx="30" cy="30" r="20" fill="#455a64"/><text x="30" y="38" text-anchor="middle" class="num">5</text>
+      <text x="62" y="36" class="t">Anten dışa monte edilir</text>
+      <g transform="translate(258,56)" class="ico"><rect x="0" y="0" width="50" height="50"/><path d="M25 25 L70 25" stroke-dasharray="4 3"/><circle cx="76" cy="25" r="5"/><path d="M76 20 L76 -2 M70 4 L82 4"/></g>
+      <text x="16" y="70" class="s">U.FL pigtail panonun MEVCUT kablo</text>
+      <text x="16" y="88" class="s">girişinden çıkarılır, panel anten pano</text>
+      <text x="16" y="106" class="s">dış yüzüne (SMA) takılır.</text>
+      <text x="16" y="140" class="r">Risk: metal pano radyoyu keser (sessiz arıza)</text>
+      <text x="16" y="156" class="r">Yeni delik yok, mevcut giriş kullanılır (§7.4)</text>
+      <text x="334" y="186" text-anchor="end" class="r">~4 dk</text>
+    </g>
+    <line x1="352" y1="100" x2="382" y2="100" stroke="#546e7a" stroke-width="2" marker-end="url(#arr)"/>
+
+    <!-- 6 -->
+    <g transform="translate(390,0)">
+      <rect x="0" y="0" width="350" height="200" rx="10" class="card"/>
+      <circle cx="30" cy="30" r="20" fill="#455a64"/><text x="30" y="38" text-anchor="middle" class="num">6</text>
+      <text x="62" y="36" class="t">Sigorta takılır, gateway'e kaydolur</text>
+      <g transform="translate(262,60)" class="ico"><rect x="0" y="0" width="60" height="24" rx="6"/><line x1="-14" y1="12" x2="0" y2="12"/><line x1="60" y1="12" x2="74" y2="12"/><line x1="18" y1="12" x2="42" y2="12"/><path d="M20 -8 q10 -14 20 0 M26 -2 q4 -6 8 0" stroke="#2e7d32"/></g>
+      <text x="16" y="70" class="s">Yardımcı devre sigortası geri takılır;</text>
+      <text x="16" y="88" class="s">modül açılır, saha gateway'ine bağlanır,</text>
+      <text x="16" y="106" class="s">ilk paket merkeze düşer (modul_id).</text>
+      <text x="16" y="140" class="r">Risk: devreye alma</text>
+      <text x="16" y="156" class="r">LED: yeşil = gateway bağlantısı var</text>
+      <text x="334" y="186" text-anchor="end" class="r">~2 dk</text>
+    </g>
+    <line x1="742" y1="100" x2="772" y2="100" stroke="#546e7a" stroke-width="2" marker-end="url(#arr)"/>
+
+    <!-- 7 -->
+    <g transform="translate(780,0)">
+      <rect x="0" y="0" width="350" height="200" rx="10" class="hi"/>
+      <circle cx="30" cy="30" r="20" fill="#e65100"/><text x="30" y="38" text-anchor="middle" class="num">7</text>
+      <text x="62" y="36" class="t">Ekrandan kapsama doğrulanır</text>
+      <g transform="translate(256,56)" class="ico"><rect x="0" y="0" width="80" height="50" rx="3"/><rect x="8" y="8" width="64" height="34" fill="#e3f2fd" stroke="#1565c0"/><line x1="16" y1="18" x2="64" y2="18" stroke="#e65100" stroke-width="4"/><line x1="16" y1="30" x2="64" y2="30" stroke="#e65100" stroke-width="4"/><path d="M60 40 l6 6 l12 -14" stroke="#2e7d32" stroke-width="3"/></g>
+      <text x="16" y="70" class="s">Termal görüntü canlı izlenir: klemens</text>
+      <text x="16" y="88" class="s">sırası kadraj içinde mi? Değilse modül</text>
+      <text x="16" y="106" class="s">kaydırılır, tekrar bakılır.</text>
+      <text x="16" y="124" class="w">ZORUNLU: SESSİZ KÖRLÜĞÜ ÖNLER</text>
+      <text x="16" y="146" class="r">Risk: montaj hatasının yakalanması (§6.3)</text>
+      <text x="16" y="162" class="r">Sistem çalışır görünürken boş duvara bakmasın</text>
+      <text x="334" y="186" text-anchor="end" class="r">~3 dk</text>
+    </g>
+
+    <!-- özet kutusu -->
+    <g transform="translate(1170,0)">
+      <rect x="0" y="0" width="350" height="200" rx="10" fill="#e8f5e9" stroke="#2e7d32" stroke-width="2"/>
+      <text x="16" y="32" class="t" fill="#1b5e20">Sonuç</text>
+      <text x="16" y="60" class="s">Toplam süre: ~19 dk (tahmini, adım başı)</text>
+      <text x="16" y="78" class="s">İşgücü: 1 teknisyen</text>
+      <text x="16" y="96" class="s">Planlı kesinti: yok</text>
+      <text x="16" y="114" class="s">Panoda yeni delik: yok</text>
+      <text x="16" y="132" class="s">Yeni kablo: 230 V + anten pigtail (2 adet)</text>
+      <text x="16" y="160" class="r">5000 panoluk yaygınlaştırmada kesintisiz</text>
+      <text x="16" y="176" class="r">montaj ölçeklenebilirliğin ön koşulu (T5, §6.2)</text>
+    </g>
+  </g>
+</svg>

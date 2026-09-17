@@ -144,7 +144,7 @@ class AsiriYuk(Senaryo):
         "whole thermal field follow with the cabinet's thermal lag; the terminal "
         "spread is unchanged"
     )
-    beklenen_tip = (Tip.ORTAM_SICAKLIK_YUKSEK, Tip.AKIM_SICAKLIK_SAPMASI)
+    beklenen_tip = (Tip.ASIRI_YUK, Tip.ORTAM_SICAKLIK_YUKSEK)
 
     def __init__(self, son_olcek: float = 1.9) -> None:
         self.son_olcek = son_olcek

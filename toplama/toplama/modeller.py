@@ -184,6 +184,7 @@ class YazimSonucu(BaseModel):
     olcum: int = 0
     termal_ozet: int = 0
     termal_kare: int = 0
+    modul_durum: int = 0
     kare_id: str | None = None
     #: True when every row was a duplicate of something already stored. A
     #: retransmitting module is normal (it has a backup store), so this is

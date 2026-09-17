@@ -96,6 +96,13 @@ class Tip(_MetinEnum):
     ARK = "ark"
     SENSOR_ARIZASI = "sensor_arizasi"
     MODUL_SAGLIK = "modul_saglik"
+    # Integration follow-up: the module simulator has always had an `asiri_yuk`
+    # scenario (senaryo.py, decision record 7.6), but the diagnosis it corresponds
+    # to was never added to the vocabulary, so the label had no `tip` to map to
+    # and track B could not raise it. `overload` — all three phase currents climb
+    # past the feeder rating together and the whole field warms with the cabinet's
+    # lag — is distinct from `sicak_nokta` (one loosened terminal heating alone).
+    ASIRI_YUK = "asiri_yuk"
 
 
 class Kalite(_MetinEnum):

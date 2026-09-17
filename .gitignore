@@ -16,3 +16,9 @@ CLAUDE.md
 
 # OS
 .DS_Store
+# KiCad yerel ayar dosyasi (kullanici/oturum)
+*.kicad_prl
+
+# KiCad GUI artıkları
+docs/track-a/eda/.history/
+*.lck

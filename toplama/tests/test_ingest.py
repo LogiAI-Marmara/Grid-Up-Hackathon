@@ -94,6 +94,15 @@ def test_gecerli_paket_yazilir(istemci):
         assert satir["modul_id"] == "TR041-P01-M1"
         assert "alindi_zaman" in satir
 
+    # Integration item 1: modul_durum (power source and signal strength) is recorded.
+    durumlar = istemci.depo.oku("modul_durum")
+    assert len(durumlar) == 1
+    assert durumlar[0]["modul_id"] == "TR041-P01-M1"
+    assert durumlar[0]["besleme"] == "sebeke"
+    assert durumlar[0]["sinyal"] == -72
+    assert durumlar[0]["yazilim_surumu"] == "1.0.3"
+    assert "alindi_zaman" in durumlar[0]
+
 
 def test_gecersiz_paket_reddedilir(istemci):
     # Missing the health block entirely.

@@ -23,6 +23,7 @@ from __future__ import annotations
 
 import json
 import os
+import struct
 import threading
 from dataclasses import dataclass, field
 from datetime import datetime
@@ -55,9 +56,29 @@ class Satirlar:
     """
 
     modul: dict[str, Any]
+    modul_durum: dict[str, Any]
     olcum: list[dict[str, Any]]
     termal_ozet: dict[str, Any] | None
     termal_kare: dict[str, Any] | None
+
+
+def kare_kodla(kare: list[float]) -> bytes:
+    """Encode a 768-value frame as the contract's int16 little-endian bytes.
+
+    The frame is decoded at the moment of storage and nowhere else, so this is
+    the inverse of what track B re-expands when it serves `termal_kare` — the
+    contract's table in `sozlesmeler/README.md` is implemented here once.
+
+    Why bytes rather than the JSON array the packet carried: the module holds the
+    frame as int16 at 0.1 degC, the array is a re-encoding of those bytes, and
+    re-encoding is where rounding differences come from. Storing the producer's
+    form is smaller (measured: 5137 -> 1536 bytes per frame) and lossless.
+
+    `struct.pack` rather than `int.to_bytes` so the little-endian choice is
+    stated once, in the format string, and a negative value cannot quietly pick
+    the wrong length.
+    """
+    return struct.pack(f"<{len(kare)}h", *(round(deger * 10) for deger in kare))
 
 
 def satirlar(paket: ModulPaketi, alindi_zaman: datetime) -> Satirlar:
@@ -76,6 +97,18 @@ def satirlar(paket: ModulPaketi, alindi_zaman: datetime) -> Satirlar:
         "modul_kodu": kimlik.modul,
         "yazilim_surumu": paket.modul_durum.yazilim_surumu,
         "son_gorulme": paket.zaman,
+    }
+
+    # Integration item 1: power source and signal strength recorded per packet
+    # rather than dropped. The exact moment mains power fails (scenario 7) and
+    # the signal attenuation trend leading up to a disconnect live here.
+    modul_durum = {
+        "modul_id": paket.modul_id,
+        "zaman": paket.zaman,
+        "besleme": paket.modul_durum.besleme.value,
+        "sinyal": paket.modul_durum.sinyal,
+        "yazilim_surumu": paket.modul_durum.yazilim_surumu,
+        "alindi_zaman": alindi_zaman,
     }
 
     olcum = [
@@ -109,14 +142,16 @@ def satirlar(paket: ModulPaketi, alindi_zaman: datetime) -> Satirlar:
         kare = {
             "modul_id": paket.modul_id,
             "zaman": paket.zaman,
-            # 768 values as one array, not 768 measurement rows.
-            "piksel_verisi": list(paket.termal_kare),
+            # The contract's int16 bytes, not the 768-number array the packet
+            # carried — migration 004. One encoder for both backends, so the file
+            # fixture and the table hold the same bytes.
+            "piksel_verisi": kare_kodla(paket.termal_kare),
             "satir_sayisi": TERMAL_SATIR,
             "sutun_sayisi": TERMAL_SUTUN,
             "alindi_zaman": alindi_zaman,
         }
 
-    return Satirlar(modul=modul, olcum=olcum, termal_ozet=ozet, termal_kare=kare)
+    return Satirlar(modul=modul, modul_durum=modul_durum, olcum=olcum, termal_ozet=ozet, termal_kare=kare)
 
 
 # ---------------------------------------------------------------------------
@@ -132,6 +167,7 @@ class Sayac:
     olcum: int = 0
     termal_ozet: int = 0
     termal_kare: int = 0
+    modul_durum: int = 0
     yinelenen: int = 0
 
     def sozluk(self) -> dict[str, int]:
@@ -140,6 +176,7 @@ class Sayac:
             "olcum": self.olcum,
             "termal_ozet": self.termal_ozet,
             "termal_kare": self.termal_kare,
+            "modul_durum": self.modul_durum,
             "yinelenen": self.yinelenen,
         }
 
@@ -177,6 +214,7 @@ class Kayit:
         olcum: int,
         ozet: int,
         kare: int,
+        durum: int,
         kare_id: str | None,
         beklenen_olcum: int,
     ) -> YazimSonucu:
@@ -185,7 +223,14 @@ class Kayit:
         self.sayac.olcum += olcum
         self.sayac.termal_ozet += ozet
         self.sayac.termal_kare += kare
-        yinelenen = olcum == 0 and ozet == 0 and kare == 0 and (beklenen_olcum > 0 or paket.termal_ozet is not None)
+        self.sayac.modul_durum += durum
+        yinelenen = (
+            olcum == 0
+            and ozet == 0
+            and kare == 0
+            and durum == 0
+            and (beklenen_olcum > 0 or paket.termal_ozet is not None or paket.modul_durum is not None)
+        )
         if yinelenen:
             self.sayac.yinelenen += 1
         return YazimSonucu(
@@ -195,6 +240,7 @@ class Kayit:
             olcum=olcum,
             termal_ozet=ozet,
             termal_kare=kare,
+            modul_durum=durum,
             kare_id=kare_id,
             yinelenen=yinelenen,
         )
@@ -227,6 +273,7 @@ class DosyaKayit(Kayit):
 
     DOSYALAR = {
         "modul": "modul.jsonl",
+        "modul_durum": "modul_durum.jsonl",
         "olcum": "olcum.jsonl",
         "termal_ozet": "termal_ozet.jsonl",
         "termal_kare": "termal_kare.jsonl",
@@ -238,6 +285,7 @@ class DosyaKayit(Kayit):
         self._gorulen_olcum: set[tuple[str, str, str]] = set()
         self._gorulen_ozet: set[tuple[str, str]] = set()
         self._gorulen_kare: set[tuple[str, str]] = set()
+        self._gorulen_durum: set[tuple[str, str]] = set()
         self._gorulen_modul: dict[str, str] = {}
         self._kare_sira = 0
 
@@ -248,9 +296,20 @@ class DosyaKayit(Kayit):
 
     @staticmethod
     def _jsonlanabilir(satir: dict[str, Any]) -> dict[str, Any]:
-        """Datetimes become contract timestamps; everything else is already JSON."""
+        """Datetimes become contract timestamps; bytes become hex for JSONL.
+
+        `piksel_verisi` is raw int16 bytes (migration 004). JSONL cannot carry
+        bytes, and silently dropping the frame would make the file backend's
+        fixture differ from the table for the one column an anomaly points at.
+        Hex is the reversible form: `bytes.fromhex` reads it back, and it keeps
+        the line plain ASCII so the file stays greppable.
+        """
         return {
-            anahtar: (zaman_yaz(deger) if isinstance(deger, datetime) else deger)
+            anahtar: (
+                zaman_yaz(deger)
+                if isinstance(deger, datetime)
+                else (deger.hex() if isinstance(deger, bytes) else deger)
+            )
             for anahtar, deger in satir.items()
         }
 
@@ -316,12 +375,20 @@ class DosyaKayit(Kayit):
                     self._ekle("termal_kare", [{"kare_id": kare_id, **satir_kumesi.termal_kare}])
                     kare_sayisi = 1
 
+            durum_sayisi = 0
+            anahtar = (paket.modul_id, paket.zaman_metni)
+            if anahtar not in self._gorulen_durum:
+                self._gorulen_durum.add(anahtar)
+                self._ekle("modul_durum", [satir_kumesi.modul_durum])
+                durum_sayisi = 1
+
         return self._sonuc(
             paket,
             alindi_zaman,
             olcum=len(yeni_olcum),
             ozet=ozet_sayisi,
             kare=kare_sayisi,
+            durum=durum_sayisi,
             kare_id=kare_id,
             beklenen_olcum=len(satir_kumesi.olcum),
         )
@@ -359,6 +426,15 @@ VALUES (%s, %s, %s, %s, %s, %s)
 ON CONFLICT (modul_id) DO UPDATE SET
     yazilim_surumu = EXCLUDED.yazilim_surumu,
     son_gorulme    = GREATEST(gridup.modul.son_gorulme, EXCLUDED.son_gorulme)
+"""
+
+#: Per-packet health log (migration 005). The power source (sebeke vs yedek)
+#: and signal strength history live here. Replaying a packet yields rowcount 0,
+#: which correctly reports as duplicate.
+DURUM_SQL = """
+INSERT INTO gridup.modul_durum (modul_id, zaman, besleme, sinyal, yazilim_surumu, alindi_zaman)
+VALUES (%s, %s, %s, %s, %s, %s)
+ON CONFLICT (modul_id, zaman) DO NOTHING
 """
 
 #: DO NOTHING on the primary key is the whole dedup story: a module with a backup
@@ -473,8 +549,6 @@ class PostgresKayit(Kayit):
         raise AssertionError("unreachable")
 
     def _yaz(self, satir_kumesi: Satirlar, paket: ModulPaketi, alindi_zaman: datetime) -> YazimSonucu:
-        from psycopg.types.json import Jsonb
-
         baglanti = self._baglanti()
         modul = satir_kumesi.modul
         with baglanti.transaction(), baglanti.cursor() as imlec:
@@ -491,6 +565,20 @@ class PostgresKayit(Kayit):
                     modul["son_gorulme"],
                 ),
             )
+
+            d = satir_kumesi.modul_durum
+            imlec.execute(
+                DURUM_SQL,
+                (
+                    d["modul_id"],
+                    d["zaman"],
+                    d["besleme"],
+                    d["sinyal"],
+                    d["yazilim_surumu"],
+                    d["alindi_zaman"],
+                ),
+            )
+            durum_sayisi = max(imlec.rowcount, 0)
 
             olcum_sayisi = 0
             if satir_kumesi.olcum:
@@ -528,7 +616,7 @@ class PostgresKayit(Kayit):
                     (
                         k["modul_id"],
                         k["zaman"],
-                        Jsonb(k["piksel_verisi"]),
+                        k["piksel_verisi"],
                         k["satir_sayisi"],
                         k["sutun_sayisi"],
                         k["alindi_zaman"],
@@ -550,6 +638,7 @@ class PostgresKayit(Kayit):
             olcum=olcum_sayisi,
             ozet=ozet_sayisi,
             kare=kare_sayisi,
+            durum=durum_sayisi,
             kare_id=kare_id,
             beklenen_olcum=len(satir_kumesi.olcum),
         )
