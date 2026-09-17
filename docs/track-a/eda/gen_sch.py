@@ -145,6 +145,31 @@ def mlx90640_symbol():
              pin('power_in', 0, 12.7, 270, 'VDD', '1'), pin('power_in', 0, -12.7, 90, 'GND', '2'),
              pin('bidirectional', 12.7, 2.54, 180, 'SDA', '3'), pin('input', 12.7, -2.54, 180, 'SCL', '4')]]
 
+def sht31_symbol():
+    """Kütüphane sembolü (Sensor_Humidity:SHT31-DIS) çok sıkışık / aynı pin numaralarıyla geniş özel sembol."""
+    def prop(k, v, y, hide=False):
+        e = [Sym('property'), k, v, [Sym('at'), Sym('0'), Sym(str(y)), Sym('0')]]
+        if hide: e.append([Sym('hide'), Sym('yes')])
+        e.append([Sym('effects'), [Sym('font'), [Sym('size'), Sym('1.27'), Sym('1.27')]]])
+        return e
+    def pin(t, x, y, a, nm, num):
+        return [Sym('pin'), Sym(t), Sym('line'), [Sym('at'), Sym(str(x)), Sym(str(y)), Sym(str(a))], [Sym('length'), Sym('2.54')],
+                [Sym('name'), nm, [Sym('effects'), [Sym('font'), [Sym('size'), Sym('1.27'), Sym('1.27')]]]],
+                [Sym('number'), num, [Sym('effects'), [Sym('font'), [Sym('size'), Sym('1.27'), Sym('1.27')]]]]]
+    return [Sym('symbol'), 'GridUp:SHT31', [Sym('pin_names'), [Sym('offset'), Sym('1.016')]],
+            [Sym('exclude_from_sim'), Sym('no')], [Sym('in_bom'), Sym('yes')], [Sym('on_board'), Sym('yes')],
+            prop('Reference', 'U', 11.43), prop('Value', 'SHT31-DIS-B', -11.43),
+            prop('Footprint', 'Sensor_Humidity:Sensirion_DFN-8-1EP_2.5x2.5mm_P0.5mm_EP1.1x1.7mm', 0, True),
+            prop('Datasheet', 'https://sensirion.com/products/catalog/SHT31-DIS-B', 0, True),
+            prop('Description', 'Sicaklik + nem, I2C 0x44/0x45', 0, True),
+            [Sym('symbol'), 'SHT31_0_1',
+             [Sym('rectangle'), [Sym('start'), Sym('-7.62'), Sym('7.62')], [Sym('end'), Sym('7.62'), Sym('-7.62')],
+              [Sym('stroke'), [Sym('width'), Sym('0.254')], [Sym('type'), Sym('default')]], [Sym('fill'), [Sym('type'), Sym('background')]]]],
+            [Sym('symbol'), 'SHT31_1_1',
+             pin('power_in', 0, 10.16, 270, 'VDD', '5'), pin('power_in', 0, -10.16, 90, 'VSS', '8'),
+             pin('bidirectional', 10.16, 5.08, 180, 'SDA', '1'), pin('input', 10.16, 0, 180, 'SCL', '4'), pin('output', 10.16, -5.08, 180, 'ALERT', '3'),
+             pin('input', -10.16, 5.08, 0, 'ADDR', '2'), pin('input', -10.16, 0, 0, '~{RESET}', '6'), pin('passive', -10.16, -5.08, 0, 'R', '7')]]
+
 # ---------------- şema ----------------
 def g(v): return Sym('%g' % round(v, 4))
 _uuid_n = [0]
@@ -321,10 +346,10 @@ def build():
        Ana hatlar tel: I²C bus (SDA x=124,46 / SCL x=127), CT_L1…N, UART1 ↔ MAX3485. Etiket: VSENSE, V_BIAS, 5V_RAW,
        servis/genişleme başlıkları (aynı ad = aynı net). Kaçınılmaz kesişmeler kicad-cli --draw-hop-over ile atlama yayı."""
     S = Sch()
-    S.libsyms['GridUp:MLX90640'] = mlx90640_symbol()
+    S.libsyms['GridUp:MLX90640'] = mlx90640_symbol(); S.libsyms['GridUp:SHT31'] = sht31_symbol()
     R = S.use('Device', 'R'); C = S.use('Device', 'C'); CP = S.use('Device', 'C_Polarized')
     DS = S.use('Device', 'D_Schottky'); FU = S.use('Device', 'Fuse'); RV = S.use('Device', 'Varistor')
-    ESP = S.use('RF_Module', 'ESP32-S3-WROOM-1'); SHT = S.use('Sensor_Humidity', 'SHT31-DIS')
+    ESP = S.use('RF_Module', 'ESP32-S3-WROOM-1'); SHT = 'GridUp:SHT31'
     MAX = S.use('Interface_UART', 'MAX3485'); RAC = S.use('Converter_ACDC', 'RAC05-05SK')
     LDO = S.use('Regulator_Linear', 'AP7361C-33E'); SW = S.use('Switch', 'SW_Push')
     BOOST = S.use('Regulator_Switching', 'TPS61099DRV'); IND = S.use('Device', 'L')
@@ -415,10 +440,10 @@ def build():
     S.wire(n_vdd, (52.07, n_vdd[1])); S.junction(n_vdd)
     Cm1 = S.part(C, 'C2', '100 nF', (52.07, n_vdd[1] + 3.81), ref_at=(45.72, n_vdd[1] + 2.54), val_at=(43.18, n_vdd[1] + 5.08))
     S.wire((52.07, n_vdd[1]), Cm1.p('1')); S.pin_power(Cm1, '2', 'GND')
-    S.text('termal dizi 32×24, 110°×75°, ≤23 mA', (33.02, 184.85), SZ_NOTE, italic=True)
-    U3 = S.part(SHT, 'U3', 'SHT31-DIS-B', (69.85, 199.39), ref_at=(46.99, 189.23), val_at=(46.99, 191.77),
+    S.text('termal dizi 32×24, 110°×75°, ≤23 mA', (30.5, 178.3), SZ_NOTE, italic=True)
+    U3 = S.part(SHT, 'U3', 'SHT31-DIS-B', (69.85, 196.85), ref_at=(35.56, 203.5), val_at=(35.56, 206.0),
                 footprint='Sensor_Humidity:Sensirion_DFN-8-1EP_2.5x2.5mm_P0.5mm_EP1.1x1.7mm')
-    S.pin_power(U3, 'VDD', '+3V3'); S.pin_power(U3, '8', 'GND')
+    S.pin_power(U3, 'VDD', '+3V3', L=0); S.pin_power(U3, '8', 'GND')
     Pg = S.pin_power(U3, 'ADDR', 'GND', L=10.16, rot=270); Pv = S.pin_power(U3, '~{RESET}', '+3V3', L=15.24, rot=90)
     ga, ra = U3.p('ADDR'), U3.p('~{RESET}')
     Pg.val_at = (ga[0] - 10.16 - 1.27, ga[1] - 2.0); Pg.just = 'center'        # yatay GND: etiket sembolün üstünde
@@ -439,7 +464,6 @@ def build():
         Rp = S.part(R, 'R%d' % (2 + i), '4,7k', (x, yb - 3.81), ref_at=(x - 8.0, yb - 6.35), val_at=(x - 8.0, yb - 3.81))
         S.pin_power(Rp, '1', '+3V3', L=1.27)
         S.wire(Rp.p('2'), (x, yb), (bx, yb), color=I2C); S.junction((bx, yb))
-    S.text('2× 4,7 kΩ pull-up → 3V3', (88.9, 194.35), SZ_NOTE, italic=True)
 
     # ================= SAĞ SÜTUN =================
     # servis başlığı (etiket / sahada bağlı değil)
@@ -585,7 +609,8 @@ if __name__ == '__main__':
     S = build()
     with open(os.path.join(HERE, 'GridUp.kicad_sym'), 'w', encoding='utf-8', newline='') as fh:   # özel sembol kütüphanesi (MLX90640)
         ms = list(mlx90640_symbol()); ms[1] = 'MLX90640'
-        fh.write(ser([Sym('kicad_symbol_lib'), [Sym('version'), Sym('20241209')], [Sym('generator'), 'gen_sch'], [Sym('generator_version'), '10.0'], ms]) + '\n')
+        hs = list(sht31_symbol()); hs[1] = 'SHT31'
+        fh.write(ser([Sym('kicad_symbol_lib'), [Sym('version'), Sym('20241209')], [Sym('generator'), 'gen_sch'], [Sym('generator_version'), '10.0'], ms, hs]) + '\n')
     libs = ['Device', 'power', 'RF_Module', 'Sensor_Humidity', 'Interface_UART', 'Converter_ACDC', 'Regulator_Linear', 'Regulator_Switching', 'Switch', 'Connector', 'Connector_Generic']
     with open(os.path.join(HERE, 'sym-lib-table'), 'w', encoding='utf-8', newline='') as fh:
         fh.write('(sym_lib_table\n  (version 7)\n')
