@@ -383,7 +383,7 @@
   <g stroke="#455a64" stroke-width="0.8"><line x1="1359" y1="216" x2="1421" y2="216"/><line x1="1390" y1="185" x2="1390" y2="247"/></g>
   <text x="1390" y="268" font-size="13" fill="#37474f" text-anchor="middle" font-weight="700">230 V AC</text>
   <text x="1390" y="284" font-size="12" fill="#546e7a" text-anchor="middle">PG7 Ø12,5</text>
-  <text x="1220" y="350" font-size="11" fill="#78909c" text-anchor="middle">her giriş kendi klemensinin altında; 230 V sağ uçta, alçak gerilim girişlerinden ayrı</text>
+  <text x="1220" y="350" font-size="11" fill="#78909c" text-anchor="middle">her giriş kendi klemensine yakın; 230 V sağ uçta, alçak gerilim girişlerinden ayrı</text>
   <text x="1220" y="366" font-size="11" fill="#78909c" text-anchor="middle">RS-485: analizör / TVOC-2 · SMA: dış anten · CT: analizör yoksa</text>
   <text x="1220" y="382" font-size="11" fill="#78909c" text-anchor="middle">kablolar menteşeye doğru iner (kıvrım payı, §4.7); merkez Z = 23</text>
   <line x1="958" y1="108" x2="958" y2="308" stroke="#455a64" stroke-width="1.5" marker-start="url(#dim)" marker-end="url(#dim)"/>
@@ -719,7 +719,7 @@
   <text x="1176" y="652" font-size="13" fill="#37474f"><tspan font-weight="700">Isı:</tspan> AC/DC modül PCB'nin arkasında, sensörlerden uzak; SHT31</text>
   <text x="1176" y="669" font-size="13" fill="#37474f">güç modülüne en uzak köşede (öz-ısınma hatası).</text>
   <text x="1176" y="691" font-size="13" fill="#37474f"><tspan font-weight="700">Kablolar:</tspan> tüm girişler alt yüzde, soldan sağa RS-485 / SMA / CT / 230 V;</text>
-  <text x="1176" y="708" font-size="13" fill="#37474f">her giriş kendi klemensinin altında, 230 V kablosu alçak gerilim</text>
+  <text x="1176" y="708" font-size="13" fill="#37474f">her giriş kendi klemensine yakın, 230 V kablosu alçak gerilim</text>
   <text x="1176" y="725" font-size="13" fill="#37474f">bölgesini geçmez. Kapak içi montajda kablolar menteşeye iner, kıvrım</text>
   <text x="1176" y="742" font-size="13" fill="#37474f">payı bırakılır (§4.7). Anten kablosu SMA'dan pano dışına (§7.4).</text>
   <text x="1176" y="764" font-size="13" fill="#37474f"><tspan font-weight="700">Sabitleme:</tspan> DIN klips veya oval yuvalardan mevcut cıvataya;</text>

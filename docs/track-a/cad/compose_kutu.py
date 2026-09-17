@@ -103,7 +103,7 @@ for (xm, d, t1, t2) in [(17.5, 12.5, 'RS-485', 'PG7 Ø12,5'), (40, 6.4, 'SMA pan
     svg.add('<g stroke="#455a64" stroke-width="0.8"><line x1="%g" y1="%g" x2="%g" y2="%g"/><line x1="%g" y1="%g" x2="%g" y2="%g"/></g>' % (x - r, y, x + r, y, x, y - r, x, y + r))
     svg.text(x, y + 52, t1, 13, DARK, 'middle', '700')
     svg.text(x, y + 68, t2, 12, GREY, 'middle')
-svg.text(ox + 240, oy + 250, 'her giriş kendi klemensinin altında; 230 V sağ uçta, alçak gerilim girişlerinden ayrı', 11, MUTED, 'middle')
+svg.text(ox + 240, oy + 250, 'her giriş kendi klemensine yakın; 230 V sağ uçta, alçak gerilim girişlerinden ayrı', 11, MUTED, 'middle')
 svg.text(ox + 240, oy + 266, 'RS-485: analizör / TVOC-2 · SMA: dış anten · CT: analizör yoksa', 11, MUTED, 'middle')
 svg.text(ox + 240, oy + 282, 'kablolar menteşeye doğru iner (kıvrım payı, §4.7); merkez Z = 23', 11, MUTED, 'middle')
 svg.dim_v(ox - 22, E(0, 50)[1], E(0, 0)[1], '50 mm', off=-16)
@@ -182,7 +182,7 @@ notes = [
     ('Isı:', ' AC/DC modül PCB\'nin arkasında, sensörlerden uzak; SHT31'),
     (None, 'güç modülüne en uzak köşede (öz-ısınma hatası).'),
     ('Kablolar:', ' tüm girişler alt yüzde, soldan sağa RS-485 / SMA / CT / 230 V;'),
-    (None, 'her giriş kendi klemensinin altında, 230 V kablosu alçak gerilim'),
+    (None, 'her giriş kendi klemensine yakın, 230 V kablosu alçak gerilim'),
     (None, 'bölgesini geçmez. Kapak içi montajda kablolar menteşeye iner, kıvrım'),
     (None, 'payı bırakılır (§4.7). Anten kablosu SMA\'dan pano dışına (§7.4).'),
     ('Sabitleme:', ' DIN klips veya oval yuvalardan mevcut cıvataya;'),
