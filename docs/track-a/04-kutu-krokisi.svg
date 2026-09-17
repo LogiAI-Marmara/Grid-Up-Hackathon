@@ -86,13 +86,13 @@
 <polygon points="208,180 208,120 212,120 212,180 208,180" fill="url(#hatch)" stroke="#263238" stroke-width="2"/>
 <polygon points="0,227 12,227 12,85 0,85 0,72 20,72 20,240 0,240 0,227" fill="url(#hatch)" stroke="#263238" stroke-width="2"/>
 <polygon points="177.6,20 184,20 184,300 177.6,300 177.6,20" fill="#2e7d32" fill-opacity="0.35" stroke="#2e7d32" stroke-width="2"/>
-<polygon points="208,168 184,168 184,132 208,132 208,168" fill="#37474f" fill-opacity="0.35" stroke="#37474f" stroke-width="2"/>
+<polygon points="208,168.6 184,168.6 184,131.4 208,131.4 208,168.6" fill="#37474f" fill-opacity="0.35" stroke="#37474f" stroke-width="2"/>
 <polygon points="173.6,148 177.6,148 177.6,156 173.6,156 173.6,148" fill="#ad1457" fill-opacity="0.35" stroke="#ad1457" stroke-width="2"/>
 </g>
   <rect x="813.6" y="248" width="4" height="8" rx="4" fill="#ad1457" fill-opacity="0.18"/>
 <rect x="810.8" y="236" width="6.8" height="28" rx="4" fill="#ad1457" fill-opacity="0.18"/>
 <rect x="811.6" y="246" width="6" height="12" rx="4" fill="#ad1457" fill-opacity="0.18"/>
-<rect x="824" y="232.076" width="24" height="35.848" rx="4" fill="#37474f" fill-opacity="0.18"/>
+<rect x="824" y="231.48" width="24" height="37.04" rx="4" fill="#37474f" fill-opacity="0.18"/>
 <rect x="730.4" y="125.2" width="87.2" height="106.8" rx="4" fill="#ad1457" fill-opacity="0.18"/>
 <rect x="815.2" y="218" width="2.4" height="4" rx="4" fill="#ad1457" fill-opacity="0.18"/>
 <rect x="775.6" y="266" width="42" height="126" rx="4" fill="#f9a825" fill-opacity="0.18"/>
@@ -246,8 +246,8 @@
 <polyline points="177.6,36 184,36" fill="none" stroke="#2e7d32" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"/>
 <polyline points="177.6,20 177.6,23.12 177.6,26.12" fill="none" stroke="#2e7d32" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"/>
 <polyline points="184,20 177.6,20" fill="none" stroke="#2e7d32" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"/>
-<polyline points="208,167.92 208,167.31 208,166.11 208,164.36 208,162.13 208,159.48 208,156.5 208,153.31 208,150 208,146.69 208,143.5 208,140.52 208,137.87 208,135.64 208,133.89 208,132.69 208,132.08" fill="none" stroke="#37474f" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"/>
-<polyline points="184,167.92 184,167.31 184,166.11 184,164.36 184,162.13 184,159.48 184,156.5 184,153.31 184,150 184,146.69 184,143.5 184,140.52 184,137.87 184,135.64 184,133.89 184,132.69 184,132.08" fill="none" stroke="#37474f" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="208,168.52 208,167.89 208,166.65 208,164.84 208,162.53 208,159.79 208,156.72 208,153.42 208,150 208,146.58 208,143.28 208,140.21 208,137.47 208,135.16 208,133.35 208,132.11 208,131.48" fill="none" stroke="#37474f" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="184,168.52 184,167.89 184,166.65 184,164.84 184,162.53 184,159.79 184,156.72 184,153.42 184,150 184,146.58 184,143.28 184,140.21 184,137.47 184,135.16 184,133.35 184,132.11 184,131.48" fill="none" stroke="#37474f" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"/>
 <polyline points="177.6,132 90.4,132" fill="none" stroke="#ad1457" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"/>
 <polyline points="177.6,25.2 90.4,25.2" fill="none" stroke="#ad1457" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"/>
 <polyline points="177.6,25.2 177.6,132" fill="none" stroke="#ad1457" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"/>
@@ -281,7 +281,7 @@
   <text x="892" y="312" font-size="12" fill="#c62828" text-anchor="middle" transform="rotate(-90 892 312)">IR pencere</text>
   <line x1="822" y1="238" x2="794" y2="238" stroke="#37474f" stroke-width="1"/>
   <circle cx="822" cy="238" r="2.5" fill="#37474f"/>
-  <text x="790" y="242" font-size="11" fill="#37474f" text-anchor="end" font-weight="700">MLX90640 TO-39 Ø9</text>
+  <text x="790" y="242" font-size="11" fill="#37474f" text-anchor="end" font-weight="700">MLX90640 TO-39 Ø9,3</text>
   <text x="790" y="256" font-size="11" fill="#37474f" text-anchor="end">pencereye dayalı</text>
   <circle cx="820.8" cy="400" r="2" fill="#2e7d32"/><line x1="820.8" y1="400" x2="820.8" y2="424" stroke="#2e7d32" stroke-width="1.2"/>
   <text x="820.8" y="435" font-size="10" fill="#2e7d32" text-anchor="middle">PCB 1,6</text>
@@ -586,7 +586,7 @@
 <polyline points="444,20 36,20" fill="none" stroke="#2e7d32" stroke-width="1.4" stroke-linejoin="round" stroke-linecap="round"/>
 <polyline points="20,36 20,284" fill="none" stroke="#2e7d32" stroke-width="1.4" stroke-linejoin="round" stroke-linecap="round"/>
 <polyline points="460,284 460,36" fill="none" stroke="#2e7d32" stroke-width="1.4" stroke-linejoin="round" stroke-linecap="round"/>
-<polyline points="222,150 222.31,153.31 223.22,156.5 224.7,159.48 226.7,162.13 229.15,164.36 231.98,166.11 235.08,167.31 238.34,167.92 241.66,167.92 244.92,167.31 248.02,166.11 250.85,164.36 253.3,162.13 255.3,159.48 256.78,156.5 257.69,153.31 258,150 257.69,146.69 256.78,143.5 255.3,140.52 253.3,137.87 250.85,135.64 248.02,133.89 244.92,132.69 241.66,132.08 238.34,132.08 235.08,132.69 231.98,133.89 229.15,135.64 226.7,137.87 224.7,140.52 223.22,143.5 222.31,146.69 222,150" fill="none" stroke="#37474f" stroke-width="1.4" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="221.4,150 221.72,153.42 222.66,156.72 224.18,159.79 226.26,162.53 228.79,164.84 231.71,166.65 234.91,167.89 238.28,168.52 241.72,168.52 245.09,167.89 248.29,166.65 251.21,164.84 253.74,162.53 255.82,159.79 257.34,156.72 258.28,153.42 258.6,150 258.28,146.58 257.34,143.28 255.82,140.21 253.74,137.47 251.21,135.16 248.29,133.35 245.09,132.11 241.72,131.48 238.28,131.48 234.91,132.11 231.71,133.35 228.79,135.16 226.26,137.47 224.18,140.21 222.66,143.28 221.72,146.58 221.4,150" fill="none" stroke="#37474f" stroke-width="1.4" stroke-linejoin="round" stroke-linecap="round"/>
 <polyline points="53,171 43,171" fill="none" stroke="#1565c0" stroke-width="1.4" stroke-linejoin="round" stroke-linecap="round"/>
 <polyline points="53,181 53,171" fill="none" stroke="#1565c0" stroke-width="1.4" stroke-linejoin="round" stroke-linecap="round"/>
 <polyline points="43,181 53,181" fill="none" stroke="#1565c0" stroke-width="1.4" stroke-linejoin="round" stroke-linecap="round"/>

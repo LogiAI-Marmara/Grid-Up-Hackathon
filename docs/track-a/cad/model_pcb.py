@@ -67,7 +67,7 @@ def run(_ctx):
     extr(sk, CUT, 5, symmetric=True, bodies=[pcb])
 
     # ---- ON YUZ (Z = 1.6 ->)  [PCB koordinati = kutu - 5]
-    cyl('MLX90640', 55, 37.5, 9, T, 6)           # TO-39, pencereye dayali
+    cyl('MLX90640', 55, 37.5, 9.3, T, 6)           # TO-39, pencereye dayali
     box('SHT31', 7-1.25, 31-1.25, 7+1.25, 31+1.25, T, 0.9)
     cyl('LED', 25, 65, 3, T, 1.5)
     for i, x in enumerate([37.5, 37.5, 37.5]):

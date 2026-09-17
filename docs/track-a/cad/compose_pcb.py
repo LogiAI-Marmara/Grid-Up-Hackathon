@@ -64,7 +64,7 @@ L = lambda x, y, t, size=11, fill='#37474f', anchor='start', w=None: svg.text(x,
 SUB = '#607d8b'
 x, y = px(55, 37.5)
 L(x, y + 100, 'MLX90640ESF-BAA-000-TU', 11, '#37474f', 'middle', '700')
-L(x, y + 114, 'TO-39 Ø9 / I²C 0x33 / merkez (55, 37,5) mm', 10, SUB, 'middle')
+L(x, y + 114, 'TO-39 Ø9,3 / I²C 0x33 / merkez (55, 37,5) mm', 10, SUB, 'middle')
 L(x, y + 128, 'Ø15 IR pencere ekseni — yüksek parça yok', 10, '#c62828', 'middle')
 x, y = px(37.5, 44)
 L(x - 8, y + 4, '2× 4,7k pull-up + 100 nF', 10, SUB, 'end')
@@ -153,7 +153,7 @@ comment = """    PCB / kart yerleşimi — (T2 "kart yapısı"). Ölçek 1 mm = 
     Kaynak: Fusion 360 modeli GridUp-PCB.f3d (thozoz hub / Default Project). Geometri modelden API ile projeksiyon:
     düz çizgi = ön yüz (Z+ yönünden bakış), kesikli = arka yüz parçaları kart üzerinden görünür (aynı bakış, kart gizlenmiş).
     Koordinat: SVG (x, y aşağı) = model (X, 70 − Y). Kart kutu içinde (5, 5) mm ofsetli → PCB koordinatı = kutu koordinatı − 5 mm.
-    Ön yüz (Z 1,6 →): MLX90640 TO-39 Ø9 × 6 merkez (55, 37,5) [kutu IR pencere (60, 42,5)] / SHT31 2,5 × 2,5 (7, 31) [kutu vent (12, 36)] /
+    Ön yüz (Z 1,6 →): MLX90640 TO-39 Ø9,3 × 6 (datasheet Ø9,30 ±0,15 × 5,70 ±0,30 + bacak, maks. zarf) merkez (55, 37,5) [kutu IR pencere (60, 42,5)] / SHT31 2,5 × 2,5 (7, 31) [kutu vent (12, 36)] /
       LED Ø3 (25, 65) [kutu (30, 70)] / pull-up + 100 nF (37,5, 42–46,5) / EN RC (29, 50–52,5) + reset 3 × 3 (32–35, 49,75–52,75).
     Arka yüz (Z 0 ←): ESP32-S3-WROOM-1U 18 × 19,2 × 3,2 (10–28, 40,8–60) / RAC05-05SK/277 31,7 × 26,7 × 21,8 (64–95,7, 42–68,7) /
       F1 (88–94,1, 22,25–25) / MOV 7 × 4 × 8 (96,5–103,5, 21,5–25,5) / 230 V klemens 3p 5,08 (84–99,25, 0,5–8,5) /

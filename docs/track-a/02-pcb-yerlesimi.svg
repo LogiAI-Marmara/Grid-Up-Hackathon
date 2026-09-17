@@ -4,7 +4,7 @@
     Kaynak: Fusion 360 modeli GridUp-PCB.f3d (thozoz hub / Default Project). Geometri modelden API ile projeksiyon:
     düz çizgi = ön yüz (Z+ yönünden bakış), kesikli = arka yüz parçaları kart üzerinden görünür (aynı bakış, kart gizlenmiş).
     Koordinat: SVG (x, y aşağı) = model (X, 70 − Y). Kart kutu içinde (5, 5) mm ofsetli → PCB koordinatı = kutu koordinatı − 5 mm.
-    Ön yüz (Z 1,6 →): MLX90640 TO-39 Ø9 × 6 merkez (55, 37,5) [kutu IR pencere (60, 42,5)] / SHT31 2,5 × 2,5 (7, 31) [kutu vent (12, 36)] /
+    Ön yüz (Z 1,6 →): MLX90640 TO-39 Ø9,3 × 6 (datasheet Ø9,30 ±0,15 × 5,70 ±0,30 + bacak, maks. zarf) merkez (55, 37,5) [kutu IR pencere (60, 42,5)] / SHT31 2,5 × 2,5 (7, 31) [kutu vent (12, 36)] /
       LED Ø3 (25, 65) [kutu (30, 70)] / pull-up + 100 nF (37,5, 42–46,5) / EN RC (29, 50–52,5) + reset 3 × 3 (32–35, 49,75–52,75).
     Arka yüz (Z 0 ←): ESP32-S3-WROOM-1U 18 × 19,2 × 3,2 (10–28, 40,8–60) / RAC05-05SK/277 31,7 × 26,7 × 21,8 (64–95,7, 42–68,7) /
       F1 (88–94,1, 22,25–25) / MOV 7 × 4 × 8 (96,5–103,5, 21,5–25,5) / 230 V klemens 3p 5,08 (84–99,25, 0,5–8,5) /
@@ -177,7 +177,7 @@
 <polyline points="848,0 32,0" fill="none" stroke="#263238" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
 <polyline points="0,32 0,528" fill="none" stroke="#263238" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
 <polyline points="880,528 880,32" fill="none" stroke="#263238" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
-<polyline points="404,260 404.62,266.62 406.43,273.01 409.39,278.95 413.39,284.26 418.3,288.73 423.95,292.22 430.15,294.62 436.68,295.85 443.32,295.85 449.85,294.62 456.05,292.22 461.7,288.73 466.61,284.26 470.61,278.95 473.57,273.01 475.38,266.62 476,260 475.38,253.38 473.57,246.99 470.61,241.05 466.61,235.74 461.7,231.27 456.05,227.78 449.85,225.38 443.32,224.15 436.68,224.15 430.15,225.38 423.95,227.78 418.3,231.27 413.39,235.74 409.39,241.05 406.43,246.99 404.62,253.38 404,260" fill="none" stroke="#263238" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="402.8,260 403.43,266.83 405.31,273.44 408.37,279.58 412.51,285.06 417.58,289.69 423.42,293.3 429.82,295.78 436.57,297.04 443.43,297.04 450.18,295.78 456.58,293.3 462.42,289.69 467.49,285.06 471.63,279.58 474.69,273.44 476.57,266.83 477.2,260 476.57,253.17 474.69,246.56 471.63,240.42 467.49,234.94 462.42,230.31 456.58,226.7 450.18,224.22 443.43,222.96 436.57,222.96 429.82,224.22 423.42,226.7 417.58,230.31 412.51,234.94 408.37,240.42 405.31,246.56 403.43,253.17 402.8,260" fill="none" stroke="#263238" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
 <polyline points="66,302 46,302" fill="none" stroke="#263238" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
 <polyline points="66,322 66,302" fill="none" stroke="#263238" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
 <polyline points="46,322 66,322" fill="none" stroke="#263238" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
@@ -209,7 +209,7 @@
 <polyline points="256,138 256,162" fill="none" stroke="#263238" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
 </g>
   <text x="520" y="440" font-size="11" fill="#37474f" text-anchor="middle" font-weight="700">MLX90640ESF-BAA-000-TU</text>
-  <text x="520" y="454" font-size="10" fill="#607d8b" text-anchor="middle">TO-39 Ø9 / I²C 0x33 / merkez (55, 37,5) mm</text>
+  <text x="520" y="454" font-size="10" fill="#607d8b" text-anchor="middle">TO-39 Ø9,3 / I²C 0x33 / merkez (55, 37,5) mm</text>
   <text x="520" y="468" font-size="10" fill="#c62828" text-anchor="middle">Ø15 IR pencere ekseni — yüksek parça yok</text>
   <text x="372" y="292" font-size="10" fill="#607d8b" text-anchor="end">2× 4,7k pull-up + 100 nF</text>
   <text x="186" y="380" font-size="11" fill="#37474f" font-weight="700">SHT31-DIS-B</text>
