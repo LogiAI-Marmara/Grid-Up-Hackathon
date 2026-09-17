@@ -23,6 +23,7 @@
 #     docker exec -i gridup-db psql -U postgres -d gridup < toplama/migrations/001_sema_ve_referans.sql
 #     docker exec -i gridup-db psql -U postgres -d gridup < toplama/migrations/002_olcum.sql
 #     docker exec -i gridup-db psql -U postgres -d gridup < toplama/migrations/003_termal.sql
+#     docker exec -i gridup-db psql -U postgres -d gridup < toplama/migrations/004_termal_kare_ikili.sql
 #     docker run --rm -p 8000:8000 --link gridup-db \
 #         -e TOPLAMA_KAYIT=postgres \
 #         -e DATABASE_URL=postgresql://postgres:gridup@gridup-db:5432/gridup \

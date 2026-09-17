@@ -43,12 +43,18 @@ CREATE TABLE IF NOT EXISTS gridup.termal_ozet (
     -- Four 16x12 quadrants: top-left, top-right, bottom-left, bottom-right.
     -- cardinality() rather than array_length(): the latter returns NULL for an
     -- empty array and a CHECK passes on NULL, so an empty array would slip in.
+    --
+    -- The per-element range is spelled out as four comparisons rather than an
+    -- `unnest(...)` subquery because PostgreSQL rejects subqueries inside CHECK
+    -- constraints ("cannot use subquery in check constraint"). `array_position`
+    -- catches a NULL element, which a BETWEEN test would let through.
     CONSTRAINT termal_ozet_bolge_sayisi CHECK (cardinality(bolge_ort) = 4),
     CONSTRAINT termal_ozet_bolge_araligi CHECK (
-        NOT EXISTS (
-            SELECT 1 FROM unnest(bolge_ort) AS o(deger)
-            WHERE o.deger IS NULL OR o.deger < -40 OR o.deger > 300
-        )
+        array_position(bolge_ort, NULL) IS NULL
+        AND bolge_ort[1] BETWEEN -40 AND 300
+        AND bolge_ort[2] BETWEEN -40 AND 300
+        AND bolge_ort[3] BETWEEN -40 AND 300
+        AND bolge_ort[4] BETWEEN -40 AND 300
     )
 );
 

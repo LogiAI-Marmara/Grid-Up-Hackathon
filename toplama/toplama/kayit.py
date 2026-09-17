@@ -23,6 +23,7 @@ from __future__ import annotations
 
 import json
 import os
+import struct
 import threading
 from dataclasses import dataclass, field
 from datetime import datetime
@@ -58,6 +59,25 @@ class Satirlar:
     olcum: list[dict[str, Any]]
     termal_ozet: dict[str, Any] | None
     termal_kare: dict[str, Any] | None
+
+
+def kare_kodla(kare: list[float]) -> bytes:
+    """Encode a 768-value frame as the contract's int16 little-endian bytes.
+
+    The frame is decoded at the moment of storage and nowhere else, so this is
+    the inverse of what track B re-expands when it serves `termal_kare` — the
+    contract's table in `sozlesmeler/README.md` is implemented here once.
+
+    Why bytes rather than the JSON array the packet carried: the module holds the
+    frame as int16 at 0.1 degC, the array is a re-encoding of those bytes, and
+    re-encoding is where rounding differences come from. Storing the producer's
+    form is smaller (measured: 5137 -> 1536 bytes per frame) and lossless.
+
+    `struct.pack` rather than `int.to_bytes` so the little-endian choice is
+    stated once, in the format string, and a negative value cannot quietly pick
+    the wrong length.
+    """
+    return struct.pack(f"<{len(kare)}h", *(round(deger * 10) for deger in kare))
 
 
 def satirlar(paket: ModulPaketi, alindi_zaman: datetime) -> Satirlar:
@@ -109,8 +129,10 @@ def satirlar(paket: ModulPaketi, alindi_zaman: datetime) -> Satirlar:
         kare = {
             "modul_id": paket.modul_id,
             "zaman": paket.zaman,
-            # 768 values as one array, not 768 measurement rows.
-            "piksel_verisi": list(paket.termal_kare),
+            # The contract's int16 bytes, not the 768-number array the packet
+            # carried — migration 004. One encoder for both backends, so the file
+            # fixture and the table hold the same bytes.
+            "piksel_verisi": kare_kodla(paket.termal_kare),
             "satir_sayisi": TERMAL_SATIR,
             "sutun_sayisi": TERMAL_SUTUN,
             "alindi_zaman": alindi_zaman,
@@ -248,9 +270,20 @@ class DosyaKayit(Kayit):
 
     @staticmethod
     def _jsonlanabilir(satir: dict[str, Any]) -> dict[str, Any]:
-        """Datetimes become contract timestamps; everything else is already JSON."""
+        """Datetimes become contract timestamps; bytes become hex for JSONL.
+
+        `piksel_verisi` is raw int16 bytes (migration 004). JSONL cannot carry
+        bytes, and silently dropping the frame would make the file backend's
+        fixture differ from the table for the one column an anomaly points at.
+        Hex is the reversible form: `bytes.fromhex` reads it back, and it keeps
+        the line plain ASCII so the file stays greppable.
+        """
         return {
-            anahtar: (zaman_yaz(deger) if isinstance(deger, datetime) else deger)
+            anahtar: (
+                zaman_yaz(deger)
+                if isinstance(deger, datetime)
+                else (deger.hex() if isinstance(deger, bytes) else deger)
+            )
             for anahtar, deger in satir.items()
         }
 
@@ -465,8 +498,6 @@ class PostgresKayit(Kayit):
         raise AssertionError("unreachable")
 
     def _yaz(self, satir_kumesi: Satirlar, paket: ModulPaketi, alindi_zaman: datetime) -> YazimSonucu:
-        from psycopg.types.json import Jsonb
-
         baglanti = self._baglanti()
         modul = satir_kumesi.modul
         with baglanti.transaction(), baglanti.cursor() as imlec:
@@ -486,6 +517,13 @@ class PostgresKayit(Kayit):
 
             olcum_sayisi = 0
             if satir_kumesi.olcum:
+                # `rowcount` is the inserted-row count here, and it is the only
+                # correct source: a *single* `fetchall()` after `executemany`
+                # (with or without `returning=True`) returns just the first
+                # statement's result set, so it would report 1 even when five
+                # rows landed. `ON CONFLICT DO NOTHING` means a retransmitted
+                # packet contributes 0, which is exactly what makes `yinelenen`
+                # work. Verified against PostgreSQL 17 with psycopg 3.3.
                 imlec.executemany(
                     OLCUM_SQL,
                     [
@@ -493,11 +531,7 @@ class PostgresKayit(Kayit):
                         for s in satir_kumesi.olcum
                     ],
                 )
-                # psycopg3's rowcount after executemany reflects only the last
-                # statement, so the count of actually-inserted rows comes from the
-                # RETURNING rows instead. ON CONFLICT DO NOTHING yields no row for
-                # a retransmitted packet, which correctly reports 0 written.
-                olcum_sayisi = len(imlec.fetchall())
+                olcum_sayisi = max(imlec.rowcount, 0)
 
             ozet_sayisi = 0
             if satir_kumesi.termal_ozet is not None:
@@ -517,7 +551,7 @@ class PostgresKayit(Kayit):
                     (
                         k["modul_id"],
                         k["zaman"],
-                        Jsonb(k["piksel_verisi"]),
+                        k["piksel_verisi"],
                         k["satir_sayisi"],
                         k["sutun_sayisi"],
                         k["alindi_zaman"],
