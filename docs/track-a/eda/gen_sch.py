@@ -538,7 +538,7 @@ def build():
     S.label('U1TXD', (205.74, p17[1]), 0); S.label('DE_RE', (205.74, p21[1]), 0); S.label('U1RXD', (205.74, p18[1]), 0)
     A, B = U4.p('A'), U4.p('B')
     ym = (A[1] + B[1]) / 2
-    J7 = S.part(C03, 'J7', 'RS-485 klemens', (292.1, ym), ref_at=(289.56, min(A[1], B[1]) - 6.35), val_at=(294.2, ym - 1.5),
+    J7 = S.part(C03, 'J7', 'RS-485 klemens', (292.1, ym), ref_at=(290.3, min(A[1], B[1]) - 3.6), val_at=(294.2, ym - 1.5),
                 footprint='TerminalBlock_Phoenix:TerminalBlock_Phoenix_MKDS-3-3-5.08_1x03_P5.08mm_Horizontal')
     S.text('1 B / 2 GND / 3 A', (295.5, ym + 2.3), SZ_PROP, color=(0, 100, 100))   # değerin 2. satırı (KiCad değeri tek satır)
     pT, pG, pB = J7.p('1'), J7.p('2'), J7.p('3')       # üst / orta / alt

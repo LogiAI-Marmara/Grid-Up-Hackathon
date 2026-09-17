@@ -12750,7 +12750,7 @@
 		(dnp no)
 		(uuid "41b12b2a-157d-5250-a6ed-2954e8093f5f")
 		(property "Reference" "J7"
-			(at 289.56 83.82 0)
+			(at 290.3 86.57 0)
 			(effects
 				(font
 					(size 1.7 1.7)
