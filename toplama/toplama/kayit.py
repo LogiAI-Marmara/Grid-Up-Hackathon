@@ -427,9 +427,17 @@ class PostgresKayit(Kayit):
 
     One long-lived connection, serialised by the backend lock. At the documented
     load — 100 modules x ~6 types every 10 s, about 60 rows/s — a single
-    connection is far from the limit, and one connection makes "one packet, one
-    transaction" trivially true. A connection pool is the upgrade path if the
-    fleet grows, not something to add before it is needed.
+    connection is far from the throughput limit, and one connection makes "one
+    packet, one transaction" trivially true.
+
+    **Known limitation, not a scalability claim.** The lock serialises *every*
+    write, so a slow query or a hung connection blocks all other module uplinks
+    for as long as it lasts; the retry path below reconnects on a broken
+    connection, but a merely *slow* one simply holds the lock. For the hackathon
+    load and the demo topology this is fine. The upgrade path is a connection
+    pool (one connection per worker, transactions per packet); it is deliberately
+    not added before it is needed, but it is the first thing to reach for if the
+    fleet outgrows a single writer.
 
     `psycopg` is imported lazily so that installing the service without a
     database (the `dosya` backend, the test suite) needs no driver at all.
