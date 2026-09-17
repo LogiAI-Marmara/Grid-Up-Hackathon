@@ -2215,7 +2215,7 @@ stroke-linecap:round; stroke-linejoin:round;">
 stroke:#006464; stroke-width:0.1524; stroke-opacity:1; 
 stroke-linecap:round; stroke-linejoin:round;">
 <text fill="#006464" x="128.1922" y="258.6600" font-size="2.2666" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" stroke="none">C33</text>
-<text fill="#006464" x="125.3994" y="261.2000" font-size="2.2666" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" stroke="none">HV 10 F</text>
+<text fill="#006464" x="126.0394" y="261.2000" font-size="2.2666" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" stroke="none">HV 10 F</text>
 <path style="fill:none; 
 stroke:#840000; stroke-width:0.1524; stroke-opacity:1; 
 stroke-linecap:round; stroke-linejoin:round;fill:none"
@@ -2290,7 +2290,7 @@ stroke-linecap:round; stroke-linejoin:round;">
 stroke:#006464; stroke-width:0.1524; stroke-opacity:1; 
 stroke-linecap:round; stroke-linejoin:round;">
 <text fill="#006464" x="128.1922" y="248.5000" font-size="2.2666" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" stroke="none">C32</text>
-<text fill="#006464" x="125.3994" y="251.0400" font-size="2.2666" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" stroke="none">HV 10 F</text>
+<text fill="#006464" x="126.0394" y="251.0400" font-size="2.2666" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" stroke="none">HV 10 F</text>
 <path style="fill:none; 
 stroke:#840000; stroke-width:0.1524; stroke-opacity:1; 
 stroke-linecap:round; stroke-linejoin:round;fill:none"
@@ -2658,7 +2658,7 @@ stroke-linecap:round; stroke-linejoin:round;">
 stroke:#006464; stroke-width:0.1524; stroke-opacity:1; 
 stroke-linecap:round; stroke-linejoin:round;">
 <text fill="#006464" x="137.2378" y="234.5300" font-size="2.2666" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" stroke="none">R52</text>
-<text fill="#006464" x="142.5401" y="237.0700" font-size="2.2666" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" stroke="none">R_şarj 22 Ω</text>
+<text fill="#006464" x="140.8701" y="237.0700" font-size="2.2666" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" stroke="none">R_şarj 22 Ω</text>
 </g>
 <g style="fill:none; 
 stroke:#840000; stroke-width:0.2540; stroke-opacity:1; 
@@ -5658,7 +5658,7 @@ stroke-linecap:round; stroke-linejoin:round;">
 stroke:#006464; stroke-width:0.1524; stroke-opacity:1; 
 stroke-linecap:round; stroke-linejoin:round;">
 <text fill="#006464" x="128.1922" y="258.6600" font-size="2.2666" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" stroke="none">C33</text>
-<text fill="#006464" x="125.3994" y="261.2000" font-size="2.2666" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" stroke="none">HV 10 F</text>
+<text fill="#006464" x="126.0394" y="261.2000" font-size="2.2666" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" stroke="none">HV 10 F</text>
 </g>
 <g style="fill:none; 
 stroke:#840000; stroke-width:0.1524; stroke-opacity:1; 

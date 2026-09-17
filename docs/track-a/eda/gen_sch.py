@@ -615,12 +615,12 @@ def build():
     # süperkap yedek: ray → R_şarj → C32 + C33 (2× HV 2,7 V seri, dengeleme R53/R54) → GND; C_sc → U7 boost 4,6 V → D2 → ray
     xs = 133.35
     S.junction((xs, ry))
-    Rs = S.part(R, 'R52', 'R_şarj 22 Ω', (xs, ry + 7.62), ref_at=(xs + 1.27, ry + 5.08), val_at=(xs + 1.27, ry + 7.62))
+    Rs = S.part(R, 'R52', 'R_şarj 22 Ω', (xs, ry + 7.62), ref_at=(xs + 1.27, ry + 5.08), val_at=(xs - 0.4, ry + 7.62))   # Arial'da ortalı yazı sağa kayıyor → sola telafi
     S.wire((xs, ry), Rs.p('1'), color=COL['5V'])
     nC = (xs, ry + 13.97); S.wire(Rs.p('2'), nC); S.junction(nC)
-    C32 = S.part(CP, 'C32', 'HV 10 F', (xs, ry + 20.32), ref_at=(xs - 2.54, ry + 19.05), val_at=(xs - 2.54, ry + 21.59)); C32.just = 'right'
+    C32 = S.part(CP, 'C32', 'HV 10 F', (xs, ry + 20.32), ref_at=(xs - 2.54, ry + 19.05), val_at=(xs - 1.9, ry + 21.59)); C32.just = 'right'
     nM = (xs, ry + 24.13); S.wire(nC, C32.p('1')); S.wire(C32.p('2'), nM); S.junction(nM)
-    C33 = S.part(CP, 'C33', 'HV 10 F', (xs, ry + 30.48), ref_at=(xs - 2.54, ry + 29.21), val_at=(xs - 2.54, ry + 31.75)); C33.just = 'right'
+    C33 = S.part(CP, 'C33', 'HV 10 F', (xs, ry + 30.48), ref_at=(xs - 2.54, ry + 29.21), val_at=(xs - 1.9, ry + 31.75)); C33.just = 'right'
     nG = (xs, ry + 34.29); S.wire(nM, C33.p('1')); S.wire(C33.p('2'), nG); S.junction(nG); S.power('GND', nG, 0)
     xb = xs + 10.16   # dengeleme dirençleri (hücre başına 10 k); süperkap etiketlerine yer kalsın diye 10 mm sağda
     R53 = S.part(R, 'R53', '10k', (xb, ry + 20.32), ref_at=(xb + 1.27, ry + 17.78), val_at=(xb + 1.27, ry + 20.32))

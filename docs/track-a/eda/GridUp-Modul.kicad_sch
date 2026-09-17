@@ -14984,7 +14984,7 @@
 			)
 		)
 		(property "Value" "R_şarj 22 Ω"
-			(at 134.62 236.22 0)
+			(at 132.95 236.22 0)
 			(effects
 				(font
 					(size 1.7 1.7)
@@ -15056,7 +15056,7 @@
 			)
 		)
 		(property "Value" "HV 10 F"
-			(at 130.81 250.19 0)
+			(at 131.45 250.19 0)
 			(effects
 				(font
 					(size 1.7 1.7)
@@ -15128,7 +15128,7 @@
 			)
 		)
 		(property "Value" "HV 10 F"
-			(at 130.81 260.35 0)
+			(at 131.45 260.35 0)
 			(effects
 				(font
 					(size 1.7 1.7)
