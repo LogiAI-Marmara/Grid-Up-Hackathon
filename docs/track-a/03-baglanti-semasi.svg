@@ -14,29 +14,29 @@
 stroke-linecap:round; stroke-linejoin:round;"
  transform="translate(0 0) scale(1 1)">
 </g>
+<g style="fill:#EBF5EB; fill-opacity:1.0000; stroke:none;">
+<rect x="222.000000" y="153.000000" width="100.000000" height="37.000000" rx="0.000000" />
+</g>
+<g style="fill:#EBF5EB; fill-opacity:1.0000; stroke:none;">
+<rect x="130.000000" y="42.000000" width="92.000000" height="108.000000" rx="0.000000" />
+</g>
+<g style="fill:#F3EDF7; fill-opacity:1.0000; stroke:none;">
+<rect x="222.000000" y="42.000000" width="100.000000" height="16.000000" rx="0.000000" />
+</g>
+<g style="fill:#FDF4EB; fill-opacity:1.0000; stroke:none;">
+<rect x="27.940000" y="42.000000" width="93.060000" height="94.000000" rx="0.000000" />
+</g>
+<g style="fill:#F3EDF7; fill-opacity:1.0000; stroke:none;">
+<rect x="222.000000" y="60.500000" width="100.000000" height="55.500000" rx="0.000000" />
+</g>
 <g style="fill:#ECF3FA; fill-opacity:1.0000; stroke:none;">
 <rect x="27.940000" y="139.700000" width="93.060000" height="74.930000" rx="0.000000" />
 </g>
 <g style="fill:#EBF5EB; fill-opacity:1.0000; stroke:none;">
 <rect x="222.000000" y="119.000000" width="100.000000" height="31.000000" rx="0.000000" />
 </g>
-<g style="fill:#F3EDF7; fill-opacity:1.0000; stroke:none;">
-<rect x="222.000000" y="60.500000" width="100.000000" height="55.500000" rx="0.000000" />
-</g>
-<g style="fill:#EBF5EB; fill-opacity:1.0000; stroke:none;">
-<rect x="130.000000" y="42.000000" width="92.000000" height="108.000000" rx="0.000000" />
-</g>
 <g style="fill:#F6EBEB; fill-opacity:1.0000; stroke:none;">
 <rect x="25.400000" y="216.400000" width="296.600000" height="63.600000" rx="0.000000" />
-</g>
-<g style="fill:#FDF4EB; fill-opacity:1.0000; stroke:none;">
-<rect x="27.940000" y="42.000000" width="93.060000" height="94.000000" rx="0.000000" />
-</g>
-<g style="fill:#EBF5EB; fill-opacity:1.0000; stroke:none;">
-<rect x="222.000000" y="153.000000" width="100.000000" height="37.000000" rx="0.000000" />
-</g>
-<g style="fill:#F3EDF7; fill-opacity:1.0000; stroke:none;">
-<rect x="222.000000" y="42.000000" width="100.000000" height="16.000000" rx="0.000000" />
 <path style="fill:none; 
 stroke:#840000; stroke-width:0.1524; stroke-opacity:1; 
 stroke-linecap:round; stroke-linejoin:round;fill:none"
@@ -539,64 +539,35 @@ stroke-linecap:round; stroke-linejoin:round;">
 <path style="fill:none; 
 stroke:#840000; stroke-width:0.1524; stroke-opacity:1; 
 stroke-linecap:round; stroke-linejoin:round;fill:none"
-d="M 66.04,233.68 66.04,234.95 67.056,235.585 66.04,236.22 65.024,235.585 66.04,234.95" /> 
+d="M 50.8,236.22 50.8,234.95 49.784,234.315 50.8,233.68 51.816,234.315 50.8,234.95" /> 
 </g>
 <g style="fill:none; 
 stroke:#840000; stroke-width:0.1524; stroke-opacity:1; 
 stroke-linecap:round; stroke-linejoin:round;">
-<path d="M66.04 233.68 L66.04 233.68" />
+<path d="M50.8 236.22 L50.8 236.22" />
 <path style="fill:none; 
 stroke:#840000; stroke-width:0.1524; stroke-opacity:1; 
 stroke-linecap:round; stroke-linejoin:round;fill:none"
-d="M 50.8,236.22 50.8,234.95 49.784,234.315 50.8,233.68 51.816,234.315 50.8,234.95" /> 
-<path d="M50.8 236.22 L50.8 236.22" />
-</g>
-<g style="fill:#FFFFC2; fill-opacity:1.0000; stroke:none;">
-<rect x="41.910000" y="227.330000" width="2.540000" height="7.620000" rx="0.000000" />
-</g>
-<g style="fill:none; 
-stroke:#840000; stroke-width:0.2540; stroke-opacity:1; 
-stroke-linecap:round; stroke-linejoin:round;">
-<rect x="41.910000" y="227.330000" width="2.540000" height="7.620000" rx="0.000000" />
-</g>
-<g style="fill:none; 
+d="M 50.165,243.205 51.435,243.205" /> 
+<path style="fill:none; 
 stroke:#840000; stroke-width:0.1524; stroke-opacity:1; 
-stroke-linecap:round; stroke-linejoin:round;">
-<rect x="43.180000" y="228.473000" width="1.270000" height="0.254000" rx="0.000000" />
-<rect x="43.180000" y="231.013000" width="1.270000" height="0.254000" rx="0.000000" />
-<rect x="43.180000" y="233.553000" width="1.270000" height="0.254000" rx="0.000000" />
-<path d="M44.45 228.6 L48.26 228.6" />
-</g>
-<g style="fill:none; 
-stroke:#A90000; stroke-width:0.1524; stroke-opacity:1; 
-stroke-linecap:round; stroke-linejoin:round;">
-<text fill="#A90000" x="46.3550" y="228.1682" font-size="1.7333" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" stroke="none">1</text>
-</g>
-<g style="fill:none; 
+stroke-linecap:round; stroke-linejoin:round;fill:none"
+d="M 50.673,243.84 50.927,243.84" /> 
+<path style="fill:none; 
 stroke:#840000; stroke-width:0.1524; stroke-opacity:1; 
-stroke-linecap:round; stroke-linejoin:round;">
-<path d="M44.45 231.14 L48.26 231.14" />
-</g>
-<g style="fill:none; 
-stroke:#A90000; stroke-width:0.1524; stroke-opacity:1; 
-stroke-linecap:round; stroke-linejoin:round;">
-<text fill="#A90000" x="46.3550" y="230.7082" font-size="1.7333" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" stroke="none">2</text>
-</g>
-<g style="fill:none; 
+stroke-linecap:round; stroke-linejoin:round;fill:none"
+d="M 50.8,242.57 50.8,238.76" /> 
+<circle cx="50.8000" cy="242.5700" r="2.5400" /> 
+<path style="fill:none; 
 stroke:#840000; stroke-width:0.1524; stroke-opacity:1; 
-stroke-linecap:round; stroke-linejoin:round;">
-<path d="M44.45 233.68 L48.26 233.68" />
-</g>
-<g style="fill:none; 
-stroke:#A90000; stroke-width:0.1524; stroke-opacity:1; 
-stroke-linecap:round; stroke-linejoin:round;">
-<text fill="#A90000" x="46.3550" y="233.2482" font-size="1.7333" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" stroke="none">3</text>
-</g>
-<g style="fill:none; 
-stroke:#006464; stroke-width:0.1524; stroke-opacity:1; 
-stroke-linecap:round; stroke-linejoin:round;">
-<text fill="#006464" x="35.4059" y="223.1000" font-size="2.2666" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" stroke="none">J1</text>
-<text fill="#006464" x="44.8558" y="225.6400" font-size="2.2666" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" stroke="none">İç ihtiyaç L / N / PE</text>
+stroke-linecap:round; stroke-linejoin:round;fill:none"
+d="M 52.07,242.57 49.53,242.57" /> 
+<path d="M50.8 238.76 L50.8 238.76" />
+<path style="fill:none; 
+stroke:#840000; stroke-width:0.1524; stroke-opacity:1; 
+stroke-linecap:round; stroke-linejoin:round;fill:none"
+d="M 66.04,233.68 66.04,234.95 67.056,235.585 66.04,236.22 65.024,235.585 66.04,234.95" /> 
+<path d="M66.04 233.68 L66.04 233.68" />
 </g>
 <g style="fill:none; 
 stroke:#840000; stroke-width:0.2540; stroke-opacity:1; 
@@ -648,8 +619,8 @@ stroke-linecap:round; stroke-linejoin:round;">
 <g style="fill:none; 
 stroke:#006464; stroke-width:0.1524; stroke-opacity:1; 
 stroke-linecap:round; stroke-linejoin:round;">
-<text fill="#006464" x="76.9368" y="225.5500" font-size="2.2666" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" stroke="none">RV1</text>
-<text fill="#006464" x="82.3393" y="225.5500" font-size="2.2666" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" stroke="none">MOV</text>
+<text fill="#006464" x="74.9368" y="224.2500" font-size="2.2666" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" stroke="none">RV1</text>
+<text fill="#006464" x="80.3393" y="224.2500" font-size="2.2666" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" stroke="none">MOV</text>
 <path style="fill:none; 
 stroke:#840000; stroke-width:0.5080; stroke-opacity:1; 
 stroke-linecap:round; stroke-linejoin:round;fill:none"
@@ -710,115 +681,53 @@ stroke:#006464; stroke-width:0.1524; stroke-opacity:1;
 stroke-linecap:round; stroke-linejoin:round;">
 <text fill="#006464" x="48.3378" y="125.3100" font-size="2.2666" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" stroke="none">C20</text>
 <text fill="#006464" x="49.7544" y="127.8500" font-size="2.2666" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" stroke="none">10 µF</text>
-<path style="fill:none; 
-stroke:#840000; stroke-width:0.1524; stroke-opacity:1; 
-stroke-linecap:round; stroke-linejoin:round;fill:none"
-d="M 50.165,243.205 51.435,243.205" /> 
-<path style="fill:none; 
-stroke:#840000; stroke-width:0.1524; stroke-opacity:1; 
-stroke-linecap:round; stroke-linejoin:round;fill:none"
-d="M 50.673,243.84 50.927,243.84" /> 
-<path style="fill:none; 
-stroke:#840000; stroke-width:0.1524; stroke-opacity:1; 
-stroke-linecap:round; stroke-linejoin:round;fill:none"
-d="M 50.8,242.57 50.8,238.76" /> 
 </g>
-<g style="fill:none; 
-stroke:#840000; stroke-width:0.1524; stroke-opacity:1; 
-stroke-linecap:round; stroke-linejoin:round;">
-<circle cx="50.8000" cy="242.5700" r="2.5400" /> 
-<path style="fill:none; 
-stroke:#840000; stroke-width:0.1524; stroke-opacity:1; 
-stroke-linecap:round; stroke-linejoin:round;fill:none"
-d="M 52.07,242.57 49.53,242.57" /> 
-<path d="M50.8 238.76 L50.8 238.76" />
-<path style="fill:none; 
-stroke:#840000; stroke-width:0.1524; stroke-opacity:1; 
-stroke-linecap:round; stroke-linejoin:round;fill:none"
-d="M 133.35,262.89 133.35,264.16 134.62,264.16 133.35,265.43 132.08,264.16 133.35,264.16" /> 
-<path d="M133.35 262.89 L133.35 262.89" />
-</g>
-<g style="fill:none; 
-stroke:#006464; stroke-width:0.1524; stroke-opacity:1; 
-stroke-linecap:round; stroke-linejoin:round;">
-<text fill="#006464" x="138.6293" y="265.0100" font-size="2.2666" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" stroke="none">GND</text>
-<path style="fill:none; 
-stroke:#840000; stroke-width:0.1524; stroke-opacity:1; 
-stroke-linecap:round; stroke-linejoin:round;fill:none"
-d="M 184.658,68.58 185.42,67.31" /> 
-<path style="fill:none; 
-stroke:#840000; stroke-width:0.1524; stroke-opacity:1; 
-stroke-linecap:round; stroke-linejoin:round;fill:none"
-d="M 185.42,67.31 186.182,68.58" /> 
-<path style="fill:none; 
-stroke:#840000; stroke-width:0.1524; stroke-opacity:1; 
-stroke-linecap:round; stroke-linejoin:round;fill:none"
-d="M 185.42,69.85 185.42,67.31" /> 
-</g>
-<g style="fill:none; 
-stroke:#840000; stroke-width:0.1524; stroke-opacity:1; 
-stroke-linecap:round; stroke-linejoin:round;">
-<path d="M185.42 69.85 L185.42 69.85" />
-</g>
-<g style="fill:none; 
-stroke:#006464; stroke-width:0.1524; stroke-opacity:1; 
-stroke-linecap:round; stroke-linejoin:round;">
-<text fill="#006464" x="185.4200" y="67.1000" font-size="2.2666" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" stroke="none">+3V3</text>
+<g style="fill:#FFFFC2; fill-opacity:1.0000; stroke:none;">
+<rect x="41.910000" y="227.330000" width="2.540000" height="7.620000" rx="0.000000" />
 </g>
 <g style="fill:none; 
 stroke:#840000; stroke-width:0.2540; stroke-opacity:1; 
 stroke-linecap:round; stroke-linejoin:round;">
-<rect x="110.744000" y="233.680000" width="2.032000" height="5.080000" rx="0.000000" />
+<rect x="41.910000" y="227.330000" width="2.540000" height="7.620000" rx="0.000000" />
 </g>
 <g style="fill:none; 
 stroke:#840000; stroke-width:0.1524; stroke-opacity:1; 
 stroke-linecap:round; stroke-linejoin:round;">
-<path d="M111.76 233.68 L111.76 232.41" />
-<path d="M111.76 238.76 L111.76 240.03" />
+<rect x="43.180000" y="228.473000" width="1.270000" height="0.254000" rx="0.000000" />
+<rect x="43.180000" y="231.013000" width="1.270000" height="0.254000" rx="0.000000" />
+<rect x="43.180000" y="233.553000" width="1.270000" height="0.254000" rx="0.000000" />
+<path d="M44.45 228.6 L48.26 228.6" />
+</g>
+<g style="fill:none; 
+stroke:#A90000; stroke-width:0.1524; stroke-opacity:1; 
+stroke-linecap:round; stroke-linejoin:round;">
+<text fill="#A90000" x="46.3550" y="228.1682" font-size="1.7333" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" stroke="none">1</text>
+</g>
+<g style="fill:none; 
+stroke:#840000; stroke-width:0.1524; stroke-opacity:1; 
+stroke-linecap:round; stroke-linejoin:round;">
+<path d="M44.45 231.14 L48.26 231.14" />
+</g>
+<g style="fill:none; 
+stroke:#A90000; stroke-width:0.1524; stroke-opacity:1; 
+stroke-linecap:round; stroke-linejoin:round;">
+<text fill="#A90000" x="46.3550" y="230.7082" font-size="1.7333" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" stroke="none">2</text>
+</g>
+<g style="fill:none; 
+stroke:#840000; stroke-width:0.1524; stroke-opacity:1; 
+stroke-linecap:round; stroke-linejoin:round;">
+<path d="M44.45 233.68 L48.26 233.68" />
+</g>
+<g style="fill:none; 
+stroke:#A90000; stroke-width:0.1524; stroke-opacity:1; 
+stroke-linecap:round; stroke-linejoin:round;">
+<text fill="#A90000" x="46.3550" y="233.2482" font-size="1.7333" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" stroke="none">3</text>
 </g>
 <g style="fill:none; 
 stroke:#006464; stroke-width:0.1524; stroke-opacity:1; 
 stroke-linecap:round; stroke-linejoin:round;">
-<text fill="#006464" x="115.6478" y="234.5300" font-size="2.2666" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" stroke="none">R50</text>
-<text fill="#006464" x="116.2954" y="237.0700" font-size="2.2666" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" stroke="none">100k</text>
-<path style="fill:none; 
-stroke:#840000; stroke-width:0.1524; stroke-opacity:1; 
-stroke-linecap:round; stroke-linejoin:round;fill:none"
-d="M 101.6,233.68 101.6,234.95 102.87,234.95 101.6,236.22 100.33,234.95 101.6,234.95" /> 
-</g>
-<g style="fill:none; 
-stroke:#840000; stroke-width:0.1524; stroke-opacity:1; 
-stroke-linecap:round; stroke-linejoin:round;">
-<path d="M101.6 233.68 L101.6 233.68" />
-</g>
-<g style="fill:none; 
-stroke:#006464; stroke-width:0.1524; stroke-opacity:1; 
-stroke-linecap:round; stroke-linejoin:round;">
-<text fill="#006464" x="101.6000" y="238.7300" font-size="2.2666" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" stroke="none">GND</text>
-<path style="fill:none; 
-stroke:#840000; stroke-width:0.2540; stroke-opacity:1; 
-stroke-linecap:round; stroke-linejoin:round;fill:none"
-d="M 120.015,227.965 120.015,227.33 119.38,227.33 119.38,229.87 118.745,229.87 118.745,229.235" /> 
-<path style="fill:none; 
-stroke:#840000; stroke-width:0.2540; stroke-opacity:1; 
-stroke-linecap:round; stroke-linejoin:round;fill:none"
-d="M 116.84,227.33 116.84,229.87 119.38,228.6 Z" /> 
-<path style="fill:none; 
-stroke:#840000; stroke-width:0.1524; stroke-opacity:1; 
-stroke-linecap:round; stroke-linejoin:round;fill:none"
-d="M 116.84,228.6 119.38,228.6" /> 
-</g>
-<g style="fill:none; 
-stroke:#840000; stroke-width:0.1524; stroke-opacity:1; 
-stroke-linecap:round; stroke-linejoin:round;">
-<path d="M119.38 228.6 L121.92 228.6" />
-<path d="M116.84 228.6 L114.3 228.6" />
-</g>
-<g style="fill:none; 
-stroke:#006464; stroke-width:0.1524; stroke-opacity:1; 
-stroke-linecap:round; stroke-linejoin:round;">
-<text fill="#006464" x="118.1100" y="223.8500" font-size="2.2666" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" stroke="none">D1</text>
-<text fill="#006464" x="118.1099" y="226.2500" font-size="2.2666" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" stroke="none">Schottky (OR)</text>
+<text fill="#006464" x="35.4059" y="223.1000" font-size="2.2666" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" stroke="none">J1</text>
+<text fill="#006464" x="44.8558" y="225.6400" font-size="2.2666" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" stroke="none">İç ihtiyaç L / N / PE</text>
 </g>
 <g style="fill:#FFFFC2; fill-opacity:1.0000; stroke:none;">
 <rect x="165.100000" y="241.300000" width="10.160000" height="8.890000" rx="0.000000" />
@@ -927,6 +836,83 @@ stroke:#006464; stroke-width:0.1524; stroke-opacity:1;
 stroke-linecap:round; stroke-linejoin:round;">
 <text fill="#006464" x="170.1800" y="261.7500" font-size="2.2666" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" stroke="none">U7</text>
 <text fill="#006464" x="170.1800" y="264.4500" font-size="2.2666" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" stroke="none">TPS61099 4,6 V</text>
+<path style="fill:none; 
+stroke:#840000; stroke-width:0.1524; stroke-opacity:1; 
+stroke-linecap:round; stroke-linejoin:round;fill:none"
+d="M 184.658,68.58 185.42,67.31" /> 
+<path style="fill:none; 
+stroke:#840000; stroke-width:0.1524; stroke-opacity:1; 
+stroke-linecap:round; stroke-linejoin:round;fill:none"
+d="M 185.42,67.31 186.182,68.58" /> 
+<path style="fill:none; 
+stroke:#840000; stroke-width:0.1524; stroke-opacity:1; 
+stroke-linecap:round; stroke-linejoin:round;fill:none"
+d="M 185.42,69.85 185.42,67.31" /> 
+</g>
+<g style="fill:none; 
+stroke:#840000; stroke-width:0.1524; stroke-opacity:1; 
+stroke-linecap:round; stroke-linejoin:round;">
+<path d="M185.42 69.85 L185.42 69.85" />
+</g>
+<g style="fill:none; 
+stroke:#006464; stroke-width:0.1524; stroke-opacity:1; 
+stroke-linecap:round; stroke-linejoin:round;">
+<text fill="#006464" x="185.4200" y="67.1000" font-size="2.2666" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" stroke="none">+3V3</text>
+</g>
+<g style="fill:none; 
+stroke:#840000; stroke-width:0.2540; stroke-opacity:1; 
+stroke-linecap:round; stroke-linejoin:round;">
+<rect x="110.744000" y="233.680000" width="2.032000" height="5.080000" rx="0.000000" />
+</g>
+<g style="fill:none; 
+stroke:#840000; stroke-width:0.1524; stroke-opacity:1; 
+stroke-linecap:round; stroke-linejoin:round;">
+<path d="M111.76 233.68 L111.76 232.41" />
+<path d="M111.76 238.76 L111.76 240.03" />
+</g>
+<g style="fill:none; 
+stroke:#006464; stroke-width:0.1524; stroke-opacity:1; 
+stroke-linecap:round; stroke-linejoin:round;">
+<text fill="#006464" x="115.6478" y="234.5300" font-size="2.2666" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" stroke="none">R50</text>
+<text fill="#006464" x="116.2954" y="237.0700" font-size="2.2666" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" stroke="none">100k</text>
+<path style="fill:none; 
+stroke:#840000; stroke-width:0.1524; stroke-opacity:1; 
+stroke-linecap:round; stroke-linejoin:round;fill:none"
+d="M 101.6,233.68 101.6,234.95 102.87,234.95 101.6,236.22 100.33,234.95 101.6,234.95" /> 
+</g>
+<g style="fill:none; 
+stroke:#840000; stroke-width:0.1524; stroke-opacity:1; 
+stroke-linecap:round; stroke-linejoin:round;">
+<path d="M101.6 233.68 L101.6 233.68" />
+</g>
+<g style="fill:none; 
+stroke:#006464; stroke-width:0.1524; stroke-opacity:1; 
+stroke-linecap:round; stroke-linejoin:round;">
+<text fill="#006464" x="101.6000" y="238.7300" font-size="2.2666" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" stroke="none">GND</text>
+<path style="fill:none; 
+stroke:#840000; stroke-width:0.2540; stroke-opacity:1; 
+stroke-linecap:round; stroke-linejoin:round;fill:none"
+d="M 120.015,227.965 120.015,227.33 119.38,227.33 119.38,229.87 118.745,229.87 118.745,229.235" /> 
+<path style="fill:none; 
+stroke:#840000; stroke-width:0.2540; stroke-opacity:1; 
+stroke-linecap:round; stroke-linejoin:round;fill:none"
+d="M 116.84,227.33 116.84,229.87 119.38,228.6 Z" /> 
+<path style="fill:none; 
+stroke:#840000; stroke-width:0.1524; stroke-opacity:1; 
+stroke-linecap:round; stroke-linejoin:round;fill:none"
+d="M 116.84,228.6 119.38,228.6" /> 
+</g>
+<g style="fill:none; 
+stroke:#840000; stroke-width:0.1524; stroke-opacity:1; 
+stroke-linecap:round; stroke-linejoin:round;">
+<path d="M119.38 228.6 L121.92 228.6" />
+<path d="M116.84 228.6 L114.3 228.6" />
+</g>
+<g style="fill:none; 
+stroke:#006464; stroke-width:0.1524; stroke-opacity:1; 
+stroke-linecap:round; stroke-linejoin:round;">
+<text fill="#006464" x="118.1100" y="223.8500" font-size="2.2666" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" stroke="none">D1</text>
+<text fill="#006464" x="118.1099" y="226.2500" font-size="2.2666" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" stroke="none">Schottky (OR)</text>
 </g>
 <g style="fill:none; 
 stroke:#840000; stroke-width:0.2540; stroke-opacity:1; 
@@ -944,6 +930,20 @@ stroke:#006464; stroke-width:0.1524; stroke-opacity:1;
 stroke-linecap:round; stroke-linejoin:round;">
 <text fill="#006464" x="199.4678" y="258.6600" font-size="2.2666" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" stroke="none">R56</text>
 <text fill="#006464" x="200.5606" y="261.2000" font-size="2.2666" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" stroke="none">R_fb2</text>
+<path style="fill:none; 
+stroke:#840000; stroke-width:0.1524; stroke-opacity:1; 
+stroke-linecap:round; stroke-linejoin:round;fill:none"
+d="M 133.35,262.89 133.35,264.16 134.62,264.16 133.35,265.43 132.08,264.16 133.35,264.16" /> 
+</g>
+<g style="fill:none; 
+stroke:#840000; stroke-width:0.1524; stroke-opacity:1; 
+stroke-linecap:round; stroke-linejoin:round;">
+<path d="M133.35 262.89 L133.35 262.89" />
+</g>
+<g style="fill:none; 
+stroke:#006464; stroke-width:0.1524; stroke-opacity:1; 
+stroke-linecap:round; stroke-linejoin:round;">
+<text fill="#006464" x="138.6293" y="265.0100" font-size="2.2666" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" stroke="none">GND</text>
 </g>
 <g style="fill:none; 
 stroke:#840000; stroke-width:0.2540; stroke-opacity:1; 
@@ -1070,6 +1070,56 @@ stroke-linecap:round; stroke-linejoin:round;">
 stroke:#006464; stroke-width:0.1524; stroke-opacity:1; 
 stroke-linecap:round; stroke-linejoin:round;">
 <text fill="#006464" x="200.8593" y="268.8200" font-size="2.2666" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" stroke="none">GND</text>
+<path style="fill:none; 
+stroke:#840000; stroke-width:0.1524; stroke-opacity:1; 
+stroke-linecap:round; stroke-linejoin:round;fill:none"
+d="M 268.478,227.33 269.24,226.06" /> 
+<path style="fill:none; 
+stroke:#840000; stroke-width:0.1524; stroke-opacity:1; 
+stroke-linecap:round; stroke-linejoin:round;fill:none"
+d="M 269.24,226.06 270.002,227.33" /> 
+<path style="fill:none; 
+stroke:#840000; stroke-width:0.1524; stroke-opacity:1; 
+stroke-linecap:round; stroke-linejoin:round;fill:none"
+d="M 269.24,228.6 269.24,226.06" /> 
+</g>
+<g style="fill:none; 
+stroke:#840000; stroke-width:0.1524; stroke-opacity:1; 
+stroke-linecap:round; stroke-linejoin:round;">
+<path d="M269.24 228.6 L269.24 228.6" />
+</g>
+<g style="fill:none; 
+stroke:#006464; stroke-width:0.1524; stroke-opacity:1; 
+stroke-linecap:round; stroke-linejoin:round;">
+<text fill="#006464" x="269.2400" y="225.8500" font-size="2.2666" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" stroke="none">+3V3</text>
+<path style="fill:none; 
+stroke:#840000; stroke-width:0.1524; stroke-opacity:1; 
+stroke-linecap:round; stroke-linejoin:round;fill:none"
+d="M 185.42,130.81 185.42,132.08 186.69,132.08 185.42,133.35 184.15,132.08 185.42,132.08" /> 
+</g>
+<g style="fill:none; 
+stroke:#840000; stroke-width:0.1524; stroke-opacity:1; 
+stroke-linecap:round; stroke-linejoin:round;">
+<path d="M185.42 130.81 L185.42 130.81" />
+</g>
+<g style="fill:none; 
+stroke:#006464; stroke-width:0.1524; stroke-opacity:1; 
+stroke-linecap:round; stroke-linejoin:round;">
+<text fill="#006464" x="190.6993" y="132.9300" font-size="2.2666" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" stroke="none">GND</text>
+<path style="fill:none; 
+stroke:#840000; stroke-width:0.1524; stroke-opacity:1; 
+stroke-linecap:round; stroke-linejoin:round;fill:none"
+d="M 88.9,64.77 88.9,66.04 90.17,66.04 88.9,67.31 87.63,66.04 88.9,66.04" /> 
+</g>
+<g style="fill:none; 
+stroke:#840000; stroke-width:0.1524; stroke-opacity:1; 
+stroke-linecap:round; stroke-linejoin:round;">
+<path d="M88.9 64.77 L88.9 64.77" />
+</g>
+<g style="fill:none; 
+stroke:#006464; stroke-width:0.1524; stroke-opacity:1; 
+stroke-linecap:round; stroke-linejoin:round;">
+<text fill="#006464" x="94.1793" y="66.8900" font-size="2.2666" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" stroke="none">GND</text>
 </g>
 <g style="fill:#FFFFC2; fill-opacity:1.0000; stroke:none;">
 <rect x="243.840000" y="226.695000" width="10.160000" height="6.985000" rx="0.000000" />
@@ -1133,54 +1183,6 @@ stroke:#006464; stroke-width:0.1524; stroke-opacity:1;
 stroke-linecap:round; stroke-linejoin:round;">
 <text fill="#006464" x="243.1488" y="243.4500" font-size="2.2666" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" stroke="none">U6</text>
 <text fill="#006464" x="258.9746" y="245.9500" font-size="2.2666" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" stroke="none">AP7361C-33E 3,3 V / 1 A</text>
-<path style="fill:none; 
-stroke:#840000; stroke-width:0.1524; stroke-opacity:1; 
-stroke-linecap:round; stroke-linejoin:round;fill:none"
-d="M 185.42,130.81 185.42,132.08 186.69,132.08 185.42,133.35 184.15,132.08 185.42,132.08" /> 
-</g>
-<g style="fill:none; 
-stroke:#840000; stroke-width:0.1524; stroke-opacity:1; 
-stroke-linecap:round; stroke-linejoin:round;">
-<path d="M185.42 130.81 L185.42 130.81" />
-</g>
-<g style="fill:none; 
-stroke:#006464; stroke-width:0.1524; stroke-opacity:1; 
-stroke-linecap:round; stroke-linejoin:round;">
-<text fill="#006464" x="190.6993" y="132.9300" font-size="2.2666" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" stroke="none">GND</text>
-<path style="fill:none; 
-stroke:#840000; stroke-width:0.1524; stroke-opacity:1; 
-stroke-linecap:round; stroke-linejoin:round;fill:none"
-d="M 88.9,64.77 88.9,66.04 90.17,66.04 88.9,67.31 87.63,66.04 88.9,66.04" /> 
-</g>
-<g style="fill:none; 
-stroke:#840000; stroke-width:0.1524; stroke-opacity:1; 
-stroke-linecap:round; stroke-linejoin:round;">
-<path d="M88.9 64.77 L88.9 64.77" />
-</g>
-<g style="fill:none; 
-stroke:#006464; stroke-width:0.1524; stroke-opacity:1; 
-stroke-linecap:round; stroke-linejoin:round;">
-<text fill="#006464" x="94.1793" y="66.8900" font-size="2.2666" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" stroke="none">GND</text>
-<path style="fill:none; 
-stroke:#840000; stroke-width:0.5080; stroke-opacity:1; 
-stroke-linecap:round; stroke-linejoin:round;fill:none"
-d="M 262.128,231.648 266.192,231.648" /> 
-<path style="fill:none; 
-stroke:#840000; stroke-width:0.5080; stroke-opacity:1; 
-stroke-linecap:round; stroke-linejoin:round;fill:none"
-d="M 262.128,233.172 266.192,233.172" /> 
-</g>
-<g style="fill:none; 
-stroke:#840000; stroke-width:0.1524; stroke-opacity:1; 
-stroke-linecap:round; stroke-linejoin:round;">
-<path d="M264.16 231.394 L264.16 228.6" />
-<path d="M264.16 233.426 L264.16 236.22" />
-</g>
-<g style="fill:none; 
-stroke:#006464; stroke-width:0.1524; stroke-opacity:1; 
-stroke-linecap:round; stroke-linejoin:round;">
-<text fill="#006464" x="268.0478" y="230.7200" font-size="2.2666" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" stroke="none">C31</text>
-<text fill="#006464" x="269.4644" y="233.2600" font-size="2.2666" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" stroke="none">10 µF</text>
 </g>
 <g style="fill:#FFFFC2; fill-opacity:1.0000; stroke:none;">
 <rect x="172.720000" y="74.930000" width="25.400000" height="50.800000" rx="0.000000" />
@@ -1910,19 +1912,25 @@ stroke-linecap:round; stroke-linejoin:round;">
 <text fill="#006464" x="73.1178" y="68.7000" font-size="2.2666" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" stroke="none">R21</text>
 <text fill="#006464" x="79.6464" y="68.7000" font-size="2.2666" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" stroke="none">1k</text>
 <path style="fill:none; 
-stroke:#840000; stroke-width:0.1524; stroke-opacity:1; 
+stroke:#840000; stroke-width:0.5080; stroke-opacity:1; 
 stroke-linecap:round; stroke-linejoin:round;fill:none"
-d="M 264.16,238.76 264.16,240.03 265.43,240.03 264.16,241.3 262.89,240.03 264.16,240.03" /> 
+d="M 262.128,231.648 266.192,231.648" /> 
+<path style="fill:none; 
+stroke:#840000; stroke-width:0.5080; stroke-opacity:1; 
+stroke-linecap:round; stroke-linejoin:round;fill:none"
+d="M 262.128,233.172 266.192,233.172" /> 
 </g>
 <g style="fill:none; 
 stroke:#840000; stroke-width:0.1524; stroke-opacity:1; 
 stroke-linecap:round; stroke-linejoin:round;">
-<path d="M264.16 238.76 L264.16 238.76" />
+<path d="M264.16 231.394 L264.16 228.6" />
+<path d="M264.16 233.426 L264.16 236.22" />
 </g>
 <g style="fill:none; 
 stroke:#006464; stroke-width:0.1524; stroke-opacity:1; 
 stroke-linecap:round; stroke-linejoin:round;">
-<text fill="#006464" x="269.4393" y="240.8800" font-size="2.2666" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" stroke="none">GND</text>
+<text fill="#006464" x="268.0478" y="230.7200" font-size="2.2666" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" stroke="none">C31</text>
+<text fill="#006464" x="269.4644" y="233.2600" font-size="2.2666" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" stroke="none">10 µF</text>
 </g>
 <g style="fill:none; 
 stroke:#840000; stroke-width:0.2540; stroke-opacity:1; 
@@ -1943,17 +1951,17 @@ stroke-linecap:round; stroke-linejoin:round;">
 <path style="fill:none; 
 stroke:#840000; stroke-width:0.1524; stroke-opacity:1; 
 stroke-linecap:round; stroke-linejoin:round;fill:none"
-d="M 248.92,238.76 248.92,240.03 250.19,240.03 248.92,241.3 247.65,240.03 248.92,240.03" /> 
+d="M 264.16,238.76 264.16,240.03 265.43,240.03 264.16,241.3 262.89,240.03 264.16,240.03" /> 
 </g>
 <g style="fill:none; 
 stroke:#840000; stroke-width:0.1524; stroke-opacity:1; 
 stroke-linecap:round; stroke-linejoin:round;">
-<path d="M248.92 238.76 L248.92 238.76" />
+<path d="M264.16 238.76 L264.16 238.76" />
 </g>
 <g style="fill:none; 
 stroke:#006464; stroke-width:0.1524; stroke-opacity:1; 
 stroke-linecap:round; stroke-linejoin:round;">
-<text fill="#006464" x="254.1993" y="240.8800" font-size="2.2666" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" stroke="none">GND</text>
+<text fill="#006464" x="269.4393" y="240.8800" font-size="2.2666" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" stroke="none">GND</text>
 </g>
 <g style="fill:none; 
 stroke:#840000; stroke-width:0.2540; stroke-opacity:1; 
@@ -2244,25 +2252,17 @@ stroke-linecap:round; stroke-linejoin:round;">
 <path style="fill:none; 
 stroke:#840000; stroke-width:0.1524; stroke-opacity:1; 
 stroke-linecap:round; stroke-linejoin:round;fill:none"
-d="M 268.478,227.33 269.24,226.06" /> 
-<path style="fill:none; 
-stroke:#840000; stroke-width:0.1524; stroke-opacity:1; 
-stroke-linecap:round; stroke-linejoin:round;fill:none"
-d="M 269.24,226.06 270.002,227.33" /> 
-<path style="fill:none; 
-stroke:#840000; stroke-width:0.1524; stroke-opacity:1; 
-stroke-linecap:round; stroke-linejoin:round;fill:none"
-d="M 269.24,228.6 269.24,226.06" /> 
+d="M 248.92,238.76 248.92,240.03 250.19,240.03 248.92,241.3 247.65,240.03 248.92,240.03" /> 
 </g>
 <g style="fill:none; 
 stroke:#840000; stroke-width:0.1524; stroke-opacity:1; 
 stroke-linecap:round; stroke-linejoin:round;">
-<path d="M269.24 228.6 L269.24 228.6" />
+<path d="M248.92 238.76 L248.92 238.76" />
 </g>
 <g style="fill:none; 
 stroke:#006464; stroke-width:0.1524; stroke-opacity:1; 
 stroke-linecap:round; stroke-linejoin:round;">
-<text fill="#006464" x="269.2400" y="225.8500" font-size="2.2666" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" stroke="none">+3V3</text>
+<text fill="#006464" x="254.1993" y="240.8800" font-size="2.2666" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" stroke="none">GND</text>
 </g>
 <g style="fill:none; 
 stroke:#840000; stroke-width:0.2540; stroke-opacity:1; 
@@ -3374,7 +3374,7 @@ stroke-linecap:round; stroke-linejoin:round;">
 <g style="fill:none; 
 stroke:#464646; stroke-width:0.2000; stroke-opacity:1; 
 stroke-linecap:round; stroke-linejoin:round;">
-<path d="M72.5 230.3 L74.6 225.3" />
+<path d="M72.5 230.3 L73.6 224" />
 </g>
 <g style="fill:none; 
 stroke:#008400; stroke-width:0.5000; stroke-opacity:1; 
@@ -3877,13 +3877,6 @@ stroke-linecap:round; stroke-linejoin:round;">
 <path d="M200.66 92.71 L226.06 92.71" />
 <path d="M226.06 92.71 L226.06 90.17" />
 <path d="M200.66 82.55 L243.84 82.55" />
-<path d="M243.84 87.63 L240.03 87.63" />
-<path d="M240.03 87.63 L240.03 90.17" />
-<path d="M240.03 90.17 L243.84 90.17" />
-<path d="M226.06 90.17 L231.8 90.17" />
-<path d="M231.8 90.17 L231.8 90.17" />
-<path d="M233.02 90.17 A0.61 0.61 0 0 0 231.8 90.17" />
-<path d="M233.02 90.17 L240.03 90.17" />
 </g>
 <g style="fill:none; 
 stroke:#009600; stroke-width:0.1524; stroke-opacity:1; 
@@ -3896,6 +3889,13 @@ stroke-linecap:round; stroke-linejoin:round;">
 <g style="fill:none; 
 stroke:#6A1B9A; stroke-width:0.1524; stroke-opacity:1; 
 stroke-linecap:round; stroke-linejoin:round;">
+<path d="M243.84 87.63 L240.03 87.63" />
+<path d="M240.03 87.63 L240.03 90.17" />
+<path d="M240.03 90.17 L243.84 90.17" />
+<path d="M226.06 90.17 L231.8 90.17" />
+<path d="M231.8 90.17 L231.8 90.17" />
+<path d="M233.02 90.17 A0.61 0.61 0 0 0 231.8 90.17" />
+<path d="M233.02 90.17 L240.03 90.17" />
 <path d="M200.66 85.09 L232.41 85.09" />
 <path d="M232.41 85.09 L232.41 92.71" />
 <path d="M264.16 90.17 L287.02 90.17" />
@@ -4080,6 +4080,11 @@ stroke-linecap:round; stroke-linejoin:round;">
 <g style="fill:none; 
 stroke:#0000C2; stroke-width:0.1524; stroke-opacity:1; 
 stroke-linecap:round; stroke-linejoin:round;">
+<text fill="#0000C2" x="30.4800" y="248.9300" font-size="2.4000" text-anchor="start" font-family="Arial,Helvetica,sans-serif" stroke="none">PE → panonun koruma iletkeni; kutu metal ise gövde PE</text>
+</g>
+<g style="fill:none; 
+stroke:#0000C2; stroke-width:0.1524; stroke-opacity:1; 
+stroke-linecap:round; stroke-linejoin:round;">
 <text fill="#0000C2" x="30.4800" y="251.7300" font-size="2.4000" text-anchor="start" font-family="Arial,Helvetica,sans-serif" stroke="none">GND: tek yıldız noktası RAC05 çıkışında</text>
 </g>
 <g style="fill:none; 
@@ -4095,11 +4100,6 @@ stroke-linecap:round; stroke-linejoin:round;">
 <g style="fill:none; 
 stroke:#0000C2; stroke-width:0.1524; stroke-opacity:1; 
 stroke-linecap:round; stroke-linejoin:round;">
-<text fill="#0000C2" x="35.5600" y="272.7500" font-size="2.4000" text-anchor="start" font-family="Arial,Helvetica,sans-serif" stroke="none">Notlar: pin atamaları 03 §3.1 ile aynı; tabloda olmayan tek ekleme GPIO1 besleme algılama. Pasif değerler tipik başlangıç değerleridir.</text>
-</g>
-<g style="fill:none; 
-stroke:#0000C2; stroke-width:0.1524; stroke-opacity:1; 
-stroke-linecap:round; stroke-linejoin:round;">
 <text fill="#0000C2" x="132.0800" y="59.7200" font-size="2.4000" text-anchor="start" font-family="Arial,Helvetica,sans-serif" stroke="none">EN: RC + reset butonu</text>
 </g>
 <g style="fill:none; 
@@ -4108,9 +4108,34 @@ stroke-linecap:round; stroke-linejoin:round;">
 <text fill="#008400" x="131.5000" y="44.9500" font-size="2.9333" text-anchor="start" font-family="Arial,Helvetica,sans-serif" stroke="none">ESP32-S3-WROOM-1U-N8 / Wi-Fi/BLE, U.FL anten</text>
 </g>
 <g style="fill:none; 
+stroke:#8C0000; stroke-width:0.4400; stroke-opacity:1; 
+stroke-linecap:round; stroke-linejoin:round;">
+<text fill="#8C0000" x="26.9000" y="219.3500" font-size="2.9333" text-anchor="start" font-family="Arial,Helvetica,sans-serif" stroke="none">Besleme / 230 V iç ihtiyaç → RAC05 5 V → D1 (OR) → 5 V rayı → LDO 3V3; yedek: 2× süperkap seri → boost 4,6 V → D2; algılama D1 öncesi (§3.4, §7.3)</text>
+</g>
+<g style="fill:none; 
+stroke:#0000C2; stroke-width:0.1524; stroke-opacity:1; 
+stroke-linecap:round; stroke-linejoin:round;">
+<text fill="#0000C2" x="35.5600" y="272.7500" font-size="2.4000" text-anchor="start" font-family="Arial,Helvetica,sans-serif" stroke="none">Notlar: pin atamaları 03 §3.1 ile aynı; tabloda olmayan tek ekleme GPIO1 besleme algılama. Pasif değerler tipik başlangıç değerleridir.</text>
+</g>
+<g style="fill:none; 
+stroke:#0000C2; stroke-width:0.1524; stroke-opacity:1; 
+stroke-linecap:round; stroke-linejoin:round;">
+<text fill="#0000C2" x="35.5600" y="275.7500" font-size="2.4000" text-anchor="start" font-family="Arial,Helvetica,sans-serif" stroke="none">Analizör varsa CT ön ucu boş kalır (hedef senaryo, 02-bom §2.3). Kavramsal şema / üretim çizimi değildir (§1.4). Üretim: eda/gen_sch.py → kicad-cli (ERC + SVG).</text>
+</g>
+<g style="fill:none; 
+stroke:#0000C2; stroke-width:0.1524; stroke-opacity:1; 
+stroke-linecap:round; stroke-linejoin:round;">
+<text fill="#0000C2" x="35.5600" y="260.8500" font-size="2.4000" text-anchor="start" font-family="Arial,Helvetica,sans-serif" stroke="none">100k/47k → GPIO1 ADC1_CH0: şebeke var/yok → modul_durum.besleme</text>
+</g>
+<g style="fill:none; 
 stroke:#E67800; stroke-width:0.4400; stroke-opacity:1; 
 stroke-linecap:round; stroke-linejoin:round;">
 <text fill="#E67800" x="29.4400" y="44.9500" font-size="2.9333" text-anchor="start" font-family="Arial,Helvetica,sans-serif" stroke="none">CT ×4 (analizör yoksa) / burden, V_bias, RC → ADC1</text>
+</g>
+<g style="fill:none; 
+stroke:#0000C2; stroke-width:0.1524; stroke-opacity:1; 
+stroke-linecap:round; stroke-linejoin:round;">
+<text fill="#0000C2" x="214.0000" y="268.8500" font-size="2.4000" text-anchor="start" font-family="Arial,Helvetica,sans-serif" stroke="none">süperkap → boost → D2 → 5 V rayı: şebeke varken D2 ters, boost boşta</text>
 </g>
 <g style="fill:none; 
 stroke:#E67800; stroke-width:0.1524; stroke-opacity:1; 
@@ -4121,6 +4146,11 @@ stroke-linecap:round; stroke-linejoin:round;">
 stroke:#0000C2; stroke-width:0.1524; stroke-opacity:1; 
 stroke-linecap:round; stroke-linejoin:round;">
 <text fill="#0000C2" x="119.5000" y="209.2500" font-size="2.4000" text-anchor="end" font-family="Arial,Helvetica,sans-serif" stroke="none">sıcaklık + nem</text>
+</g>
+<g style="fill:none; 
+stroke:#0000C2; stroke-width:0.3600; stroke-opacity:1; 
+stroke-linecap:round; stroke-linejoin:round;">
+<text fill="#0000C2" x="222.0000" y="28.2500" font-size="2.4000" text-anchor="start" font-family="Arial,Helvetica,sans-serif" stroke="none">tel kesişmeleri atlama yayıyla gösterilir (bağlantı yok):</text>
 </g>
 <g style="fill:none; 
 stroke:#6A1B9A; stroke-width:0.1524; stroke-opacity:1; 
@@ -4143,11 +4173,6 @@ stroke-linecap:round; stroke-linejoin:round;">
 <text fill="#0000C2" x="25.4000" y="37.2500" font-size="2.4000" text-anchor="start" font-family="Arial,Helvetica,sans-serif" stroke="none">KiCad şematik (eda/GridUp-Modul.kicad_sch): ERC 0 hata / 0 uyarı, netlist §3.1 tablosuyla otomatik doğrulanmış. Kavramsal / üretim çizimi değildir (§1.4); pasif değerler tipik.</text>
 </g>
 <g style="fill:none; 
-stroke:#0000C2; stroke-width:0.1524; stroke-opacity:1; 
-stroke-linecap:round; stroke-linejoin:round;">
-<text fill="#0000C2" x="214.0000" y="268.8500" font-size="2.4000" text-anchor="start" font-family="Arial,Helvetica,sans-serif" stroke="none">süperkap → boost → D2 → 5 V rayı: şebeke varken D2 ters, boost boşta</text>
-</g>
-<g style="fill:none; 
 stroke:#464646; stroke-width:0.1524; stroke-opacity:1; 
 stroke-linecap:round; stroke-linejoin:round;">
 <text fill="#464646" x="52.8600" y="240.6300" font-size="2.2666" text-anchor="start" font-family="Arial,Helvetica,sans-serif" stroke="none">PE</text>
@@ -4158,29 +4183,25 @@ stroke-linecap:round; stroke-linejoin:round;">
 <text fill="#1565C0" x="29.4400" y="142.6500" font-size="2.9333" text-anchor="start" font-family="Arial,Helvetica,sans-serif" stroke="none">I²C / MLX90640 0x33 + SHT31 0x44, tek hat 400 kHz+</text>
 </g>
 <g style="fill:none; 
-stroke:#0000C2; stroke-width:0.1524; stroke-opacity:1; 
+stroke:#008400; stroke-width:0.2500; stroke-opacity:1; 
 stroke-linecap:round; stroke-linejoin:round;">
-<text fill="#0000C2" x="35.5600" y="275.7500" font-size="2.4000" text-anchor="start" font-family="Arial,Helvetica,sans-serif" stroke="none">Analizör varsa CT ön ucu boş kalır (hedef senaryo, 02-bom §2.3). Kavramsal şema / üretim çizimi değildir (§1.4). Üretim: eda/gen_sch.py → kicad-cli (ERC + SVG).</text>
+<rect x="222.000000" y="153.000000" width="100.000000" height="37.000000" rx="0.000000" />
+<rect x="130.000000" y="42.000000" width="92.000000" height="108.000000" rx="0.000000" />
 </g>
 <g style="fill:none; 
-stroke:#0000C2; stroke-width:0.1524; stroke-opacity:1; 
+stroke:#6A1B9A; stroke-width:0.2500; stroke-opacity:1; 
 stroke-linecap:round; stroke-linejoin:round;">
-<text fill="#0000C2" x="35.5600" y="260.8500" font-size="2.4000" text-anchor="start" font-family="Arial,Helvetica,sans-serif" stroke="none">100k/47k → GPIO1 ADC1_CH0: şebeke var/yok → modul_durum.besleme</text>
+<rect x="222.000000" y="42.000000" width="100.000000" height="16.000000" rx="0.000000" />
 </g>
 <g style="fill:none; 
-stroke:#0000C2; stroke-width:0.1524; stroke-opacity:1; 
+stroke:#E67800; stroke-width:0.2500; stroke-opacity:1; 
 stroke-linecap:round; stroke-linejoin:round;">
-<text fill="#0000C2" x="30.4800" y="248.9300" font-size="2.4000" text-anchor="start" font-family="Arial,Helvetica,sans-serif" stroke="none">PE → panonun koruma iletkeni; kutu metal ise gövde PE</text>
+<rect x="27.940000" y="42.000000" width="93.060000" height="94.000000" rx="0.000000" />
 </g>
 <g style="fill:none; 
-stroke:#8C0000; stroke-width:0.4400; stroke-opacity:1; 
+stroke:#6A1B9A; stroke-width:0.2500; stroke-opacity:1; 
 stroke-linecap:round; stroke-linejoin:round;">
-<text fill="#8C0000" x="26.9000" y="219.3500" font-size="2.9333" text-anchor="start" font-family="Arial,Helvetica,sans-serif" stroke="none">Besleme / 230 V iç ihtiyaç → RAC05 5 V → D1 (OR) → 5 V rayı → LDO 3V3; yedek: 2× süperkap seri → boost 4,6 V → D2; algılama D1 öncesi (§3.4, §7.3)</text>
-</g>
-<g style="fill:none; 
-stroke:#0000C2; stroke-width:0.3600; stroke-opacity:1; 
-stroke-linecap:round; stroke-linejoin:round;">
-<text fill="#0000C2" x="222.0000" y="28.2500" font-size="2.4000" text-anchor="start" font-family="Arial,Helvetica,sans-serif" stroke="none">tel kesişmeleri atlama yayıyla gösterilir (bağlantı yok):</text>
+<rect x="222.000000" y="60.500000" width="100.000000" height="55.500000" rx="0.000000" />
 </g>
 <g style="fill:none; 
 stroke:#1565C0; stroke-width:0.2500; stroke-opacity:1; 
@@ -4193,34 +4214,9 @@ stroke-linecap:round; stroke-linejoin:round;">
 <rect x="222.000000" y="119.000000" width="100.000000" height="31.000000" rx="0.000000" />
 </g>
 <g style="fill:none; 
-stroke:#6A1B9A; stroke-width:0.2500; stroke-opacity:1; 
-stroke-linecap:round; stroke-linejoin:round;">
-<rect x="222.000000" y="60.500000" width="100.000000" height="55.500000" rx="0.000000" />
-</g>
-<g style="fill:none; 
-stroke:#008400; stroke-width:0.2500; stroke-opacity:1; 
-stroke-linecap:round; stroke-linejoin:round;">
-<rect x="130.000000" y="42.000000" width="92.000000" height="108.000000" rx="0.000000" />
-</g>
-<g style="fill:none; 
 stroke:#8C0000; stroke-width:0.2500; stroke-opacity:1; 
 stroke-linecap:round; stroke-linejoin:round;">
 <rect x="25.400000" y="216.400000" width="296.600000" height="63.600000" rx="0.000000" />
-</g>
-<g style="fill:none; 
-stroke:#E67800; stroke-width:0.2500; stroke-opacity:1; 
-stroke-linecap:round; stroke-linejoin:round;">
-<rect x="27.940000" y="42.000000" width="93.060000" height="94.000000" rx="0.000000" />
-</g>
-<g style="fill:none; 
-stroke:#008400; stroke-width:0.2500; stroke-opacity:1; 
-stroke-linecap:round; stroke-linejoin:round;">
-<rect x="222.000000" y="153.000000" width="100.000000" height="37.000000" rx="0.000000" />
-</g>
-<g style="fill:none; 
-stroke:#6A1B9A; stroke-width:0.2500; stroke-opacity:1; 
-stroke-linecap:round; stroke-linejoin:round;">
-<rect x="222.000000" y="42.000000" width="100.000000" height="16.000000" rx="0.000000" />
 </g>
 <g style="fill:none; 
 stroke:#006464; stroke-width:0.1524; stroke-opacity:1; 
@@ -5676,14 +5672,28 @@ stroke-linecap:round; stroke-linejoin:round;">
 <g style="fill:none; 
 stroke:#006464; stroke-width:0.1524; stroke-opacity:1; 
 stroke-linecap:round; stroke-linejoin:round;">
-<text fill="#006464" x="76.9368" y="225.5500" font-size="2.2666" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" stroke="none">RV1</text>
-<text fill="#006464" x="82.3393" y="225.5500" font-size="2.2666" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" stroke="none">MOV</text>
+<text fill="#006464" x="74.9368" y="224.2500" font-size="2.2666" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" stroke="none">RV1</text>
+<text fill="#006464" x="80.3393" y="224.2500" font-size="2.2666" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" stroke="none">MOV</text>
 </g>
 <g style="fill:none; 
 stroke:#840000; stroke-width:0.1524; stroke-opacity:1; 
 stroke-linecap:round; stroke-linejoin:round;">
 <path d="M71.12 228.6 L71.12 227.33" />
 <path d="M71.12 233.68 L71.12 234.95" />
+<path d="M68.58 228.6 L68.58 228.6" />
+</g>
+<g style="fill:none; 
+stroke:#006464; stroke-width:0.1524; stroke-opacity:1; 
+stroke-linecap:round; stroke-linejoin:round;">
+<text fill="#006464" x="62.2300" y="224.2500" font-size="2.2666" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" stroke="none">F1</text>
+<text fill="#006464" x="62.2300" y="226.7500" font-size="2.2666" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" stroke="none">sigorta</text>
+</g>
+<g style="fill:none; 
+stroke:#840000; stroke-width:0.1524; stroke-opacity:1; 
+stroke-linecap:round; stroke-linejoin:round;">
+<path d="M59.69 228.6 L58.42 228.6" />
+<path d="M64.77 228.6 L66.04 228.6" />
+<path d="M50.8 236.22 L50.8 236.22" />
 </g>
 <g style="fill:none; 
 stroke:#006464; stroke-width:0.1524; stroke-opacity:1; 
@@ -5720,34 +5730,6 @@ stroke-linecap:round; stroke-linejoin:round;">
 stroke:#A90000; stroke-width:0.1524; stroke-opacity:1; 
 stroke-linecap:round; stroke-linejoin:round;">
 <text fill="#A90000" x="46.3550" y="233.2482" font-size="1.7333" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" stroke="none">3</text>
-</g>
-<g style="fill:none; 
-stroke:#840000; stroke-width:0.1524; stroke-opacity:1; 
-stroke-linecap:round; stroke-linejoin:round;">
-<path d="M68.58 228.6 L68.58 228.6" />
-</g>
-<g style="fill:none; 
-stroke:#006464; stroke-width:0.1524; stroke-opacity:1; 
-stroke-linecap:round; stroke-linejoin:round;">
-<text fill="#006464" x="62.2300" y="224.2500" font-size="2.2666" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" stroke="none">F1</text>
-<text fill="#006464" x="62.2300" y="226.7500" font-size="2.2666" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" stroke="none">sigorta</text>
-</g>
-<g style="fill:none; 
-stroke:#840000; stroke-width:0.1524; stroke-opacity:1; 
-stroke-linecap:round; stroke-linejoin:round;">
-<path d="M59.69 228.6 L58.42 228.6" />
-<path d="M64.77 228.6 L66.04 228.6" />
-<path d="M50.8 236.22 L50.8 236.22" />
-</g>
-<g style="fill:none; 
-stroke:#006464; stroke-width:0.1524; stroke-opacity:1; 
-stroke-linecap:round; stroke-linejoin:round;">
-<text fill="#006464" x="138.6293" y="265.0100" font-size="2.2666" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" stroke="none">GND</text>
-</g>
-<g style="fill:none; 
-stroke:#840000; stroke-width:0.1524; stroke-opacity:1; 
-stroke-linecap:round; stroke-linejoin:round;">
-<path d="M133.35 262.89 L133.35 262.89" />
 </g>
 <g style="fill:none; 
 stroke:#006464; stroke-width:0.1524; stroke-opacity:1; 
@@ -5852,6 +5834,26 @@ stroke-linecap:round; stroke-linejoin:round;">
 <g style="fill:none; 
 stroke:#006464; stroke-width:0.1524; stroke-opacity:1; 
 stroke-linecap:round; stroke-linejoin:round;">
+<text fill="#006464" x="138.6293" y="265.0100" font-size="2.2666" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" stroke="none">GND</text>
+</g>
+<g style="fill:none; 
+stroke:#840000; stroke-width:0.1524; stroke-opacity:1; 
+stroke-linecap:round; stroke-linejoin:round;">
+<path d="M133.35 262.89 L133.35 262.89" />
+</g>
+<g style="fill:none; 
+stroke:#006464; stroke-width:0.1524; stroke-opacity:1; 
+stroke-linecap:round; stroke-linejoin:round;">
+<text fill="#006464" x="269.2400" y="225.8500" font-size="2.2666" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" stroke="none">+3V3</text>
+</g>
+<g style="fill:none; 
+stroke:#840000; stroke-width:0.1524; stroke-opacity:1; 
+stroke-linecap:round; stroke-linejoin:round;">
+<path d="M269.24 228.6 L269.24 228.6" />
+</g>
+<g style="fill:none; 
+stroke:#006464; stroke-width:0.1524; stroke-opacity:1; 
+stroke-linecap:round; stroke-linejoin:round;">
 <text fill="#006464" x="243.1488" y="243.4500" font-size="2.2666" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" stroke="none">U6</text>
 <text fill="#006464" x="258.9746" y="245.9500" font-size="2.2666" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" stroke="none">AP7361C-33E 3,3 V / 1 A</text>
 </g>
@@ -5935,16 +5937,6 @@ stroke-linecap:round; stroke-linejoin:round;">
 stroke:#840000; stroke-width:0.1524; stroke-opacity:1; 
 stroke-linecap:round; stroke-linejoin:round;">
 <path d="M248.92 238.76 L248.92 238.76" />
-</g>
-<g style="fill:none; 
-stroke:#006464; stroke-width:0.1524; stroke-opacity:1; 
-stroke-linecap:round; stroke-linejoin:round;">
-<text fill="#006464" x="269.2400" y="225.8500" font-size="2.2666" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" stroke="none">+3V3</text>
-</g>
-<g style="fill:none; 
-stroke:#840000; stroke-width:0.1524; stroke-opacity:1; 
-stroke-linecap:round; stroke-linejoin:round;">
-<path d="M269.24 228.6 L269.24 228.6" />
 </g>
 <g style="fill:#009600; fill-opacity:1.0000; stroke:none;">
 <circle cx="274.3200" cy="95.2500" r="0.4572" /> 
@@ -6061,9 +6053,6 @@ stroke-linecap:round; stroke-linejoin:round;">
 <circle cx="264.1600" cy="228.6000" r="0.4572" /> 
 </g>
 <g style="fill:#009600; fill-opacity:1.0000; stroke:none;">
-<circle cx="218.4400" cy="228.6000" r="0.4572" /> 
-</g>
-<g style="fill:#009600; fill-opacity:1.0000; stroke:none;">
 <circle cx="195.5800" cy="256.5400" r="0.4572" /> 
 </g>
 <g style="fill:#009600; fill-opacity:1.0000; stroke:none;">
@@ -6083,5 +6072,8 @@ stroke-linecap:round; stroke-linejoin:round;">
 </g>
 <g style="fill:#009600; fill-opacity:1.0000; stroke:none;">
 <circle cx="158.7500" cy="242.5700" r="0.4572" /> 
+</g>
+<g style="fill:#009600; fill-opacity:1.0000; stroke:none;">
+<circle cx="218.4400" cy="228.6000" r="0.4572" /> 
 </g> 
 </svg>
