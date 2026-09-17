@@ -7216,6 +7216,7 @@
 		(stroke
 			(width 0)
 			(type default)
+			(color 198 40 40 1)
 		)
 		(uuid "d00262a0-da1e-5fa9-b820-f63e8d6f2072")
 	)
@@ -7227,6 +7228,7 @@
 		(stroke
 			(width 0)
 			(type default)
+			(color 198 40 40 1)
 		)
 		(uuid "bef44f90-8efd-5b3f-8e65-085e1851cf69")
 	)

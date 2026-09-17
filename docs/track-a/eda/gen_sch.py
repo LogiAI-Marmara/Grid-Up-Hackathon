@@ -443,7 +443,7 @@ def build():
     S.text('termal dizi 32×24, 110°×75°, ≤23 mA', (30.5, 178.3), SZ_NOTE, italic=True)
     U3 = S.part(SHT, 'U3', 'SHT31-DIS-B', (69.85, 196.85), ref_at=(35.56, 203.5), val_at=(35.56, 206.0),
                 footprint='Sensor_Humidity:Sensirion_DFN-8-1EP_2.5x2.5mm_P0.5mm_EP1.1x1.7mm')
-    v3 = U3.p('VDD'); n3 = (v3[0], v3[1] - 1.27); S.wire(v3, n3, (62.23, n3[1])); S.power('+3V3', (62.23, n3[1]))   # ok solda: U2 GND ile karşı karşıya durmasın
+    v3 = U3.p('VDD'); n3 = (v3[0], v3[1] - 1.27); S.wire(v3, n3, (62.23, n3[1]), color=net_color('+3V3')); S.power('+3V3', (62.23, n3[1]))   # ok solda: U2 GND ile karşı karşıya durmasın
     S.pin_power(U3, '8', 'GND')
     Pg = S.pin_power(U3, 'ADDR', 'GND', L=10.16, rot=270); Pv = S.pin_power(U3, '~{RESET}', '+3V3', L=15.24, rot=90)
     ga, ra = U3.p('ADDR'), U3.p('~{RESET}')
