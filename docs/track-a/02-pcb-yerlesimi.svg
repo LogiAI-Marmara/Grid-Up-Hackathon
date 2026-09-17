@@ -208,14 +208,14 @@
 <polyline points="256,162 280,162" fill="none" stroke="#263238" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
 <polyline points="256,138 256,162" fill="none" stroke="#263238" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
 </g>
-  <rect x="405.4" y="235.2" width="149.2" height="11.6" rx="2" fill="#e8f5e9"/>
-  <text x="480" y="244" font-size="11" fill="#37474f" text-anchor="middle" font-weight="700">MLX90640ESF-BAA-000-TU</text>
-  <rect x="357" y="250" width="246" height="10.5" rx="2" fill="#e8f5e9"/>
-  <text x="480" y="258" font-size="10" fill="#607d8b" text-anchor="middle">TO-39 Ø9,3 / I²C 0x33 / merkez (55, 37,5) mm</text>
-  <rect x="343.2" y="264" width="273.5" height="10.5" rx="2" fill="#e8f5e9"/>
-  <text x="480" y="272" font-size="10" fill="#c62828" text-anchor="middle">Ø15 IR pencere ekseni / ön yüzde yüksek parça yok</text>
-  <rect x="238" y="284" width="136" height="10.5" rx="2" fill="#e8f5e9"/>
-  <text x="372" y="292" font-size="10" fill="#607d8b" text-anchor="end">2× 4,7k pull-up + 100 nF</text>
+  <rect x="421.4" y="223.2" width="149.2" height="11.6" rx="2" fill="#e8f5e9"/>
+  <text x="496" y="232" font-size="11" fill="#37474f" text-anchor="middle" font-weight="700">MLX90640ESF-BAA-000-TU</text>
+  <rect x="373" y="238" width="246" height="10.5" rx="2" fill="#e8f5e9"/>
+  <text x="496" y="246" font-size="10" fill="#607d8b" text-anchor="middle">TO-39 Ø9,3 / I²C 0x33 / merkez (55, 37,5) mm</text>
+  <rect x="381.2" y="252" width="229.5" height="10.5" rx="2" fill="#e8f5e9"/>
+  <text x="496" y="260" font-size="10" fill="#c62828" text-anchor="middle">Ø15 kapak penceresi izdüşümü / ön yüz boş</text>
+  <rect x="310" y="307.2" width="136" height="10.5" rx="2" fill="#e8f5e9"/>
+  <text x="312" y="315.2" font-size="10" fill="#607d8b">2× 4,7k pull-up + 100 nF</text>
   <rect x="184" y="371.2" width="76.6" height="11.6" rx="2" fill="#e8f5e9"/>
   <text x="186" y="380" font-size="11" fill="#37474f" font-weight="700">SHT31-DIS-B</text>
   <rect x="184" y="386" width="125" height="10.5" rx="2" fill="#e8f5e9"/>
@@ -227,8 +227,8 @@
   <text x="92" y="342" font-size="10" fill="#1565c0">ısı yarığı (kart yalıtımı)</text>
   <rect x="290" y="106" width="53.5" height="10.5" rx="2" fill="#e8f5e9"/>
   <text x="292" y="114" font-size="10" fill="#607d8b">durum LED</text>
-  <rect x="276.2" y="196.8" width="119.5" height="10.5" rx="2" fill="#e8f5e9"/>
-  <text x="336" y="204.8" font-size="10" fill="#607d8b" text-anchor="middle">EN: 10k + 1µF + reset</text>
+  <rect x="310" y="196.8" width="119.5" height="10.5" rx="2" fill="#e8f5e9"/>
+  <text x="312" y="204.8" font-size="10" fill="#607d8b">EN: 10k + 1µF + reset</text>
   <rect x="164" y="222" width="136" height="11.6" rx="2" fill="#e8f5e9"/>
   <text x="232" y="230.8" font-size="11" fill="#37474f" text-anchor="middle" font-weight="700">ESP32-S3-WROOM-1U-N8</text>
   <rect x="175" y="236.8" width="114" height="10.5" rx="2" fill="#e8f5e9"/>
