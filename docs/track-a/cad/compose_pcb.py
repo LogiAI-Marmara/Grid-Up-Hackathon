@@ -107,7 +107,7 @@ x, y = px(43.75, 21.6); L(x, y, 'MAX3485', 10, SUB, 'middle')
 x, y = px(48, 16); L(x + 8, y + 4, '120 Ω', 10, SUB)
 x, y = px(5, 18.6); L(x, y - 70, 'RS-485', 11, '#2e7d32', 'middle'); L(x, y + 54, 'A/B/GND', 10, '#2e7d32', 'middle')
 x, y = px(32, 14.5); L(x, y - 12, '4× R_burden + bias (3V3/2)', 10, '#6a1b9a', 'middle')
-x, y = px(39, 7.5); L(x, y - 14, 'CT klemens 8 kutup, 3,5 mm / L1 L2 L3 N', 11, '#37474f', 'middle')
+x, y = px(39, 7.5); L(x, y - 6, 'CT klemens 8 kutup, 3,5 mm / L1 L2 L3 N', 11, '#37474f', 'middle')
 x, y = px(17.5, 8.75); L(x, y + 36, 'genişleme 2×5 / §7.1', 11, '#1565c0', 'middle'); L(x, y + 50, 'I²C/UART/3V3/5V/GND', 9, SUB, 'middle')
 
 # ---- ölçüler

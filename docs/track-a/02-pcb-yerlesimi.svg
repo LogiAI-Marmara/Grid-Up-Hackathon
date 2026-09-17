@@ -289,8 +289,8 @@
   <text x="120" y="545.2" font-size="10" fill="#2e7d32" text-anchor="middle">A/B/GND</text>
   <rect x="263.5" y="504" width="143" height="10.5" rx="2" fill="#e8f5e9"/>
   <text x="336" y="512" font-size="10" fill="#6a1b9a" text-anchor="middle">4× R_burden + bias (3V3/2)</text>
-  <rect x="273" y="557.2" width="236" height="11.6" rx="2" fill="#e8f5e9"/>
-  <text x="392" y="566" font-size="11" fill="#37474f" text-anchor="middle">CT klemens 8 kutup, 3,5 mm / L1 L2 L3 N</text>
+  <rect x="273" y="565.2" width="236" height="11.6" rx="2" fill="#e8f5e9"/>
+  <text x="392" y="574" font-size="11" fill="#37474f" text-anchor="middle">CT klemens 8 kutup, 3,5 mm / L1 L2 L3 N</text>
   <rect x="158.5" y="597.2" width="121" height="11.6" rx="2" fill="#e8f5e9"/>
   <text x="220" y="606" font-size="11" fill="#1565c0" text-anchor="middle">genişleme 2×5 / §7.1</text>
   <rect x="172" y="612.8" width="94.1" height="9.5" rx="2" fill="#e8f5e9"/>
