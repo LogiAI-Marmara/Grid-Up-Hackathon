@@ -270,13 +270,13 @@ class Sch:
                            [Sym('uuid'), new_uuid()]])
     def nc(self, at):
         self.items.append([Sym('no_connect'), [Sym('at'), g(at[0]), g(at[1])], [Sym('uuid'), new_uuid()]])
-    def text(self, s, at, size=SZ_NOTE, bold=False, italic=False, rot=0, color=None):
+    def text(self, s, at, size=SZ_NOTE, bold=False, italic=False, rot=0, color=None, just='left'):
         font = [Sym('font'), [Sym('size'), g(size), g(size)]]
         if bold: font.append([Sym('bold'), Sym('yes')])
         if italic: font.append([Sym('italic'), Sym('yes')])
         if color: font.append(color_node(color))
         self.items.append([Sym('text'), s, [Sym('exclude_from_sim'), Sym('no')], [Sym('at'), g(at[0]), g(at[1]), Sym(str(rot))],
-                           [Sym('effects'), font, [Sym('justify'), Sym('left'), Sym('bottom')]], [Sym('uuid'), new_uuid()]])
+                           [Sym('effects'), font, [Sym('justify'), Sym(just), Sym('bottom')]], [Sym('uuid'), new_uuid()]])
     def rect(self, a, b, color=(120, 120, 120), tint=0.08, title=None):
         # kicad-cli SVG alfa uygulamıyor → dolgu açık ton (beyaza doğru karıştırılmış), çerçeve tam renk
         fill = tuple(int(round(255 - (255 - c) * tint)) for c in color)
@@ -452,7 +452,8 @@ def build():
     Pg.val_at = (ga[0] - 10.16 - 1.27, ga[1] - 2.0); Pg.just = 'center'        # yatay GND: etiket sembolün üstünde
     Pv.val_at = (ra[0] - 15.24 - 1.27, ra[1] + 3.3); Pv.just = 'center'        # yatay +3V3: etiket sembolün altında
     S.pin_nc(U3, 'ALERT'); S.pin_nc(U3, 'R')
-    S.text('sıcaklık + nem (ADDR → GND: 0x44)', (78.74, 212.35), SZ_NOTE, italic=True)
+    S.text('sıcaklık + nem', (119.5, 209.5), SZ_NOTE, italic=True, just='right')
+    S.text('ADDR → GND: 0x44', (119.5, 212.35), SZ_NOTE, italic=True, just='right')
     # bus: SDA x=124,46 (IO8 satırından SHT SDA'ya), SCL x=127 (IO9 satırından SHT SCL'ye)
     m_sda, m_scl, s_sda, s_scl = U2.p('SDA'), U2.p('SCL'), U3.p('SDA'), U3.p('SCL')
     S.wire(sda_pin, (BX_SDA, sda_pin[1]), (BX_SDA, s_sda[1]), color=I2C)
@@ -464,7 +465,7 @@ def build():
     # pull-up'lar 2× 4,7 kΩ → 3V3
     for i, (x, bx, net) in enumerate([(113.03, BX_SDA, 'SDA'), (100.33, BX_SCL, 'SCL')]):   # SDA sağda/üstte, SCL solda/altta → yatay teller gövde kesmez
         yb = 184.15 + i * 5.08
-        Rp = S.part(R, 'R%d' % (2 + i), '4,7k', (x, yb - 3.81), ref_at=(x - 8.0, yb - 6.35), val_at=(x - 8.0, yb - 3.81))
+        Rp = S.part(R, 'R%d' % (2 + i), '4,7k', (x, yb - 3.81), ref_at=(x - 6.0, yb - 6.35), val_at=(x - 6.6, yb - 3.81))
         S.pin_power(Rp, '1', '+3V3', L=1.27)
         S.wire(Rp.p('2'), (x, yb), (bx, yb), color=I2C); S.junction((bx, yb))
 
