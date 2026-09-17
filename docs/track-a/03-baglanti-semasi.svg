@@ -4113,7 +4113,7 @@ stroke-linecap:round; stroke-linejoin:round;">
 <g style="fill:none; 
 stroke:#0000C2; stroke-width:0.1524; stroke-opacity:1; 
 stroke-linecap:round; stroke-linejoin:round;">
-<text fill="#0000C2" x="236.2200" y="109.7500" font-size="2.4000" text-anchor="start" font-family="Arial,Helvetica,sans-serif" stroke="none">hat: enerji analizörü (slave 1, akım) / TVOC-2 (slave 2, yalnız trip-diag.)</text>
+<text fill="#0000C2" x="236.2200" y="109.7500" font-size="2.4000" text-anchor="start" font-family="Arial,Helvetica,sans-serif" stroke="none">hat: enerji analizörü (akım) / TVOC-2 (yalnız trip-diag.); ayrı slave adresleri</text>
 </g>
 <g style="fill:none; 
 stroke:#E67800; stroke-width:0.4400; stroke-opacity:1; 
