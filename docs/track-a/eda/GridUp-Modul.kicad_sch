@@ -14407,7 +14407,7 @@
 		(dnp no)
 		(uuid "e238393f-e070-5fdf-995f-074221c0cf15")
 		(property "Reference" "C30"
-			(at 232.41 229.87 0)
+			(at 233.3 232 0)
 			(effects
 				(font
 					(size 1.7 1.7)
@@ -14416,7 +14416,7 @@
 			)
 		)
 		(property "Value" "10 µF"
-			(at 232.41 232.41 0)
+			(at 233.3 234.6 0)
 			(effects
 				(font
 					(size 1.7 1.7)
@@ -14614,7 +14614,7 @@
 		(dnp no)
 		(uuid "de2dbf3a-14b3-5749-820e-ce1bfc62f908")
 		(property "Reference" "C31"
-			(at 265.43 229.87 0)
+			(at 266.26 232 0)
 			(effects
 				(font
 					(size 1.7 1.7)
@@ -14623,7 +14623,7 @@
 			)
 		)
 		(property "Value" "10 µF"
-			(at 265.43 232.41 0)
+			(at 266.26 234.6 0)
 			(effects
 				(font
 					(size 1.7 1.7)

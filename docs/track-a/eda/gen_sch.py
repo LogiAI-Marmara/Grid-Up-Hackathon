@@ -599,11 +599,11 @@ def build():
     S.wire(D1.p('K'), vi, color=COL['5V'])
     Pg6 = S.pin_power(U6, 'GND', 'GND'); Pg6.val_at = (U6.p('GND')[0] + 1.7, U6.p('GND')[1] + 2.54 + 1.3)   # GND yazısı sembole yakın
     x5 = 218.44; S.power('+5V', (x5, rail_y)); S.junction((x5, rail_y)); S.flag((x5 + 5.08, rail_y)); S.junction((x5 + 5.08, rail_y))
-    Ci = S.part(C, 'C30', '10 µF', (231.14, rail_y + 3.81), ref_at=(232.41, rail_y + 1.27), val_at=(232.41, rail_y + 3.81))
+    Ci = S.part(C, 'C30', '10 µF', (231.14, rail_y + 3.81), ref_at=(233.3, rail_y + 3.4), val_at=(233.3, rail_y + 6.0))
     S.wire((231.14, rail_y), Ci.p('1'), color=COL['5V']); Pgi = S.pin_power(Ci, '2', 'GND'); S.junction((231.14, rail_y))
     Pgi.val_at = (Ci.p('2')[0] + 1.7, Ci.p('2')[1] + 2.54 + 1.3)
     n3 = (vo[0] + 7.62, vo[1]); S.wire(vo, n3, color=COL['3V3']); S.junction(n3); S.power('+3V3', (n3[0] + 5.08, rail_y)); S.wire(n3, (n3[0] + 5.08, rail_y), color=COL['3V3'])
-    Co = S.part(C, 'C31', '10 µF', (n3[0], rail_y + 3.81), ref_at=(n3[0] + 1.27, rail_y + 1.27), val_at=(n3[0] + 1.27, rail_y + 3.81))
+    Co = S.part(C, 'C31', '10 µF', (n3[0], rail_y + 3.81), ref_at=(n3[0] + 2.1, rail_y + 3.4), val_at=(n3[0] + 2.1, rail_y + 6.0))
     S.wire(n3, Co.p('1'), color=COL['3V3']); Pgo = S.pin_power(Co, '2', 'GND'); Pgo.val_at = (Co.p('2')[0] + 1.7, Co.p('2')[1] + 2.54 + 1.3)
     # besleme algılama bölücü (D1 öncesi) → VSENSE etiketi (IO1)
     xd = nRaw[0]
