@@ -558,8 +558,8 @@ def build():
     ac_l, ac_n = U5.p('AC(L)'), U5.p('AC(N)')
     S.wire(F1.p('2'), (F1.p('2')[0], ac_l[1]), ac_l, color=COL['5V'])
     S.wire(pN, (66.04, pN[1]), (66.04, ac_n[1]), ac_n, color=COL['5V'])
-    RV1 = S.part(RV, 'RV1', 'MOV', (71.12, (ac_l[1] + ac_n[1]) / 2), ref_at=(72.4, ac_l[1] - 5.2), val_at=(77.6, ac_l[1] - 5.2))   # etiketler L hattının üstünde, gövdeden kılavuz çizgi
-    S.gline((72.5, ac_l[1] + 1.7), (73.6, ac_l[1] - 4.6), COL['GND'], 0.2)
+    RV1 = S.part(RV, 'RV1', 'MOV', (71.12, (ac_l[1] + ac_n[1]) / 2), ref_at=(73.0, ac_l[1] - 6.8), val_at=(73.0, ac_l[1] - 4.3))   # etiketler L hattının üstünde, gövdeden kılavuz çizgi
+    S.gline((72.5, ac_l[1] + 1.7), (73.8, ac_l[1] - 3.7), COL['GND'], 0.2)
     S.wire((71.12, ac_l[1]), RV1.p('1'), color=COL['5V']); S.wire((71.12, ac_n[1]), RV1.p('2'), color=COL['5V']); S.junction((71.12, ac_l[1])); S.junction((71.12, ac_n[1]))
     S.wire(pPE, (pPE[0] + 2.54, pPE[1]), (pPE[0] + 2.54, pPE[1] + 5.08), color=COL['GND']); PEs = S.power('Earth_Protective', (pPE[0] + 2.54, pPE[1] + 5.08)); PEs.hide_value = True; S.text('PE', (pPE[0] + 4.6, pPE[1] + 7.2), SZ_PROP, color=COL['GND'])
     S.flag((pPE[0] + 2.54, pPE[1] + 2.54)); S.junction((pPE[0] + 2.54, pPE[1] + 2.54))   # PE dış kaynak
