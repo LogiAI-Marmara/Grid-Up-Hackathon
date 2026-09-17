@@ -567,7 +567,7 @@ def build():
     S.flag((66.04, ac_n[1]), rot=180); S.junction((66.04, ac_n[1]))                     # N dış kaynak (ERC)
     S.pin_nc(U5, 'NC')
     vout = U5.p('+Vout'); Pg5 = S.pin_power(U5, '-Vout', 'GND', L=2.54, rot=0)
-    Pg5.val_at = (U5.p('-Vout')[0] + 2.54, U5.p('-Vout')[1] + 4.9); Pg5.just = 'center'   # GND yazısı üçgenin altında, ortalı
+    Pg5.val_at = (U5.p('-Vout')[0] + 2.54, U5.p('-Vout')[1] + 4.2); Pg5.just = 'center'   # GND yazısı üçgenin altında, ortalı
     # 5V_RAW → D1 → +5V rayı (ray sağa doğru: D2 dönüşü, +5V, C30, LDO, +3V3)
     nRaw = (vout[0] + 12.7, vout[1]); S.wire(vout, nRaw, color=COL['5V']); S.junction(nRaw)
     S.label('5V_RAW', (vout[0] + 1.27, vout[1]), 0)
