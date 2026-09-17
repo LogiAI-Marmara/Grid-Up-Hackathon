@@ -613,7 +613,7 @@ def build():
     S.wire(nRaw, Rd1.p('1'), color=COL['5V'])
     nS = (xd, rail_y + 13.97); S.wire(Rd1.p('2'), nS, color=ANA); S.junction(nS)
     Rd2 = S.part(R, 'R51', '47k', (xd, rail_y + 20.32), ref_at=(xd + 1.27, rail_y + 17.78), val_at=(xd + 1.27, rail_y + 20.32))
-    S.wire(nS, Rd2.p('1'), color=ANA); S.pin_power(Rd2, '2', 'GND')
+    S.wire(nS, Rd2.p('1'), color=ANA); Pg51 = S.pin_power(Rd2, '2', 'GND'); Pg51.val_at = (Rd2.p('2')[0] + 1.7, Rd2.p('2')[1] + 2.54 + 1.3)
     S.wire(nS, (xd + 5.08, nS[1]), color=ANA); S.label('VSENSE', (xd + 5.08, nS[1]), 0)
     # süperkap yedek: ray → R_şarj → C32 + C33 (2× HV 2,7 V seri, dengeleme R53/R54) → GND; C_sc → U7 boost 4,6 V → D2 → ray
     xs = 133.35
