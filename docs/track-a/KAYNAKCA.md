@@ -152,7 +152,7 @@ tek adımda cevaplanması.
 > yük kısa sürelidir (Wi-Fi paket başına ms mertebesi); ortalama ~100 mA'da TJ ≈ 100 °C. 150 °C
 > arıza değil koruma eşiğidir. Yedek modda ray 4,3 V ve yük ~50 mA olduğundan kayıp düşer.
 > **Paket alternatifleri neden seçilmedi:** TO252 (DPAK, 95 °C/W) PCB'de LDO penceresine (Y 33,5–42,
-> 8,5 mm) dik sığmaz — yatay (90°) konumda X 49–76,75 boşluğuna sığar (boost + L X 46–49'a taşındı), gerekirse `model_pcb.py`'de
+> 8,5 mm) dik sığmaz — yatay (90°) konumda X 47–76,75 boşluğuna sığar (boost + L X 43,5–46,5'e taşındı), gerekirse `model_pcb.py`'de
 > yapılır; U-DFN3030-8 (70 °C/W) ve SO-8EP (100 °C/W) 8 pinlidir → şema/netlist revizyonu gerekir.
 > Layout notu: [04-mekanik-yerlesim.md §4.6](04-mekanik-yerlesim.md).
 
