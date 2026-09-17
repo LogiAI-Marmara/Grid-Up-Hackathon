@@ -439,7 +439,8 @@ def build():
     vdd = U2.p('VDD'); n_vdd = (69.85, vdd[1] - 3.81); S.wire(vdd, n_vdd); S.power('+3V3', n_vdd)
     S.wire(n_vdd, (52.07, n_vdd[1])); S.junction(n_vdd)
     Cm1 = S.part(C, 'C2', '100 nF', (52.07, n_vdd[1] + 3.81), ref_at=(45.72, n_vdd[1] + 2.54), val_at=(43.18, n_vdd[1] + 5.08))
-    S.wire((52.07, n_vdd[1]), Cm1.p('1')); S.pin_power(Cm1, '2', 'GND')
+    S.wire((52.07, n_vdd[1]), Cm1.p('1')); Pc = S.pin_power(Cm1, '2', 'GND')
+    Pc.val_at = (Cm1.p('2')[0] - 2.0, Cm1.p('2')[1] + 2.54 + 1.27); Pc.just = 'right'   # GND etiketi solda (sağda U2 kutusu)
     S.text('termal dizi 32×24, 110°×75°, ≤23 mA', (30.5, 178.3), SZ_NOTE, italic=True)
     U3 = S.part(SHT, 'U3', 'SHT31-DIS-B', (69.85, 196.85), ref_at=(35.56, 203.5), val_at=(35.56, 206.0),
                 footprint='Sensor_Humidity:Sensirion_DFN-8-1EP_2.5x2.5mm_P0.5mm_EP1.1x1.7mm')

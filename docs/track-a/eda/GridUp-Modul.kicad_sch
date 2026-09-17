@@ -11857,16 +11857,16 @@
 				(font
 					(size 1.7 1.7)
 				)
-				(justify left)
+				(justify right)
 			)
 		)
 		(property "Value" "GND"
-			(at 54.61 158.75 0)
+			(at 50.07 158.75 0)
 			(effects
 				(font
 					(size 1.7 1.7)
 				)
-				(justify left)
+				(justify right)
 			)
 		)
 		(property "Footprint" ""
@@ -11876,7 +11876,7 @@
 				(font
 					(size 1.7 1.7)
 				)
-				(justify left)
+				(justify right)
 			)
 		)
 		(property "Datasheet" ""
@@ -11886,7 +11886,7 @@
 				(font
 					(size 1.7 1.7)
 				)
-				(justify left)
+				(justify right)
 			)
 		)
 		(property "Description" ""
@@ -11896,7 +11896,7 @@
 				(font
 					(size 1.7 1.7)
 				)
-				(justify left)
+				(justify right)
 			)
 		)
 		(pin "1"
