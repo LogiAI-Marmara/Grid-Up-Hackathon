@@ -140,6 +140,7 @@ g.append('</g>')
 svg.add('\n'.join(g))
 ic_col = {n: col_of(n) for n in {pl['body'] for pl in M['ic']}}
 svg.view(M['ic'], ox, oy, S, (0, -80), stroke=INK, sw=1.4, colors=ic_col)
+svg.add('<circle cx="%g" cy="%g" r="4.5" fill="#43a047"/>' % C(30, 70))   # durum LED içi dolu (02 ile aynı; kutu dikmesi halkasıyla karışmasın)
 svg.text(C(60, 42.5)[0], C(60, 42.5)[1] + 34, 'MLX90640', 11, DARK, 'middle', '700')
 svg.text(C(12, 36)[0], C(12, 36)[1] - 13, 'SHT31', 10, '#1565c0', 'middle')   # karenin üstünde (altı RS-485 kutusuna giriyordu)
 svg.text(C(24, 55.4)[0], C(24, 55.4)[1], 'ESP32-S3', 10, '#455a64', 'middle')
