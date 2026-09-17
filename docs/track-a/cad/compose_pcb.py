@@ -96,7 +96,7 @@ x, y = px(73.25, 37.5); svg.text(x, y - 2, 'LDO', 9, '#ad1457', 'middle', '700')
 x, y = px(78.9, 40.3); svg.text(x, y + 3, 'D1', 8, '#ad1457', 'middle', '700')   # kutu içi (OR diyotu)
 x, y = px(78.9, 36.3); svg.text(x, y + 3, 'D2', 8, '#ad1457', 'middle', '700')
 x, y = px(61.5, 44.4); svg.leader(x, y, px(63.6, 40.6)[0], px(63.6, 40.6)[1], ['R_şarj', '22 Ω'], 9, SUB, 'start', dot=False, halo=BG)
-x, y = px(80.2, 26.8); svg.text(x, y, 'bölücü → GPIO1', 10, SUB, 'end', rotate=-90)   # süperkap ile yarık arasındaki dikey şerit
+x, y = px(77.5, 29.25); L(x - 6, y + 4, 'bölücü → GPIO1', 10, '#ad1457', 'end')
 x, y = px(66.5, 17.75)
 L(x, y - 4, '2× süperkapasitör seri', 11, '#f57f17', 'middle', '700')
 L(x, y + 10, 'Eaton HV1030 Ø10,5 × 31,5 yatık / arka yüz', 10, SUB, 'middle')
