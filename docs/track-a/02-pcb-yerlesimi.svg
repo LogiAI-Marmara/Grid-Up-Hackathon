@@ -37,7 +37,7 @@
   <circle cx="904" cy="584" r="22" fill="none" stroke="#78909c" stroke-width="1"/>
   <circle cx="136" cy="136" r="22" fill="none" stroke="#78909c" stroke-width="1"/>
   <circle cx="904" cy="136" r="22" fill="none" stroke="#78909c" stroke-width="1"/>
-  <rect x="162.2" y="141.6" width="183.5" height="10.5" rx="2" fill="#e8f5e9"/>
+  <rect x="162.2" y="141.6" width="181.5" height="10.5" rx="2" fill="#e8f5e9"/>
   <text x="163.2" y="149.6" font-size="10" fill="#607d8b">M3 × 4 (7, 7) / kutu dikmeleri Ø6</text>
   <g fill="none" stroke-width="1.8" stroke-dasharray="6 3" stroke-linejoin="round">
 <polyline points="160,313.6 304,313.6" stroke="#546e7a"/>
@@ -209,91 +209,91 @@
 <polyline points="256,162 280,162" fill="none" stroke="#263238" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
 <polyline points="256,138 256,162" fill="none" stroke="#263238" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
 </g>
-  <rect x="422.4" y="223.2" width="147.2" height="11.6" rx="2" fill="#e8f5e9"/>
+  <rect x="422.4" y="223.2" width="145.2" height="11.6" rx="2" fill="#e8f5e9"/>
   <text x="496" y="232" font-size="11" fill="#37474f" text-anchor="middle" font-weight="700">MLX90640ESF-BAA-000-TU</text>
-  <rect x="374" y="238" width="244" height="10.5" rx="2" fill="#e8f5e9"/>
+  <rect x="374" y="238" width="242" height="10.5" rx="2" fill="#e8f5e9"/>
   <text x="496" y="246" font-size="10" fill="#607d8b" text-anchor="middle">TO-39 Ø9,3 / I²C 0x33 / merkez (55, 37,5) mm</text>
-  <rect x="382.2" y="252" width="227.5" height="10.5" rx="2" fill="#e8f5e9"/>
+  <rect x="382.2" y="252" width="225.5" height="10.5" rx="2" fill="#e8f5e9"/>
   <text x="496" y="260" font-size="10" fill="#c62828" text-anchor="middle">Ø15 kapak penceresi izdüşümü / ön yüz boş</text>
   <line x1="508" y1="267.2" x2="520" y2="279.2" stroke="#c62828" stroke-width="1"/>
-  <rect x="331" y="307.2" width="134" height="10.5" rx="2" fill="#e8f5e9"/>
-  <text x="332" y="315.2" font-size="10" fill="#607d8b">2× 4,7k pull-up + 100 nF</text>
-  <rect x="185" y="371.2" width="74.6" height="11.6" rx="2" fill="#e8f5e9"/>
+  <rect x="327" y="307.2" width="132" height="10.5" rx="2" fill="#e8f5e9"/>
+  <text x="328" y="315.2" font-size="10" fill="#607d8b">2× 4,7k pull-up + 100 nF</text>
+  <rect x="185" y="371.2" width="72.6" height="11.6" rx="2" fill="#e8f5e9"/>
   <text x="186" y="380" font-size="11" fill="#37474f" font-weight="700">SHT31-DIS-B</text>
-  <rect x="185" y="386" width="123" height="10.5" rx="2" fill="#e8f5e9"/>
+  <rect x="185" y="386" width="121" height="10.5" rx="2" fill="#e8f5e9"/>
   <text x="186" y="394" font-size="10" fill="#607d8b">I²C 0x44 / vent hizası</text>
-  <rect x="185" y="400" width="128.5" height="10.5" rx="2" fill="#e8f5e9"/>
+  <rect x="185" y="400" width="126.5" height="10.5" rx="2" fill="#e8f5e9"/>
   <text x="186" y="408" font-size="10" fill="#607d8b">ısı kaynaklarından uzak</text>
   <path d="M92 348 h72 v72" fill="none" stroke="#1565c0" stroke-width="2"/>
-  <rect x="91" y="334" width="145" height="10.5" rx="2" fill="#e8f5e9"/>
+  <rect x="91" y="334" width="143" height="10.5" rx="2" fill="#e8f5e9"/>
   <text x="92" y="342" font-size="10" fill="#1565c0">ısı yarığı (kart yalıtımı)</text>
-  <rect x="291" y="106" width="51.5" height="10.5" rx="2" fill="#e8f5e9"/>
+  <rect x="291" y="106" width="49.5" height="10.5" rx="2" fill="#e8f5e9"/>
   <text x="292" y="114" font-size="10" fill="#607d8b">durum LED</text>
-  <rect x="311" y="196.8" width="117.5" height="10.5" rx="2" fill="#e8f5e9"/>
+  <rect x="311" y="196.8" width="115.5" height="10.5" rx="2" fill="#e8f5e9"/>
   <text x="312" y="204.8" font-size="10" fill="#607d8b">EN: 10k + 1µF + reset</text>
-  <rect x="165" y="222" width="134" height="11.6" rx="2" fill="#e8f5e9"/>
+  <rect x="165" y="222" width="132" height="11.6" rx="2" fill="#e8f5e9"/>
   <text x="232" y="230.8" font-size="11" fill="#37474f" text-anchor="middle" font-weight="700">ESP32-S3-WROOM-1U-N8</text>
-  <rect x="176" y="236.8" width="112" height="10.5" rx="2" fill="#e8f5e9"/>
+  <rect x="176" y="236.8" width="110" height="10.5" rx="2" fill="#e8f5e9"/>
   <text x="232" y="244.8" font-size="10" fill="#607d8b" text-anchor="middle">18 × 19,2 / arka yüz</text>
-  <rect x="167.8" y="250.8" width="128.5" height="10.5" rx="2" fill="#e8f5e9"/>
+  <rect x="167.8" y="250.8" width="126.5" height="10.5" rx="2" fill="#e8f5e9"/>
   <text x="232" y="258.8" font-size="10" fill="#607d8b" text-anchor="middle">U.FL kenarda → kutu SMA</text>
-  <rect x="593" y="165.2" width="134" height="11.6" rx="2" fill="#e8f5e9"/>
+  <rect x="593" y="165.2" width="132" height="11.6" rx="2" fill="#e8f5e9"/>
   <text x="660" y="174" font-size="11" fill="#ad1457" text-anchor="middle" font-weight="700">RECOM RAC05-05SK/277</text>
-  <rect x="579.2" y="180" width="161.5" height="10.5" rx="2" fill="#e8f5e9"/>
+  <rect x="579.2" y="180" width="159.5" height="10.5" rx="2" fill="#e8f5e9"/>
   <text x="660" y="188" font-size="10" fill="#607d8b" text-anchor="middle">31,7 × 26,7 × 21,8 / arka yüz</text>
-  <rect x="560" y="194" width="200" height="10.5" rx="2" fill="#e8f5e9"/>
+  <rect x="560" y="194" width="198" height="10.5" rx="2" fill="#e8f5e9"/>
   <text x="660" y="202" font-size="10" fill="#607d8b" text-anchor="middle">sol 5 V ikincil / sağ 230 V birincil</text>
-  <rect x="599" y="104" width="84.5" height="10.5" rx="2" fill="#e8f5e9"/>
+  <rect x="599" y="104" width="82.5" height="10.5" rx="2" fill="#e8f5e9"/>
   <text x="600" y="112" font-size="10" fill="#607d8b">çıkış +5V / GND</text>
-  <rect x="778.5" y="104" width="62.5" height="10.5" rx="2" fill="#e8f5e9"/>
+  <rect x="778.5" y="104" width="60.5" height="10.5" rx="2" fill="#e8f5e9"/>
   <text x="840" y="112" font-size="10" fill="#607d8b" text-anchor="end">giriş L / N</text>
-  <rect x="785" y="473.2" width="46" height="10.5" rx="2" fill="#e8f5e9"/>
+  <rect x="785" y="473.2" width="44" height="10.5" rx="2" fill="#e8f5e9"/>
   <text x="808" y="481.2" font-size="10" fill="#607d8b" text-anchor="middle">F1 (SMD)</text>
-  <rect x="862.5" y="488" width="35" height="10.5" rx="2" fill="#e8f5e9"/>
+  <rect x="862.5" y="488" width="33" height="10.5" rx="2" fill="#e8f5e9"/>
   <text x="880" y="496" font-size="10" fill="#607d8b" text-anchor="middle">MOV Ø7</text>
-  <rect x="772.5" y="553.2" width="80.7" height="11.6" rx="2" fill="#e8f5e9"/>
+  <rect x="772.5" y="553.2" width="78.7" height="11.6" rx="2" fill="#e8f5e9"/>
   <text x="812.8" y="562" font-size="11" fill="#37474f" text-anchor="middle">230 V klemens</text>
-  <rect x="748.5" y="539" width="128.5" height="10.5" rx="2" fill="#e8f5e9"/>
+  <rect x="748.5" y="539" width="126.5" height="10.5" rx="2" fill="#e8f5e9"/>
   <text x="812.8" y="547" font-size="10" fill="#607d8b" text-anchor="middle">3 kutup L/N/PE, 5,08 mm</text>
   <text x="666" y="338" font-size="9" fill="#ad1457" text-anchor="middle" font-weight="700">LDO</text>
   <text x="666" y="349" font-size="9" fill="#ad1457" text-anchor="middle" font-weight="700">3,3 V</text>
   <text x="711.2" y="320.6" font-size="8" fill="#ad1457" text-anchor="middle" font-weight="700">D1</text>
   <text x="711.2" y="352.6" font-size="8" fill="#ad1457" text-anchor="middle" font-weight="700">D2</text>
   <line x1="572" y1="284.8" x2="588.8" y2="315.2" stroke="#607d8b" stroke-width="1"/>
-  <rect x="591.8" y="312" width="34.4" height="9.5" rx="2" fill="#e8f5e9"/>
+  <rect x="591.8" y="312" width="32.4" height="9.5" rx="2" fill="#e8f5e9"/>
   <text x="592.8" y="319.2" font-size="9" fill="#607d8b" font-weight="700">R_şarj</text>
-  <rect x="591.8" y="324" width="21.8" height="9.5" rx="2" fill="#e8f5e9"/>
+  <rect x="591.8" y="324" width="19.8" height="9.5" rx="2" fill="#e8f5e9"/>
   <text x="592.8" y="331.2" font-size="9" fill="#607d8b">22 Ω</text>
-  <rect x="616" y="402" width="79" height="10.5" rx="2" fill="#e8f5e9"/>
+  <rect x="616" y="402" width="77" height="10.5" rx="2" fill="#e8f5e9"/>
   <text x="694" y="410" font-size="10" fill="#ad1457" text-anchor="end">bölücü → GPIO1</text>
-  <rect x="538.4" y="485.2" width="147.2" height="11.6" rx="2" fill="#e8f5e9"/>
+  <rect x="538.4" y="485.2" width="145.2" height="11.6" rx="2" fill="#e8f5e9"/>
   <text x="612" y="494" font-size="11" fill="#f57f17" text-anchor="middle" font-weight="700">2× süperkapasitör seri</text>
-  <rect x="495.5" y="500" width="233" height="10.5" rx="2" fill="#e8f5e9"/>
+  <rect x="495.5" y="500" width="231" height="10.5" rx="2" fill="#e8f5e9"/>
   <text x="612" y="508" font-size="10" fill="#607d8b" text-anchor="middle">Eaton HV1030 Ø10,5 × 31,5 yatık / arka yüz</text>
-  <rect x="503.8" y="514" width="216.5" height="10.5" rx="2" fill="#e8f5e9"/>
+  <rect x="503.8" y="514" width="214.5" height="10.5" rx="2" fill="#e8f5e9"/>
   <text x="612" y="522" font-size="10" fill="#607d8b" text-anchor="middle">10 F 2,7 V ×2 → 5 F 4,6 V / 02-bom §2.5</text>
   <line x1="428" y1="376" x2="384" y2="400" stroke="#607d8b" stroke-width="1"/>
-  <rect x="307" y="396" width="74" height="10.5" rx="2" fill="#e8f5e9"/>
+  <rect x="307" y="396" width="72" height="10.5" rx="2" fill="#e8f5e9"/>
   <text x="380" y="404" font-size="10" fill="#607d8b" text-anchor="end" font-weight="700">boost U7 + L</text>
-  <rect x="291" y="409" width="90" height="10.5" rx="2" fill="#e8f5e9"/>
+  <rect x="291" y="409" width="88" height="10.5" rx="2" fill="#e8f5e9"/>
   <text x="380" y="417" font-size="10" fill="#607d8b" text-anchor="end">çıkış 4,6 V → D2</text>
-  <rect x="438" y="413.5" width="68" height="10.5" rx="2" fill="#e8f5e9"/>
+  <rect x="438" y="413.5" width="66" height="10.5" rx="2" fill="#e8f5e9"/>
   <text x="472" y="421.5" font-size="10" fill="#f57f17" text-anchor="middle">dengeleme 2×</text>
-  <rect x="364.5" y="488" width="40.5" height="10.5" rx="2" fill="#e8f5e9"/>
+  <rect x="364.5" y="488" width="38.5" height="10.5" rx="2" fill="#e8f5e9"/>
   <text x="404" y="496" font-size="10" fill="#607d8b" text-anchor="end">MAX3485</text>
-  <rect x="471" y="508" width="29.5" height="10.5" rx="2" fill="#e8f5e9"/>
+  <rect x="471" y="508" width="27.5" height="10.5" rx="2" fill="#e8f5e9"/>
   <text x="472" y="516" font-size="10" fill="#607d8b">120 Ω</text>
-  <rect x="100.8" y="412.4" width="38.3" height="11.6" rx="2" fill="#e8f5e9"/>
+  <rect x="100.8" y="412.4" width="36.3" height="11.6" rx="2" fill="#e8f5e9"/>
   <text x="120" y="421.2" font-size="11" fill="#2e7d32" text-anchor="middle">RS-485</text>
-  <rect x="99.8" y="537.2" width="40.5" height="10.5" rx="2" fill="#e8f5e9"/>
+  <rect x="99.8" y="537.2" width="38.5" height="10.5" rx="2" fill="#e8f5e9"/>
   <text x="120" y="545.2" font-size="10" fill="#2e7d32" text-anchor="middle">A/B/GND</text>
-  <rect x="263.5" y="504" width="145" height="10.5" rx="2" fill="#e8f5e9"/>
+  <rect x="263.5" y="504" width="143" height="10.5" rx="2" fill="#e8f5e9"/>
   <text x="336" y="512" font-size="10" fill="#6a1b9a" text-anchor="middle">4× R_burden + bias (3V3/2)</text>
-  <rect x="273" y="557.2" width="238" height="11.6" rx="2" fill="#e8f5e9"/>
+  <rect x="273" y="557.2" width="236" height="11.6" rx="2" fill="#e8f5e9"/>
   <text x="392" y="566" font-size="11" fill="#37474f" text-anchor="middle">CT klemens 8 kutup, 3,5 mm / L1 L2 L3 N</text>
-  <rect x="158.5" y="597.2" width="123" height="11.6" rx="2" fill="#e8f5e9"/>
+  <rect x="158.5" y="597.2" width="121" height="11.6" rx="2" fill="#e8f5e9"/>
   <text x="220" y="606" font-size="11" fill="#1565c0" text-anchor="middle">genişleme 2×5 / §7.1</text>
-  <rect x="172" y="612.8" width="96.1" height="9.5" rx="2" fill="#e8f5e9"/>
+  <rect x="172" y="612.8" width="94.1" height="9.5" rx="2" fill="#e8f5e9"/>
   <text x="220" y="620" font-size="9" fill="#607d8b" text-anchor="middle">I²C/UART/3V3/5V/GND</text>
   <line x1="80" y1="670" x2="960" y2="670" stroke="#455a64" stroke-width="1.5" marker-start="url(#dim)" marker-end="url(#dim)"/>
   <text x="520" y="688" font-size="12" fill="#455a64" text-anchor="middle">110 mm</text>
