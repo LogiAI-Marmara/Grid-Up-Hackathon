@@ -95,7 +95,7 @@ x, y = px(91.6, 4.5); L(x, y - 42, '230 V klemens', 11, '#37474f', 'middle'); L(
 x, y = px(73.25, 37.5); svg.text(x, y - 2, 'LDO', 9, '#ad1457', 'middle', '700'); svg.text(x, y + 9, '3,3 V', 9, '#ad1457', 'middle', '700')
 x, y = px(78.9, 40.3); svg.text(x, y + 3, 'D1', 8, '#ad1457', 'middle', '700')   # kutu içi (OR diyotu)
 x, y = px(78.9, 36.3); svg.text(x, y + 3, 'D2', 8, '#ad1457', 'middle', '700')
-x, y = px(62.5, 45); svg.leader(x, y, px(65, 48.5)[0], px(65, 48.5)[1], ['R_şarj 22 Ω'], 10, SUB, 'start', dot=False, halo=BG)
+x, y = px(61.5, 44.4); svg.leader(x, y, px(63.6, 40.6)[0], px(63.6, 40.6)[1], ['R_şarj', '22 Ω'], 9, SUB, 'start', dot=False, halo=BG)
 x, y = px(77.5, 29.25); L(x - 6, y + 4, 'bölücü→GPIO1', 10, SUB, 'end')
 x, y = px(66.5, 17.75)
 L(x, y - 4, '2× süperkapasitör seri', 11, '#f57f17', 'middle', '700')

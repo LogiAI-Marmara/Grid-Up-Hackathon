@@ -258,9 +258,11 @@
   <text x="666" y="349" font-size="9" fill="#ad1457" text-anchor="middle" font-weight="700">3,3 V</text>
   <text x="711.2" y="320.6" font-size="8" fill="#ad1457" text-anchor="middle" font-weight="700">D1</text>
   <text x="711.2" y="352.6" font-size="8" fill="#ad1457" text-anchor="middle" font-weight="700">D2</text>
-  <line x1="580" y1="280" x2="600" y2="252" stroke="#607d8b" stroke-width="1"/>
-  <rect x="602" y="248" width="70" height="10.5" rx="2" fill="#e8f5e9"/>
-  <text x="604" y="256" font-size="10" fill="#607d8b" font-weight="700">R_şarj 22 Ω</text>
+  <line x1="572" y1="284.8" x2="588.8" y2="315.2" stroke="#607d8b" stroke-width="1"/>
+  <rect x="590.8" y="312" width="36.4" height="9.5" rx="2" fill="#e8f5e9"/>
+  <text x="592.8" y="319.2" font-size="9" fill="#607d8b" font-weight="700">R_şarj</text>
+  <rect x="590.8" y="324" width="23.8" height="9.5" rx="2" fill="#e8f5e9"/>
+  <text x="592.8" y="331.2" font-size="9" fill="#607d8b">22 Ω</text>
   <rect x="626" y="402" width="70" height="10.5" rx="2" fill="#e8f5e9"/>
   <text x="694" y="410" font-size="10" fill="#607d8b" text-anchor="end">bölücü→GPIO1</text>
   <rect x="537.4" y="485.2" width="149.2" height="11.6" rx="2" fill="#e8f5e9"/>
