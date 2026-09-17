@@ -214,6 +214,7 @@
   <text x="496" y="246" font-size="10" fill="#607d8b" text-anchor="middle">TO-39 Ø9,3 / I²C 0x33 / merkez (55, 37,5) mm</text>
   <rect x="381.2" y="252" width="229.5" height="10.5" rx="2" fill="#e8f5e9"/>
   <text x="496" y="260" font-size="10" fill="#c62828" text-anchor="middle">Ø15 kapak penceresi izdüşümü / ön yüz boş</text>
+  <line x1="508" y1="267.2" x2="520" y2="279.2" stroke="#37474f" stroke-width="1"/>
   <rect x="310" y="307.2" width="136" height="10.5" rx="2" fill="#e8f5e9"/>
   <text x="312" y="315.2" font-size="10" fill="#607d8b">2× 4,7k pull-up + 100 nF</text>
   <rect x="184" y="371.2" width="76.6" height="11.6" rx="2" fill="#e8f5e9"/>
