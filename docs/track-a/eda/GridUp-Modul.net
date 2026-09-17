@@ -1163,7 +1163,7 @@
 		)
 		(comp
 			(ref "J7")
-			(value "RS-485 klemens B / GND / A")
+			(value "RS-485 klemens 1 B / 2 GND / 3 A")
 			(footprint "TerminalBlock_Phoenix:TerminalBlock_Phoenix_MKDS-3-3-5.08_1x03_P5.08mm_Horizontal")
 			(fields
 				(field
