@@ -524,7 +524,7 @@ def build():
     Rt = S.part(R, 'R40', '120 Ω', (274.32, (A[1] + B[1]) / 2), ref_at=(267.5, min(A[1], B[1]) + 2.2), val_at=(270.5, max(A[1], B[1]) + 3.2))
     S.wire((274.32, top[1]), Rt.p('1')); S.wire((274.32, bot[1]), Rt.p('2')); S.junction((274.32, top[1])); S.junction((274.32, bot[1]))
     Pj = S.pin_power(J7, '2', 'GND', L=7.62, rot=270); Pj.val_at = (pG[0] - 7.62 + 0.8, pG[1] - 1.1); Pj.just = 'center'   # yatay GND: etiket B/A telleri arasında
-    S.text('→ enerji analizörü (slave 1, akım) / TVOC-2 (slave 2, yalnız trip-diag.)', (236.22, 110.0), SZ_NOTE, italic=True)
+    S.text('hat: enerji analizörü (slave 1, akım) / TVOC-2 (slave 2, yalnız trip-diag.)', (236.22, 110.0), SZ_NOTE, italic=True)
     S.text('A/B bükümlü çift, ekranlı; son cihazda 2. 120 Ω', (236.22, 113.0), SZ_NOTE, italic=True)
     # anten
     S.rect((222.0, 119.0), (322.0, 150.0), COL['DEF'], title='Anten / U.FL pigtail → SMA panel → dış anten (pano dış yüzü)')

@@ -7648,7 +7648,7 @@
 		)
 		(uuid "8e1ae04b-230f-5da8-9085-8c5fa521bf43")
 	)
-	(text "→ enerji analizörü (slave 1, akım) / TVOC-2 (slave 2, yalnız trip-diag.)"
+	(text "hat: enerji analizörü (slave 1, akım) / TVOC-2 (slave 2, yalnız trip-diag.)"
 		(exclude_from_sim no)
 		(at 236.22 110 0)
 		(effects
