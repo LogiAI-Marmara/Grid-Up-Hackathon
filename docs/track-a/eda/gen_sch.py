@@ -647,7 +647,7 @@ def build():
     xf = fb[0] + 6.35   # FB dönüşü gövdeden uzak insin
     S.wire(fb, (xf, fb[1]), (xf, nF[1]), nF)
     xD = 208.28
-    D2 = S.part(DS, 'D2', 'D2', (xD, ry + 12.7), rot=270, ref_at=(xD + 2.1, ry + 14.5), hide_value=True)
+    D2 = S.part(DS, 'D2', 'D2', (xD, ry + 12.7), rot=270, ref_at=(xD + 2.1, ry + 13.3), hide_value=True)
     S.wire((xv, vb[1]), (xD, vb[1]), D2.p('A'), color=COL['5V']); S.wire(D2.p('K'), (xD, ry), color=COL['5V']); S.junction((xD, ry))
     # ---------- notlar (besleme) ----------
     S.text('PE → panonun koruma iletkeni; kutu metal ise gövde PE', (30.48, pPE[1] + 15.5), SZ_NOTE, italic=True)
