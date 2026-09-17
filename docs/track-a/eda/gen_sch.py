@@ -441,7 +441,8 @@ def build():
     Cm1 = S.part(C, 'C2', '100 nF', (52.07, n_vdd[1] + 3.81), ref_at=(45.72, n_vdd[1] + 2.54), val_at=(43.18, n_vdd[1] + 5.08))
     S.wire((52.07, n_vdd[1]), Cm1.p('1')); Pc = S.pin_power(Cm1, '2', 'GND')
     Pc.val_at = (Cm1.p('2')[0] - 2.0, Cm1.p('2')[1] + 2.54 + 1.27); Pc.just = 'right'   # GND etiketi solda (sağda U2 kutusu)
-    S.text('termal dizi 32×24, 110°×75°, ≤23 mA', (30.5, 178.3), SZ_NOTE, italic=True)
+    S.text('termal dizi 32×24, ≤23 mA', (30.5, 177.0), SZ_NOTE, italic=True)
+    S.text('görüş açısı 110°×75°', (30.5, 179.8), SZ_NOTE, italic=True)
     U3 = S.part(SHT, 'U3', 'SHT31-DIS-B', (69.85, 196.85), ref_at=(35.56, 203.5), val_at=(35.56, 206.0),
                 footprint='Sensor_Humidity:Sensirion_DFN-8-1EP_2.5x2.5mm_P0.5mm_EP1.1x1.7mm')
     v3 = U3.p('VDD'); n3 = (v3[0], v3[1] - 1.27); S.wire(v3, n3, (62.23, n3[1]), color=net_color('+3V3')); S.power('+3V3', (62.23, n3[1]))   # ok solda: U2 GND ile karşı karşıya durmasın
@@ -461,7 +462,7 @@ def build():
     S.wire(s_sda, (BX_SDA, s_sda[1]), color=I2C); S.wire(s_scl, (BX_SCL, s_scl[1]), color=I2C)
     S.label('SDA', (BX_SDA + 1.27, sda_pin[1]), 0); S.label('SCL', (BX_SCL + 1.27 + 6.35, scl_pin[1]), 0)
     # pull-up'lar 2× 4,7 kΩ → 3V3
-    for i, (x, bx, net) in enumerate([(100.33, BX_SDA, 'SDA'), (113.03, BX_SCL, 'SCL')]):
+    for i, (x, bx, net) in enumerate([(113.03, BX_SDA, 'SDA'), (100.33, BX_SCL, 'SCL')]):   # SDA sağda/üstte, SCL solda/altta → yatay teller gövde kesmez
         yb = 184.15 + i * 5.08
         Rp = S.part(R, 'R%d' % (2 + i), '4,7k', (x, yb - 3.81), ref_at=(x - 8.0, yb - 6.35), val_at=(x - 8.0, yb - 3.81))
         S.pin_power(Rp, '1', '+3V3', L=1.27)
