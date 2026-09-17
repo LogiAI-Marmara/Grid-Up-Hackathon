@@ -25,7 +25,7 @@ svg.add('<defs>'
         '<pattern id="cut" width="12" height="12" patternTransform="rotate(45)" patternUnits="userSpaceOnUse"><line x1="0" y1="0" x2="0" y2="12" stroke="#78909c" stroke-width="2"/></pattern>'
         '<marker id="arw-red" markerWidth="10" markerHeight="10" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 z" fill="#c62828"/></marker>'
         '</defs>')
-svg.text(1160, -45, 'Modül yerleşimi ve termal görüş hattı — 1600 kVA AG pano (TEDAŞ-MLZ/2003-06.B, EK-II/14)', 34, INK, 'middle', '700')
+svg.text(1160, -45, 'Modül yerleşimi ve termal görüş hattı / 1600 kVA AG pano (TEDAŞ-MLZ/2003-06.B, EK-II/14)', 34, INK, 'middle', '700')
 
 def col_of(n):
     if n.startswith('NH') or n.startswith('Klemens'): return ORANGE
@@ -35,17 +35,17 @@ def col_of(n):
 
 # ================= SOL: ÖNDEN GÖRÜNÜŞ =================
 svg.add('<g id="on-gorunus">')
-svg.text(800, -8, 'ÖNDEN GÖRÜNÜŞ — kapak açık (A × B = 1600 × 1500 mm)', 24, DIM, 'middle', '700')
+svg.text(800, -8, 'ÖNDEN GÖRÜNÜŞ / kapak açık (A × B = 1600 × 1500 mm)', 24, DIM, 'middle', '700')
 svg.add('<rect x="0" y="0" width="1600" height="1500" fill="#fafafa"/>')
 # bölgeler (TEDAŞ çiziminden, ±30 mm)
 svg.add('<rect x="40" y="50" width="1520" height="415" fill="#eceff1" stroke="#90a4ae" stroke-width="2"/>')
-svg.text(60, 84, 'Üst bölüm — kumanda / haberleşme (≈50–465 mm)', 21, GREY)
+svg.text(60, 84, 'Üst bölüm / kumanda / haberleşme (≈50–465 mm)', 21, GREY)
 svg.add('<rect x="1290" y="530" width="270" height="540" fill="#eceff1" stroke="#90a4ae" stroke-width="2"/>')
 svg.text(1425, 1040, 'ölçü / kontrol sütunu', 15, GREY, 'middle')
 svg.add('<rect x="50" y="545" width="1200" height="530" fill="url(#hatch)" stroke="#ef6c00" stroke-width="3"/>')
-svg.text(60, 493, 'KRİTİK BÖLGE — NH sigortalı yük ayırıcı sıraları + çıkış klemensleri (≈560–1060 mm)', 21, ORANGE, weight='700')
+svg.text(60, 493, 'KRİTİK BÖLGE / NH sigortalı yük ayırıcı sıraları + çıkış klemensleri (≈560–1060 mm)', 21, ORANGE, weight='700')
 svg.add('<rect x="40" y="1080" width="1520" height="380" fill="#f5f5f5" stroke="#90a4ae" stroke-width="2" stroke-dasharray="6 4"/>')
-svg.text(700, 1300, 'Alt bölüm — kablo yönlendirme boşluğu', 21, '#607d8b', 'middle')
+svg.text(700, 1300, 'Alt bölüm / kablo yönlendirme boşluğu', 21, '#607d8b', 'middle')
 svg.add('<line x1="300" y1="1065" x2="300" y2="1455" stroke="#455a64" stroke-width="2" marker-start="url(#dim)" marker-end="url(#dim)"/>')
 svg.text(312, 1265, '"En az 400 mm" (şartname)', 17, DIM)
 # cihaz dolguları (bilinen bloklar)
@@ -68,7 +68,7 @@ svg.text(1425, 630, 'T1 ölçü', 17, '#37474f', 'middle'); svg.text(1425, 654, 
 svg.text(1425, 822, 'kontrol', 17, '#37474f', 'middle')
 for i, y in enumerate([625, 760, 895]): svg.text(1262, y, 'sıra %d' % (i+1), 15, '#bf360c')
 svg.text(1262, 1037, 'klemens', 15, '#bf360c')
-# TERMAL KAPSAMA — modelden: sensör yüzü → montaj plakası D_BACK, → NH yüzü D_NH
+# TERMAL KAPSAMA / modelden: sensör yüzü → montaj plakası D_BACK, → NH yüzü D_NH
 cx, cy = IRX, 1500 - IRY
 svg.add('<rect x="%g" y="%g" width="%g" height="%g" fill="#1565c0" opacity="0.13"/>' % (cx-WB/2, cy-HB/2, WB, HB))
 svg.add('<rect x="%g" y="%g" width="%g" height="%g" fill="none" stroke="#0d47a1" stroke-width="4" stroke-dasharray="14 8"/>' % (cx-WB/2, cy-HB/2, WB, HB))
@@ -76,7 +76,7 @@ svg.add('<rect x="%g" y="%g" width="%g" height="%g" fill="none" stroke="#0d47a1"
 svg.add('<rect x="560" y="1128" width="620" height="58" fill="#fff" opacity="0.92"/>')
 svg.text(870, 1150, 'termal görüş alanı: %d × %d mm montaj plakasında (110°×75° @ %d mm)' % (round(WB), round(HB), round(D_BACK)), 19, BLUE, 'middle', '700')
 svg.text(870, 1175, 'iç kesikli: %d × %d mm NH ayırıcı yüzeyinde (@ %d mm)' % (round(WN), round(HN), round(D_NH)), 16, BLUE, 'middle')
-# MODÜL — kapak iç yüzündeki konumun izdüşümü (modelden, kesikli)
+# MODÜL / kapak iç yüzündeki konumun izdüşümü (modelden, kesikli)
 svg.add('<rect x="590" y="%g" width="120" height="80" rx="6" fill="#2e7d32" opacity="0.18"/>' % (1500-730))
 g = ['<g fill="none" stroke="#1b5e20" stroke-width="2.5" stroke-dasharray="9 5">']
 for pl in V['modul']:
@@ -87,7 +87,7 @@ g.append('</g>')
 svg.add('\n'.join(g))
 svg.add('<line x1="%g" y1="%g" x2="%g" y2="%g" stroke="#1b5e20" stroke-width="2"/><line x1="%g" y1="%g" x2="%g" y2="%g" stroke="#1b5e20" stroke-width="2"/>' % (cx-25, cy, cx+25, cy, cx, cy-25, cx, cy+25))
 svg.add('<rect x="715" y="765" width="360" height="92" fill="#fff" opacity="0.92" stroke="#2e7d32" stroke-width="1.5"/>')
-svg.text(728, 790, 'MODÜL — kapak iç yüzünde', 18, '#1b5e20', weight='700')
+svg.text(728, 790, 'MODÜL / kapak iç yüzünde', 18, '#1b5e20', weight='700')
 svg.text(728, 814, 'kutu 120 × 80, X 590–710 / IR merkezi (%g, %g) mm' % (IRX, 1500-IRY), 15, GREEN)
 svg.text(728, 836, 'bakış: sayfaya dik (→ yan kesit) / klemense DİK', 15, GREEN)
 svg.text(728, 852, 'kesikli çizgi = ön düzlemde, kapağa bağlı (model: GridUp-Pano.f3d)', 13, '#558b2f', style='italic')
@@ -100,7 +100,7 @@ svg.add('</g>')
 # ================= SAĞ: YAN KESİT (X = 650) =================
 OX = 1810
 svg.add('<g id="yan-kesit" transform="translate(%d,0)">' % OX)
-svg.text(240, -8, 'YAN KESİT — X = 650 (C × B = 450 × 1500 mm)', 24, DIM, 'middle', '700')
+svg.text(240, -8, 'YAN KESİT / X = 650 (C × B = 450 × 1500 mm)', 24, DIM, 'middle', '700')
 svg.add('<rect x="-22" y="0" width="472" height="1500" fill="#fafafa"/>')
 # kesit poligonları: x = -Z, y = 1500 - Y
 cuts = [pl for pl in V['kesit'] if pl['kind'] == 'cut']
@@ -151,9 +151,9 @@ svg.add('<g id="lejant" transform="translate(0,1610)">')
 svg.add('<rect x="0" y="0" width="2260" height="110" fill="#fff" stroke="#90a4ae" stroke-width="2"/>')
 svg.text(16, 30, 'Lejant', 19, INK, weight='700')
 svg.add('<rect x="16" y="50" width="30" height="18" rx="3" fill="#2e7d32" fill-opacity="0.3" stroke="#1b5e20" stroke-dasharray="6 3"/>')
-svg.text(56, 65, 'Modül — kapak iç yüzünde (önden görünüşte izdüşüm, kesikli; yan kesitte gövde + PCB)', 17, '#37474f')
+svg.text(56, 65, 'Modül / kapak iç yüzünde (önden görünüşte izdüşüm, kesikli; yan kesitte gövde + PCB)', 17, '#37474f')
 svg.add('<rect x="16" y="78" width="30" height="18" fill="#1565c0" opacity="0.3" stroke="#0d47a1" stroke-dasharray="6 3"/>')
-svg.text(56, 93, 'Termal görüş alanı (110°×75°, MLX90640 geniş açı) — önde kapsama dikdörtgeni (dış: plaka, iç: NH yüzü), yanda koni', 17, '#37474f')
+svg.text(56, 93, 'Termal görüş alanı (110°×75°, MLX90640 geniş açı) / önde kapsama dikdörtgeni (dış: plaka, iç: NH yüzü), yanda koni', 17, '#37474f')
 svg.add('<rect x="1000" y="50" width="30" height="18" fill="#fff3e0" stroke="#e65100"/>')
 svg.text(1040, 65, 'NH sigortalı yük ayırıcı sıraları + çıkış klemensleri (kritik bölge)', 17, '#37474f')
 svg.add('<rect x="1000" y="78" width="30" height="18" fill="none" stroke="#2e7d32" stroke-width="2" stroke-dasharray="6 3"/>')
@@ -162,7 +162,7 @@ svg.text(1660, 65, 'Bölge sınırları TEDAŞ çiziminden orantıyla (±30 mm);
 svg.text(1660, 93, '1 birim = 1 mm. Geometri: Fusion 360 GridUp-Pano.f3d (kutu + PCB montajı dahil).', 15, '#607d8b')
 svg.add('</g>')
 
-comment = """    Modül yerleşimi ve termal görüş hattı — TEDAŞ-MLZ/2003-06.B, EK-II/14 üzerine.
+comment = """    Modül yerleşimi ve termal görüş hattı / TEDAŞ-MLZ/2003-06.B, EK-II/14 üzerine.
     Kaynak: Fusion 360 modeli GridUp-Pano.f3d (pano gövdesi 1600 × 1500 × 450, sac 2 mm, montaj plakası 20 mm,
     kapak 22 mm, cihaz blokları; GridUp-Kutu-Montaj kapak iç yüzüne 180° döndürülerek yerleştirildi).
     Görünüşler modelden API ile projeksiyon; kesit X = 650 düzleminden (IR ekseni). Ölçek: 1 birim = 1 mm.
@@ -176,7 +176,7 @@ comment = """    Modül yerleşimi ve termal görüş hattı — TEDAŞ-MLZ/2003
       Busbar Supports kataloğu, L: 33–70 mm / UL standoff 40–71 mm) → s = 50 + 30 = 80 mm, bara ön yüzü Z = −350,
       NH ön yüzü Z = −208,5. İzolatör yüksekliği bir SEÇİMDİR, şartname dayatmıyor; farklı seçim kapsamayı değiştirir.
     Termal kapsama (110° × 75°): sensör → montaj plakası %d mm → %d × %d mm; sensör → NH yüzü %.1f mm → %d × %d mm.
-      (Karar kaydı §7.1: "~40 cm, kabaca 114 × 61 cm" — eski kroki 35 mm modül derinliğiyle 395 mm / 1128 × 606 almıştı
+      (Karar kaydı §7.1: "~40 cm, kabaca 114 × 61 cm" / eski kroki 35 mm modül derinliğiyle 395 mm / 1128 × 606 almıştı
        [1143 × 614 = 400 mm]; kutu 50 mm + klips 5 mm olunca mesafe 377 mm'e iner.)
     Bölge sınırları TEDAŞ çiziminden orantıyla ölçülmüştür (±30 mm).""" % (round(D_BACK), round(WB), round(HB), D_NH, round(WN), round(HN))
 n = svg.write(OUT, comment)

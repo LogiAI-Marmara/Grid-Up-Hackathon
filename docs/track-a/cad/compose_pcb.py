@@ -23,7 +23,7 @@ def col_of(name):
     return '#546e7a'
 
 svg = Svg(1500, 720, 'pcb')
-svg.text(750, 34, 'Kart yerleşimi — PCB 110 × 70 mm, ön yüzden bakış (1 mm = 8 birim)', 24, INK, 'middle', '700')
+svg.text(750, 34, 'Kart yerleşimi / PCB 110 × 70 mm, ön yüzden bakış (1 mm = 8 birim)', 24, INK, 'middle', '700')
 
 # ---- kart zemini, 230 V bölgesi, sınır
 svg.add('<defs><pattern id="pcb" width="16" height="16" patternUnits="userSpaceOnUse"><rect width="16" height="16" fill="#e8f5e9"/><circle cx="8" cy="8" r="1" fill="#a5d6a7"/></pattern>'
@@ -36,14 +36,14 @@ svg.text(x, y, '230 V BİRİNCİL BÖLGE', 11, '#c62828', 'middle', '700')
 svg.text(x, y + 16, 'izolasyon sınırı ≥ 6 mm creepage', 10, '#607d8b', 'middle')
 svg.text(x, y + 30, 'alt yarıda frezelenmiş yarık (slot)', 10, '#607d8b', 'middle')
 svg.text(x, y + 44, 'RAC05 bariyeri sınırın üstünde', 10, '#607d8b', 'middle')
-# IR pencere ekseni Ø15 keepout (kutu penceresi) — çizim notu
+# IR pencere ekseni Ø15 keepout (kutu penceresi) / çizim notu
 x, y = px(55, 37.5)
 svg.add('<circle cx="%g" cy="%g" r="60" fill="none" stroke="#c62828" stroke-width="2" stroke-dasharray="6 3"/>' % (x, y))
 # M3 keepout Ø5,5
 for (mx, my) in [(7, 7), (103, 7), (7, 63), (103, 63)]:
     x, y = px(mx, my)
     svg.add('<circle cx="%g" cy="%g" r="22" fill="none" stroke="#78909c" stroke-width="1" stroke-dasharray="3 2"/>' % (x, y))
-svg.text(OX + 90, OY + 20, 'M3 × 4 (7, 7) — kutu dikmeleri Ø6', 10, '#607d8b')
+svg.text(OX + 90, OY + 20, 'M3 × 4 (7, 7) / kutu dikmeleri Ø6', 10, '#607d8b')
 
 # ---- arka yüz parçaları (kart üzerinden, kesikli)
 g = ['<g fill="none" stroke-width="1.8" stroke-dasharray="6 3" stroke-linejoin="round">']
@@ -60,12 +60,13 @@ svg.add('<circle cx="%g" cy="%g" r="8" fill="#43a047"/>' % px(25, 65))
 svg.view(V['on'], OX, OY, S, ORIG, stroke=INK, sw=2)
 
 # ---- etiketler
-L = lambda x, y, t, size=11, fill='#37474f', anchor='start', w=None: svg.text(x, y, t, size, fill, anchor, w)
+BG = '#e8f5e9'   # kart zemini: etiket arka planı (halo)
+L = lambda x, y, t, size=11, fill='#37474f', anchor='start', w=None: svg.text(x, y, t, size, fill, anchor, w, halo=BG)
 SUB = '#607d8b'
-x, y = px(55, 37.5)
-L(x, y + 100, 'MLX90640ESF-BAA-000-TU', 11, '#37474f', 'middle', '700')
-L(x, y + 114, 'TO-39 Ø9,3 / I²C 0x33 / merkez (55, 37,5) mm', 10, SUB, 'middle')
-L(x, y + 128, 'Ø15 IR pencere ekseni — yüksek parça yok', 10, '#c62828', 'middle')
+x, y = px(50, 49)
+L(x, y - 4, 'MLX90640ESF-BAA-000-TU', 11, '#37474f', 'middle', '700')
+L(x, y + 10, 'TO-39 Ø9,3 / I²C 0x33 / merkez (55, 37,5) mm', 10, SUB, 'middle')
+L(x, y + 24, 'Ø15 IR pencere ekseni / yüksek parça yok', 10, '#c62828', 'middle')
 x, y = px(37.5, 44)
 L(x - 8, y + 4, '2× 4,7k pull-up + 100 nF', 10, SUB, 'end')
 x, y = px(7, 31)
@@ -76,8 +77,8 @@ svg.add('<path d="M%g %g h72 v72" fill="none" stroke="#1565c0" stroke-width="2"/
 L(x + 36, y - 30, 'ısı yarığı (kart yalıtımı)', 10, '#1565c0')
 x, y = px(25, 65)
 L(x + 12, y - 6, 'durum LED', 10, SUB)
-x, y = px(33.5, 51.25)
-L(x + 16, y + 4, 'EN: 10k + 1µF + reset', 10, SUB)
+x, y = px(32, 54.4)
+L(x, y, 'EN: 10k + 1µF + reset', 10, SUB, 'middle')
 x, y = px(19, 50.4)
 L(x, y - 6, 'ESP32-S3-WROOM-1U-N8', 11, '#37474f', 'middle', '700')
 L(x, y + 8, '18 × 19,2 / arka yüz', 10, SUB, 'middle')
@@ -91,28 +92,27 @@ x, y = px(91, 23.6); L(x, y + 30, 'F1 (SMD)', 10, SUB, 'middle')
 x, y = px(100, 23.5); L(x, y + 44, 'MOV Ø7', 10, SUB, 'middle')
 x, y = px(91.6, 4.5); L(x, y - 42, '230 V klemens', 11, '#37474f', 'middle'); L(x, y - 57, '3 kutup L/N/PE, 5,08 mm', 10, SUB, 'middle')
 x, y = px(73.25, 37.5); L(x, y - 2, 'LDO', 9, SUB, 'middle'); L(x, y + 9, '3,3 V', 9, SUB, 'middle')
-x, y = px(78.9, 40.3); L(x, y - 14, 'D1 (OR)', 10, SUB, 'middle')
-x, y = px(78.9, 36.3); L(x, y + 17, 'D2', 10, SUB, 'middle')
-x, y = px(60.5, 45); svg.leader(x, y, px(53.5, 49.5)[0], px(53.5, 49.5)[1] - 4, ['R_şarj'], 10, SUB, 'end', dot=False)
+x, y = px(78.9, 36.3); L(x, y + 17, 'D1 (OR) üst / D2 alt', 9, SUB, 'middle')
+x, y = px(62.5, 45); svg.leader(x, y, px(65, 48.5)[0], px(65, 48.5)[1], ['R_şarj 22 Ω'], 10, SUB, 'start', dot=False, halo=BG)
 x, y = px(77.5, 29.25); L(x - 6, y + 4, 'bölücü→GPIO1', 10, SUB, 'end')
 x, y = px(66.5, 17.75)
 L(x, y - 4, '2× süperkapasitör seri', 11, '#f57f17', 'middle', '700')
 L(x, y + 10, 'Eaton HV1030 Ø10,5 × 31,5 yatık / arka yüz', 10, SUB, 'middle')
 L(x, y + 24, '10 F 2,7 V ×2 → 5 F 4,6 V / 02-bom §2.5', 10, SUB, 'middle')
-x, y = px(55, 36); svg.leader(x, y, px(46.5, 35.5)[0], px(46.5, 35.5)[1], ['boost U7 + L', '→ 4,6 V → D2'], 10, SUB, 'end', dot=False)
+x, y = px(46, 33.5); svg.leader(x, y, px(39.5, 30.5)[0], px(39.5, 30.5)[1], ['boost U7 + L', '→ 4,6 V → D2'], 10, SUB, 'end', dot=False, halo=BG)
 x, y = px(53, 28.5); L(x - 6, y + 4, 'dengeleme 2×', 10, SUB, 'end')
 x, y = px(41.25, 18); L(x - 6, y, 'MAX3485', 10, SUB, 'end')
 x, y = px(48, 16); L(x + 8, y + 4, '120 Ω', 10, SUB)
 x, y = px(5, 18.6); L(x, y - 70, 'RS-485', 11, '#2e7d32', 'middle'); L(x, y + 54, 'A/B/GND', 10, '#2e7d32', 'middle')
 x, y = px(32, 14.5); L(x, y - 12, '4× R_burden + bias (3V3/2)', 10, '#6a1b9a', 'middle')
-x, y = px(39, 7.5); L(x, y - 14, 'CT klemens 8 kutup, 3,5 mm — L1 L2 L3 N', 11, '#37474f', 'middle')
-x, y = px(17.5, 8.75); L(x, y + 36, 'genişleme 2×5 — §7.1', 11, '#1565c0', 'middle'); L(x, y + 50, 'I²C/UART/3V3/5V/GND', 9, SUB, 'middle')
+x, y = px(39, 7.5); L(x, y - 14, 'CT klemens 8 kutup, 3,5 mm / L1 L2 L3 N', 11, '#37474f', 'middle')
+x, y = px(17.5, 8.75); L(x, y + 36, 'genişleme 2×5 / §7.1', 11, '#1565c0', 'middle'); L(x, y + 50, 'I²C/UART/3V3/5V/GND', 9, SUB, 'middle')
 
 # ---- ölçüler
 svg.dim_h(OX, OX + 880, OY + 590, '110 mm', size=12)
 svg.dim_v(OX - 30, OY, OY + 560, '70 mm', size=12)
 
-# ---- izometrik küçük görünüş (kartın altında sağda) — notlar panelinin altına sığmaz; sağ panel içine
+# ---- izometrik küçük görünüş (kartın altında sağda) / notlar panelinin altına sığmaz; sağ panel içine
 NX, NY = 1000, 80
 svg.add('<rect x="%d" y="%d" width="460" height="560" fill="#fff" stroke="#90a4ae" stroke-width="2"/>' % (NX, NY))
 svg.text(NX + 16, NY + 28, 'Yerleşim kuralları', 13, INK, weight='700')
@@ -120,7 +120,7 @@ notes = [
     ('Bakış:', ' ön yüz = kutu penceresine bakan taraf.'),
     (None, 'Düz = ön yüz parçası, kesikli = arka yüz (kart üzerinden).'),
     ('Ön yüz', ' (pencere ile PCB arası 6 mm): yalnız alçak'),
-    (None, 'parçalar — MLX90640 (TO-39, 6 mm), SHT31, LED,'),
+    (None, 'parçalar / MLX90640 (TO-39, 6 mm), SHT31, LED,'),
     (None, 'pasifler. IR pencere ekseninde Ø15 boş alan.'),
     ('Arka yüz', ' (39 mm derinlik): ESP32 modülü, RAC05 (21,8 mm),'),
     (None, '2× süperkap yatık (Ø10,5 × 31,5) + boost, klemensler,'),
@@ -146,10 +146,10 @@ for i, (b, t) in enumerate(notes):
     if b: svg.add('<text x="%d" y="%d" font-size="12" fill="#37474f"><tspan font-weight="700">%s</tspan>%s</text>' % (NX + 16, y, b, t))
     else: svg.text(NX + 16, y, t, 12, '#37474f')
     y += 16 if (i + 1 < len(notes) and notes[i + 1][0] is None) else 22
-svg.text(NX + 16, NY + 526, 'Kaynak: Fusion 360 GridUp-PCB.f3d — üretim çizimi değildir (§1.4).', 10, SUB)
+svg.text(NX + 16, NY + 526, 'Kaynak: Fusion 360 GridUp-PCB.f3d / üretim çizimi değildir (§1.4).', 10, SUB)
 svg.text(NX + 16, NY + 542, 'Pasif değerler 03-baglanti-semasi ile aynı.', 10, SUB)
 
-comment = """    PCB / kart yerleşimi — (T2 "kart yapısı"). Ölçek 1 mm = 8 birim, kart 110 × 70 × 1,6 mm, köşe R2.
+comment = """    PCB / kart yerleşimi / (T2 "kart yapısı"). Ölçek 1 mm = 8 birim, kart 110 × 70 × 1,6 mm, köşe R2.
     Kaynak: Fusion 360 modeli GridUp-PCB.f3d (thozoz hub / Default Project). Geometri modelden API ile projeksiyon:
     düz çizgi = ön yüz (Z+ yönünden bakış), kesikli = arka yüz parçaları kart üzerinden görünür (aynı bakış, kart gizlenmiş).
     Koordinat: SVG (x, y aşağı) = model (X, 70 − Y). Kart kutu içinde (5, 5) mm ofsetli → PCB koordinatı = kutu koordinatı − 5 mm.
@@ -158,7 +158,7 @@ comment = """    PCB / kart yerleşimi — (T2 "kart yapısı"). Ölçek 1 mm = 
     Arka yüz (Z 0 ←): ESP32-S3-WROOM-1U 18 × 19,2 × 3,2 (10–28, 40,8–60) / RAC05-05SK/277 31,7 × 26,7 × 21,8 (64–95,7, 42–68,7) /
       F1 (88–94,1, 22,25–25) / MOV 7 × 4 × 8 (96,5–103,5, 21,5–25,5) / 230 V klemens 3p 5,08 (84–99,25, 0,5–8,5) /
       LDO AP7361C SOT-223 (70–76,5, 34–41) / D1 (76,75–81, 39–41,65) / D2 (76,75–81, 35–37,65) / R_şarj (60,5–62,5, 44,5–45,5) / bölücü (77,5–79,5, 28–30,5) /
-      boost U7 (55–57,5, 36–38) + L 3×3 (59–62, 35,5–38,5) / dengeleme R (52–54, 28–31,5) /
+      boost U7 (46–48,5, 36–38) + L 3×3 (46–49, 31,5–34,5) / dengeleme R (52–54, 28–31,5) /
       2× süperkap Eaton HV1030 Ø10,5 × 31,5 yatık, eksen Y, merkezler (61, 17,75) (72, 17,75), Y 2–33,5 / MAX3485 SOIC-8 (41,25–46,25, 14–20) / 120 Ω (47,5–48,5, 15–17) /
       RS-485 klemens 3p (1–9, 11–26,25) / R_burden ×4 (25–36, 14–15) + bias (37–39, 13–15) / CT klemens 8p 3,5 (25–53, 0,5–7,5) / genişleme 2×5 (11–24, 6,25–11,25).
     Kart: M3 Ø3,2 (7, 7) (103, 7) (7, 63) (103, 63) → kutu dikmeleri Ø6 kutu (12, 12) vb.; köşelerde Ø8 boşluk (kapak vida direği Ø7); izolasyon yarığı 1 mm (81,5–82,5, Y 0–40); 230 V bölgesi X ≥ 82.

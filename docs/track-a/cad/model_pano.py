@@ -20,6 +20,9 @@ def run(_ctx):
     doc.activate()
     des = adsk.fusion.Design.cast(app.activeProduct)
     root = des.rootComponent
+    # temiz baslangic: eski zincir timeline'da kalirsa her calistirma 'Govde15', 'Kapak (1)' gibi kopya govde uretir
+    tl = des.timeline
+    if tl.count: tl.markerPosition = 0; tl.deleteAllAfterMarker()
     for i in range(root.bRepBodies.count-1, -1, -1): root.bRepBodies.item(i).deleteMe()
     for i in range(root.occurrences.count-1, -1, -1): root.occurrences.item(i).deleteMe()
     comp = root

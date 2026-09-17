@@ -20,6 +20,8 @@ def run(_ctx):
     doc.activate()
     des = adsk.fusion.Design.cast(app.activeProduct)
     comp = des.rootComponent
+    tl = des.timeline   # temiz baslangic: eski zincir kalirsa kopya govdeler ('(1)') olusur
+    if tl.count: tl.markerPosition = 0; tl.deleteAllAfterMarker()
     for i in range(comp.bRepBodies.count-1, -1, -1):
         comp.bRepBodies.item(i).deleteMe()
     feats = comp.features; ext = feats.extrudeFeatures
@@ -91,8 +93,8 @@ def run(_ctx):
     box('R_sarj', 60.5, 44.5, 62.5, 45.5, 0, -0.6)
     box('Bolucu1', 77.5, 29.5, 79.5, 30.5, 0, -0.6)
     box('Bolucu2', 77.5, 28, 79.5, 29, 0, -0.6)
-    box('Boost U7', 55, 36, 57.5, 38, 0, -1)                   # TPS61099 WSON-6
-    box('L_boost', 59, 35.5, 62, 38.5, 0, -1.5)               # 4,7 uH 3x3
+    box('Boost U7', 46, 36, 48.5, 38, 0, -1)                   # TPS61099 WSON-6 (MLX ekseninin disinda, arka yuz)
+    box('L_boost', 46, 31.5, 49, 34.5, 0, -1.5)               # 2,2 uH 3x3
     box('R_bal1', 52, 28, 54, 29, 0, -0.6)
     box('R_bal2', 52, 30.5, 54, 31.5, 0, -0.6)
     # superkap: 2x Eaton HV1030 (O10.5 x 31.5, 10 F 2,7 V) seri, yatik, eksen Y; merkezler x 61 / 72, y 17.75 (Y 2..33.5), govde Z 0..-10.5

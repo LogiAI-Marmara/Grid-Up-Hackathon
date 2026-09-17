@@ -9,14 +9,14 @@
 			(name "/")
 			(tstamps "/")
 			(title_block
-				(title "GridUp modül bağlantı şeması — ESP32-S3-WROOM-1U")
+				(title "GridUp modül bağlantı şeması / ESP32-S3-WROOM-1U")
 				(company "Grid Up Hackathon / İZ A")
 				(rev "1")
 				(date "2026-09-14")
 				(source "GridUp-Modul.kicad_sch")
 				(comment
 					(number "1")
-					(value "Kavramsal şema — üretim çizimi değildir (karar kaydı §1.4). Pasif değerler tipik başlangıç değerleri.")
+					(value "Kavramsal şema / üretim çizimi değildir (karar kaydı §1.4). Pasif değerler tipik başlangıç değerleri.")
 				)
 				(comment
 					(number "2")

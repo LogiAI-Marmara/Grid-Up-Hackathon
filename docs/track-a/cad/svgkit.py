@@ -1,4 +1,4 @@
-# SVG kompozisyon yardımcıları — Fusion projeksiyon JSON'undan teknik kroki
+# SVG kompozisyon yardımcıları / Fusion projeksiyon JSON'undan teknik kroki
 import json
 
 FONT = 'Arial,Helvetica,sans-serif'
@@ -6,6 +6,18 @@ INK = '#263238'; DIM = '#455a64'; MUTED = '#78909c'
 
 def esc(s):
     return s.replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;')
+
+_FONTS = {}
+def text_width(s, size, bold=False):
+    """Arial metriğiyle metin genişliği (px, font-size birimi). PIL/arial yoksa yaklaşık."""
+    try:
+        from PIL import ImageFont
+        k = bold
+        if k not in _FONTS:
+            _FONTS[k] = ImageFont.truetype(r'C:\Windows\Fontsrialbd.ttf' if bold else r'C:\Windows\Fontsrial.ttf', 100)
+        return _FONTS[k].getlength(s) / 100.0 * size
+    except Exception:
+        return len(s) * size * (0.6 if bold else 0.55)
 
 class Svg:
     def __init__(self, w, h, title):
@@ -17,8 +29,12 @@ class Svg:
 
     def add(self, s): self.parts.append(s)
 
-    def text(self, x, y, s, size=13, fill=INK, anchor='start', weight=None, rotate=None, style=None):
+    def text(self, x, y, s, size=13, fill=INK, anchor='start', weight=None, rotate=None, style=None, halo=None):
         a = ['x="%g" y="%g"' % (x, y), 'font-size="%g"' % size, 'fill="%s"' % fill]
+        if halo and rotate is None:   # zemin renkli arka plan dikdörtgeni: kesikli çizgi üstünde okunur (renderer bağımsız)
+            w = text_width(s, size, bold=bool(weight and str(weight) in ('700', 'bold')))
+            x0 = x if anchor == 'start' else (x - w / 2 if anchor == 'middle' else x - w)
+            self.add('<rect x="%g" y="%g" width="%g" height="%g" rx="2" fill="%s"/>' % (round(x0 - 2, 1), round(y - size * 0.8, 1), round(w + 4, 1), round(size * 1.05, 1), halo))
         if anchor != 'start': a.append('text-anchor="%s"' % anchor)
         if weight: a.append('font-weight="%s"' % weight)
         if style: a.append('font-style="%s"' % style)
@@ -41,11 +57,11 @@ class Svg:
         tx = x - 8 if off >= 0 else x + 18
         self.text(tx, (y1 + y2) / 2, label, size, DIM, 'middle', rotate=-90)
 
-    def leader(self, x1, y1, x2, y2, lines, size=12, fill=INK, anchor='start', dot=True):
+    def leader(self, x1, y1, x2, y2, lines, size=12, fill=INK, anchor='start', dot=True, halo=None):
         self.add('<line x1="%g" y1="%g" x2="%g" y2="%g" stroke="%s" stroke-width="1"/>' % (x1, y1, x2, y2, fill))
         if dot: self.add('<circle cx="%g" cy="%g" r="2.5" fill="%s"/>' % (x1, y1, fill))
         for i, ln in enumerate(lines):
-            self.text(x2 + (4 if anchor == 'start' else -4), y2 + 4 + i * (size + 3), ln, size, fill, anchor, weight='700' if i == 0 else None)
+            self.text(x2 + (4 if anchor == 'start' else -4), y2 + 4 + i * (size + 3), ln, size, fill, anchor, weight='700' if i == 0 else None, halo=halo)
 
     def view(self, polys, ox, oy, S, origin, stroke=INK, sw=1.5, colors=None, bg=None):
         """polys: JSON listesi (mm, y aşağı). origin: (x_mm, y_mm) → (ox, oy) piksel."""

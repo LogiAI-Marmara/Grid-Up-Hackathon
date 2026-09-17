@@ -25,20 +25,20 @@ svg = Svg(1720, 1400, 'kutu')
 svg.add('<defs><pattern id="hatch" width="8" height="8" patternTransform="rotate(45)" patternUnits="userSpaceOnUse">'
         '<line x1="0" y1="0" x2="0" y2="8" stroke="#78909c" stroke-width="1.5"/></pattern>'
         '<pattern id="pcbp" width="12" height="12" patternUnits="userSpaceOnUse"><rect width="12" height="12" fill="#e8f5e9"/><circle cx="6" cy="6" r="1" fill="#a5d6a7"/></pattern></defs>')
-svg.text(860, 38, 'Modül kutusu — teknik kroki (120 × 80 × 50 mm, IP54, 1 mm = 4 birim)', 30, INK, 'middle', '700')
+svg.text(860, 38, 'Modül kutusu / teknik kroki (120 × 80 × 50 mm, IP54, 1 mm = 4 birim)', 30, INK, 'middle', '700')
 
 # ---------- A / ÖN YÜZ ----------
 ox, oy = 60, 100
-svg.text(ox + 240, oy - 14, 'A / ÖN YÜZ — klemenslere bakan yüz (120 × 80)', 20, DIM, 'middle', '700')
+svg.text(ox + 240, oy - 14, 'A / ÖN YÜZ / klemenslere bakan yüz (120 × 80)', 20, DIM, 'middle', '700')
 svg.view(V['on'], ox, oy, S, (0, -80), colors=COL, bg=BOXBG)
 def A(x, y): return ox + x * S, oy + (80 - y) * S
 x, y = A(60, 42.5)
 svg.text(x, y + 68, 'IR geçirgen pencere Ø15', 15, RED, 'middle', '700')
-svg.text(x, y + 86, '(standart cam/plastik DEĞİL — §4.4)', 13, RED, 'middle')
+svg.text(x, y + 86, '(standart cam/plastik DEĞİL / §4.4)', 13, RED, 'middle')
 svg.text(x, y + 104, 'yükseltilmiş yuva Ø23, 3 mm konik pah / arkasında MLX90640 TO-39', 12, GREY, 'middle')
 x, y = A(12, 36)
 svg.text(x + 24, y - 4, 'membran vent M6', 13, DARK)
-svg.text(x + 24, y + 12, '(SHT31 — IP54 korunur)', 12, GREY)
+svg.text(x + 24, y + 12, '(SHT31 / IP54 korunur)', 12, GREY)
 x, y = A(30, 70)
 svg.text(x, y + 26, 'durum LED Ø3', 12, GREY, 'middle')
 svg.text(ox + 240, oy + 300, 'kapak: 4 × M3 vida + conta (IP54)', 12, MUTED, 'middle')
@@ -47,7 +47,7 @@ svg.dim_v(ox - 22, oy, oy + 320, '80 mm', off=-16)
 
 # ---------- B / YAN KESİT (X = 60, IR ekseni; −X'ten bakış, X ≥ 60 yarısı) ----------
 ox, oy = 640, 100
-svg.text(ox + 114, oy - 14, 'B / YAN KESİT — X = 60 (IR ekseni)', 20, DIM, 'middle', '700')
+svg.text(ox + 114, oy - 14, 'B / YAN KESİT / X = 60 (IR ekseni)', 20, DIM, 'middle', '700')
 def B(z, y): return ox + (z + 5) * S, oy + (80 - y) * S
 g = ['<g transform="translate(%g,%g)">' % (ox, oy)]
 for pl in M['kesit']:
@@ -91,7 +91,7 @@ svg.text(ox + 114, oy + 392, 'bakış yönü → (klemenslere)', 12, MUTED, 'mid
 
 # ---------- E / ALT YÜZ ----------
 ox, oy = 980, 100
-svg.text(ox + 240, oy - 14, 'E / ALT YÜZ — kablo girişleri (120 × 50)', 20, DIM, 'middle', '700')
+svg.text(ox + 240, oy - 14, 'E / ALT YÜZ / kablo girişleri (120 × 50)', 20, DIM, 'middle', '700')
 svg.view(V['alt'], ox, oy, S, (0, -52), colors=COL,
          bg='<rect x="0" y="8" width="480" height="200" rx="12" fill="#eceff1"/>')
 def E(x, z): return ox + x * S, oy + (52 - z) * S
@@ -109,7 +109,7 @@ svg.dim_v(ox - 22, E(0, 50)[1], E(0, 0)[1], '50 mm', off=-16)
 
 # ---------- D / ARKA YÜZ ----------
 ox, oy = 60, 560
-svg.text(ox + 240, oy - 14, 'D / ARKA YÜZ — sabitleme (kapağa bakan)', 20, DIM, 'middle', '700')
+svg.text(ox + 240, oy - 14, 'D / ARKA YÜZ / sabitleme (kapağa bakan)', 20, DIM, 'middle', '700')
 svg.view(V['arka'], ox, oy, S, (-120, -80), colors=COL, bg=BOXBG)
 def D(x, y): return ox + (120 - x) * S, oy + (80 - y) * S
 x, y = D(60, 41)
@@ -120,12 +120,12 @@ for xm in (17.5, 102.5):
     x, y = D(xm, 45.25)
     svg.text(x, y + 34, 'oval yuva M5 15 × 5,5', 12, DARK, 'middle')
 svg.text(ox + 240, oy + 40, 'mevcut cıvata / kapak çerçevesi için (yeni delik YOK)', 12, DARK, 'middle')
-svg.text(ox + 240, oy + 266, '4× mıknatıs pedi Ø7 (köşeler, 1 mm cep) — yalnız konumlandırma/kadraj', 12, RED, 'middle')
+svg.text(ox + 240, oy + 266, '4× mıknatıs pedi Ø7 (köşeler, 1 mm cep) / yalnız konumlandırma/kadraj', 12, RED, 'middle')
 svg.text(ox + 240, oy + 283, 'mekanik tutma DEĞİL (§4.8) / akım trafolarından uzak (§7.5 satır 337)', 11, RED, 'middle')
 
 # ---------- C / İÇ GÖRÜNÜŞ (kapak açık) ----------
 ox, oy = 640, 560
-svg.text(ox + 240, oy - 14, 'C / İÇ GÖRÜNÜŞ — kapak açık, önden (PCB 110 × 70)', 20, DIM, 'middle', '700')
+svg.text(ox + 240, oy - 14, 'C / İÇ GÖRÜNÜŞ / kapak açık, önden (PCB 110 × 70)', 20, DIM, 'middle', '700')
 svg.add('<g transform="translate(%g,%g)"><rect x="0" y="0" width="480" height="320" rx="16" fill="#eceff1"/>'
         '<rect x="20" y="20" width="440" height="280" rx="8" fill="url(#pcbp)"/>'
         '<rect x="348" y="20" width="112" height="280" fill="#fff3e0" opacity="0.8"/>'
@@ -150,17 +150,17 @@ svg.text(C(44, 9)[0], C(44, 9)[1], 'CT ×4', 9, '#6a1b9a', 'middle')
 svg.text(C(22.5, 13.75)[0], C(22.5, 13.75)[1], 'genişleme', 9, '#1565c0', 'middle')
 svg.text(C(99, 9.5)[0], C(99, 9.5)[1], '230 V', 9, '#ef6c00', 'middle')
 svg.text(C(101, 40)[0], C(101, 40)[1], '230 V bölgesi', 10, '#e65100', 'middle')
-svg.text(ox + 240, oy + 338, 'düz = ön yüz + gövde, kesikli = arka yüz parçaları — ayrıntı: 02-pcb-yerlesimi.svg', 11, MUTED, 'middle')
+svg.text(ox + 240, oy + 338, 'düz = ön yüz + gövde, kesikli = arka yüz parçaları / ayrıntı: 02-pcb-yerlesimi.svg', 11, MUTED, 'middle')
 
 # ---------- F / İZOMETRİK ----------
 ox, oy = 640, 1020
-svg.text(ox + 240, oy - 14, 'F / İZOMETRİK — Fusion 360 modeli', 20, DIM, 'middle', '700')
+svg.text(ox + 240, oy - 14, 'F / İZOMETRİK / Fusion 360 modeli', 20, DIM, 'middle', '700')
 mnx, mny, mxx, mxy = svg.bbox(V['iso'])
 SI = min(2.6, 300 / (mxy - mny), 470 / (mxx - mnx))
 w, h = (mxx - mnx) * SI, (mxy - mny) * SI
 svg.view(V['iso'], ox + (480 - w) / 2, oy + 10 + (300 - h) / 2, SI, (mnx, mny), colors=COL, sw=1.3)
 print('iso SI', round(SI, 2), 'h', round(h))
-svg.text(ox + 240, oy + 338, 'kaynak: GridUp-Kutu.f3d + GridUp-PCB.f3d (montaj) — görünüşler modelden projeksiyon, gizli çizgiler ayıklandı', 11, MUTED, 'middle')
+svg.text(ox + 240, oy + 338, 'kaynak: GridUp-Kutu.f3d + GridUp-PCB.f3d (montaj) / görünüşler modelden projeksiyon, gizli çizgiler ayıklandı', 11, MUTED, 'middle')
 
 # ---------- NOTLAR ----------
 ox, oy = 1160, 400
@@ -179,7 +179,7 @@ notes = [
     (None, 'vent M6 (PTFE) arkasında; su/toz geçmez, hava/nem geçer.'),
     ('Isı:', ' AC/DC modül PCB\'nin arkasında, sensörlerden uzak; SHT31'),
     (None, 'güç modülüne en uzak köşede (öz-ısınma hatası).'),
-    ('Kablolar:', ' tüm girişler alt yüzde, soldan sağa RS-485 / SMA / CT / 230 V —'),
+    ('Kablolar:', ' tüm girişler alt yüzde, soldan sağa RS-485 / SMA / CT / 230 V;'),
     (None, 'her giriş kendi klemensinin altında, 230 V kablosu alçak gerilim'),
     (None, 'bölgesini geçmez. Kapak içi montajda kablolar menteşeye iner, kıvrım'),
     (None, 'payı bırakılır (§4.7). Anten kablosu SMA\'dan pano dışına (§7.4).'),
@@ -190,7 +190,7 @@ notes = [
     ('PCB:', ' 110 × 70, kutu içinde (5, 5, 39,4) mm, 4 × Ø6 dikme üstünde'),
     (None, '(M3); ön yüzü kapaktan 5 mm geride, PCB koordinatı = kutu − 5 mm'),
     (None, '(02-pcb-yerlesimi.svg).'),
-    ('Genişleme payı:', ' 2×5 başlık ayrılmış I²C/UART — PD/akustik'),
+    ('Genişleme payı:', ' 2×5 başlık ayrılmış I²C/UART / PD/akustik'),
     (None, 'fark katmanı için (§7.1 şartı); kutuda ilgili yüzde kör tapa.'),
 ]
 y = oy + 62
@@ -200,7 +200,7 @@ for i, (b, t) in enumerate(notes):
     else:
         svg.text(ox + 16, y, t, 13, DARK)
     y += 17 if (i + 1 < len(notes) and notes[i + 1][0] is None) else 22
-svg.text(ox + 16, y + 4, 'Kavramsal tasarım — üretim çizimi değildir (§1.4: fiziksel donanım yok).', 12, MUTED)
+svg.text(ox + 16, y + 4, 'Kavramsal tasarım / üretim çizimi değildir (§1.4: fiziksel donanım yok).', 12, MUTED)
 
 # lejant (sol alt boşluk)
 ox, oy = 60, 1020
@@ -215,7 +215,7 @@ svg.text(ox + 66, oy + 108, 'arka yüz parçası (kart üzerinden görünür)', 
 svg.add('<line x1="%d" y1="%d" x2="%d" y2="%d" stroke="%s" stroke-width="1.5"/>' % (ox + 16, oy + 128, ox + 56, oy + 128, INK))
 svg.text(ox + 66, oy + 132, 'görünür kenar (modelden, ışın testiyle ayıklanmış)', 12, DARK)
 
-comment = """    Modül kutusu — teknik kroki (04-mekanik-yerlesim.md §4.5–4.6, §4.4 IR pencere).
+comment = """    Modül kutusu / teknik kroki (04-mekanik-yerlesim.md §4.5–4.6, §4.4 IR pencere).
     Kaynak: Fusion 360 modelleri GridUp-Kutu.f3d + GridUp-PCB.f3d, montaj GridUp-Kutu-Montaj.f3d (thozoz hub / Default Project).
     Görünüşler modelden API ile ortografik projeksiyon (kenarlar + silindir siluetleri, gizli çizgiler ışın testiyle ayıklandı);
     kesit TemporaryBRepManager.planeIntersection ile X = 60 düzleminden. Ölçek: 1 mm = 4 birim (izometrik 2,6).

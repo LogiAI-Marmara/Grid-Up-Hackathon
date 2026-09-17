@@ -18,6 +18,9 @@ def run(_ctx):
     app = adsk.core.Application.get()
     des = adsk.fusion.Design.cast(app.activeProduct)
     comp = des.rootComponent
+    # temiz baslangic: eski zincir timeline'da kalirsa her calistirma 'Govde15', 'Kapak (1)' gibi kopya govde uretir
+    tl = des.timeline
+    if tl.count: tl.markerPosition = 0; tl.deleteAllAfterMarker()
     for i in range(comp.bRepBodies.count-1, -1, -1): comp.bRepBodies.item(i).deleteMe()
     feats = comp.features; ext = feats.extrudeFeatures
 
