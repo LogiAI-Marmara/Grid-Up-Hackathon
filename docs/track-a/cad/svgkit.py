@@ -34,7 +34,7 @@ class Svg:
         if halo and rotate is None:   # zemin renkli arka plan dikdörtgeni: kesikli çizgi üstünde okunur (renderer bağımsız)
             w = text_width(s, size, bold=bool(weight and str(weight) in ('700', 'bold')))
             x0 = x if anchor == 'start' else (x - w / 2 if anchor == 'middle' else x - w)
-            self.add('<rect x="%g" y="%g" width="%g" height="%g" rx="2" fill="%s"/>' % (round(x0 - 2, 1), round(y - size * 0.8, 1), round(w + 4, 1), round(size * 1.05, 1), halo))
+            self.add('<rect x="%g" y="%g" width="%g" height="%g" rx="2" fill="%s"/>' % (round(x0 - 1, 1), round(y - size * 0.8, 1), round(w + 2, 1), round(size * 1.05, 1), halo))
         if anchor != 'start': a.append('text-anchor="%s"' % anchor)
         if weight: a.append('font-weight="%s"' % weight)
         if style: a.append('font-style="%s"' % style)
