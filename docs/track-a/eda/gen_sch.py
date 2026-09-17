@@ -537,7 +537,10 @@ def build():
     for num, name, dx in [('1', '+3V3', -3.81), ('2', '+5V', 3.81)]:
         a0 = J6.p(num); b0 = (a0[0] + dx, a0[1]); c0 = (b0[0], b0[1] - 5.08)
         S.wire(a0, b0, c0, color=net_color(name)); S.power(name, c0)
-    S.pin_power(J6, '3', 'GND', L=20.32, rot=0); S.pin_power(J6, '4', 'GND', L=11.43, rot=0)
+    g3 = S.pin_power(J6, '3', 'GND', L=22.86, rot=270); g4 = S.pin_power(J6, '4', 'GND', L=15.24, rot=90)   # yatay GND, düz gider
+    p3, p4 = J6.p('3'), J6.p('4')
+    g3.val_at = (p3[0] - 22.86 - 1.3, p3[1] - 1.6); g3.just = 'center'
+    g4.val_at = (p4[0] + 15.24 + 1.3, p4[1] - 1.6); g4.just = 'center'
     S.pin_label(J6, '5', 'SDA'); S.pin_label(J6, '6', 'SCL'); S.pin_label(J6, '7', 'GPIO10'); S.pin_label(J6, '8', 'GPIO11')
     S.pin_nc(J6, '9'); S.pin_nc(J6, '10')
 

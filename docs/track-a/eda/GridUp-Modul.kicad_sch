@@ -7777,7 +7777,7 @@
 	(wire
 		(pts
 			(xy 257.81 171.45)
-			(xy 237.49 171.45)
+			(xy 234.95 171.45)
 		)
 		(stroke
 			(width 0)
@@ -7789,7 +7789,7 @@
 	(wire
 		(pts
 			(xy 270.51 171.45)
-			(xy 281.94 171.45)
+			(xy 285.75 171.45)
 		)
 		(stroke
 			(width 0)
@@ -13216,7 +13216,7 @@
 	)
 	(symbol
 		(lib_id "power:GND")
-		(at 237.49 171.45 0)
+		(at 234.95 171.45 270)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -13224,52 +13224,47 @@
 		(dnp no)
 		(uuid "b24a2774-ec74-5230-86dc-fa353e977426")
 		(property "Reference" "#PWR28"
-			(at 240.03 168.91 0)
+			(at 237.49 168.91 90)
 			(hide yes)
 			(effects
 				(font
 					(size 1.7 1.7)
 				)
-				(justify left)
 			)
 		)
 		(property "Value" "GND"
-			(at 240.03 172.72 0)
+			(at 233.65 169.85 90)
 			(effects
 				(font
 					(size 1.7 1.7)
 				)
-				(justify left)
 			)
 		)
 		(property "Footprint" ""
-			(at 237.49 171.45 0)
+			(at 234.95 171.45 90)
 			(hide yes)
 			(effects
 				(font
 					(size 1.7 1.7)
 				)
-				(justify left)
 			)
 		)
 		(property "Datasheet" ""
-			(at 237.49 171.45 0)
+			(at 234.95 171.45 90)
 			(hide yes)
 			(effects
 				(font
 					(size 1.7 1.7)
 				)
-				(justify left)
 			)
 		)
 		(property "Description" ""
-			(at 237.49 171.45 0)
+			(at 234.95 171.45 90)
 			(hide yes)
 			(effects
 				(font
 					(size 1.7 1.7)
 				)
-				(justify left)
 			)
 		)
 		(pin "1"
@@ -13286,7 +13281,7 @@
 	)
 	(symbol
 		(lib_id "power:GND")
-		(at 281.94 171.45 0)
+		(at 285.75 171.45 90)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -13294,52 +13289,47 @@
 		(dnp no)
 		(uuid "267476f4-936e-520d-8542-83276c4ffd6d")
 		(property "Reference" "#PWR29"
-			(at 284.48 168.91 0)
+			(at 288.29 168.91 270)
 			(hide yes)
 			(effects
 				(font
 					(size 1.7 1.7)
 				)
-				(justify left)
 			)
 		)
 		(property "Value" "GND"
-			(at 284.48 172.72 0)
+			(at 287.05 169.85 270)
 			(effects
 				(font
 					(size 1.7 1.7)
 				)
-				(justify left)
 			)
 		)
 		(property "Footprint" ""
-			(at 281.94 171.45 0)
+			(at 285.75 171.45 270)
 			(hide yes)
 			(effects
 				(font
 					(size 1.7 1.7)
 				)
-				(justify left)
 			)
 		)
 		(property "Datasheet" ""
-			(at 281.94 171.45 0)
+			(at 285.75 171.45 270)
 			(hide yes)
 			(effects
 				(font
 					(size 1.7 1.7)
 				)
-				(justify left)
 			)
 		)
 		(property "Description" ""
-			(at 281.94 171.45 0)
+			(at 285.75 171.45 270)
 			(hide yes)
 			(effects
 				(font
 					(size 1.7 1.7)
 				)
-				(justify left)
 			)
 		)
 		(pin "1"
