@@ -12747,7 +12747,7 @@
 			)
 		)
 		(property "Value" "RS-485 klemens 1 B / 2 GND / 3 A"
-			(at 284.48 100.33 0)
+			(at 278 100.33 0)
 			(effects
 				(font
 					(size 1.7 1.7)
