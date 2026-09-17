@@ -571,7 +571,7 @@ def build():
     # 5V_RAW → D1 → +5V rayı (ray sağa doğru: D2 dönüşü, +5V, C30, LDO, +3V3)
     nRaw = (vout[0] + 12.7, vout[1]); S.wire(vout, nRaw, color=COL['5V']); S.junction(nRaw)
     S.label('5V_RAW', (vout[0] + 1.27, vout[1]), 0)
-    D1 = S.part(DS, 'D1', 'Schottky (OR)', (nRaw[0] + 6.35, vout[1]), mirror='y', ref_at=(nRaw[0] + 2.54, vout[1] - 7.0), val_at=(nRaw[0] + 2.54, vout[1] - 4.5))
+    D1 = S.part(DS, 'D1', 'Schottky (OR)', (nRaw[0] + 6.35, vout[1]), mirror='y', ref_at=(nRaw[0] + 6.35, vout[1] - 7.0), val_at=(nRaw[0] + 6.35, vout[1] - 4.5)); D1.just = 'center'   # diyotun tam üstünde
     S.wire(nRaw, D1.p('A'), color=COL['5V'])
     rail_y = vout[1]; ry = rail_y
     U6 = S.part(LDO, 'U6', 'AP7361C-33E 3,3 V / 1 A', (248.92, rail_y), ref_at=(241.3, rail_y + 14.0), val_at=(241.3, rail_y + 16.5),

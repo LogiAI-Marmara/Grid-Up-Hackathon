@@ -14065,21 +14065,19 @@
 		(dnp no)
 		(uuid "99f44b16-62b5-5351-bb0f-91d85c299d43")
 		(property "Reference" "D1"
-			(at 114.3 221.6 0)
+			(at 118.11 221.6 0)
 			(effects
 				(font
 					(size 1.7 1.7)
 				)
-				(justify left)
 			)
 		)
 		(property "Value" "Schottky (OR)"
-			(at 114.3 224.1 0)
+			(at 118.11 224.1 0)
 			(effects
 				(font
 					(size 1.7 1.7)
 				)
-				(justify left)
 			)
 		)
 		(property "Footprint" ""
@@ -14089,7 +14087,6 @@
 				(font
 					(size 1.7 1.7)
 				)
-				(justify left)
 			)
 		)
 		(property "Datasheet" ""
@@ -14099,7 +14096,6 @@
 				(font
 					(size 1.7 1.7)
 				)
-				(justify left)
 			)
 		)
 		(property "Description" ""
@@ -14109,7 +14105,6 @@
 				(font
 					(size 1.7 1.7)
 				)
-				(justify left)
 			)
 		)
 		(pin "1"

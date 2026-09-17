@@ -945,8 +945,8 @@ stroke-linecap:round; stroke-linejoin:round;">
 <g style="fill:none; 
 stroke:#006464; stroke-width:0.1524; stroke-opacity:1; 
 stroke-linecap:round; stroke-linejoin:round;">
-<text fill="#006464" x="112.4917" y="222.4500" font-size="2.2666" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" stroke="none">D1</text>
-<text fill="#006464" x="105.2465" y="224.9500" font-size="2.2666" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" stroke="none">Schottky (OR)</text>
+<text fill="#006464" x="118.1100" y="222.4500" font-size="2.2666" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" stroke="none">D1</text>
+<text fill="#006464" x="118.1099" y="224.9500" font-size="2.2666" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" stroke="none">Schottky (OR)</text>
 <path style="fill:none; 
 stroke:#840000; stroke-width:0.5080; stroke-opacity:1; 
 stroke-linecap:round; stroke-linejoin:round;fill:none"
@@ -5674,18 +5674,6 @@ stroke-linecap:round; stroke-linejoin:round;">
 stroke:#A90000; stroke-width:0.1524; stroke-opacity:1; 
 stroke-linecap:round; stroke-linejoin:round;">
 <text fill="#A90000" x="97.7900" y="228.1682" font-size="1.7333" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" stroke="none">5</text>
-</g>
-<g style="fill:none; 
-stroke:#006464; stroke-width:0.1524; stroke-opacity:1; 
-stroke-linecap:round; stroke-linejoin:round;">
-<text fill="#006464" x="112.4917" y="222.4500" font-size="2.2666" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" stroke="none">D1</text>
-<text fill="#006464" x="105.2465" y="224.9500" font-size="2.2666" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" stroke="none">Schottky (OR)</text>
-</g>
-<g style="fill:none; 
-stroke:#840000; stroke-width:0.1524; stroke-opacity:1; 
-stroke-linecap:round; stroke-linejoin:round;">
-<path d="M119.38 228.6 L121.92 228.6" />
-<path d="M116.84 228.6 L114.3 228.6" />
 </g>
 <g style="fill:none; 
 stroke:#006464; stroke-width:0.1524; stroke-opacity:1; 
