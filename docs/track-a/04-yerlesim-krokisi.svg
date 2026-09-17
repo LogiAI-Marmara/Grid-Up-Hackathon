@@ -676,7 +676,7 @@
 </g>
   <rect x="-22" y="0" width="472" height="1500" fill="none" stroke="#263238" stroke-width="3"/>
   <text x="420" y="1478" font-size="14" fill="#546e7a" text-anchor="end">montaj plakası (20 mm) ▸</text>
-  <text x="-6" y="1400" font-size="15" fill="#37474f" transform="rotate(-90 -6 1400)">ön kapak 22 mm (menteşe altta)</text>
+  <text x="-6" y="1400" font-size="15" fill="#37474f" transform="rotate(-90 -6 1400)">ön kapak 22 mm</text>
   <text x="335" y="1128" font-size="15" fill="#e65100" text-anchor="end" font-weight="700">kritik bölge</text>
   <text x="370" y="380" font-size="14" fill="#546e7a" text-anchor="end">kumanda</text>
   <polygon points="53,807.5 430,518.218 430,1096.78" fill="#1565c0" opacity="0.16"/>

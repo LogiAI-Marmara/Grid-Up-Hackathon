@@ -122,7 +122,7 @@ rcol = {n: col_of(n) for n in {pl['body'] for pl in rest}}
 svg.view(rest, 0, 0, S, (0, -1500), stroke='#78909c', sw=1.5, colors=rcol)
 svg.add('<rect x="-22" y="0" width="472" height="1500" fill="none" stroke="#263238" stroke-width="3"/>')
 svg.text(420, 1478, 'montaj plakası (20 mm) ▸', 14, GREY, 'end')
-svg.text(-6, 1400, 'ön kapak 22 mm (menteşe altta)', 15, '#37474f', rotate=-90)
+svg.text(-6, 1400, 'ön kapak 22 mm', 15, '#37474f', rotate=-90)
 svg.text(335, 1128, 'kritik bölge', 15, ORANGE, 'end', '700')
 svg.text(370, 380, 'kumanda', 14, GREY, 'end')
 sx, sy = -SENS_Z, 1500 - IRY
