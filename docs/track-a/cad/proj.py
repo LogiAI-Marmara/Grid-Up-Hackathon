@@ -118,7 +118,14 @@ def run(_ctx):
                     for t in (tmin, tmax):
                         c = add(o, mul(a, t)); q0 = add(c, mul(s, g.radius)); q1 = add(c, mul(s, -g.radius))
                         if visible(add(c, mul(d, -(g.radius + 0.001)))):   # bakana en yakin yuzey noktasi
-                            polys.append(dict(body=bname, kind='sil', pts=[proj(q0), proj(q1)]))
+                            a2, b2 = proj(q0), proj(q1)
+                            L2 = ((b2[0]-a2[0])**2 + (b2[1]-a2[1])**2) ** 0.5 or 1.0
+                            def onchord(pt):   # ayni dogru uzerinde ve kiris araliginda mi (2B)
+                                dist = abs((b2[0]-a2[0])*(a2[1]-pt[1]) - (a2[0]-pt[0])*(b2[1]-a2[1])) / L2
+                                t = ((pt[0]-a2[0])*(b2[0]-a2[0]) + (pt[1]-a2[1])*(b2[1]-a2[1])) / (L2*L2)
+                                return dist < 0.05 and -0.01 <= t <= 1.01
+                            polys[:] = [pl for pl in polys if not (pl['body'] == bname and pl.get('kind') != 'sil' and all(onchord(pt) for pt in pl['pts']))]   # ornekli kenar kirisle cakismasin
+                            polys.append(dict(body=bname, kind='sil', pts=[a2, b2]))
         if clip and view.get('section'):
             tmp = adsk.fusion.TemporaryBRepManager.get()
             nrm = [0,0,0]; nrm[clip['axis']] = 1
