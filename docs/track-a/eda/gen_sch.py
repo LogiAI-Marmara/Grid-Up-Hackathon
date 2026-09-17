@@ -170,6 +170,31 @@ def sht31_symbol():
              pin('bidirectional', 10.16, 5.08, 180, 'SDA', '1'), pin('input', 10.16, 0, 180, 'SCL', '4'), pin('output', 10.16, -5.08, 180, 'ALERT', '3'),
              pin('input', -10.16, 5.08, 0, 'ADDR', '2'), pin('input', -10.16, 0, 0, '~{RESET}', '6'), pin('passive', -10.16, -5.08, 0, 'R', '7')]]
 
+def max3485_symbol():
+    """Kütüphane sembolü (Interface_UART:MAX3485) aynalanınca içi karışıyor / sade kutu, aynı pin numaraları."""
+    def prop(k, v, y, hide=False):
+        e = [Sym('property'), k, v, [Sym('at'), Sym('0'), Sym(str(y)), Sym('0')]]
+        if hide: e.append([Sym('hide'), Sym('yes')])
+        e.append([Sym('effects'), [Sym('font'), [Sym('size'), Sym('1.27'), Sym('1.27')]]])
+        return e
+    def pin(t, x, y, a, nm, num):
+        return [Sym('pin'), Sym(t), Sym('line'), [Sym('at'), Sym(str(x)), Sym(str(y)), Sym(str(a))], [Sym('length'), Sym('2.54')],
+                [Sym('name'), nm, [Sym('effects'), [Sym('font'), [Sym('size'), Sym('1.27'), Sym('1.27')]]]],
+                [Sym('number'), num, [Sym('effects'), [Sym('font'), [Sym('size'), Sym('1.27'), Sym('1.27')]]]]]
+    return [Sym('symbol'), 'GridUp:MAX3485', [Sym('pin_names'), [Sym('offset'), Sym('1.016')]],
+            [Sym('exclude_from_sim'), Sym('no')], [Sym('in_bom'), Sym('yes')], [Sym('on_board'), Sym('yes')],
+            prop('Reference', 'U', 13.97), prop('Value', 'MAX3485', -13.97),
+            prop('Footprint', 'Package_SO:SOIC-8_3.9x4.9mm_P1.27mm', 0, True),
+            prop('Datasheet', 'https://www.analog.com/media/en/technical-documentation/data-sheets/MAX3483-MAX3491.pdf', 0, True),
+            prop('Description', 'RS-485 alici-verici 3,3 V yaricift', 0, True),
+            [Sym('symbol'), 'MAX3485_0_1',
+             [Sym('rectangle'), [Sym('start'), Sym('-7.62'), Sym('10.16')], [Sym('end'), Sym('7.62'), Sym('-10.16')],
+              [Sym('stroke'), [Sym('width'), Sym('0.254')], [Sym('type'), Sym('default')]], [Sym('fill'), [Sym('type'), Sym('background')]]]],
+            [Sym('symbol'), 'MAX3485_1_1',
+             pin('power_in', 0, 12.7, 270, 'VCC', '8'), pin('power_in', 0, -12.7, 90, 'GND', '5'),
+             pin('input', -10.16, 5.08, 0, 'DI', '4'), pin('input', -10.16, 0, 0, 'DE', '3'), pin('input', -10.16, -2.54, 0, '~{RE}', '2'), pin('output', -10.16, -5.08, 0, 'RO', '1'),
+             pin('bidirectional', 10.16, -2.54, 180, 'B', '7'), pin('bidirectional', 10.16, -7.62, 180, 'A', '6')]]
+
 # ---------------- şema ----------------
 def g(v): return Sym('%g' % round(v, 4))
 _uuid_n = [0]
@@ -347,11 +372,11 @@ def build():
        Ana hatlar tel: I²C bus (SDA x=124,46 / SCL x=127), CT_L1…N, UART1 ↔ MAX3485. Etiket: VSENSE, V_BIAS, 5V_RAW,
        servis/genişleme başlıkları (aynı ad = aynı net). Kaçınılmaz kesişmeler kicad-cli --draw-hop-over ile atlama yayı."""
     S = Sch()
-    S.libsyms['GridUp:MLX90640'] = mlx90640_symbol(); S.libsyms['GridUp:SHT31'] = sht31_symbol()
+    S.libsyms['GridUp:MLX90640'] = mlx90640_symbol(); S.libsyms['GridUp:SHT31'] = sht31_symbol(); S.libsyms['GridUp:MAX3485'] = max3485_symbol()
     R = S.use('Device', 'R'); C = S.use('Device', 'C'); CP = S.use('Device', 'C_Polarized')
     DS = S.use('Device', 'D_Schottky'); FU = S.use('Device', 'Fuse'); RV = S.use('Device', 'Varistor')
     ESP = S.use('RF_Module', 'ESP32-S3-WROOM-1'); SHT = 'GridUp:SHT31'
-    MAX = S.use('Interface_UART', 'MAX3485'); RAC = S.use('Converter_ACDC', 'RAC05-05SK')
+    MAX = 'GridUp:MAX3485'; RAC = S.use('Converter_ACDC', 'RAC05-05SK')
     LDO = S.use('Regulator_Linear', 'AP7361C-33E'); SW = S.use('Switch', 'SW_Push')
     BOOST = S.use('Regulator_Switching', 'TPS61099DRV'); IND = S.use('Device', 'L')
     C02 = S.use('Connector_Generic', 'Conn_01x02'); C03 = S.use('Connector_Generic', 'Conn_01x03')
@@ -479,11 +504,9 @@ def build():
     for num, net in [('1', 'U0TXD'), ('2', 'U0RXD'), ('3', 'USB_DN'), ('4', 'USB_DP')]: S.pin_label(J9, num, net)
     # RS-485: MAX3485 aynalı (mirror x) → DI / DE / RE / RO sırası ESP IO17 / IO21 / IO18 ile kesişmesiz
     S.rect((222.0, 60.5), (322.0, 116.0), UART, title='RS-485 / Modbus RTU / MAX3485 3,3 V, yarıçift, 120 Ω sonlandırma')
-    U4 = S.part(MAX, 'U4', 'MAX3485', (254.0, 87.63), mirror='x', ref_at=(233.68, 73.66), val_at=(233.68, 76.2),
+    U4 = S.part(MAX, 'U4', 'MAX3485', (254.0, 87.63), ref_at=(233.68, 73.66), val_at=(233.68, 76.2),
                 footprint='Package_SO:SOIC-8_3.9x4.9mm_P1.27mm')
-    vcc4, gnd4 = U4.p('VCC'), U4.p('GND')   # aynalı çip: VCC altta, GND üstte → telle yana taşı, semboller normal yönde
-    S.wire(gnd4, (gnd4[0], gnd4[1] - 1.27), (267.97, gnd4[1] - 1.27), color=net_color('GND')); S.power('GND', (267.97, gnd4[1] - 1.27), 0)
-    S.wire(vcc4, (vcc4[0], vcc4[1] + 1.27), (240.03, vcc4[1] + 1.27), color=net_color('+3V3')); S.power('+3V3', (240.03, vcc4[1] + 1.27), 0)
+    S.pin_power(U4, 'VCC', '+3V3'); S.pin_power(U4, 'GND', 'GND')
     di, de, re_, ro = U4.p('DI'), U4.p('DE'), U4.p('~{RE}'), U4.p('RO')
     p17, p18, p21 = U1.p('IO17'), U1.p('IO18'), U1.p('IO21')
     S.wire(p17, di, color=UART)                                                     # IO17 (U1TXD) → DI, düz
@@ -618,7 +641,8 @@ if __name__ == '__main__':
     with open(os.path.join(HERE, 'GridUp.kicad_sym'), 'w', encoding='utf-8', newline='') as fh:   # özel sembol kütüphanesi (MLX90640)
         ms = list(mlx90640_symbol()); ms[1] = 'MLX90640'
         hs = list(sht31_symbol()); hs[1] = 'SHT31'
-        fh.write(ser([Sym('kicad_symbol_lib'), [Sym('version'), Sym('20241209')], [Sym('generator'), 'gen_sch'], [Sym('generator_version'), '10.0'], ms, hs]) + '\n')
+        xs = list(max3485_symbol()); xs[1] = 'MAX3485'
+        fh.write(ser([Sym('kicad_symbol_lib'), [Sym('version'), Sym('20241209')], [Sym('generator'), 'gen_sch'], [Sym('generator_version'), '10.0'], ms, hs, xs]) + '\n')
     libs = ['Device', 'power', 'RF_Module', 'Sensor_Humidity', 'Interface_UART', 'Converter_ACDC', 'Regulator_Linear', 'Regulator_Switching', 'Switch', 'Connector', 'Connector_Generic']
     with open(os.path.join(HERE, 'sym-lib-table'), 'w', encoding='utf-8', newline='') as fh:
         fh.write('(sym_lib_table\n  (version 7)\n')
