@@ -3431,7 +3431,7 @@ stroke-linecap:round; stroke-linejoin:round;">
 <path d="M254 55.88 L248.92 55.88" />
 </g>
 <g style="fill:none; 
-stroke:#009600; stroke-width:0.1524; stroke-opacity:1; 
+stroke:#C62828; stroke-width:0.1524; stroke-opacity:1; 
 stroke-linecap:round; stroke-linejoin:round;">
 <path d="M69.85 149.86 L52.07 149.86" />
 <path d="M52.07 149.86 L52.07 149.86" />
@@ -3468,7 +3468,7 @@ stroke-linecap:round; stroke-linejoin:round;">
 <path d="M44.45 130.81 L44.45 132.08" />
 </g>
 <g style="fill:none; 
-stroke:#009600; stroke-width:0.1524; stroke-opacity:1; 
+stroke:#E67800; stroke-width:0.1524; stroke-opacity:1; 
 stroke-linecap:round; stroke-linejoin:round;">
 <path d="M80.01 54.61 L88.9 54.61" />
 </g>
@@ -3481,26 +3481,10 @@ stroke-linecap:round; stroke-linejoin:round;">
 stroke:#E67800; stroke-width:0.1524; stroke-opacity:1; 
 stroke-linecap:round; stroke-linejoin:round;">
 <path d="M48.26 69.85 L60.96 69.85" />
-</g>
-<g style="fill:none; 
-stroke:#009600; stroke-width:0.1524; stroke-opacity:1; 
-stroke-linecap:round; stroke-linejoin:round;">
 <path d="M60.96 69.85 L72.39 69.85" />
 <path d="M80.01 69.85 L88.9 69.85" />
-</g>
-<g style="fill:none; 
-stroke:#E67800; stroke-width:0.1524; stroke-opacity:1; 
-stroke-linecap:round; stroke-linejoin:round;">
 <path d="M60.96 62.23 L60.96 66.04" />
-</g>
-<g style="fill:none; 
-stroke:#009600; stroke-width:0.1524; stroke-opacity:1; 
-stroke-linecap:round; stroke-linejoin:round;">
 <path d="M60.96 54.61 L72.39 54.61" />
-</g>
-<g style="fill:none; 
-stroke:#E67800; stroke-width:0.1524; stroke-opacity:1; 
-stroke-linecap:round; stroke-linejoin:round;">
 <path d="M114.3 85.09 L114.3 97.79" />
 <path d="M48.26 72.39 L54.61 72.39" />
 <path d="M54.61 72.39 L54.61 77.47" />
@@ -3510,10 +3494,6 @@ stroke-linecap:round; stroke-linejoin:round;">
 <path d="M54.61 87.63 L54.61 92.71" />
 <path d="M54.61 92.71 L60.96 92.71" />
 <path d="M60.96 92.71 L60.96 96.52" />
-</g>
-<g style="fill:none; 
-stroke:#009600; stroke-width:0.1524; stroke-opacity:1; 
-stroke-linecap:round; stroke-linejoin:round;">
 <path d="M60.96 85.09 L72.39 85.09" />
 <path d="M80.01 85.09 L88.9 85.09" />
 </g>
@@ -3527,16 +3507,8 @@ stroke:#E67800; stroke-width:0.1524; stroke-opacity:1;
 stroke-linecap:round; stroke-linejoin:round;">
 <path d="M48.26 100.33 L60.96 100.33" />
 <path d="M48.26 102.87 L54.61 102.87" />
-</g>
-<g style="fill:none; 
-stroke:#009600; stroke-width:0.1524; stroke-opacity:1; 
-stroke-linecap:round; stroke-linejoin:round;">
 <path d="M60.96 100.33 L72.39 100.33" />
 <path d="M80.01 100.33 L88.9 100.33" />
-</g>
-<g style="fill:none; 
-stroke:#E67800; stroke-width:0.1524; stroke-opacity:1; 
-stroke-linecap:round; stroke-linejoin:round;">
 <path d="M54.61 102.87 L54.61 107.95" />
 <path d="M54.61 107.95 L60.96 107.95" />
 <path d="M60.96 107.95 L60.96 111.76" />
@@ -3557,7 +3529,7 @@ stroke-linecap:round; stroke-linejoin:round;">
 <path d="M33.02 110.49 L33.02 107.95" />
 </g>
 <g style="fill:none; 
-stroke:#009600; stroke-width:0.1524; stroke-opacity:1; 
+stroke:#E67800; stroke-width:0.1524; stroke-opacity:1; 
 stroke-linecap:round; stroke-linejoin:round;">
 <path d="M33.02 118.11 L33.02 120.65" />
 <path d="M33.02 120.65 L33.02 123.19" />
@@ -3568,14 +3540,10 @@ stroke-linecap:round; stroke-linejoin:round;">
 <path d="M33.02 130.81 L33.02 132.08" />
 </g>
 <g style="fill:none; 
-stroke:#009600; stroke-width:0.1524; stroke-opacity:1; 
+stroke:#E67800; stroke-width:0.1524; stroke-opacity:1; 
 stroke-linecap:round; stroke-linejoin:round;">
 <path d="M33.02 120.65 L44.45 120.65" />
 <path d="M44.45 120.65 L44.45 123.19" />
-</g>
-<g style="fill:none; 
-stroke:#E67800; stroke-width:0.1524; stroke-opacity:1; 
-stroke-linecap:round; stroke-linejoin:round;">
 <path d="M44.45 120.65 L53.34 120.65" />
 </g>
 <g style="fill:none; 
@@ -3663,10 +3631,6 @@ stroke-linecap:round; stroke-linejoin:round;">
 <path d="M232.41 85.09 L232.41 92.71" />
 <path d="M264.16 90.17 L287.02 90.17" />
 <path d="M264.16 95.25 L287.02 95.25" />
-</g>
-<g style="fill:none; 
-stroke:#009600; stroke-width:0.1524; stroke-opacity:1; 
-stroke-linecap:round; stroke-linejoin:round;">
 <path d="M274.32 95.25 L274.32 96.52" />
 </g>
 <g style="fill:none; 
@@ -3739,9 +3703,13 @@ stroke-linecap:round; stroke-linejoin:round;">
 <path d="M254 74.93 L254 72.39" />
 </g>
 <g style="fill:none; 
-stroke:#009600; stroke-width:0.1524; stroke-opacity:1; 
+stroke:#6A1B9A; stroke-width:0.1524; stroke-opacity:1; 
 stroke-linecap:round; stroke-linejoin:round;">
 <path d="M274.32 90.17 L274.32 88.9" />
+</g>
+<g style="fill:none; 
+stroke:#E67800; stroke-width:0.1524; stroke-opacity:1; 
+stroke-linecap:round; stroke-linejoin:round;">
 <path d="M111.76 240.03 L111.76 242.57" />
 <path d="M111.76 242.57 L111.76 245.11" />
 </g>
@@ -3761,15 +3729,7 @@ stroke-linecap:round; stroke-linejoin:round;">
 <path d="M99.06 228.6 L111.76 228.6" />
 <path d="M111.76 228.6 L114.3 228.6" />
 <path d="M62.23 228.6 L78.74 228.6" />
-</g>
-<g style="fill:none; 
-stroke:#009600; stroke-width:0.1524; stroke-opacity:1; 
-stroke-linecap:round; stroke-linejoin:round;">
 <path d="M71.12 233.68 L71.12 234.95" />
-</g>
-<g style="fill:none; 
-stroke:#8C0000; stroke-width:0.1524; stroke-opacity:1; 
-stroke-linecap:round; stroke-linejoin:round;">
 <path d="M66.04 233.68 L78.74 233.68" />
 </g>
 <g style="fill:none; 
@@ -3799,10 +3759,6 @@ stroke:#8C0000; stroke-width:0.1524; stroke-opacity:1;
 stroke-linecap:round; stroke-linejoin:round;">
 <path d="M48.26 231.14 L66.04 231.14" />
 <path d="M66.04 231.14 L66.04 233.68" />
-</g>
-<g style="fill:none; 
-stroke:#009600; stroke-width:0.1524; stroke-opacity:1; 
-stroke-linecap:round; stroke-linejoin:round;">
 <path d="M71.12 228.6 L71.12 227.33" />
 </g>
 <g style="fill:none; 
@@ -3847,10 +3803,6 @@ stroke-linecap:round; stroke-linejoin:round;">
 stroke:#C62828; stroke-width:0.1524; stroke-opacity:1; 
 stroke-linecap:round; stroke-linejoin:round;">
 <path d="M100.33 181.61 L100.33 180.34" />
-</g>
-<g style="fill:none; 
-stroke:#009600; stroke-width:0.1524; stroke-opacity:1; 
-stroke-linecap:round; stroke-linejoin:round;">
 <path d="M69.85 151.13 L69.85 149.86" />
 </g>
 <g style="fill:none; 
@@ -3862,16 +3814,8 @@ stroke-linecap:round; stroke-linejoin:round;">
 stroke:#8C0000; stroke-width:0.1524; stroke-opacity:1; 
 stroke-linecap:round; stroke-linejoin:round;">
 <path d="M121.92 228.6 L177.8 228.6" />
-</g>
-<g style="fill:none; 
-stroke:#009600; stroke-width:0.1524; stroke-opacity:1; 
-stroke-linecap:round; stroke-linejoin:round;">
 <path d="M111.76 228.6 L111.76 232.41" />
 <path d="M133.35 228.6 L133.35 232.41" />
-</g>
-<g style="fill:none; 
-stroke:#8C0000; stroke-width:0.1524; stroke-opacity:1; 
-stroke-linecap:round; stroke-linejoin:round;">
 <path d="M176.53 237.49 L176.53 228.6" />
 </g>
 <g style="fill:none; 
