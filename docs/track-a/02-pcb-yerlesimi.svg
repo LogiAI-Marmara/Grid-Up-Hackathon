@@ -104,10 +104,14 @@
 <polyline points="535.824,372 541,372 547,372 553.632,372 560.704,372 568,372 575.296,372 582.368,372 589,372 595,372 600.176,372" stroke="#f9a825"/>
 <polyline points="526,624 526,372" stroke="#f9a825"/>
 <polyline points="610,624 610,372" stroke="#f9a825"/>
+<polyline points="526,624 610,624" stroke="#f9a825"/>
+<polyline points="526,372 610,372" stroke="#f9a825"/>
 <polyline points="688.176,624 683,624 677,624 670.368,624 663.296,624 656,624 648.704,624 641.632,624 635,624 629,624 623.824,624" stroke="#f9a825"/>
 <polyline points="623.824,372 629,372 635,372 641.632,372 648.704,372 656,372 663.296,372 670.368,372 677,372 683,372 688.176,372" stroke="#f9a825"/>
 <polyline points="614,624 614,372" stroke="#f9a825"/>
 <polyline points="698,624 698,372" stroke="#f9a825"/>
+<polyline points="614,624 698,624" stroke="#f9a825"/>
+<polyline points="614,372 698,372" stroke="#f9a825"/>
 <polyline points="410,528 450,528" stroke="#2e7d32"/>
 <polyline points="450,528 450,480" stroke="#2e7d32"/>
 <polyline points="450,480 410,480" stroke="#2e7d32"/>
@@ -279,8 +283,8 @@
   <text x="380" y="417" font-size="10" fill="#607d8b" text-anchor="end">çıkış 4,6 V → D2</text>
   <rect x="438" y="413.5" width="66" height="10.5" rx="2" fill="#e8f5e9"/>
   <text x="472" y="421.5" font-size="10" fill="#f57f17" text-anchor="middle">dengeleme 2×</text>
-  <rect x="364.5" y="488" width="38.5" height="10.5" rx="2" fill="#e8f5e9"/>
-  <text x="404" y="496" font-size="10" fill="#607d8b" text-anchor="end">MAX3485</text>
+  <rect x="409.8" y="459.2" width="38.5" height="10.5" rx="2" fill="#e8f5e9"/>
+  <text x="430" y="467.2" font-size="10" fill="#607d8b" text-anchor="middle">MAX3485</text>
   <rect x="471" y="508" width="27.5" height="10.5" rx="2" fill="#e8f5e9"/>
   <text x="472" y="516" font-size="10" fill="#607d8b">120 Ω</text>
   <rect x="100.8" y="412.4" width="36.3" height="11.6" rx="2" fill="#e8f5e9"/>

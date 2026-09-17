@@ -114,6 +114,11 @@ def run(_ctx):
                     if not ok or not f.evaluator.isParameterOnFace(prm): continue
                     if visible(add(mul(add(p0, p1), 0.5), mul(s, sign*0.001))):
                         polys.append(dict(body=bname, kind='sil', pts=[proj(p0), proj(p1)]))
+                if abs(dot(a, d)) < 1e-3:   # eksen bakisa dik: uc daireleri yandan cizgi olur; kenar orneklemesi uclara ulasmaz -> tam capli kirisi ekle
+                    for t in (tmin, tmax):
+                        c = add(o, mul(a, t)); q0 = add(c, mul(s, g.radius)); q1 = add(c, mul(s, -g.radius))
+                        if visible(add(c, mul(d, -(g.radius + 0.001)))):   # bakana en yakin yuzey noktasi
+                            polys.append(dict(body=bname, kind='sil', pts=[proj(q0), proj(q1)]))
         if clip and view.get('section'):
             tmp = adsk.fusion.TemporaryBRepManager.get()
             nrm = [0,0,0]; nrm[clip['axis']] = 1
