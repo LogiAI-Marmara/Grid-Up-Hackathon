@@ -547,7 +547,7 @@ def build():
     # ================= ALT: Besleme =================
     S.rect((25.4, 216.4), (322.0, 280.0), COL['5V'], title='Besleme / 230 V iç ihtiyaç → RAC05 5 V → D1 (OR) → 5 V rayı → LDO 3V3; yedek: 2× süperkap seri → boost 4,6 V → D2; algılama D1 öncesi (§3.4, §7.3)')
     yL = 228.6
-    J1 = S.part(C03, 'J1', 'İç ihtiyaç L / N / PE', (43.18, yL + 2.54), mirror='y', ref_at=(36.83, yL - 6.35), val_at=(33.5, yL - 3.81),
+    J1 = S.part(C03, 'J1', 'İç ihtiyaç L / N / PE', (43.18, yL + 2.54), mirror='y', ref_at=(33.8, yL - 6.35), val_at=(30.5, yL - 3.81),
                 footprint='TerminalBlock_Phoenix:TerminalBlock_Phoenix_MKDS-3-3-5.08_1x03_P5.08mm_Horizontal')
     J1.just = 'right'   # aynalı sembol: hiza da aynalanır (bkz. CT klemensleri)
     pL, pN, pPE = J1.p('1'), J1.p('2'), J1.p('3')
