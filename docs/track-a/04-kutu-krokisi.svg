@@ -310,10 +310,10 @@
 </g>
   <line x1="908" y1="250" x2="878" y2="250" stroke="#c62828" stroke-width="3" marker-start="url(#arr)"/>
   <text x="892" y="312" font-size="12" fill="#c62828" text-anchor="middle" transform="rotate(-90 892 312)">IR pencere</text>
-  <line x1="822" y1="238" x2="794" y2="238" stroke="#37474f" stroke-width="1"/>
+  <line x1="822" y1="238" x2="794" y2="246" stroke="#37474f" stroke-width="1"/>
   <circle cx="822" cy="238" r="2.5" fill="#37474f"/>
-  <text x="790" y="242" font-size="11" fill="#37474f" text-anchor="end" font-weight="700">MLX90640 TO-39 Ø9,3</text>
-  <text x="790" y="256" font-size="11" fill="#37474f" text-anchor="end">pencereye dayalı</text>
+  <text x="790" y="250" font-size="11" fill="#37474f" text-anchor="end" font-weight="700">MLX90640 TO-39 Ø9,3</text>
+  <text x="790" y="264" font-size="11" fill="#37474f" text-anchor="end">pencereye dayalı</text>
   <circle cx="820.8" cy="400" r="2" fill="#2e7d32"/><line x1="820.8" y1="400" x2="820.8" y2="424" stroke="#2e7d32" stroke-width="1.2"/>
   <text x="820.8" y="435" font-size="10" fill="#2e7d32" text-anchor="middle">PCB 1,6</text>
   <text x="796.6" y="325" font-size="12" fill="#f57f17" text-anchor="middle">2× süperkap.</text>
