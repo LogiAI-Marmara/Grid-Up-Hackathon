@@ -530,7 +530,7 @@ def build():
     S.rect((222.0, 119.0), (322.0, 150.0), COL['DEF'], title='Anten / U.FL pigtail → SMA panel → dış anten (pano dış yüzü)')
     J8 = S.part(COAX, 'J8', 'SMA panel', (259.08, 133.35), ref_at=(262.9, 131.6), val_at=(262.9, 134.4), footprint='Connector_Coaxial:SMA_Amphenol_132134_Vertical')
     S.pin_nc(J8, '1'); S.pin_power(J8, '2', 'GND')
-    S.text('U.FL pigtail (modül konnektörü) / RF, şemada net değil; mevcut kablo girişinden', (236.22, 147.5), SZ_NOTE, italic=True)
+    S.text('U.FL pigtail (modül konnektörü) / RF, şemada net değil; mevcut kablo girişinden', (228.6, 147.5), SZ_NOTE, italic=True)
     # genişleme
     S.rect((222.0, 153.0), (322.0, 190.0), COL['DEF'], title='Genişleme 2×5 (boş) / PD / akustik için ayrılmış (§7.1); kör tapa')
     J6 = S.part(C25, 'J6', 'Genişleme 2×5', (262.89, 173.99), ref_at=(264.16, 163.5), val_at=(257.81, 184.0), footprint='Connector_PinHeader_2.54mm:PinHeader_2x05_P2.54mm_Vertical')
