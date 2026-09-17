@@ -96,9 +96,10 @@ tek adımda cevaplanması.
 
 | | |
 |---|---|
-| **Kaynak** | Melexis MLX90640 veri sayfası |
-| **Alınan değerler** | Geniş açılı varyant **110° × 75°** (device marking `A` = 110°, `B` = 55°); TO-39 Ø9,30 × 5,70 mm; I²C adres **0x33**; 0,4–1 MHz; yayma katsayısı EEPROM'da tutulmaz, yazılımda belirtilir (**§11.2.2.5.4**) |
-| **Durum** | **ATIF** — dokümanlarda bölüm numarasıyla anılıyor |
+| **Kaynak** | Melexis MLX90640 veri sayfası, **REV 12 — 3 Aralık 2019**, doküman 3901090640 |
+| **URL** | `melexis.com/-/media/files/documents/datasheets/mlx90640-datasheet-melexis.pdf` |
+| **Alınan değerler** | Sipariş kodu §16: **`xxA` → FOV = 110° × 75°**, `xxB` → 55° × 35° — yani **BAA = geniş açılı** (lazer markalama §15.3: `A` = 110°, `B` = 55°); mekanik çizim §15.2 (Şekil 29): **Ø9,30 ±0,15 × 5,70 ±0,30** gövde, bacak 6 ±0,50, pencere Ø2,60; I²C varsayılan **SA = 0x33**; FM+ **1 MHz**'e kadar (EEPROM işlemleri maks. 400 kHz); **NETD 0,1 K RMS @1 Hz**; akım **< 23 mA**; 3,3 V; ortam **−40…+85 °C**, hedef **−40…+300 °C**; yayma katsayısı yazılımda verilir (**§11.2.2.5.4**) |
+| **Durum** | **OKUNDU** — PDF metin katmanı + mekanik çizim sayfası (s. 57) görsel olarak okundu. **Not:** bazı ikincil kaynaklar BAA/BAB'ı ters verir; datasheet sipariş kodu tablosu esas alındı |
 | **Kullanıldığı yer** | 01 (sensör gerekçesi), 02 §2.1 (1), 03 §3.2, README |
 
 ### 1.7 MCU + radyo — Espressif ESP32-S3-WROOM-1U-N8
@@ -108,7 +109,7 @@ tek adımda cevaplanması.
 | **Kaynak** | Espressif *ESP32-S3-WROOM-1 & WROOM-1U* veri sayfası, **v1.8** |
 | **URL** | `documentation.espressif.com/esp32-s3-wroom-1_wroom-1u_datasheet_en.pdf` |
 | **Alınan değerler** | 18,0 × 19,2 × 3,2 mm; **IO35/IO36/IO37 Octal SPI PSRAM'li varyantlarda (ESP32-S3R8/R16V) PSRAM'e bağlıdır, başka amaçla kullanılamaz**; N8 varyantında PSRAM yoktur → bu pinler serbesttir. Strapping: IO0/IO3/IO45/IO46. U1TXD=IO17, U1RXD=IO18 |
-| **Durum** | **OKUNDU** (IO35–37 notu PDF metninden doğrulandı) / kalan pinler **ATIF** |
+| **Durum** | **OKUNDU** — pin tablosu (§3-1) birebir doğrulandı: IO1 = ADC1_CH0 · IO4/5/6/7 = ADC1_CH3/CH4/CH5/CH6 · IO10 = ADC1_CH9 · IO17 = U1TXD · IO18 = U1RXD · IO35/36/37 = modül pin 28/29/30 (yalnız Octal PSRAM'li R8/R16V'de bağlı) · strapping tablosu (§4-1) GPIO0 / GPIO3 / GPIO45 / GPIO46 · varyant tablosu (Tablo 1-2): 1U-N8 18,0 × 19,2 × 3,2 mm, **−40 ~ 85 °C**; N…R8 / N16R16V **−40 ~ 65 °C** |
 | **Kullanıldığı yer** | §2.1 (2), §2.6 (1), 03 §3.1–3.7 |
 
 ### 1.8 Sıcaklık + nem — Sensirion SHT31-DIS-B2.5KS
@@ -116,8 +117,8 @@ tek adımda cevaplanması.
 | | |
 |---|---|
 | **Kaynak** | Sensirion SHT31 veri sayfası |
-| **Alınan değerler** | I²C adres **0x44** (ADDR=GND) / 0x45 (ADDR=VDD); −40…+125 °C |
-| **Durum** | **ATIF** |
+| **Alınan değerler** | I²C adres **0x44** (ADDR=GND) / **0x45** (ADDR=VDD); **−40…+125 °C**; sıcaklık doğruluğu tipik **±0,2 °C**; DFN **2,5 × 2,5 × 0,9 mm** |
+| **Durum** | **ÖZET** — Sensirion PDF'i bu oturumda açılamadı (DNS), değerler üç bağımsız kaynakla (Sensirion doküman sürümü 7 / Aralık 2022 alıntısı, DigiKey HTML datasheet, Adafruit breakout dokümanı) teyit edildi; DFN ölçüsü modeldeki gövdeyle birebir |
 | **Kullanıldığı yer** | §2.1 (3), 03 §3.2 |
 
 ### 1.9 RS-485 alıcı-verici — MAX3485 sınıfı
