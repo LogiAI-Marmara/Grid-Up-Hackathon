@@ -12593,7 +12593,7 @@
 		(dnp no)
 		(uuid "0b1cb7fa-d61c-5eec-b9fc-816910f6bb2f")
 		(property "Reference" "J9"
-			(at 263 48 0)
+			(at 263 49 0)
 			(effects
 				(font
 					(size 1.7 1.7)
@@ -12602,7 +12602,7 @@
 			)
 		)
 		(property "Value" "Servis USB/UART0"
-			(at 263 57 0)
+			(at 263 52 0)
 			(effects
 				(font
 					(size 1.7 1.7)

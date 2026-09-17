@@ -2053,8 +2053,8 @@ stroke-linecap:round; stroke-linejoin:round;">
 <g style="fill:none; 
 stroke:#006464; stroke-width:0.1524; stroke-opacity:1; 
 stroke-linecap:round; stroke-linejoin:round;">
-<text fill="#006464" x="264.6059" y="48.8500" font-size="2.2666" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" stroke="none">J9</text>
-<text fill="#006464" x="274.9677" y="57.8500" font-size="2.2666" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" stroke="none">Servis USB/UART0</text>
+<text fill="#006464" x="264.6059" y="49.8500" font-size="2.2666" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" stroke="none">J9</text>
+<text fill="#006464" x="274.9677" y="52.8500" font-size="2.2666" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" stroke="none">Servis USB/UART0</text>
 <path style="fill:none; 
 stroke:#840000; stroke-width:0.1524; stroke-opacity:1; 
 stroke-linecap:round; stroke-linejoin:round;fill:none"

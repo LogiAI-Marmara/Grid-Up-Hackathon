@@ -474,7 +474,7 @@ def build():
     # ================= SAĞ SÜTUN =================
     # servis başlığı (etiket / sahada bağlı değil)
     S.rect((222.0, 42.0), (322.0, 58.0), UART, title='Servis başlığı / USB + UART0, sahada bağlı değil')
-    J9 = S.part(C04, 'J9', 'Servis USB/UART0', (259.08, 50.8), ref_at=(263.0, 48.0), val_at=(263.0, 57.0),
+    J9 = S.part(C04, 'J9', 'Servis USB/UART0', (259.08, 50.8), ref_at=(263.0, 49.0), val_at=(263.0, 52.0),
                 footprint='Connector_PinHeader_2.54mm:PinHeader_1x04_P2.54mm_Vertical')
     for num, net in [('1', 'U0TXD'), ('2', 'U0RXD'), ('3', 'USB_DN'), ('4', 'USB_DP')]: S.pin_label(J9, num, net)
     # RS-485: MAX3485 aynalı (mirror x) → DI / DE / RE / RO sırası ESP IO17 / IO21 / IO18 ile kesişmesiz
