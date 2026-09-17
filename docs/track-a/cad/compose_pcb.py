@@ -43,7 +43,7 @@ svg.add('<circle cx="%g" cy="%g" r="60" fill="none" stroke="#c62828" stroke-widt
 for (mx, my) in [(7, 7), (103, 7), (7, 63), (103, 63)]:
     x, y = px(mx, my)
     svg.add('<circle cx="%g" cy="%g" r="22" fill="none" stroke="#78909c" stroke-width="1"/>' % (x, y))
-svg.text(OX + 90, OY + 20, 'M3 × 4 (7, 7) / kutu dikmeleri Ø6', 10, '#607d8b')
+svg.text(px(10.4, 61.3)[0], px(10.4, 61.3)[1], 'M3 × 4 (7, 7) / kutu dikmeleri Ø6', 10, '#607d8b', halo='#e8f5e9')
 
 # ---- arka yüz parçaları (kart üzerinden, kesikli)
 g = ['<g fill="none" stroke-width="1.8" stroke-dasharray="6 3" stroke-linejoin="round">']
