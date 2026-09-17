@@ -195,6 +195,25 @@ def max3485_symbol():
              pin('input', -10.16, 5.08, 0, 'DI', '4'), pin('input', -10.16, 0, 0, 'DE', '3'), pin('input', -10.16, -2.54, 0, '~{RE}', '2'), pin('output', -10.16, -5.08, 0, 'RO', '1'),
              pin('bidirectional', 10.16, -2.54, 180, 'B', '7'), pin('bidirectional', 10.16, -7.62, 180, 'A', '6')]]
 
+def rac05_symbol():
+    """Converter_ACDC:RAC05-05SK kopyası; NC pini (3) kütüphanede gizli / 0 mm: diğer pinler gibi görünür yap
+    (sağda 2,54 mm bacak, pasif tip → sadece şemadaki mavi X görünür, kütüphane uyuşmazlığı uyarısı yok).
+    DC simgesi (kesikli+düz çizgi) NC yazısının altında kalmasın diye 1 mm sola."""
+    sym = scale_pin_fonts(lib_symbol('Converter_ACDC', 'RAC05-05SK'), SZ_PIN, SZ_PINNUM)
+    for unit in find(sym, 'symbol'):
+        for pin in find(unit, 'pin'):
+            if find1(pin, 'name')[1] == 'NC':
+                pin[:] = [x for x in pin if not (isinstance(x, list) and x and x[0] == Sym('hide'))]
+                pin[1] = Sym('passive')
+                find1(pin, 'at')[1:] = [Sym('10.16'), Sym('0'), Sym('180')]
+        for pl in find(unit, 'polyline'):
+            pts = find1(pl, 'pts')
+            xs_ = [float(xy[1]) for xy in pts[1:]]
+            if min(xs_) > 0 and max(xs_) - min(xs_) < 4:   # sağ yarıdaki kısa yatay çizgiler = DC simgesi
+                for xy in pts[1:]: xy[1] = Sym('%g' % (float(xy[1]) - 1.0))
+    sym[1] = 'GridUp:RAC05-05SK'
+    return sym
+
 # ---------------- şema ----------------
 def g(v): return Sym('%g' % round(v, 4))
 _uuid_n = [0]
@@ -376,7 +395,7 @@ def build():
     R = S.use('Device', 'R'); C = S.use('Device', 'C'); CP = S.use('Device', 'C_Polarized')
     DS = S.use('Device', 'D_Schottky'); FU = S.use('Device', 'Fuse'); RV = S.use('Device', 'Varistor')
     ESP = S.use('RF_Module', 'ESP32-S3-WROOM-1'); SHT = 'GridUp:SHT31'
-    MAX = 'GridUp:MAX3485'; RAC = S.use('Converter_ACDC', 'RAC05-05SK')
+    MAX = 'GridUp:MAX3485'; RAC = 'GridUp:RAC05-05SK'; S.libsyms[RAC] = rac05_symbol()
     LDO = S.use('Regulator_Linear', 'AP7361C-33E'); SW = S.use('Switch', 'SW_Push')
     BOOST = S.use('Regulator_Switching', 'TPS61099DRV'); IND = S.use('Device', 'L')
     C02 = S.use('Connector_Generic', 'Conn_01x02'); C03 = S.use('Connector_Generic', 'Conn_01x03')
@@ -654,7 +673,8 @@ if __name__ == '__main__':
         ms = list(mlx90640_symbol()); ms[1] = 'MLX90640'
         hs = list(sht31_symbol()); hs[1] = 'SHT31'
         xs = list(max3485_symbol()); xs[1] = 'MAX3485'
-        fh.write(ser([Sym('kicad_symbol_lib'), [Sym('version'), Sym('20241209')], [Sym('generator'), 'gen_sch'], [Sym('generator_version'), '10.0'], ms, hs, xs]) + '\n')
+        rs = list(rac05_symbol()); rs[1] = 'RAC05-05SK'
+        fh.write(ser([Sym('kicad_symbol_lib'), [Sym('version'), Sym('20241209')], [Sym('generator'), 'gen_sch'], [Sym('generator_version'), '10.0'], ms, hs, xs, rs]) + '\n')
     libs = ['Device', 'power', 'RF_Module', 'Sensor_Humidity', 'Interface_UART', 'Converter_ACDC', 'Regulator_Linear', 'Regulator_Switching', 'Switch', 'Connector', 'Connector_Generic']
     with open(os.path.join(HERE, 'sym-lib-table'), 'w', encoding='utf-8', newline='') as fh:
         fh.write('(sym_lib_table\n  (version 7)\n')

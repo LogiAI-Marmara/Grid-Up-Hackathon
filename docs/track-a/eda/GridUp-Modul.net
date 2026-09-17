@@ -2990,7 +2990,7 @@
 				)
 			)
 			(libsource
-				(lib "Converter_ACDC")
+				(lib "GridUp")
 				(part "RAC05-05SK")
 				(description "5W Single Output EMC Class B 5V 1000mA")
 			)
@@ -3026,10 +3026,10 @@
 							(num "2")
 						)
 						(pin
-							(num "3")
+							(num "5")
 						)
 						(pin
-							(num "5")
+							(num "3")
 						)
 						(pin
 							(num "4")
@@ -3402,54 +3402,6 @@
 			)
 		)
 		(libpart
-			(lib "Converter_ACDC")
-			(part "RAC05-05SK")
-			(description "5W Single Output EMC Class B 5V 1000mA")
-			(docs "https://www.recom-power.com/pdf/Powerline-AC-DC/RAC05-K.pdf")
-			(footprints
-				(fp "Converter*ACDC*RECOM*RAC05*SK*")
-			)
-			(fields
-				(field
-					(name "Reference") "U")
-				(field
-					(name "Value") "RAC05-05SK")
-				(field
-					(name "Footprint") "Converter_ACDC:Converter_ACDC_RECOM_RAC05-xxSK_THT")
-				(field
-					(name "Datasheet") "https://www.recom-power.com/pdf/Powerline-AC-DC/RAC05-K.pdf")
-				(field
-					(name "Description") "5W Single Output EMC Class B 5V 1000mA")
-			)
-			(pins
-				(pin
-					(num "1")
-					(name "AC(L)")
-					(type "power_in")
-				)
-				(pin
-					(num "2")
-					(name "AC(N)")
-					(type "power_in")
-				)
-				(pin
-					(num "3")
-					(name "NC")
-					(type "no_connect")
-				)
-				(pin
-					(num "4")
-					(name "-Vout")
-					(type "power_out")
-				)
-				(pin
-					(num "5")
-					(name "+Vout")
-					(type "power_out")
-				)
-			)
-		)
-		(libpart
 			(lib "Device")
 			(part "C")
 			(description "Unpolarized capacitor")
@@ -3801,6 +3753,54 @@
 					(num "4")
 					(name "SCL")
 					(type "input")
+				)
+			)
+		)
+		(libpart
+			(lib "GridUp")
+			(part "RAC05-05SK")
+			(description "5W Single Output EMC Class B 5V 1000mA")
+			(docs "https://www.recom-power.com/pdf/Powerline-AC-DC/RAC05-K.pdf")
+			(footprints
+				(fp "Converter*ACDC*RECOM*RAC05*SK*")
+			)
+			(fields
+				(field
+					(name "Reference") "U")
+				(field
+					(name "Value") "RAC05-05SK")
+				(field
+					(name "Footprint") "Converter_ACDC:Converter_ACDC_RECOM_RAC05-xxSK_THT")
+				(field
+					(name "Datasheet") "https://www.recom-power.com/pdf/Powerline-AC-DC/RAC05-K.pdf")
+				(field
+					(name "Description") "5W Single Output EMC Class B 5V 1000mA")
+			)
+			(pins
+				(pin
+					(num "1")
+					(name "AC(L)")
+					(type "power_in")
+				)
+				(pin
+					(num "2")
+					(name "AC(N)")
+					(type "power_in")
+				)
+				(pin
+					(num "3")
+					(name "NC")
+					(type "passive")
+				)
+				(pin
+					(num "4")
+					(name "-Vout")
+					(type "power_out")
+				)
+				(pin
+					(num "5")
+					(name "+Vout")
+					(type "power_out")
 				)
 			)
 		)
@@ -4228,10 +4228,6 @@
 		(library
 			(logical "Connector_Generic")
 			(uri "${KICAD10_SYMBOL_DIR}/Connector_Generic.kicad_sym")
-		)
-		(library
-			(logical "Converter_ACDC")
-			(uri "${KICAD10_SYMBOL_DIR}/Converter_ACDC.kicad_sym")
 		)
 		(library
 			(logical "Device")
@@ -5595,7 +5591,7 @@
 				(ref "U5")
 				(pin "3")
 				(pinfunction "NC_3")
-				(pintype "no_connect")
+				(pintype "passive+no_connect")
 			)
 		)
 	)
