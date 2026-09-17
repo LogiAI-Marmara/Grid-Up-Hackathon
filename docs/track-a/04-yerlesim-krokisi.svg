@@ -339,11 +339,11 @@
 <polyline points="632.5,788 632.5,791.25"/>
 </g>
   <line x1="625" y1="807.5" x2="675" y2="807.5" stroke="#1b5e20" stroke-width="2"/><line x1="650" y1="782.5" x2="650" y2="832.5" stroke="#1b5e20" stroke-width="2"/>
-  <rect x="715" y="765" width="360" height="92" fill="#fff" opacity="0.92" stroke="#2e7d32" stroke-width="1.5"/>
-  <text x="728" y="790" font-size="18" fill="#1b5e20" font-weight="700">MODÜL / kapak iç yüzünde</text>
-  <text x="728" y="814" font-size="15" fill="#2e7d32">kutu 120 × 80, X 590–710 / IR merkezi (650, 807.5) mm</text>
-  <text x="728" y="836" font-size="15" fill="#2e7d32">bakış: sayfaya dik (→ yan kesit) / klemense DİK</text>
-  <text x="728" y="852" font-size="13" fill="#558b2f" font-style="italic">kesikli çizgi = ön düzlemde, kapağa bağlı (model: GridUp-Pano.f3d)</text>
+  <rect x="722" y="765" width="410" height="92" fill="#fff" opacity="0.92" stroke="#2e7d32" stroke-width="1.5"/>
+  <text x="735" y="790" font-size="18" fill="#1b5e20" font-weight="700">MODÜL / kapak iç yüzünde</text>
+  <text x="735" y="814" font-size="15" fill="#2e7d32">kutu 120 × 80, X 590–710 / IR merkezi (650, 807,5) mm</text>
+  <text x="735" y="836" font-size="15" fill="#2e7d32">bakış: sayfaya dik (→ yan kesit) / klemense DİK</text>
+  <text x="735" y="852" font-size="13" fill="#558b2f" font-style="italic">kesikli çizgi = ön düzlemde, kapağa bağlı (model: GridUp-Pano.f3d)</text>
   <line x1="-40" y1="0" x2="-40" y2="1500" stroke="#455a64" stroke-width="2" marker-start="url(#dim)" marker-end="url(#dim)"/>
   <text x="-50" y="750" font-size="22" fill="#455a64" text-anchor="middle" transform="rotate(-90 -50 750)">B = 1500 mm</text>
   <line x1="0" y1="1545" x2="1600" y2="1545" stroke="#455a64" stroke-width="2" marker-start="url(#dim)" marker-end="url(#dim)"/>
