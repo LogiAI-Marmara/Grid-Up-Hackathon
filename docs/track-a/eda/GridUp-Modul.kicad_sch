@@ -13641,7 +13641,7 @@
 		(dnp no)
 		(uuid "413388b5-8d65-5780-9627-d53df98a7fba")
 		(property "Reference" "RV1"
-			(at 72.39 228.1 0)
+			(at 73.2 229.9 0)
 			(effects
 				(font
 					(size 1.7 1.7)
@@ -13650,7 +13650,7 @@
 			)
 		)
 		(property "Value" "MOV"
-			(at 72.39 234.18 0)
+			(at 73.2 232.5 0)
 			(effects
 				(font
 					(size 1.7 1.7)
