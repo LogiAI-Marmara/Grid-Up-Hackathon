@@ -8014,7 +8014,7 @@
 	(polyline
 		(pts
 			(xy 72.5 230.3)
-			(xy 73.8 224.9)
+			(xy 73.9 223)
 		)
 		(stroke
 			(width 0.2)
@@ -13672,7 +13672,7 @@
 		(dnp no)
 		(uuid "1fc932a0-728d-5d98-b8bf-cb78ea179cd9")
 		(property "Reference" "RV1"
-			(at 73 221.8 0)
+			(at 73 222.3 0)
 			(effects
 				(font
 					(size 1.7 1.7)
@@ -13681,7 +13681,7 @@
 			)
 		)
 		(property "Value" "MOV 275 V"
-			(at 73 224.3 0)
+			(at 77.4 222.3 0)
 			(effects
 				(font
 					(size 1.7 1.7)
