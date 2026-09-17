@@ -92,7 +92,8 @@ svg.text(ox + 114, oy + 392, 'bakış yönü → (klemenslere)', 12, MUTED, 'mid
 # ---------- E / ALT YÜZ ----------
 ox, oy = 980, 100
 svg.text(ox + 240, oy - 14, 'E / ALT YÜZ / kablo girişleri (120 × 50)', 20, DIM, 'middle', '700')
-svg.view(V['alt'], ox, oy, S, (0, -52), colors=COL,
+alt_polys = [pl for pl in V['alt'] if not (pl.get('kind') == 'sil' and abs(pl['pts'][0][0] - pl['pts'][-1][0]) < 0.5 and 5 < pl['pts'][0][0] < 115)]   # PG7 deliğinden görünen dikme siluetleri gizli (kroki deliği gösterir)
+svg.view(alt_polys, ox, oy, S, (0, -52), colors=COL,
          bg='<rect x="0" y="8" width="480" height="200" rx="12" fill="#eceff1"/>')
 def E(x, z): return ox + x * S, oy + (52 - z) * S
 for (xm, d, t1, t2) in [(17.5, 12.5, 'RS-485', 'PG7 Ø12,5'), (40, 6.4, 'SMA panel', 'Ø6,4 → anten'),
