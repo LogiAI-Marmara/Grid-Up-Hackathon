@@ -2414,7 +2414,7 @@
 		)
 		(comp
 			(ref "R55")
-			(value "R_fb1")
+			(value "360k")
 			(fields
 				(field
 					(name "Footprint")
@@ -2468,7 +2468,7 @@
 		)
 		(comp
 			(ref "R56")
-			(value "R_fb2")
+			(value "100k")
 			(fields
 				(field
 					(name "Footprint")

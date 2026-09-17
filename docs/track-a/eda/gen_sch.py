@@ -593,17 +593,18 @@ def build():
     D1 = S.part(DS, 'D1', 'Schottky (OR)', (nRaw[0] + 6.35, vout[1]), mirror='y', ref_at=(nRaw[0] + 6.35, vout[1] - 5.6), val_at=(nRaw[0] + 6.35, vout[1] - 3.2)); D1.just = 'center'   # diyotun tam üstünde
     S.wire(nRaw, D1.p('A'), color=COL['5V'])
     rail_y = vout[1]; ry = rail_y
-    U6 = S.part(LDO, 'U6', 'AP7361C-33E 3,3 V / 1 A', (248.92, rail_y), ref_at=(241.3, rail_y + 14.0), val_at=(241.3, rail_y + 16.5),
-                footprint='Package_TO_SOT_SMD:SOT-223-3_TabPin2')
+    U6 = S.part(LDO, 'U6', 'AP7361C-33E 3,3 V / 1 A', (248.92, rail_y), ref_at=(248.92, rail_y - 6.0), val_at=(248.92, rail_y - 3.5),
+                footprint='Package_TO_SOT_SMD:SOT-223-3_TabPin2'); U6.just = 'center'   # yazılar kutunun üstünde, ortalı
     vi, vo = U6.p('VI'), U6.p('VO')
     S.wire(D1.p('K'), vi, color=COL['5V'])
-    S.pin_power(U6, 'GND', 'GND')
+    Pg6 = S.pin_power(U6, 'GND', 'GND'); Pg6.val_at = (U6.p('GND')[0] + 1.7, U6.p('GND')[1] + 2.54 + 1.3)   # GND yazısı sembole yakın
     x5 = 218.44; S.power('+5V', (x5, rail_y)); S.junction((x5, rail_y)); S.flag((x5 + 5.08, rail_y)); S.junction((x5 + 5.08, rail_y))
     Ci = S.part(C, 'C30', '10 µF', (231.14, rail_y + 3.81), ref_at=(232.41, rail_y + 1.27), val_at=(232.41, rail_y + 3.81))
-    S.wire((231.14, rail_y), Ci.p('1'), color=COL['5V']); S.pin_power(Ci, '2', 'GND'); S.junction((231.14, rail_y))
+    S.wire((231.14, rail_y), Ci.p('1'), color=COL['5V']); Pgi = S.pin_power(Ci, '2', 'GND'); S.junction((231.14, rail_y))
+    Pgi.val_at = (Ci.p('2')[0] + 1.7, Ci.p('2')[1] + 2.54 + 1.3)
     n3 = (vo[0] + 7.62, vo[1]); S.wire(vo, n3, color=COL['3V3']); S.junction(n3); S.power('+3V3', (n3[0] + 5.08, rail_y)); S.wire(n3, (n3[0] + 5.08, rail_y), color=COL['3V3'])
     Co = S.part(C, 'C31', '10 µF', (n3[0], rail_y + 3.81), ref_at=(n3[0] + 1.27, rail_y + 1.27), val_at=(n3[0] + 1.27, rail_y + 3.81))
-    S.wire(n3, Co.p('1'), color=COL['3V3']); S.pin_power(Co, '2', 'GND')
+    S.wire(n3, Co.p('1'), color=COL['3V3']); Pgo = S.pin_power(Co, '2', 'GND'); Pgo.val_at = (Co.p('2')[0] + 1.7, Co.p('2')[1] + 2.54 + 1.3)
     # besleme algılama bölücü (D1 öncesi) → VSENSE etiketi (IO1)
     xd = nRaw[0]
     Rd1 = S.part(R, 'R50', '100k', (xd, rail_y + 7.62), ref_at=(xd + 1.27, rail_y + 5.08), val_at=(xd + 1.27, rail_y + 7.62))
@@ -641,8 +642,8 @@ def build():
     S.pin_power(U7, '1', 'GND')
     xv = 195.58   # VOUT düğümü: FB bölücü + D2
     S.wire(vb, (xv, vb[1]), color=COL['5V']); S.junction((xv, vb[1]))
-    R55 = S.part(R, 'R55', 'R_fb1', (xv, ry + 21.59), ref_at=(xv + 1.27, ry + 19.05), val_at=(xv + 1.27, ry + 21.59))
-    R56 = S.part(R, 'R56', 'R_fb2', (xv, ry + 31.75), ref_at=(xv + 1.27, ry + 29.21), val_at=(xv + 1.27, ry + 31.75))
+    R55 = S.part(R, 'R55', '360k', (xv, ry + 21.59), ref_at=(xv + 1.27, ry + 19.05), val_at=(xv + 1.27, ry + 21.59))
+    R56 = S.part(R, 'R56', '100k', (xv, ry + 31.75), ref_at=(xv + 1.27, ry + 29.21), val_at=(xv + 1.27, ry + 31.75))
     S.wire((xv, vb[1]), R55.p('1')); nF = (xv, ry + 27.94); S.wire(R55.p('2'), nF); S.junction(nF); S.wire(nF, R56.p('1')); S.pin_power(R56, '2', 'GND')
     xf = fb[0] + 6.35   # FB dönüşü gövdeden uzak insin
     S.wire(fb, (xf, fb[1]), (xf, nF[1]), nF)
@@ -660,7 +661,7 @@ def build():
     S.text('C32/C33: 2× Eaton HV1030-2R7106-R (10 F, 2,7 V) seri = 5 F; float 4,6 V', (xn, ry + 33.0), SZ_NOTE, italic=True)
     S.text('(+85 °C\'de 2,3 V/hücre, derating); U7 boost 0,7–5,5 V giriş → 4,6 V → D2', (xn, ry + 35.5), SZ_NOTE, italic=True)
     S.text('kesintide ~50 J → ~5 dk @ 50 mA (yalnız alarm paketi; 02-bom §2.5)', (xn, ry + 38.0), SZ_NOTE, italic=True)
-    S.text('süperkap → boost → D2 → 5 V rayı: şebeke varken D2 ters, boost boşta', (xn, ry + 40.5), SZ_NOTE, italic=True)
+    S.text('şebeke varken D2 ters, boost boşta; FB: V_OUT = 1,0 V × (1 + R55/R56) = 4,6 V', (xn, ry + 40.5), SZ_NOTE, italic=True)
 
     # ---------- notlar ----------
     S.text('Notlar: pin atamaları 03 §3.1 ile aynı; tabloda olmayan tek ekleme GPIO1 besleme algılama. Pasif değerler tipik başlangıç değerleridir.', (35.56, 273.0), SZ_NOTE)

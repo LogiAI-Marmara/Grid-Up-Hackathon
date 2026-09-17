@@ -8780,7 +8780,7 @@
 		)
 		(uuid "665e91c2-f1a6-5ad8-9c34-8fac3bbd0de1")
 	)
-	(text "süperkap → boost → D2 → 5 V rayı: şebeke varken D2 ters, boost boşta"
+	(text "şebeke varken D2 ters, boost boşta; FB: V_OUT = 1,0 V × (1 + R55/R56) = 4,6 V"
 		(exclude_from_sim no)
 		(at 214 269.1 0)
 		(effects
@@ -14131,21 +14131,19 @@
 		(dnp no)
 		(uuid "85ffdb25-2409-5bf3-8777-59c65102666d")
 		(property "Reference" "U6"
-			(at 241.3 242.6 0)
+			(at 248.92 222.6 0)
 			(effects
 				(font
 					(size 1.7 1.7)
 				)
-				(justify left)
 			)
 		)
 		(property "Value" "AP7361C-33E 3,3 V / 1 A"
-			(at 241.3 245.1 0)
+			(at 248.92 225.1 0)
 			(effects
 				(font
 					(size 1.7 1.7)
 				)
-				(justify left)
 			)
 		)
 		(property "Footprint" "Package_TO_SOT_SMD:SOT-223-3_TabPin2"
@@ -14155,7 +14153,6 @@
 				(font
 					(size 1.7 1.7)
 				)
-				(justify left)
 			)
 		)
 		(property "Datasheet" ""
@@ -14165,7 +14162,6 @@
 				(font
 					(size 1.7 1.7)
 				)
-				(justify left)
 			)
 		)
 		(property "Description" ""
@@ -14175,7 +14171,6 @@
 				(font
 					(size 1.7 1.7)
 				)
-				(justify left)
 			)
 		)
 		(pin "1"
@@ -14216,7 +14211,7 @@
 			)
 		)
 		(property "Value" "GND"
-			(at 251.46 240.03 0)
+			(at 250.62 240.06 0)
 			(effects
 				(font
 					(size 1.7 1.7)
@@ -14494,7 +14489,7 @@
 			)
 		)
 		(property "Value" "GND"
-			(at 233.68 240.03 0)
+			(at 232.84 240.06 0)
 			(effects
 				(font
 					(size 1.7 1.7)
@@ -14701,7 +14696,7 @@
 			)
 		)
 		(property "Value" "GND"
-			(at 266.7 240.03 0)
+			(at 265.86 240.06 0)
 			(effects
 				(font
 					(size 1.7 1.7)
@@ -15779,7 +15774,7 @@
 				(justify left)
 			)
 		)
-		(property "Value" "R_fb1"
+		(property "Value" "360k"
 			(at 196.85 250.19 0)
 			(effects
 				(font
@@ -15851,7 +15846,7 @@
 				(justify left)
 			)
 		)
-		(property "Value" "R_fb2"
+		(property "Value" "100k"
 			(at 196.85 260.35 0)
 			(effects
 				(font
