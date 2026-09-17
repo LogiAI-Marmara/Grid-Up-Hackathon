@@ -7931,7 +7931,7 @@
 	(wire
 		(pts
 			(xy 48.26 228.6)
-			(xy 54.61 228.6)
+			(xy 58.42 228.6)
 		)
 		(stroke
 			(width 0)
@@ -7942,7 +7942,7 @@
 	)
 	(wire
 		(pts
-			(xy 62.23 228.6)
+			(xy 66.04 228.6)
 			(xy 78.74 228.6)
 		)
 		(stroke
@@ -8079,7 +8079,7 @@
 		(uuid "71115ecd-deee-5237-80f7-aa342d41ae1c")
 	)
 	(junction
-		(at 64.77 228.6)
+		(at 68.58 228.6)
 		(diameter 0)
 		(color 0 0 0 0)
 		(uuid "ff6b93f3-dbb9-5086-bf7b-bdd2303c7e95")
@@ -13492,7 +13492,7 @@
 	)
 	(symbol
 		(lib_id "Device:Fuse")
-		(at 58.42 228.6 90)
+		(at 62.23 228.6 90)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -13500,51 +13500,46 @@
 		(dnp no)
 		(uuid "96e049d9-5d51-5e14-a13b-229273a7628f")
 		(property "Reference" "F1"
-			(at 62.5 220.98 270)
+			(at 62.23 222 270)
 			(effects
 				(font
 					(size 1.7 1.7)
 				)
-				(justify left)
 			)
 		)
 		(property "Value" "sigorta"
-			(at 61 223.52 270)
+			(at 62.23 224.5 270)
 			(effects
 				(font
 					(size 1.7 1.7)
 				)
-				(justify left)
 			)
 		)
 		(property "Footprint" ""
-			(at 58.42 228.6 270)
+			(at 62.23 228.6 270)
 			(hide yes)
 			(effects
 				(font
 					(size 1.7 1.7)
 				)
-				(justify left)
 			)
 		)
 		(property "Datasheet" ""
-			(at 58.42 228.6 270)
+			(at 62.23 228.6 270)
 			(hide yes)
 			(effects
 				(font
 					(size 1.7 1.7)
 				)
-				(justify left)
 			)
 		)
 		(property "Description" ""
-			(at 58.42 228.6 270)
+			(at 62.23 228.6 270)
 			(hide yes)
 			(effects
 				(font
 					(size 1.7 1.7)
 				)
-				(justify left)
 			)
 		)
 		(pin "1"
@@ -13854,7 +13849,7 @@
 	)
 	(symbol
 		(lib_id "power:PWR_FLAG")
-		(at 64.77 228.6 0)
+		(at 68.58 228.6 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -13862,7 +13857,7 @@
 		(dnp no)
 		(uuid "f1aed309-67d3-5cec-9f6e-393e6f55d77f")
 		(property "Reference" "#FLG32"
-			(at 67.31 226.06 0)
+			(at 71.12 226.06 0)
 			(hide yes)
 			(effects
 				(font
@@ -13872,7 +13867,7 @@
 			)
 		)
 		(property "Value" "PWR_FLAG"
-			(at 67.31 229.87 0)
+			(at 71.12 229.87 0)
 			(hide yes)
 			(effects
 				(font
@@ -13882,7 +13877,7 @@
 			)
 		)
 		(property "Footprint" ""
-			(at 64.77 228.6 0)
+			(at 68.58 228.6 0)
 			(hide yes)
 			(effects
 				(font
@@ -13892,7 +13887,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 64.77 228.6 0)
+			(at 68.58 228.6 0)
 			(hide yes)
 			(effects
 				(font
@@ -13902,7 +13897,7 @@
 			)
 		)
 		(property "Description" ""
-			(at 64.77 228.6 0)
+			(at 68.58 228.6 0)
 			(hide yes)
 			(effects
 				(font

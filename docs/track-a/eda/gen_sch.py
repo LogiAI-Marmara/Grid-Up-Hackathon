@@ -551,7 +551,7 @@ def build():
                 footprint='TerminalBlock_Phoenix:TerminalBlock_Phoenix_MKDS-3-3-5.08_1x03_P5.08mm_Horizontal')
     J1.just = 'right'   # aynalı sembol: hiza da aynalanır (bkz. CT klemensleri)
     pL, pN, pPE = J1.p('1'), J1.p('2'), J1.p('3')
-    F1 = S.part(FU, 'F1', 'sigorta', (58.42, pL[1]), rot=90, ref_at=(62.5, pL[1] - 7.62), val_at=(61.0, pL[1] - 5.08))
+    F1 = S.part(FU, 'F1', 'sigorta', (62.23, pL[1]), rot=90, ref_at=(62.23, pL[1] - 6.6), val_at=(62.23, pL[1] - 4.1)); F1.just = 'center'   # yazı sigortanın tam üstünde
     S.wire(pL, F1.p('1'), color=COL['5V'])
     U5 = S.part(RAC, 'U5', 'RAC05-05SK/277', (88.9, pN[1]), ref_at=(76.2, pL[1] + 9.5), val_at=(76.2, pL[1] + 12.0),
                 footprint='Converter_ACDC:Converter_ACDC_RECOM_RAC05-xxSK_THT')
@@ -563,7 +563,7 @@ def build():
     S.wire((71.12, ac_l[1]), RV1.p('1'), color=COL['5V']); S.wire((71.12, ac_n[1]), RV1.p('2'), color=COL['5V']); S.junction((71.12, ac_l[1])); S.junction((71.12, ac_n[1]))
     S.wire(pPE, (pPE[0] + 2.54, pPE[1]), (pPE[0] + 2.54, pPE[1] + 5.08), color=COL['GND']); PEs = S.power('Earth_Protective', (pPE[0] + 2.54, pPE[1] + 5.08)); PEs.hide_value = True; S.text('PE', (pPE[0] + 4.6, pPE[1] + 7.2), SZ_PROP, color=COL['GND'])
     S.flag((pPE[0] + 2.54, pPE[1] + 2.54)); S.junction((pPE[0] + 2.54, pPE[1] + 2.54))   # PE dış kaynak
-    S.flag((F1.p('2')[0] + 2.54, ac_l[1])); S.junction((F1.p('2')[0] + 2.54, ac_l[1]))   # L dış kaynak (ERC)
+    S.flag((F1.p('2')[0] + 2.54, ac_l[1])); S.junction((F1.p('2')[0] + 2.54, ac_l[1]))   # L dış kaynak (ERC); sigorta sonrası net
     S.flag((66.04, ac_n[1]), rot=180); S.junction((66.04, ac_n[1]))                     # N dış kaynak (ERC)
     S.pin_nc(U5, 'NC')
     vout = U5.p('+Vout'); Pg5 = S.pin_power(U5, '-Vout', 'GND', L=2.54, rot=0)
