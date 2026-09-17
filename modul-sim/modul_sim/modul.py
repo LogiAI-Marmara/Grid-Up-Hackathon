@@ -27,6 +27,7 @@ from .senaryo import Baglam, Senaryo
 from .sozlesme import (
     OLCUM_ARALIK,
     OLCUM_BIRIM,
+    TERMAL_PIKSEL,
     Besleme,
     Kalite,
     OlcumTipi,
@@ -223,19 +224,27 @@ class Modul:
         modul_an = an + timedelta(seconds=kayma_s)
         zaman = zaman_yaz(modul_an)
 
-        # 7 — thermal array, if this cycle samples it
+        # 7 — thermal array: unconditional full frame on every sampling instant (integration item 2)
         termal_ozet_veri = None
         termal_kare = None
         kare_sebebi = None
-        termal_cevrim = max(int(o.termal_s / o.paket_s), 1)
         ozet: TermalOzet | None = None
-        if not b.dusuk_guc and self._sayac % termal_cevrim == 0:
-            ham_kare = self._dizi.kare(
-                kabin_c,
-                yuk_katsayisi,
-                klemens_ek_c=b.klemens_ek_c,
-                genel_ek_c=b.termal_genel_ek_c,
-            )
+        if not b.dusuk_guc:
+            # Sub-sample averaging: sensor reads faster and averages into one frame
+            # to reduce temporal sensor noise (integration item 2).
+            alt_termal_adim = max(int(o.paket_s / getattr(o, "termal_okuma_s", 6)), 1)
+            kare_toplam = [0.0] * TERMAL_PIKSEL
+            for _ in range(alt_termal_adim):
+                sub_kare = self._dizi.kare(
+                    kabin_c,
+                    yuk_katsayisi,
+                    klemens_ek_c=b.klemens_ek_c,
+                    genel_ek_c=b.termal_genel_ek_c,
+                )
+                for p in range(TERMAL_PIKSEL):
+                    kare_toplam[p] += sub_kare[p]
+            ham_kare = [v / alt_termal_adim for v in kare_toplam]
+
             alt, ust = OLCUM_ARALIK[OlcumTipi.TERMAL_MAKS]
             # Round before summarising, not after: the collector checks that
             # maks_konum really points at the hottest pixel of the frame it
@@ -249,10 +258,9 @@ class Modul:
                 "maks_konum": [ozet.maks_konum[0], ozet.maks_konum[1]],
                 "bolge_ort": [round(v, 2) for v in ozet.bolge_ort],
             }
-            kare_sebebi = self._kare_gerekli(ozet, kabin_c, an, ark=bool(b.ark_tetik))
-            if kare_sebebi:
-                termal_kare = kare
-                self._son_kare_an = an
+            termal_kare = kare
+            kare_sebebi = "surekli"
+            self._son_kare_an = an
 
         # 8 — assemble the measurement rows
         olcumler: list[dict] = []

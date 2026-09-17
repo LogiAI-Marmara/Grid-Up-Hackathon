@@ -248,13 +248,12 @@ def test_kare_gonderildiginde_ozet_karesiyle_tutarli():
 
 
 def test_normal_kosu_sakin():
-    """The control run must look healthy: no evidence frames, nothing suspect.
+    """The control run must look healthy: all frames present (unconditional policy), nothing suspect.
 
-    Data in which the healthy baseline already trips the module's own threshold
-    logic would make every detector look good.
+    Integration item 2: every packet attaches a full thermal frame regardless of health.
     """
     paketler = kosu(None)
-    assert not kareler(paketler), "the healthy run attached evidence frames"
+    assert all(p.get("termal_kare") is not None for p in paketler), "unconditional policy: every packet must carry a full frame"
     kotu = [o for p in paketler for o in p["olcumler"] if o["kalite"] == Kalite.YOK.value]
     assert not kotu, "the healthy run reported missing values"
     assert all(p["modul_durum"]["besleme"] == Besleme.SEBEKE.value for p in paketler)
@@ -358,7 +357,7 @@ def test_asiri_yuk_her_sey_birlikte_isiniyor():
     # The phases rise together, so the imbalance must stay where it was.
     assert abs(faz_sapmasi(senaryo, GEC) - faz_sapmasi(kontrol, GEC)) < 0.05
 
-    bekleniyor("asiri_yuk", Tip.ORTAM_SICAKLIK_YUKSEK, Tip.AKIM_SICAKLIK_SAPMASI)
+    bekleniyor("asiri_yuk", Tip.ASIRI_YUK, Tip.ORTAM_SICAKLIK_YUKSEK)
 
 
 # ---------------------------------------------------------------------------

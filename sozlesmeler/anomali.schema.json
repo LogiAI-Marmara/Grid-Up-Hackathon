@@ -40,7 +40,7 @@
       "enum": ["normal", "izle", "uyari", "kritik"]
     },
     "tip": {
-      "description": "Which of the seven fault scenarios this is. sensor_arizasi and modul_saglik are system self-health, not grid faults.",
+      "description": "Which fault scenario this is. sensor_arizasi and modul_saglik are system self-health, not grid faults. asiri_yuk is the overload diagnosis, distinct from the single-terminal sicak_nokta.",
       "type": "string",
       "enum": [
         "sicak_nokta",
@@ -50,7 +50,8 @@
         "ortam_sicaklik_yuksek",
         "ark",
         "sensor_arizasi",
-        "modul_saglik"
+        "modul_saglik",
+        "asiri_yuk"
       ]
     },
     "gerekce": {

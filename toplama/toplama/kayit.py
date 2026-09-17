@@ -56,6 +56,7 @@ class Satirlar:
     """
 
     modul: dict[str, Any]
+    modul_durum: dict[str, Any]
     olcum: list[dict[str, Any]]
     termal_ozet: dict[str, Any] | None
     termal_kare: dict[str, Any] | None
@@ -98,6 +99,18 @@ def satirlar(paket: ModulPaketi, alindi_zaman: datetime) -> Satirlar:
         "son_gorulme": paket.zaman,
     }
 
+    # Integration item 1: power source and signal strength recorded per packet
+    # rather than dropped. The exact moment mains power fails (scenario 7) and
+    # the signal attenuation trend leading up to a disconnect live here.
+    modul_durum = {
+        "modul_id": paket.modul_id,
+        "zaman": paket.zaman,
+        "besleme": paket.modul_durum.besleme.value,
+        "sinyal": paket.modul_durum.sinyal,
+        "yazilim_surumu": paket.modul_durum.yazilim_surumu,
+        "alindi_zaman": alindi_zaman,
+    }
+
     olcum = [
         {
             "modul_id": kayit.modul_id,
@@ -138,7 +151,7 @@ def satirlar(paket: ModulPaketi, alindi_zaman: datetime) -> Satirlar:
             "alindi_zaman": alindi_zaman,
         }
 
-    return Satirlar(modul=modul, olcum=olcum, termal_ozet=ozet, termal_kare=kare)
+    return Satirlar(modul=modul, modul_durum=modul_durum, olcum=olcum, termal_ozet=ozet, termal_kare=kare)
 
 
 # ---------------------------------------------------------------------------
@@ -154,6 +167,7 @@ class Sayac:
     olcum: int = 0
     termal_ozet: int = 0
     termal_kare: int = 0
+    modul_durum: int = 0
     yinelenen: int = 0
 
     def sozluk(self) -> dict[str, int]:
@@ -162,6 +176,7 @@ class Sayac:
             "olcum": self.olcum,
             "termal_ozet": self.termal_ozet,
             "termal_kare": self.termal_kare,
+            "modul_durum": self.modul_durum,
             "yinelenen": self.yinelenen,
         }
 
@@ -199,6 +214,7 @@ class Kayit:
         olcum: int,
         ozet: int,
         kare: int,
+        durum: int,
         kare_id: str | None,
         beklenen_olcum: int,
     ) -> YazimSonucu:
@@ -207,7 +223,14 @@ class Kayit:
         self.sayac.olcum += olcum
         self.sayac.termal_ozet += ozet
         self.sayac.termal_kare += kare
-        yinelenen = olcum == 0 and ozet == 0 and kare == 0 and (beklenen_olcum > 0 or paket.termal_ozet is not None)
+        self.sayac.modul_durum += durum
+        yinelenen = (
+            olcum == 0
+            and ozet == 0
+            and kare == 0
+            and durum == 0
+            and (beklenen_olcum > 0 or paket.termal_ozet is not None or paket.modul_durum is not None)
+        )
         if yinelenen:
             self.sayac.yinelenen += 1
         return YazimSonucu(
@@ -217,6 +240,7 @@ class Kayit:
             olcum=olcum,
             termal_ozet=ozet,
             termal_kare=kare,
+            modul_durum=durum,
             kare_id=kare_id,
             yinelenen=yinelenen,
         )
@@ -249,6 +273,7 @@ class DosyaKayit(Kayit):
 
     DOSYALAR = {
         "modul": "modul.jsonl",
+        "modul_durum": "modul_durum.jsonl",
         "olcum": "olcum.jsonl",
         "termal_ozet": "termal_ozet.jsonl",
         "termal_kare": "termal_kare.jsonl",
@@ -260,6 +285,7 @@ class DosyaKayit(Kayit):
         self._gorulen_olcum: set[tuple[str, str, str]] = set()
         self._gorulen_ozet: set[tuple[str, str]] = set()
         self._gorulen_kare: set[tuple[str, str]] = set()
+        self._gorulen_durum: set[tuple[str, str]] = set()
         self._gorulen_modul: dict[str, str] = {}
         self._kare_sira = 0
 
@@ -349,12 +375,20 @@ class DosyaKayit(Kayit):
                     self._ekle("termal_kare", [{"kare_id": kare_id, **satir_kumesi.termal_kare}])
                     kare_sayisi = 1
 
+            durum_sayisi = 0
+            anahtar = (paket.modul_id, paket.zaman_metni)
+            if anahtar not in self._gorulen_durum:
+                self._gorulen_durum.add(anahtar)
+                self._ekle("modul_durum", [satir_kumesi.modul_durum])
+                durum_sayisi = 1
+
         return self._sonuc(
             paket,
             alindi_zaman,
             olcum=len(yeni_olcum),
             ozet=ozet_sayisi,
             kare=kare_sayisi,
+            durum=durum_sayisi,
             kare_id=kare_id,
             beklenen_olcum=len(satir_kumesi.olcum),
         )
@@ -392,6 +426,15 @@ VALUES (%s, %s, %s, %s, %s, %s)
 ON CONFLICT (modul_id) DO UPDATE SET
     yazilim_surumu = EXCLUDED.yazilim_surumu,
     son_gorulme    = GREATEST(gridup.modul.son_gorulme, EXCLUDED.son_gorulme)
+"""
+
+#: Per-packet health log (migration 005). The power source (sebeke vs yedek)
+#: and signal strength history live here. Replaying a packet yields rowcount 0,
+#: which correctly reports as duplicate.
+DURUM_SQL = """
+INSERT INTO gridup.modul_durum (modul_id, zaman, besleme, sinyal, yazilim_surumu, alindi_zaman)
+VALUES (%s, %s, %s, %s, %s, %s)
+ON CONFLICT (modul_id, zaman) DO NOTHING
 """
 
 #: DO NOTHING on the primary key is the whole dedup story: a module with a backup
@@ -523,6 +566,20 @@ class PostgresKayit(Kayit):
                 ),
             )
 
+            d = satir_kumesi.modul_durum
+            imlec.execute(
+                DURUM_SQL,
+                (
+                    d["modul_id"],
+                    d["zaman"],
+                    d["besleme"],
+                    d["sinyal"],
+                    d["yazilim_surumu"],
+                    d["alindi_zaman"],
+                ),
+            )
+            durum_sayisi = max(imlec.rowcount, 0)
+
             olcum_sayisi = 0
             if satir_kumesi.olcum:
                 # `rowcount` is the inserted-row count here, and it is the only
@@ -581,6 +638,7 @@ class PostgresKayit(Kayit):
             olcum=olcum_sayisi,
             ozet=ozet_sayisi,
             kare=kare_sayisi,
+            durum=durum_sayisi,
             kare_id=kare_id,
             beklenen_olcum=len(satir_kumesi.olcum),
         )
