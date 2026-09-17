@@ -6894,7 +6894,7 @@
 		)
 		(uuid "20bfdb8b-1bf3-5e42-ab7b-ac379197b3f5")
 	)
-	(text "R_burden = 1,5 V / I_sek,tepe"
+	(text "R_burden = 1,5 V / CT sekonder tepe akımı"
 		(exclude_from_sim no)
 		(at 66.04 124.46 0)
 		(effects
@@ -9810,7 +9810,7 @@
 		(dnp no)
 		(uuid "0c7085f6-c532-565d-bda6-0e958a70d92b")
 		(property "Reference" "C10"
-			(at 90.17 55.88 0)
+			(at 91.8 58.01 0)
 			(effects
 				(font
 					(size 1.7 1.7)
@@ -9819,7 +9819,7 @@
 			)
 		)
 		(property "Value" "100 nF"
-			(at 90.17 58.42 0)
+			(at 91.8 60.61 0)
 			(effects
 				(font
 					(size 1.7 1.7)
@@ -10169,7 +10169,7 @@
 		(dnp no)
 		(uuid "83b6e67f-48c2-5411-b9db-235f15e022ca")
 		(property "Reference" "C11"
-			(at 90.17 71.12 0)
+			(at 91.8 73.25 0)
 			(effects
 				(font
 					(size 1.7 1.7)
@@ -10178,7 +10178,7 @@
 			)
 		)
 		(property "Value" "100 nF"
-			(at 90.17 73.66 0)
+			(at 91.8 75.85 0)
 			(effects
 				(font
 					(size 1.7 1.7)
@@ -10528,7 +10528,7 @@
 		(dnp no)
 		(uuid "c634a44f-7d30-5915-abbe-8a149485935a")
 		(property "Reference" "C12"
-			(at 90.17 86.36 0)
+			(at 91.8 88.49 0)
 			(effects
 				(font
 					(size 1.7 1.7)
@@ -10537,7 +10537,7 @@
 			)
 		)
 		(property "Value" "100 nF"
-			(at 90.17 88.9 0)
+			(at 91.8 91.09 0)
 			(effects
 				(font
 					(size 1.7 1.7)
@@ -10887,7 +10887,7 @@
 		(dnp no)
 		(uuid "a13d3429-8757-5393-90bc-3559a4007560")
 		(property "Reference" "C13"
-			(at 90.17 101.6 0)
+			(at 91.8 103.73 0)
 			(effects
 				(font
 					(size 1.7 1.7)
@@ -10896,7 +10896,7 @@
 			)
 		)
 		(property "Value" "100 nF"
-			(at 90.17 104.14 0)
+			(at 91.8 106.33 0)
 			(effects
 				(font
 					(size 1.7 1.7)

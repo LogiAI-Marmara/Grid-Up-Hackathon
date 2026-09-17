@@ -457,7 +457,7 @@ def build():
         Rr = S.part(R, 'R%d' % (20 + k), '1k', (76.2, hot[1]), rot=90, ref_at=(70.5, hot[1] - 2.0), val_at=(78.0, hot[1] - 2.0))
         S.wire(nA, Rr.p('1'), color=ANA)
         nB = (88.9, hot[1]); S.wire(Rr.p('2'), nB, color=ANA); S.junction(nB)
-        Cr = S.part(C, 'C%d' % (10 + k), '100 nF', (88.9, hot[1] + 3.81), ref_at=(90.17, hot[1] + 1.27), val_at=(90.17, hot[1] + 3.81))
+        Cr = S.part(C, 'C%d' % (10 + k), '100 nF', (88.9, hot[1] + 3.81), ref_at=(91.8, hot[1] + 3.4), val_at=(91.8, hot[1] + 6.0))   # yazı çifti kapasitör ortasında
         S.wire(nB, Cr.p('1'), color=ANA); S.pin_power(Cr, '2', 'GND')
         tx = trunk_x[k]; pe = U1.p(pin)
         S.wire(nB, (tx, hot[1]), (tx, pe[1]), pe, color=ANA)          # satır → dikey → ESP pini
@@ -474,7 +474,7 @@ def build():
     S.wire((44.45, nV[1]), Cv.p('1'), color=ANA); S.pin_power(Cv, '2', 'GND', L=1.27); S.junction((44.45, nV[1]))
     S.wire((44.45, nV[1]), (53.34, nV[1]), color=ANA); S.label('V_BIAS', (53.34, nV[1]), 0)
     S.text('V_BIAS = 3V3 / 2 = 1,65 V (CT DC ofseti)', (66.04, 121.92), SZ_NOTE, italic=True)
-    S.text('R_burden = 1,5 V / I_sek,tepe', (66.04, 124.46), SZ_NOTE, italic=True)
+    S.text('R_burden = 1,5 V / CT sekonder tepe akımı', (66.04, 124.46), SZ_NOTE, italic=True)
     S.text('(CT oranına göre; CT seçimi 02-bom §2.3)', (66.04, 127.0), SZ_NOTE, italic=True)
 
     # ================= SOL ALT: I²C sensörler → IO8/IO9 (bus) =================
