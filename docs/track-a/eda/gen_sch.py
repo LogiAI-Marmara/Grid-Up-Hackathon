@@ -454,8 +454,8 @@ def build():
     S.wire(p17, di, color=UART)                                                     # IO17 (U1TXD) → DI, düz
     n_de = (de[0] - 3.81, de[1]); n_re = (re_[0] - 3.81, re_[1])
     S.wire(de, n_de, n_re, re_, color=UART); S.junction(n_re)
-    S.wire(p21, (222.25, p21[1]), (222.25, n_re[1]), n_re, color=UART)              # IO21 (DE/RE) → RE+DE
-    S.wire(p18, (226.06, p18[1]), (226.06, ro[1]), ro, color=UART)                  # IO18 (U1RXD) → RO
+    S.wire(p21, (226.06, p21[1]), (226.06, n_re[1]), n_re, color=UART)              # IO21 (DE/RE) → RE+DE
+    S.wire(p18, (232.41, p18[1]), (232.41, ro[1]), ro, color=UART)                  # IO18 (U1RXD) → RO
     S.label('U1TXD', (205.74, p17[1]), 0); S.label('DE_RE', (205.74, p21[1]), 0); S.label('U1RXD', (205.74, p18[1]), 0)
     A, B = U4.p('A'), U4.p('B')
     J7 = S.part(C03, 'J7', 'RS-485 klemens B / GND / A', (287.02, (A[1] + B[1]) / 2), ref_at=(284.48, min(A[1], B[1]) - 6.35), val_at=(279.4, max(A[1], B[1]) + 5.08),
@@ -599,6 +599,6 @@ if __name__ == '__main__':
     if not os.path.exists(pro):
         with open(pro, 'w', encoding='utf-8', newline='') as fh:
             json.dump({"meta": {"filename": PROJECT + ".kicad_pro", "version": 3},
-                       "schematic": {"drawing": {"default_font": "KiCad Font"}, "legacy_lib_dir": "", "legacy_lib_list": []},
+                       "schematic": {"drawing": {"default_font": "KiCad Font", "hop_over_size_choice": 2}, "legacy_lib_dir": "", "legacy_lib_list": []},   # hop_over 0 = atlama yayı kapalı
                        "sheets": [[ROOT_UUID, "Root"]], "text_variables": {}}, fh, indent=2, ensure_ascii=False)
     print('yazıldı', out, len(S.parts), 'parça', len(S.items), 'öğe')
