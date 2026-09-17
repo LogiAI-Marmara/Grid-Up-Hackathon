@@ -263,8 +263,7 @@
   <text x="592.8" y="319.2" font-size="9" fill="#607d8b" font-weight="700">R_şarj</text>
   <rect x="590.8" y="324" width="23.8" height="9.5" rx="2" fill="#e8f5e9"/>
   <text x="592.8" y="331.2" font-size="9" fill="#607d8b">22 Ω</text>
-  <rect x="615" y="402" width="81" height="10.5" rx="2" fill="#e8f5e9"/>
-  <text x="694" y="410" font-size="10" fill="#607d8b" text-anchor="end">bölücü → GPIO1</text>
+  <text x="721.6" y="425.6" font-size="10" fill="#607d8b" text-anchor="end" transform="rotate(-90 721.6 425.6)">bölücü → GPIO1</text>
   <rect x="537.4" y="485.2" width="149.2" height="11.6" rx="2" fill="#e8f5e9"/>
   <text x="612" y="494" font-size="11" fill="#f57f17" text-anchor="middle" font-weight="700">2× süperkapasitör seri</text>
   <rect x="494.5" y="500" width="235" height="10.5" rx="2" fill="#e8f5e9"/>
@@ -276,8 +275,8 @@
   <text x="380" y="404" font-size="10" fill="#607d8b" text-anchor="end" font-weight="700">boost U7 + L</text>
   <rect x="290" y="409" width="92" height="10.5" rx="2" fill="#e8f5e9"/>
   <text x="380" y="417" font-size="10" fill="#607d8b" text-anchor="end">çıkış 4,6 V → D2</text>
-  <rect x="390" y="414" width="70" height="10.5" rx="2" fill="#e8f5e9"/>
-  <text x="458" y="422" font-size="10" fill="#607d8b" text-anchor="end">dengeleme 2×</text>
+  <rect x="393.5" y="414" width="70" height="10.5" rx="2" fill="#e8f5e9"/>
+  <text x="461.5" y="422" font-size="10" fill="#607d8b" text-anchor="end">dengeleme 2×</text>
   <rect x="363.5" y="488" width="42.5" height="10.5" rx="2" fill="#e8f5e9"/>
   <text x="404" y="496" font-size="10" fill="#607d8b" text-anchor="end">MAX3485</text>
   <rect x="470" y="508" width="31.5" height="10.5" rx="2" fill="#e8f5e9"/>
