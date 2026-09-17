@@ -475,7 +475,7 @@ def build():
     S.wire((44.45, nV[1]), (53.34, nV[1]), color=ANA); S.label('V_BIAS', (53.34, nV[1]), 0)
     S.text('V_BIAS = 3V3 / 2 = 1,65 V (CT DC ofseti)', (66.04, 121.92), SZ_NOTE, italic=True)
     S.text('R_burden = 1,5 V / CT sekonder tepe akımı', (66.04, 124.46), SZ_NOTE, italic=True)
-    S.text('(CT oranına göre; CT seçimi 02-bom §2.3)', (66.04, 127.0), SZ_NOTE, italic=True)
+    S.text('(CT oranına göre; CT senaryosu 02-bom §2.3)', (66.04, 127.0), SZ_NOTE, italic=True)
 
     # ================= SOL ALT: I²C sensörler → IO8/IO9 (bus) =================
     S.rect((27.94, 139.7), (121.0, 214.63), I2C, title='I²C / MLX90640 0x33 + SHT31 0x44, tek hat 400 kHz+')
@@ -660,13 +660,13 @@ def build():
     S.text('3V3 rayı → ESP32 / MLX90640 / SHT31 / RS-485 / CT bias / genişleme', (xn, ry + 24.0), SZ_NOTE, italic=True)
     S.text('Bütçe: ESP32 Wi-Fi tepe ~350 mA + MLX 23 mA + SHT31 <2 mA + RS-485 ~10 mA', (xn, ry + 26.5), SZ_NOTE, italic=True)
     S.text('→ 5 V/1 A modül; LDO dropout ≈0,3 V (yedekte ray 4,3 V)', (xn, ry + 29.0), SZ_NOTE, italic=True)
-    S.text('C32/C33: 2× Eaton HV1030-2R7106-R (10 F, 2,7 V) seri = 5 F; float 4,6 V', (xn, ry + 33.0), SZ_NOTE, italic=True)
-    S.text('(+85 °C\'de 2,3 V/hücre, derating); U7 boost 0,7–5,5 V giriş → 4,6 V → D2', (xn, ry + 35.5), SZ_NOTE, italic=True)
+    S.text('C32/C33: 2× Eaton HV1030-2R7106-R (10 F, 2,7 V) seri = 5 F; float ≈4,7 V (ray)', (xn, ry + 33.0), SZ_NOTE, italic=True)
+    S.text('+85 °C derate 4,6 V (2,3 V/hücre); U7 boost 0,7–5,5 V giriş → 4,6 V → D2', (xn, ry + 35.5), SZ_NOTE, italic=True)
     S.text('kesintide ~50 J → ~5 dk @ 50 mA (yalnız alarm paketi; 02-bom §2.5)', (xn, ry + 38.0), SZ_NOTE, italic=True)
     S.text('şebeke varken D2 ters, boost boşta; FB: V_OUT = 1,0 V × (1 + R55/R56) = 4,6 V', (xn, ry + 40.5), SZ_NOTE, italic=True)
 
     # ---------- notlar ----------
-    S.text('Notlar: pin atamaları 03 §3.1 ile aynı; tabloda olmayan tek ekleme GPIO1 besleme algılama. Pasif değerler tipik başlangıç değerleridir.', (35.56, 273.0), SZ_NOTE)
+    S.text('Notlar: pin atamaları 03 §3.1 tablosuyla aynı (GPIO1 besleme algılama dahil). Pasif değerler tipik başlangıç değerleridir.', (35.56, 273.0), SZ_NOTE)
     S.text('Analizör varsa CT ön ucu boş kalır (hedef senaryo, 02-bom §2.3). Kavramsal şema / üretim çizimi değildir (§1.4). Üretim: eda/gen_sch.py → kicad-cli (ERC + SVG).', (35.56, 276.0), SZ_NOTE)
     return S
 

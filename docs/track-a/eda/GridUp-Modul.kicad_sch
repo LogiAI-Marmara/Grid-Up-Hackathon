@@ -6906,7 +6906,7 @@
 		)
 		(uuid "6289cae2-5253-584f-b9c1-70a6760b3548")
 	)
-	(text "(CT oranına göre; CT seçimi 02-bom §2.3)"
+	(text "(CT oranına göre; CT senaryosu 02-bom §2.3)"
 		(exclude_from_sim no)
 		(at 66.04 127 0)
 		(effects
@@ -8769,7 +8769,7 @@
 		)
 		(uuid "ca60aef8-d64a-5771-9d9c-be65fb8be4f3")
 	)
-	(text "C32/C33: 2× Eaton HV1030-2R7106-R (10 F, 2,7 V) seri = 5 F; float 4,6 V"
+	(text "C32/C33: 2× Eaton HV1030-2R7106-R (10 F, 2,7 V) seri = 5 F; float ≈4,7 V (ray)"
 		(exclude_from_sim no)
 		(at 214 261.6 0)
 		(effects
@@ -8781,7 +8781,7 @@
 		)
 		(uuid "665e91c2-f1a6-5ad8-9c34-8fac3bbd0de1")
 	)
-	(text "(+85 °C'de 2,3 V/hücre, derating); U7 boost 0,7–5,5 V giriş → 4,6 V → D2"
+	(text "+85 °C derate 4,6 V (2,3 V/hücre); U7 boost 0,7–5,5 V giriş → 4,6 V → D2"
 		(exclude_from_sim no)
 		(at 214 264.1 0)
 		(effects
@@ -8817,7 +8817,7 @@
 		)
 		(uuid "96e22033-436b-5ed9-b426-335a0c5e0056")
 	)
-	(text "Notlar: pin atamaları 03 §3.1 ile aynı; tabloda olmayan tek ekleme GPIO1 besleme algılama. Pasif değerler tipik başlangıç değerleridir."
+	(text "Notlar: pin atamaları 03 §3.1 tablosuyla aynı (GPIO1 besleme algılama dahil). Pasif değerler tipik başlangıç değerleridir."
 		(exclude_from_sim no)
 		(at 35.56 273 0)
 		(effects
