@@ -5369,7 +5369,7 @@
 			(type color)
 			(color 246 235 235 1)
 		)
-		(uuid "187875fe-a8a6-59b7-a818-026aace7fb80")
+		(uuid "0e7cb814-d5dd-5f1b-b016-b9b43e32c26b")
 	)
 	(rectangle
 		(start 222 153)
@@ -5383,7 +5383,7 @@
 			(type color)
 			(color 235 245 235 1)
 		)
-		(uuid "49289289-b34d-59d2-88ec-4e54a6cd0c6f")
+		(uuid "4d980782-a8f2-542b-ae61-f2db0fb6852e")
 	)
 	(rectangle
 		(start 222 119)
@@ -5397,7 +5397,7 @@
 			(type color)
 			(color 235 245 235 1)
 		)
-		(uuid "e703f345-9c51-5d88-ade3-931ba0e69cbd")
+		(uuid "63e015c2-3214-53a2-9dad-cf0f6371f122")
 	)
 	(rectangle
 		(start 222 60.5)
@@ -7616,6 +7616,18 @@
 		)
 		(uuid "a11259f1-1263-51e1-b155-82bc5f6a5abc")
 	)
+	(text "1 B / 2 GND / 3 A"
+		(exclude_from_sim no)
+		(at 295.5 95.01 0)
+		(effects
+			(font
+				(size 1.7 1.7)
+				(color 0 100 100 1)
+			)
+			(justify left bottom)
+		)
+		(uuid "2307e559-fbf1-5be1-949c-488d0ccd388b")
+	)
 	(wire
 		(pts
 			(xy 264.16 90.17)
@@ -7626,7 +7638,7 @@
 			(type default)
 			(color 106 27 154 1)
 		)
-		(uuid "2307e559-fbf1-5be1-949c-488d0ccd388b")
+		(uuid "a4cd8088-6f67-58ee-bb96-ef6a22e9daaf")
 	)
 	(wire
 		(pts
@@ -7638,7 +7650,7 @@
 			(type default)
 			(color 106 27 154 1)
 		)
-		(uuid "a4cd8088-6f67-58ee-bb96-ef6a22e9daaf")
+		(uuid "bb47b977-8306-582f-9b6e-b036d74d2d8e")
 	)
 	(wire
 		(pts
@@ -7650,7 +7662,7 @@
 			(type default)
 			(color 106 27 154 1)
 		)
-		(uuid "bb47b977-8306-582f-9b6e-b036d74d2d8e")
+		(uuid "c7b7f63a-87ad-5db0-ad2b-96e9120765ad")
 	)
 	(wire
 		(pts
@@ -7662,19 +7674,19 @@
 			(type default)
 			(color 106 27 154 1)
 		)
-		(uuid "c7b7f63a-87ad-5db0-ad2b-96e9120765ad")
+		(uuid "8e1ae04b-230f-5da8-9085-8c5fa521bf43")
 	)
 	(junction
 		(at 274.32 90.17)
 		(diameter 0)
 		(color 0 0 0 0)
-		(uuid "8e1ae04b-230f-5da8-9085-8c5fa521bf43")
+		(uuid "1a662744-4865-585b-a34b-8ecbb78a9e10")
 	)
 	(junction
 		(at 274.32 95.25)
 		(diameter 0)
 		(color 0 0 0 0)
-		(uuid "1a662744-4865-585b-a34b-8ecbb78a9e10")
+		(uuid "7091d14d-460c-5e9c-bba3-bb051889d2e5")
 	)
 	(wire
 		(pts
@@ -7686,7 +7698,7 @@
 			(type default)
 			(color 70 70 70 1)
 		)
-		(uuid "7091d14d-460c-5e9c-bba3-bb051889d2e5")
+		(uuid "848f1b58-4c7d-5b00-a9a2-863a96079193")
 	)
 	(text "hat: enerji analizörü (akım) / TVOC-2 (yalnız trip-diag.); ayrı slave adresleri"
 		(exclude_from_sim no)
@@ -7698,7 +7710,7 @@
 			)
 			(justify left bottom)
 		)
-		(uuid "848f1b58-4c7d-5b00-a9a2-863a96079193")
+		(uuid "b9cd9b3d-cdc6-53ba-8ae3-8343ec570f5e")
 	)
 	(text "A/B bükümlü çift, ekranlı; son cihazda 2. 120 Ω"
 		(exclude_from_sim no)
@@ -7710,7 +7722,7 @@
 			)
 			(justify left bottom)
 		)
-		(uuid "b9cd9b3d-cdc6-53ba-8ae3-8343ec570f5e")
+		(uuid "e703f345-9c51-5d88-ade3-931ba0e69cbd")
 	)
 	(text "Anten / U.FL pigtail → SMA panel → dış anten (pano dış yüzü)"
 		(exclude_from_sim no)
@@ -7723,11 +7735,11 @@
 			)
 			(justify left bottom)
 		)
-		(uuid "63e015c2-3214-53a2-9dad-cf0f6371f122")
+		(uuid "a7d2450f-5af5-5216-8943-e37304ac35de")
 	)
 	(no_connect
 		(at 254 133.35)
-		(uuid "a7d2450f-5af5-5216-8943-e37304ac35de")
+		(uuid "3cfcae85-b70b-5dda-88b6-b456338bde8e")
 	)
 	(wire
 		(pts
@@ -7739,7 +7751,7 @@
 			(type default)
 			(color 70 70 70 1)
 		)
-		(uuid "3cfcae85-b70b-5dda-88b6-b456338bde8e")
+		(uuid "8a2728c8-6048-52a0-8e12-fb19e997f272")
 	)
 	(text "U.FL pigtail (modül konnektörü) / RF, şemada net değil; mevcut kablo girişinden"
 		(exclude_from_sim no)
@@ -7751,7 +7763,7 @@
 			)
 			(justify left bottom)
 		)
-		(uuid "8a2728c8-6048-52a0-8e12-fb19e997f272")
+		(uuid "49289289-b34d-59d2-88ec-4e54a6cd0c6f")
 	)
 	(text "Genişleme 2×5 (boş) / PD / akustik için ayrılmış (§7.1); kör tapa"
 		(exclude_from_sim no)
@@ -7764,7 +7776,7 @@
 			)
 			(justify left bottom)
 		)
-		(uuid "4d980782-a8f2-542b-ae61-f2db0fb6852e")
+		(uuid "7e017f30-c380-5886-8613-e92d5d39b708")
 	)
 	(wire
 		(pts
@@ -7776,7 +7788,7 @@
 			(type default)
 			(color 198 40 40 1)
 		)
-		(uuid "7e017f30-c380-5886-8613-e92d5d39b708")
+		(uuid "7fd380b8-7e57-50b1-933a-e7a3179c4eb9")
 	)
 	(wire
 		(pts
@@ -7788,7 +7800,7 @@
 			(type default)
 			(color 198 40 40 1)
 		)
-		(uuid "7fd380b8-7e57-50b1-933a-e7a3179c4eb9")
+		(uuid "78329eec-8115-5281-965a-9c71b3c87962")
 	)
 	(wire
 		(pts
@@ -7800,7 +7812,7 @@
 			(type default)
 			(color 140 0 0 1)
 		)
-		(uuid "78329eec-8115-5281-965a-9c71b3c87962")
+		(uuid "eb9a9b22-6b3b-5f31-9765-be7cbaff7ff7")
 	)
 	(wire
 		(pts
@@ -7812,7 +7824,7 @@
 			(type default)
 			(color 140 0 0 1)
 		)
-		(uuid "eb9a9b22-6b3b-5f31-9765-be7cbaff7ff7")
+		(uuid "58abc0d6-e6a8-5752-9359-37fc9e1548f7")
 	)
 	(wire
 		(pts
@@ -7824,7 +7836,7 @@
 			(type default)
 			(color 70 70 70 1)
 		)
-		(uuid "58abc0d6-e6a8-5752-9359-37fc9e1548f7")
+		(uuid "9ffbe831-0b82-5300-b99d-07496caf26e1")
 	)
 	(wire
 		(pts
@@ -7836,7 +7848,7 @@
 			(type default)
 			(color 70 70 70 1)
 		)
-		(uuid "9ffbe831-0b82-5300-b99d-07496caf26e1")
+		(uuid "47a87101-f056-5a91-b7ab-98a23e5ab1cc")
 	)
 	(wire
 		(pts
@@ -7848,7 +7860,7 @@
 			(type default)
 			(color 21 101 192 1)
 		)
-		(uuid "47a87101-f056-5a91-b7ab-98a23e5ab1cc")
+		(uuid "fab83a85-ae5f-57f7-bc36-35af9196f00f")
 	)
 	(label "SDA"
 		(at 252.73 173.99 180)
@@ -7859,7 +7871,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "fab83a85-ae5f-57f7-bc36-35af9196f00f")
+		(uuid "6d7fb118-4707-55a5-9d53-8c8974a99c0c")
 	)
 	(wire
 		(pts
@@ -7871,7 +7883,7 @@
 			(type default)
 			(color 21 101 192 1)
 		)
-		(uuid "6d7fb118-4707-55a5-9d53-8c8974a99c0c")
+		(uuid "c8eacec7-6067-585c-96e0-3904dc07053e")
 	)
 	(label "SCL"
 		(at 275.59 173.99 0)
@@ -7882,7 +7894,7 @@
 			)
 			(justify left bottom)
 		)
-		(uuid "c8eacec7-6067-585c-96e0-3904dc07053e")
+		(uuid "077c1912-ef35-56b6-aba1-5989c7c67acb")
 	)
 	(wire
 		(pts
@@ -7894,7 +7906,7 @@
 			(type default)
 			(color 0 132 0 1)
 		)
-		(uuid "077c1912-ef35-56b6-aba1-5989c7c67acb")
+		(uuid "7ea58624-324b-5e04-bca0-8e7c09bbae3a")
 	)
 	(label "GPIO10"
 		(at 252.73 176.53 180)
@@ -7905,7 +7917,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "7ea58624-324b-5e04-bca0-8e7c09bbae3a")
+		(uuid "3a3dcfc3-355b-5612-8c53-bbdcf5e56c71")
 	)
 	(wire
 		(pts
@@ -7917,7 +7929,7 @@
 			(type default)
 			(color 0 132 0 1)
 		)
-		(uuid "3a3dcfc3-355b-5612-8c53-bbdcf5e56c71")
+		(uuid "5d88f4ac-269a-5eb5-8b7c-5462d97ddf70")
 	)
 	(label "GPIO11"
 		(at 275.59 176.53 0)
@@ -7928,15 +7940,15 @@
 			)
 			(justify left bottom)
 		)
-		(uuid "5d88f4ac-269a-5eb5-8b7c-5462d97ddf70")
-	)
-	(no_connect
-		(at 257.81 179.07)
 		(uuid "8c2f243b-c420-53fb-a097-b53c74cf4e79")
 	)
 	(no_connect
-		(at 270.51 179.07)
+		(at 257.81 179.07)
 		(uuid "4d9d0205-cc2c-530f-ab55-25f0b7d82537")
+	)
+	(no_connect
+		(at 270.51 179.07)
+		(uuid "187875fe-a8a6-59b7-a818-026aace7fb80")
 	)
 	(text "Besleme / 230 V iç ihtiyaç → RAC05 5 V → D1 (OR) → 5 V rayı → LDO 3V3; yedek: 2× süperkap seri → boost 4,6 V → D2; algılama D1 öncesi (§3.4, §7.3)"
 		(exclude_from_sim no)
@@ -7949,7 +7961,7 @@
 			)
 			(justify left bottom)
 		)
-		(uuid "0e7cb814-d5dd-5f1b-b016-b9b43e32c26b")
+		(uuid "7df56919-7bd4-5fed-8037-8a788d1d17e3")
 	)
 	(wire
 		(pts
@@ -7961,7 +7973,7 @@
 			(type default)
 			(color 140 0 0 1)
 		)
-		(uuid "7df56919-7bd4-5fed-8037-8a788d1d17e3")
+		(uuid "07cd127d-80ff-540e-bdb3-126fe5e193e7")
 	)
 	(wire
 		(pts
@@ -7973,7 +7985,7 @@
 			(type default)
 			(color 140 0 0 1)
 		)
-		(uuid "07cd127d-80ff-540e-bdb3-126fe5e193e7")
+		(uuid "c7db7a6a-557b-5f00-a99e-431f52f6c884")
 	)
 	(wire
 		(pts
@@ -7985,7 +7997,7 @@
 			(type default)
 			(color 140 0 0 1)
 		)
-		(uuid "c7db7a6a-557b-5f00-a99e-431f52f6c884")
+		(uuid "cc685892-b6c2-5d41-b5f2-61e22b337d44")
 	)
 	(wire
 		(pts
@@ -7997,7 +8009,7 @@
 			(type default)
 			(color 140 0 0 1)
 		)
-		(uuid "cc685892-b6c2-5d41-b5f2-61e22b337d44")
+		(uuid "ac5c07dd-f845-5e5f-a487-8ff3eb4c4dc9")
 	)
 	(wire
 		(pts
@@ -8009,7 +8021,7 @@
 			(type default)
 			(color 140 0 0 1)
 		)
-		(uuid "ac5c07dd-f845-5e5f-a487-8ff3eb4c4dc9")
+		(uuid "7cdeaea0-2ccc-5edf-9ddc-dc4157953657")
 	)
 	(polyline
 		(pts
@@ -8021,7 +8033,7 @@
 			(type solid)
 			(color 70 70 70 1)
 		)
-		(uuid "7cdeaea0-2ccc-5edf-9ddc-dc4157953657")
+		(uuid "29ac0601-a8a4-5af0-9f00-0a40b7bb734a")
 	)
 	(wire
 		(pts
@@ -8033,7 +8045,7 @@
 			(type default)
 			(color 140 0 0 1)
 		)
-		(uuid "29ac0601-a8a4-5af0-9f00-0a40b7bb734a")
+		(uuid "a15a4b94-b3fb-56cd-a362-01904861b860")
 	)
 	(wire
 		(pts
@@ -8045,19 +8057,19 @@
 			(type default)
 			(color 140 0 0 1)
 		)
-		(uuid "a15a4b94-b3fb-56cd-a362-01904861b860")
+		(uuid "6c4e5b32-f50b-57ca-bd4e-c2d50680e347")
 	)
 	(junction
 		(at 71.12 228.6)
 		(diameter 0)
 		(color 0 0 0 0)
-		(uuid "6c4e5b32-f50b-57ca-bd4e-c2d50680e347")
+		(uuid "f005811a-3db7-5d1d-bdf8-e63a5d680182")
 	)
 	(junction
 		(at 71.12 233.68)
 		(diameter 0)
 		(color 0 0 0 0)
-		(uuid "f005811a-3db7-5d1d-bdf8-e63a5d680182")
+		(uuid "c368aadc-5bfe-5fdc-aa1d-8a1f2115168d")
 	)
 	(wire
 		(pts
@@ -8069,7 +8081,7 @@
 			(type default)
 			(color 70 70 70 1)
 		)
-		(uuid "c368aadc-5bfe-5fdc-aa1d-8a1f2115168d")
+		(uuid "71115ecd-deee-5237-80f7-aa342d41ae1c")
 	)
 	(wire
 		(pts
@@ -8081,7 +8093,7 @@
 			(type default)
 			(color 70 70 70 1)
 		)
-		(uuid "71115ecd-deee-5237-80f7-aa342d41ae1c")
+		(uuid "ff6b93f3-dbb9-5086-bf7b-bdd2303c7e95")
 	)
 	(text "PE"
 		(exclude_from_sim no)
@@ -8093,29 +8105,29 @@
 			)
 			(justify left bottom)
 		)
-		(uuid "ff6b93f3-dbb9-5086-bf7b-bdd2303c7e95")
+		(uuid "006c3c32-d894-5caf-b591-1571900656f3")
 	)
 	(junction
 		(at 50.8 236.22)
 		(diameter 0)
 		(color 0 0 0 0)
-		(uuid "006c3c32-d894-5caf-b591-1571900656f3")
+		(uuid "6039a358-1033-5c88-b3f8-768b8969ff9b")
 	)
 	(junction
 		(at 68.58 228.6)
 		(diameter 0)
 		(color 0 0 0 0)
-		(uuid "6039a358-1033-5c88-b3f8-768b8969ff9b")
+		(uuid "935f7481-7fbd-54af-8f19-e8d499119461")
 	)
 	(junction
 		(at 66.04 233.68)
 		(diameter 0)
 		(color 0 0 0 0)
-		(uuid "935f7481-7fbd-54af-8f19-e8d499119461")
+		(uuid "29b0c0dc-ccf6-58ac-bf3c-84ef9051f6d2")
 	)
 	(no_connect
 		(at 99.06 231.14)
-		(uuid "29b0c0dc-ccf6-58ac-bf3c-84ef9051f6d2")
+		(uuid "9fbd538f-3f1b-5a4a-af99-31ec34b3ef77")
 	)
 	(wire
 		(pts
@@ -8127,7 +8139,7 @@
 			(type default)
 			(color 70 70 70 1)
 		)
-		(uuid "9fbd538f-3f1b-5a4a-af99-31ec34b3ef77")
+		(uuid "60032ca4-5322-5eff-8a87-57a2a73ba8a0")
 	)
 	(wire
 		(pts
@@ -8139,13 +8151,13 @@
 			(type default)
 			(color 140 0 0 1)
 		)
-		(uuid "60032ca4-5322-5eff-8a87-57a2a73ba8a0")
+		(uuid "e3f2a5bc-1d61-5fc1-a5b8-1fab7b6a27be")
 	)
 	(junction
 		(at 111.76 228.6)
 		(diameter 0)
 		(color 0 0 0 0)
-		(uuid "e3f2a5bc-1d61-5fc1-a5b8-1fab7b6a27be")
+		(uuid "4ea535f1-b24b-588b-9317-dd3a384e21cb")
 	)
 	(label "5V_RAW"
 		(at 100.33 228.6 0)
@@ -8156,7 +8168,7 @@
 			)
 			(justify left bottom)
 		)
-		(uuid "4ea535f1-b24b-588b-9317-dd3a384e21cb")
+		(uuid "ff4ef9d4-45d1-5623-9c37-3e57b057a00c")
 	)
 	(wire
 		(pts
@@ -8168,7 +8180,7 @@
 			(type default)
 			(color 140 0 0 1)
 		)
-		(uuid "ff4ef9d4-45d1-5623-9c37-3e57b057a00c")
+		(uuid "beae06dc-d1f5-5eee-a5c1-f49c2861bd67")
 	)
 	(wire
 		(pts
@@ -8180,7 +8192,7 @@
 			(type default)
 			(color 140 0 0 1)
 		)
-		(uuid "beae06dc-d1f5-5eee-a5c1-f49c2861bd67")
+		(uuid "11544698-dc4c-5415-834f-0c3a0096c801")
 	)
 	(wire
 		(pts
@@ -8192,19 +8204,19 @@
 			(type default)
 			(color 70 70 70 1)
 		)
-		(uuid "11544698-dc4c-5415-834f-0c3a0096c801")
+		(uuid "fd373055-a2ec-5896-9df4-b24f85588ebf")
 	)
 	(junction
 		(at 218.44 228.6)
 		(diameter 0)
 		(color 0 0 0 0)
-		(uuid "fd373055-a2ec-5896-9df4-b24f85588ebf")
+		(uuid "7df22c5a-3819-5ced-8e66-d990b6103b4d")
 	)
 	(junction
 		(at 223.52 228.6)
 		(diameter 0)
 		(color 0 0 0 0)
-		(uuid "7df22c5a-3819-5ced-8e66-d990b6103b4d")
+		(uuid "0b8e4a1b-a1b3-513a-a6c9-d71a6b0a06d4")
 	)
 	(wire
 		(pts
@@ -8216,13 +8228,13 @@
 			(type default)
 			(color 70 70 70 1)
 		)
-		(uuid "0b8e4a1b-a1b3-513a-a6c9-d71a6b0a06d4")
+		(uuid "c9786164-32fe-5bfd-9118-5954c05d4f23")
 	)
 	(junction
 		(at 231.14 228.6)
 		(diameter 0)
 		(color 0 0 0 0)
-		(uuid "c9786164-32fe-5bfd-9118-5954c05d4f23")
+		(uuid "bac72eb9-1dda-5098-b680-26a16eb41471")
 	)
 	(wire
 		(pts
@@ -8234,13 +8246,13 @@
 			(type default)
 			(color 198 40 40 1)
 		)
-		(uuid "bac72eb9-1dda-5098-b680-26a16eb41471")
+		(uuid "ee1d32ab-0284-51d7-82b3-bb0716b911cc")
 	)
 	(junction
 		(at 264.16 228.6)
 		(diameter 0)
 		(color 0 0 0 0)
-		(uuid "ee1d32ab-0284-51d7-82b3-bb0716b911cc")
+		(uuid "3055746a-0488-52e9-959e-d836ce7ed6c1")
 	)
 	(wire
 		(pts
@@ -8252,7 +8264,7 @@
 			(type default)
 			(color 198 40 40 1)
 		)
-		(uuid "3055746a-0488-52e9-959e-d836ce7ed6c1")
+		(uuid "337cd1b3-5a9a-57db-9792-227952eb94e8")
 	)
 	(wire
 		(pts
@@ -8264,7 +8276,7 @@
 			(type default)
 			(color 70 70 70 1)
 		)
-		(uuid "337cd1b3-5a9a-57db-9792-227952eb94e8")
+		(uuid "ce5e3b1b-0145-5e02-acde-64ebd9d77311")
 	)
 	(wire
 		(pts
@@ -8276,7 +8288,7 @@
 			(type default)
 			(color 140 0 0 1)
 		)
-		(uuid "ce5e3b1b-0145-5e02-acde-64ebd9d77311")
+		(uuid "4fc389f1-a7e7-5f08-842b-eaa5fe922522")
 	)
 	(wire
 		(pts
@@ -8288,13 +8300,13 @@
 			(type default)
 			(color 230 120 0 1)
 		)
-		(uuid "4fc389f1-a7e7-5f08-842b-eaa5fe922522")
+		(uuid "71cc274e-c9f9-5151-abcd-b44100fc8425")
 	)
 	(junction
 		(at 111.76 242.57)
 		(diameter 0)
 		(color 0 0 0 0)
-		(uuid "71cc274e-c9f9-5151-abcd-b44100fc8425")
+		(uuid "485be92c-2e2f-5bc3-b18b-b82321a94dc9")
 	)
 	(wire
 		(pts
@@ -8306,7 +8318,7 @@
 			(type default)
 			(color 230 120 0 1)
 		)
-		(uuid "485be92c-2e2f-5bc3-b18b-b82321a94dc9")
+		(uuid "e7a6f251-0490-5291-ad21-8e32e7c05980")
 	)
 	(wire
 		(pts
@@ -8318,7 +8330,7 @@
 			(type default)
 			(color 70 70 70 1)
 		)
-		(uuid "e7a6f251-0490-5291-ad21-8e32e7c05980")
+		(uuid "f15ee042-5e39-5425-87e1-d004efae140d")
 	)
 	(wire
 		(pts
@@ -8330,7 +8342,7 @@
 			(type default)
 			(color 230 120 0 1)
 		)
-		(uuid "f15ee042-5e39-5425-87e1-d004efae140d")
+		(uuid "a28e9cce-d532-526a-90f1-ae86e63c6047")
 	)
 	(label "VSENSE"
 		(at 116.84 242.57 0)
@@ -8341,13 +8353,13 @@
 			)
 			(justify left bottom)
 		)
-		(uuid "a28e9cce-d532-526a-90f1-ae86e63c6047")
+		(uuid "4a93b86d-8835-5d91-9809-1b6469f66c3c")
 	)
 	(junction
 		(at 133.35 228.6)
 		(diameter 0)
 		(color 0 0 0 0)
-		(uuid "4a93b86d-8835-5d91-9809-1b6469f66c3c")
+		(uuid "49d04c45-030d-5ca7-8916-49905639441e")
 	)
 	(wire
 		(pts
@@ -8359,7 +8371,7 @@
 			(type default)
 			(color 140 0 0 1)
 		)
-		(uuid "49d04c45-030d-5ca7-8916-49905639441e")
+		(uuid "d8ce15bf-c82f-50c4-bfd7-e30e2983066c")
 	)
 	(wire
 		(pts
@@ -8370,13 +8382,13 @@
 			(width 0)
 			(type default)
 		)
-		(uuid "d8ce15bf-c82f-50c4-bfd7-e30e2983066c")
+		(uuid "4290a9a5-95ba-50ef-ab31-0552f6f0f7a0")
 	)
 	(junction
 		(at 133.35 242.57)
 		(diameter 0)
 		(color 0 0 0 0)
-		(uuid "4290a9a5-95ba-50ef-ab31-0552f6f0f7a0")
+		(uuid "3eef6d04-6abf-5d5e-a3ef-b537a71f2617")
 	)
 	(wire
 		(pts
@@ -8387,13 +8399,13 @@
 			(width 0)
 			(type default)
 		)
-		(uuid "3eef6d04-6abf-5d5e-a3ef-b537a71f2617")
+		(uuid "34f99cb0-82d7-52a6-9720-052187e46b22")
 	)
 	(junction
 		(at 133.35 252.73)
 		(diameter 0)
 		(color 0 0 0 0)
-		(uuid "34f99cb0-82d7-52a6-9720-052187e46b22")
+		(uuid "9a8607fd-35b1-5d42-95ad-d460b0943a9d")
 	)
 	(wire
 		(pts
@@ -8404,13 +8416,13 @@
 			(width 0)
 			(type default)
 		)
-		(uuid "9a8607fd-35b1-5d42-95ad-d460b0943a9d")
+		(uuid "e338b925-dbf2-5db1-86fc-51862d9369c9")
 	)
 	(junction
 		(at 133.35 262.89)
 		(diameter 0)
 		(color 0 0 0 0)
-		(uuid "e338b925-dbf2-5db1-86fc-51862d9369c9")
+		(uuid "2f584e55-3d82-5c78-8f8c-a23bb5a30f80")
 	)
 	(wire
 		(pts
@@ -8421,7 +8433,7 @@
 			(width 0)
 			(type default)
 		)
-		(uuid "2f584e55-3d82-5c78-8f8c-a23bb5a30f80")
+		(uuid "01c6cfd9-dda2-594a-90b8-62b384e2217d")
 	)
 	(wire
 		(pts
@@ -8432,19 +8444,19 @@
 			(width 0)
 			(type default)
 		)
-		(uuid "01c6cfd9-dda2-594a-90b8-62b384e2217d")
+		(uuid "0d41c502-ae69-526d-81eb-8157bc3525fd")
 	)
 	(junction
 		(at 143.51 242.57)
 		(diameter 0)
 		(color 0 0 0 0)
-		(uuid "0d41c502-ae69-526d-81eb-8157bc3525fd")
+		(uuid "2541803c-32b7-5624-b59c-27083c0a1203")
 	)
 	(junction
 		(at 143.51 252.73)
 		(diameter 0)
 		(color 0 0 0 0)
-		(uuid "2541803c-32b7-5624-b59c-27083c0a1203")
+		(uuid "f2095a07-a4e1-50c5-9965-32f0319fba70")
 	)
 	(wire
 		(pts
@@ -8455,7 +8467,7 @@
 			(width 0)
 			(type default)
 		)
-		(uuid "f2095a07-a4e1-50c5-9965-32f0319fba70")
+		(uuid "0e3389ef-06ce-531b-9b89-8e3be954e48b")
 	)
 	(wire
 		(pts
@@ -8467,7 +8479,7 @@
 			(type default)
 			(color 70 70 70 1)
 		)
-		(uuid "0e3389ef-06ce-531b-9b89-8e3be954e48b")
+		(uuid "0a74a1db-3f76-588d-ab1c-fd018f7fc3b4")
 	)
 	(wire
 		(pts
@@ -8478,7 +8490,7 @@
 			(width 0)
 			(type default)
 		)
-		(uuid "0a74a1db-3f76-588d-ab1c-fd018f7fc3b4")
+		(uuid "80fadaad-8d07-5202-a10c-d63beb580d9c")
 	)
 	(wire
 		(pts
@@ -8489,13 +8501,13 @@
 			(width 0)
 			(type default)
 		)
-		(uuid "80fadaad-8d07-5202-a10c-d63beb580d9c")
+		(uuid "4871beda-a792-5567-a769-17082a0dbba6")
 	)
 	(junction
 		(at 162.56 242.57)
 		(diameter 0)
 		(color 0 0 0 0)
-		(uuid "4871beda-a792-5567-a769-17082a0dbba6")
+		(uuid "7c7c2ef9-bfbb-52be-bbed-50196b6eb8df")
 	)
 	(wire
 		(pts
@@ -8506,13 +8518,13 @@
 			(width 0)
 			(type default)
 		)
-		(uuid "7c7c2ef9-bfbb-52be-bbed-50196b6eb8df")
+		(uuid "02453447-38b6-5952-9cef-0f4fa3636ed8")
 	)
 	(junction
 		(at 158.75 242.57)
 		(diameter 0)
 		(color 0 0 0 0)
-		(uuid "02453447-38b6-5952-9cef-0f4fa3636ed8")
+		(uuid "d47928dd-e85f-5799-b61b-f49be425ea05")
 	)
 	(wire
 		(pts
@@ -8523,7 +8535,7 @@
 			(width 0)
 			(type default)
 		)
-		(uuid "d47928dd-e85f-5799-b61b-f49be425ea05")
+		(uuid "ac9e076c-c2c5-5eb4-b84f-b9773469c431")
 	)
 	(wire
 		(pts
@@ -8534,7 +8546,7 @@
 			(width 0)
 			(type default)
 		)
-		(uuid "ac9e076c-c2c5-5eb4-b84f-b9773469c431")
+		(uuid "42e2a891-3532-564a-b23e-5e26f06999db")
 	)
 	(wire
 		(pts
@@ -8545,7 +8557,7 @@
 			(width 0)
 			(type default)
 		)
-		(uuid "42e2a891-3532-564a-b23e-5e26f06999db")
+		(uuid "00f14991-1243-5be0-b220-9afc88c24242")
 	)
 	(wire
 		(pts
@@ -8556,13 +8568,13 @@
 			(width 0)
 			(type default)
 		)
-		(uuid "00f14991-1243-5be0-b220-9afc88c24242")
+		(uuid "f5924b51-f5e1-56e5-a619-1d2ae5020915")
 	)
 	(junction
 		(at 177.8 237.49)
 		(diameter 0)
 		(color 0 0 0 0)
-		(uuid "f5924b51-f5e1-56e5-a619-1d2ae5020915")
+		(uuid "af6e1678-a0ca-5745-8961-76db79b780b8")
 	)
 	(wire
 		(pts
@@ -8574,7 +8586,7 @@
 			(type default)
 			(color 70 70 70 1)
 		)
-		(uuid "af6e1678-a0ca-5745-8961-76db79b780b8")
+		(uuid "30548ce5-d151-5a3a-bcca-cdaa6c4b5fcc")
 	)
 	(wire
 		(pts
@@ -8586,13 +8598,13 @@
 			(type default)
 			(color 140 0 0 1)
 		)
-		(uuid "30548ce5-d151-5a3a-bcca-cdaa6c4b5fcc")
+		(uuid "998682ce-b015-5cdb-a452-5d344e19167d")
 	)
 	(junction
 		(at 195.58 245.11)
 		(diameter 0)
 		(color 0 0 0 0)
-		(uuid "998682ce-b015-5cdb-a452-5d344e19167d")
+		(uuid "bb90b5d7-97cc-5270-bfe1-2649d63250b7")
 	)
 	(wire
 		(pts
@@ -8603,7 +8615,7 @@
 			(width 0)
 			(type default)
 		)
-		(uuid "bb90b5d7-97cc-5270-bfe1-2649d63250b7")
+		(uuid "148b61ea-59be-57e4-88f8-916dc9fde989")
 	)
 	(wire
 		(pts
@@ -8614,13 +8626,13 @@
 			(width 0)
 			(type default)
 		)
-		(uuid "148b61ea-59be-57e4-88f8-916dc9fde989")
+		(uuid "751062a6-80b2-5a75-8bae-f35202a688f5")
 	)
 	(junction
 		(at 195.58 256.54)
 		(diameter 0)
 		(color 0 0 0 0)
-		(uuid "751062a6-80b2-5a75-8bae-f35202a688f5")
+		(uuid "3dd57fe0-57c1-5fe1-afb6-ee8e1a812b43")
 	)
 	(wire
 		(pts
@@ -8632,7 +8644,7 @@
 			(type default)
 			(color 70 70 70 1)
 		)
-		(uuid "3dd57fe0-57c1-5fe1-afb6-ee8e1a812b43")
+		(uuid "080fabf5-5cda-5979-b568-102a0e1267fc")
 	)
 	(wire
 		(pts
@@ -8643,7 +8655,7 @@
 			(width 0)
 			(type default)
 		)
-		(uuid "080fabf5-5cda-5979-b568-102a0e1267fc")
+		(uuid "35672fcc-7def-5fee-8c13-b850eee7746b")
 	)
 	(wire
 		(pts
@@ -8654,7 +8666,7 @@
 			(width 0)
 			(type default)
 		)
-		(uuid "35672fcc-7def-5fee-8c13-b850eee7746b")
+		(uuid "f971b437-d319-5b04-9d5a-098f93064277")
 	)
 	(wire
 		(pts
@@ -8665,7 +8677,7 @@
 			(width 0)
 			(type default)
 		)
-		(uuid "f971b437-d319-5b04-9d5a-098f93064277")
+		(uuid "c2b459f3-9d90-5df7-a924-7d5d37478c4c")
 	)
 	(wire
 		(pts
@@ -8677,7 +8689,7 @@
 			(type default)
 			(color 140 0 0 1)
 		)
-		(uuid "c2b459f3-9d90-5df7-a924-7d5d37478c4c")
+		(uuid "a48c987e-7a62-50c5-a648-4e906e074cdf")
 	)
 	(wire
 		(pts
@@ -8689,13 +8701,13 @@
 			(type default)
 			(color 140 0 0 1)
 		)
-		(uuid "a48c987e-7a62-50c5-a648-4e906e074cdf")
+		(uuid "96f474ef-366d-5848-b832-33f3bfde8432")
 	)
 	(junction
 		(at 208.28 228.6)
 		(diameter 0)
 		(color 0 0 0 0)
-		(uuid "96f474ef-366d-5848-b832-33f3bfde8432")
+		(uuid "9f952cfd-f5b1-54c3-aede-467bceb938be")
 	)
 	(text "PE → panonun koruma iletkeni; kutu metal ise gövde PE"
 		(exclude_from_sim no)
@@ -8707,7 +8719,7 @@
 			)
 			(justify left bottom)
 		)
-		(uuid "9f952cfd-f5b1-54c3-aede-467bceb938be")
+		(uuid "65c351d8-a9d9-5676-95a1-fcf451fc1044")
 	)
 	(text "GND: tek yıldız noktası RAC05 çıkışında"
 		(exclude_from_sim no)
@@ -8719,7 +8731,7 @@
 			)
 			(justify left bottom)
 		)
-		(uuid "65c351d8-a9d9-5676-95a1-fcf451fc1044")
+		(uuid "2cc47ccc-2313-5ec6-a6ae-161e94b8c995")
 	)
 	(text "100k/47k → GPIO1 ADC1_CH0: şebeke var/yok → modul_durum.besleme"
 		(exclude_from_sim no)
@@ -8731,7 +8743,7 @@
 			)
 			(justify left bottom)
 		)
-		(uuid "2cc47ccc-2313-5ec6-a6ae-161e94b8c995")
+		(uuid "b1273d8c-7e2e-51e7-a9bc-3544728ce50d")
 	)
 	(text "3V3 rayı → ESP32 / MLX90640 / SHT31 / RS-485 / CT bias / genişleme"
 		(exclude_from_sim no)
@@ -8743,7 +8755,7 @@
 			)
 			(justify left bottom)
 		)
-		(uuid "b1273d8c-7e2e-51e7-a9bc-3544728ce50d")
+		(uuid "aad7fe8c-b6f8-57f0-8a4e-c931d94f7732")
 	)
 	(text "Bütçe: ESP32 Wi-Fi tepe ~350 mA + MLX 23 mA + SHT31 <2 mA + RS-485 ~10 mA"
 		(exclude_from_sim no)
@@ -8755,7 +8767,7 @@
 			)
 			(justify left bottom)
 		)
-		(uuid "aad7fe8c-b6f8-57f0-8a4e-c931d94f7732")
+		(uuid "ca60aef8-d64a-5771-9d9c-be65fb8be4f3")
 	)
 	(text "→ 5 V/1 A modül; LDO dropout ≈0,3 V (yedekte ray 4,3 V)"
 		(exclude_from_sim no)
@@ -8767,7 +8779,7 @@
 			)
 			(justify left bottom)
 		)
-		(uuid "ca60aef8-d64a-5771-9d9c-be65fb8be4f3")
+		(uuid "665e91c2-f1a6-5ad8-9c34-8fac3bbd0de1")
 	)
 	(text "C32/C33: 2× Eaton HV1030-2R7106-R (10 F, 2,7 V) seri = 5 F; float ≈4,7 V (ray)"
 		(exclude_from_sim no)
@@ -8779,7 +8791,7 @@
 			)
 			(justify left bottom)
 		)
-		(uuid "665e91c2-f1a6-5ad8-9c34-8fac3bbd0de1")
+		(uuid "e00323c7-7013-5ab7-ae22-c97f888f5aaf")
 	)
 	(text "+85 °C derate 4,6 V (2,3 V/hücre); U7 boost 0,7–5,5 V giriş → 4,6 V → D2"
 		(exclude_from_sim no)
@@ -8791,7 +8803,7 @@
 			)
 			(justify left bottom)
 		)
-		(uuid "e00323c7-7013-5ab7-ae22-c97f888f5aaf")
+		(uuid "525e8e22-3749-580d-bd22-8f60da139be2")
 	)
 	(text "kesintide ~50 J → ~5 dk @ 50 mA (yalnız alarm paketi; 02-bom §2.5)"
 		(exclude_from_sim no)
@@ -8803,7 +8815,7 @@
 			)
 			(justify left bottom)
 		)
-		(uuid "525e8e22-3749-580d-bd22-8f60da139be2")
+		(uuid "96e22033-436b-5ed9-b426-335a0c5e0056")
 	)
 	(text "şebeke varken D2 ters, boost boşta; FB: V_OUT = 1,0 V × (1 + R55/R56) = 4,6 V"
 		(exclude_from_sim no)
@@ -8815,7 +8827,7 @@
 			)
 			(justify left bottom)
 		)
-		(uuid "96e22033-436b-5ed9-b426-335a0c5e0056")
+		(uuid "100cd61d-2eea-57e9-9fcc-eb9caf036695")
 	)
 	(text "Notlar: pin atamaları 03 §3.1 tablosuyla aynı (GPIO1 besleme algılama dahil). Pasif değerler tipik başlangıç değerleridir."
 		(exclude_from_sim no)
@@ -8826,7 +8838,7 @@
 			)
 			(justify left bottom)
 		)
-		(uuid "100cd61d-2eea-57e9-9fcc-eb9caf036695")
+		(uuid "1290eea0-5d60-5a95-b395-aa8542029f72")
 	)
 	(text "Analizör varsa CT ön ucu boş kalır (hedef senaryo, 02-bom §2.3). Kavramsal şema / üretim çizimi değildir (§1.4). Üretim: eda/gen_sch.py → kicad-cli (ERC + SVG)."
 		(exclude_from_sim no)
@@ -8837,7 +8849,7 @@
 			)
 			(justify left bottom)
 		)
-		(uuid "1290eea0-5d60-5a95-b395-aa8542029f72")
+		(uuid "d5bd74c6-2a40-55e8-a05f-d6b1e6c0fcd9")
 	)
 	(symbol
 		(lib_id "RF_Module:ESP32-S3-WROOM-1")
@@ -8847,7 +8859,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "d5bd74c6-2a40-55e8-a05f-d6b1e6c0fcd9")
+		(uuid "40ec15c6-a563-5f0e-971f-9db7f2335bc1")
 		(property "Reference" "U1"
 			(at 171.2 131.5 0)
 			(effects
@@ -8897,127 +8909,127 @@
 			)
 		)
 		(pin "1"
-			(uuid "40ec15c6-a563-5f0e-971f-9db7f2335bc1")
-		)
-		(pin "2"
 			(uuid "a0319526-c7af-51b4-8744-2817595ca6b8")
 		)
-		(pin "3"
+		(pin "2"
 			(uuid "3465631a-2645-57d7-9880-e47d05b3ff51")
 		)
-		(pin "4"
+		(pin "3"
 			(uuid "019c3bc4-e7ea-58a9-9af8-e3dba81832c5")
 		)
-		(pin "5"
+		(pin "4"
 			(uuid "2745215c-3efe-5ce4-b056-fb7bcb3247ae")
 		)
-		(pin "6"
+		(pin "5"
 			(uuid "c9947538-338f-5056-a019-081a75cbf381")
 		)
-		(pin "7"
+		(pin "6"
 			(uuid "42638b64-0641-5159-9189-07374a044857")
 		)
-		(pin "8"
+		(pin "7"
 			(uuid "71ce2628-6a7e-5891-9ed8-137b1825e39e")
 		)
-		(pin "9"
+		(pin "8"
 			(uuid "a9c5a0d4-ef3d-5b35-8c52-04230c0b36d7")
 		)
-		(pin "10"
+		(pin "9"
 			(uuid "05555bf2-3420-5735-8d3a-afab02c4bb06")
 		)
-		(pin "11"
+		(pin "10"
 			(uuid "6054ee98-a3e5-559b-aef4-9a6b182e4470")
 		)
-		(pin "12"
+		(pin "11"
 			(uuid "770fa5dc-effb-548e-b260-a629e005fc22")
 		)
-		(pin "13"
+		(pin "12"
 			(uuid "fbea07e0-6d0c-5d5b-b53e-8d63c50a8605")
 		)
-		(pin "14"
+		(pin "13"
 			(uuid "3c6e47e0-eb33-50df-bbd4-dd9bf69fa6e7")
 		)
-		(pin "15"
+		(pin "14"
 			(uuid "fff3304c-5c90-56a6-a238-daebae852369")
 		)
-		(pin "16"
+		(pin "15"
 			(uuid "38540ec8-38ee-5e83-a958-c44a8aadc5b3")
 		)
-		(pin "17"
+		(pin "16"
 			(uuid "d37e7f2b-1f99-5bc1-be68-123dbc0fa1c6")
 		)
-		(pin "18"
+		(pin "17"
 			(uuid "2d72ed21-e10f-5e42-890d-7017fa75cb6d")
 		)
-		(pin "19"
+		(pin "18"
 			(uuid "aa8dcf4e-1354-5da1-8334-15056da246e9")
 		)
-		(pin "20"
+		(pin "19"
 			(uuid "9a70c2b7-b0cc-5c6a-99c3-17496624009d")
 		)
-		(pin "21"
+		(pin "20"
 			(uuid "e90eebbd-284a-5137-997e-3dcaf1d68ee7")
 		)
-		(pin "22"
+		(pin "21"
 			(uuid "7bb8a585-50ed-5b5f-968d-2c6ad5f8ec3f")
 		)
-		(pin "23"
+		(pin "22"
 			(uuid "7ca2cd0a-61cc-562f-b1c4-47f007046627")
 		)
-		(pin "24"
+		(pin "23"
 			(uuid "0de34eaf-5455-57e7-a5d9-6d917527136e")
 		)
-		(pin "25"
+		(pin "24"
 			(uuid "56400287-9f61-5ad1-a30f-f5092290d8b4")
 		)
-		(pin "26"
+		(pin "25"
 			(uuid "53bc117c-fa8e-5cb4-84d3-7856bc55acd5")
 		)
-		(pin "27"
+		(pin "26"
 			(uuid "2fc79971-4007-5b04-8a6f-d996da1a3857")
 		)
-		(pin "28"
+		(pin "27"
 			(uuid "8a689e3e-bd6c-52ce-8b7d-e00681e7061a")
 		)
-		(pin "29"
+		(pin "28"
 			(uuid "501cb714-b730-5270-ad21-478d97f7e83f")
 		)
-		(pin "30"
+		(pin "29"
 			(uuid "4290bb6c-f0b7-59d7-a1f8-e8676269d436")
 		)
-		(pin "31"
+		(pin "30"
 			(uuid "deb48977-c471-590d-9457-0d1c073152b9")
 		)
-		(pin "32"
+		(pin "31"
 			(uuid "e9c0df75-b30a-55b9-b14f-e461bd98b20a")
 		)
-		(pin "33"
+		(pin "32"
 			(uuid "baf3ed15-c5e8-512a-8029-a4f17b35a845")
 		)
-		(pin "34"
+		(pin "33"
 			(uuid "23908dd2-5e60-5c01-8f3f-a8f88cffc9f3")
 		)
-		(pin "35"
+		(pin "34"
 			(uuid "718d1422-738c-5432-935e-d3602607ad6a")
 		)
-		(pin "36"
+		(pin "35"
 			(uuid "247418a5-7436-58ae-9cb0-f0091e0e0267")
 		)
-		(pin "37"
+		(pin "36"
 			(uuid "e5689c31-4fe7-50cc-b164-e70948989ef4")
 		)
-		(pin "38"
+		(pin "37"
 			(uuid "0f9c9061-0378-506e-917c-ba33c9cccd1f")
 		)
-		(pin "39"
+		(pin "38"
 			(uuid "e8129cb3-efe8-5148-8177-f8293cbdf374")
 		)
-		(pin "40"
+		(pin "39"
 			(uuid "a6fa8e1a-7c05-5117-a5df-da65420ed8b2")
 		)
-		(pin "41"
+		(pin "40"
 			(uuid "5f01d884-0c98-55ad-8347-f9d0cb0deaf5")
+		)
+		(pin "41"
+			(uuid "5c304892-0705-59ff-988d-ea41e6bb30b1")
 		)
 		(instances
 			(project "GridUp-Modul"
@@ -9036,7 +9048,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "5c304892-0705-59ff-988d-ea41e6bb30b1")
+		(uuid "94b0aa15-6e6b-50e6-9239-195e76c2e0f4")
 		(property "Reference" "#PWR01"
 			(at 187.96 67.31 0)
 			(hide yes)
@@ -9082,7 +9094,7 @@
 			)
 		)
 		(pin "1"
-			(uuid "94b0aa15-6e6b-50e6-9239-195e76c2e0f4")
+			(uuid "ef4976fe-900a-5954-aa6c-92584bf4b41b")
 		)
 		(instances
 			(project "GridUp-Modul"
@@ -9101,7 +9113,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "ef4976fe-900a-5954-aa6c-92584bf4b41b")
+		(uuid "01b0c0ce-380e-5871-b46e-e7569d22d7c5")
 		(property "Reference" "#PWR02"
 			(at 187.96 128.27 0)
 			(hide yes)
@@ -9152,7 +9164,7 @@
 			)
 		)
 		(pin "1"
-			(uuid "01b0c0ce-380e-5871-b46e-e7569d22d7c5")
+			(uuid "dc2c99e0-71d9-5df7-b544-128fe872794a")
 		)
 		(instances
 			(project "GridUp-Modul"
@@ -9171,7 +9183,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "dc2c99e0-71d9-5df7-b544-128fe872794a")
+		(uuid "d62da9d8-fe2c-5e22-a765-239740ddfcac")
 		(property "Reference" "R1"
 			(at 151.13 71.12 0)
 			(effects
@@ -9221,10 +9233,10 @@
 			)
 		)
 		(pin "1"
-			(uuid "d62da9d8-fe2c-5e22-a765-239740ddfcac")
+			(uuid "493dcf81-61db-5843-8cb9-874d02b05222")
 		)
 		(pin "2"
-			(uuid "493dcf81-61db-5843-8cb9-874d02b05222")
+			(uuid "290c14f5-2768-5479-990b-06ba128a5a1e")
 		)
 		(instances
 			(project "GridUp-Modul"
@@ -9243,7 +9255,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "290c14f5-2768-5479-990b-06ba128a5a1e")
+		(uuid "e03afdca-76d1-58e9-820d-b1a9b4848073")
 		(property "Reference" "#PWR03"
 			(at 152.4 64.77 0)
 			(hide yes)
@@ -9289,7 +9301,7 @@
 			)
 		)
 		(pin "1"
-			(uuid "e03afdca-76d1-58e9-820d-b1a9b4848073")
+			(uuid "c0a25348-5bf7-5844-89fa-6345ec0e5e41")
 		)
 		(instances
 			(project "GridUp-Modul"
@@ -9308,7 +9320,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "c0a25348-5bf7-5844-89fa-6345ec0e5e41")
+		(uuid "95f08a71-02f4-5166-9807-facbb4f7738d")
 		(property "Reference" "C1"
 			(at 143.51 80.01 0)
 			(effects
@@ -9358,10 +9370,10 @@
 			)
 		)
 		(pin "1"
-			(uuid "95f08a71-02f4-5166-9807-facbb4f7738d")
+			(uuid "970f1048-8a7e-5b1c-9ed6-a6b23d3c857c")
 		)
 		(pin "2"
-			(uuid "970f1048-8a7e-5b1c-9ed6-a6b23d3c857c")
+			(uuid "02036722-7889-5271-836f-3f439fd88598")
 		)
 		(instances
 			(project "GridUp-Modul"
@@ -9380,7 +9392,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "02036722-7889-5271-836f-3f439fd88598")
+		(uuid "5d55b8a0-fe17-5206-9861-2ff83949007f")
 		(property "Reference" "#PWR04"
 			(at 152.4 85.09 0)
 			(hide yes)
@@ -9431,7 +9443,7 @@
 			)
 		)
 		(pin "1"
-			(uuid "5d55b8a0-fe17-5206-9861-2ff83949007f")
+			(uuid "c75cd869-e55b-5130-a2b7-1d7f3cb741f9")
 		)
 		(instances
 			(project "GridUp-Modul"
@@ -9450,7 +9462,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "c75cd869-e55b-5130-a2b7-1d7f3cb741f9")
+		(uuid "4719cc2f-ad0e-523b-9194-9f48e0b23bbc")
 		(property "Reference" "SW1"
 			(at 138.43 73.66 0)
 			(effects
@@ -9500,10 +9512,10 @@
 			)
 		)
 		(pin "1"
-			(uuid "4719cc2f-ad0e-523b-9194-9f48e0b23bbc")
+			(uuid "fc52e6dd-8ef5-5967-9f24-d5365f432353")
 		)
 		(pin "2"
-			(uuid "fc52e6dd-8ef5-5967-9f24-d5365f432353")
+			(uuid "0ad67ff1-2b9a-5cdd-8422-97ebeb4eba2c")
 		)
 		(instances
 			(project "GridUp-Modul"
@@ -9522,7 +9534,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "0ad67ff1-2b9a-5cdd-8422-97ebeb4eba2c")
+		(uuid "348ee25e-4ec8-5bd2-a9a4-0e82d3479fde")
 		(property "Reference" "#PWR05"
 			(at 135.89 74.93 0)
 			(hide yes)
@@ -9573,7 +9585,7 @@
 			)
 		)
 		(pin "1"
-			(uuid "348ee25e-4ec8-5bd2-a9a4-0e82d3479fde")
+			(uuid "5df976d8-2634-52ee-a366-ea7cba04a74a")
 		)
 		(instances
 			(project "GridUp-Modul"
@@ -9593,7 +9605,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "5df976d8-2634-52ee-a366-ea7cba04a74a")
+		(uuid "e5e14d07-0c48-5340-ae99-782016304a3b")
 		(property "Reference" "J2"
 			(at 53.34 53.11 0)
 			(effects
@@ -9643,10 +9655,10 @@
 			)
 		)
 		(pin "1"
-			(uuid "e5e14d07-0c48-5340-ae99-782016304a3b")
+			(uuid "98165c71-44cf-5a08-8946-0356368f5f50")
 		)
 		(pin "2"
-			(uuid "98165c71-44cf-5a08-8946-0356368f5f50")
+			(uuid "d4f31d12-fe23-52fe-a0f1-73acbf1eb986")
 		)
 		(instances
 			(project "GridUp-Modul"
@@ -9665,7 +9677,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "d4f31d12-fe23-52fe-a0f1-73acbf1eb986")
+		(uuid "ed46c076-2005-5452-b051-47d3dafa80db")
 		(property "Reference" "R10"
 			(at 62.23 55.88 0)
 			(effects
@@ -9715,10 +9727,10 @@
 			)
 		)
 		(pin "1"
-			(uuid "ed46c076-2005-5452-b051-47d3dafa80db")
+			(uuid "8b81c45b-16e0-5b11-9fdb-bbf5532ba527")
 		)
 		(pin "2"
-			(uuid "8b81c45b-16e0-5b11-9fdb-bbf5532ba527")
+			(uuid "ed24ea45-af28-586c-9c38-bc017c2c3222")
 		)
 		(instances
 			(project "GridUp-Modul"
@@ -9737,7 +9749,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "ed24ea45-af28-586c-9c38-bc017c2c3222")
+		(uuid "8e578aea-62fe-54bb-900a-b3bf740bb6ad")
 		(property "Reference" "R20"
 			(at 70.5 52.61 270)
 			(effects
@@ -9787,10 +9799,10 @@
 			)
 		)
 		(pin "1"
-			(uuid "8e578aea-62fe-54bb-900a-b3bf740bb6ad")
+			(uuid "b6ca9b98-3b4e-58eb-8091-926b02bfb4fc")
 		)
 		(pin "2"
-			(uuid "b6ca9b98-3b4e-58eb-8091-926b02bfb4fc")
+			(uuid "0c7085f6-c532-565d-bda6-0e958a70d92b")
 		)
 		(instances
 			(project "GridUp-Modul"
@@ -9809,7 +9821,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "0c7085f6-c532-565d-bda6-0e958a70d92b")
+		(uuid "0dfbb6f7-feec-592e-af1b-0813312b308b")
 		(property "Reference" "C10"
 			(at 91.8 58.01 0)
 			(effects
@@ -9859,10 +9871,10 @@
 			)
 		)
 		(pin "1"
-			(uuid "0dfbb6f7-feec-592e-af1b-0813312b308b")
+			(uuid "8343cd25-07ed-5dd6-a812-11ae12fe84d4")
 		)
 		(pin "2"
-			(uuid "8343cd25-07ed-5dd6-a812-11ae12fe84d4")
+			(uuid "453f3ef8-c923-5653-b5a9-1a2563f51353")
 		)
 		(instances
 			(project "GridUp-Modul"
@@ -9881,7 +9893,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "453f3ef8-c923-5653-b5a9-1a2563f51353")
+		(uuid "3b05c217-2f39-5341-ba3a-6dad5321b68c")
 		(property "Reference" "#PWR06"
 			(at 91.44 62.23 0)
 			(hide yes)
@@ -9932,7 +9944,7 @@
 			)
 		)
 		(pin "1"
-			(uuid "3b05c217-2f39-5341-ba3a-6dad5321b68c")
+			(uuid "3912333a-33c0-5d7d-a983-359003f70ba9")
 		)
 		(instances
 			(project "GridUp-Modul"
@@ -9952,7 +9964,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "3912333a-33c0-5d7d-a983-359003f70ba9")
+		(uuid "c4127789-da73-56a8-9e56-ae5762fcf29d")
 		(property "Reference" "J3"
 			(at 53.34 68.35 0)
 			(effects
@@ -10002,10 +10014,10 @@
 			)
 		)
 		(pin "1"
-			(uuid "c4127789-da73-56a8-9e56-ae5762fcf29d")
+			(uuid "81a29d98-a51f-5dd8-85f0-304e6303e0e2")
 		)
 		(pin "2"
-			(uuid "81a29d98-a51f-5dd8-85f0-304e6303e0e2")
+			(uuid "b9d1ea3b-64c2-5f85-b074-625e56486b16")
 		)
 		(instances
 			(project "GridUp-Modul"
@@ -10024,7 +10036,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "b9d1ea3b-64c2-5f85-b074-625e56486b16")
+		(uuid "65c234f4-c536-53e5-8ead-a9b2a041be00")
 		(property "Reference" "R11"
 			(at 62.23 71.12 0)
 			(effects
@@ -10074,10 +10086,10 @@
 			)
 		)
 		(pin "1"
-			(uuid "65c234f4-c536-53e5-8ead-a9b2a041be00")
+			(uuid "9c4d6abb-88a0-5790-8f5e-6f632967a11f")
 		)
 		(pin "2"
-			(uuid "9c4d6abb-88a0-5790-8f5e-6f632967a11f")
+			(uuid "a3eda15f-023c-58b8-ba1a-3b4f1d0f5972")
 		)
 		(instances
 			(project "GridUp-Modul"
@@ -10096,7 +10108,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "a3eda15f-023c-58b8-ba1a-3b4f1d0f5972")
+		(uuid "634cb6d3-6212-5659-8e58-8ddb8e7c1146")
 		(property "Reference" "R21"
 			(at 70.5 67.85 270)
 			(effects
@@ -10146,10 +10158,10 @@
 			)
 		)
 		(pin "1"
-			(uuid "634cb6d3-6212-5659-8e58-8ddb8e7c1146")
+			(uuid "88a1b7b9-ac6e-5d84-a139-45efc4fba292")
 		)
 		(pin "2"
-			(uuid "88a1b7b9-ac6e-5d84-a139-45efc4fba292")
+			(uuid "83b6e67f-48c2-5411-b9db-235f15e022ca")
 		)
 		(instances
 			(project "GridUp-Modul"
@@ -10168,7 +10180,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "83b6e67f-48c2-5411-b9db-235f15e022ca")
+		(uuid "11299087-a38e-5947-877f-6e82f4f9beda")
 		(property "Reference" "C11"
 			(at 91.8 73.25 0)
 			(effects
@@ -10218,10 +10230,10 @@
 			)
 		)
 		(pin "1"
-			(uuid "11299087-a38e-5947-877f-6e82f4f9beda")
+			(uuid "c19f6def-7cbe-55fe-9ce8-fa8c4508bbd1")
 		)
 		(pin "2"
-			(uuid "c19f6def-7cbe-55fe-9ce8-fa8c4508bbd1")
+			(uuid "be8e3c75-f766-5805-b8fd-508b115ac4d4")
 		)
 		(instances
 			(project "GridUp-Modul"
@@ -10240,7 +10252,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "be8e3c75-f766-5805-b8fd-508b115ac4d4")
+		(uuid "b1f4f4c1-83a5-5b80-b8e6-a7136a81a424")
 		(property "Reference" "#PWR07"
 			(at 91.44 77.47 0)
 			(hide yes)
@@ -10291,7 +10303,7 @@
 			)
 		)
 		(pin "1"
-			(uuid "b1f4f4c1-83a5-5b80-b8e6-a7136a81a424")
+			(uuid "9f21310e-42f9-5767-92f6-30a660284041")
 		)
 		(instances
 			(project "GridUp-Modul"
@@ -10311,7 +10323,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "9f21310e-42f9-5767-92f6-30a660284041")
+		(uuid "a3c5c135-b083-5b30-8bd6-17628d68b2ae")
 		(property "Reference" "J4"
 			(at 53.34 83.59 0)
 			(effects
@@ -10361,10 +10373,10 @@
 			)
 		)
 		(pin "1"
-			(uuid "a3c5c135-b083-5b30-8bd6-17628d68b2ae")
+			(uuid "829cb5f6-6333-5ec0-ada5-dc926293d49b")
 		)
 		(pin "2"
-			(uuid "829cb5f6-6333-5ec0-ada5-dc926293d49b")
+			(uuid "083967b4-a524-51d1-b412-1a044b184cf0")
 		)
 		(instances
 			(project "GridUp-Modul"
@@ -10383,7 +10395,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "083967b4-a524-51d1-b412-1a044b184cf0")
+		(uuid "02dbbcc5-a228-521d-bd55-463c46eb1efe")
 		(property "Reference" "R12"
 			(at 62.23 86.36 0)
 			(effects
@@ -10433,10 +10445,10 @@
 			)
 		)
 		(pin "1"
-			(uuid "02dbbcc5-a228-521d-bd55-463c46eb1efe")
+			(uuid "9721540d-7ad0-5f6e-ab62-f2bbb5c482e3")
 		)
 		(pin "2"
-			(uuid "9721540d-7ad0-5f6e-ab62-f2bbb5c482e3")
+			(uuid "b585b34c-1c5d-5308-9b28-d2f931aeac87")
 		)
 		(instances
 			(project "GridUp-Modul"
@@ -10455,7 +10467,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "b585b34c-1c5d-5308-9b28-d2f931aeac87")
+		(uuid "16a6e987-2aae-5bdf-9574-73535b393e57")
 		(property "Reference" "R22"
 			(at 70.5 83.09 270)
 			(effects
@@ -10505,10 +10517,10 @@
 			)
 		)
 		(pin "1"
-			(uuid "16a6e987-2aae-5bdf-9574-73535b393e57")
+			(uuid "aca85900-9704-52ff-94dd-2df110459d11")
 		)
 		(pin "2"
-			(uuid "aca85900-9704-52ff-94dd-2df110459d11")
+			(uuid "c634a44f-7d30-5915-abbe-8a149485935a")
 		)
 		(instances
 			(project "GridUp-Modul"
@@ -10527,7 +10539,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "c634a44f-7d30-5915-abbe-8a149485935a")
+		(uuid "5f893774-5e34-5f42-ab3d-6a4dcae3c953")
 		(property "Reference" "C12"
 			(at 91.8 88.49 0)
 			(effects
@@ -10577,10 +10589,10 @@
 			)
 		)
 		(pin "1"
-			(uuid "5f893774-5e34-5f42-ab3d-6a4dcae3c953")
+			(uuid "e59d210c-8edb-588a-a268-97f3e42a77ba")
 		)
 		(pin "2"
-			(uuid "e59d210c-8edb-588a-a268-97f3e42a77ba")
+			(uuid "0440211a-4fea-5b69-8ef6-4578e0bc47d1")
 		)
 		(instances
 			(project "GridUp-Modul"
@@ -10599,7 +10611,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "0440211a-4fea-5b69-8ef6-4578e0bc47d1")
+		(uuid "0de429d8-a418-5337-9117-e24997c9f68c")
 		(property "Reference" "#PWR08"
 			(at 91.44 92.71 0)
 			(hide yes)
@@ -10650,7 +10662,7 @@
 			)
 		)
 		(pin "1"
-			(uuid "0de429d8-a418-5337-9117-e24997c9f68c")
+			(uuid "bc52613c-7131-50db-a065-8aca49fa0232")
 		)
 		(instances
 			(project "GridUp-Modul"
@@ -10670,7 +10682,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "bc52613c-7131-50db-a065-8aca49fa0232")
+		(uuid "9a93f2d9-afc2-5a9a-86fe-e2be7b4ebaf7")
 		(property "Reference" "J5"
 			(at 53.34 98.83 0)
 			(effects
@@ -10720,10 +10732,10 @@
 			)
 		)
 		(pin "1"
-			(uuid "9a93f2d9-afc2-5a9a-86fe-e2be7b4ebaf7")
+			(uuid "3849147c-5f92-55ce-bf3b-c51d78926d9a")
 		)
 		(pin "2"
-			(uuid "3849147c-5f92-55ce-bf3b-c51d78926d9a")
+			(uuid "205167a4-7f1f-5154-8682-1f50b7a61bb1")
 		)
 		(instances
 			(project "GridUp-Modul"
@@ -10742,7 +10754,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "205167a4-7f1f-5154-8682-1f50b7a61bb1")
+		(uuid "0a8969e3-631d-5f56-aec7-a5b9c40b47cb")
 		(property "Reference" "R13"
 			(at 62.23 101.6 0)
 			(effects
@@ -10792,10 +10804,10 @@
 			)
 		)
 		(pin "1"
-			(uuid "0a8969e3-631d-5f56-aec7-a5b9c40b47cb")
+			(uuid "74ccf388-fdf2-561b-9b8a-7d1d27afb79d")
 		)
 		(pin "2"
-			(uuid "74ccf388-fdf2-561b-9b8a-7d1d27afb79d")
+			(uuid "9c26256c-8cd7-5e9d-b00f-1a1e7650c02b")
 		)
 		(instances
 			(project "GridUp-Modul"
@@ -10814,7 +10826,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "9c26256c-8cd7-5e9d-b00f-1a1e7650c02b")
+		(uuid "f92a2e5d-19c6-5939-82cd-76812666cc92")
 		(property "Reference" "R23"
 			(at 70.5 98.33 270)
 			(effects
@@ -10864,10 +10876,10 @@
 			)
 		)
 		(pin "1"
-			(uuid "f92a2e5d-19c6-5939-82cd-76812666cc92")
+			(uuid "e2e02265-9161-55fc-aada-61f3df78bb15")
 		)
 		(pin "2"
-			(uuid "e2e02265-9161-55fc-aada-61f3df78bb15")
+			(uuid "a13d3429-8757-5393-90bc-3559a4007560")
 		)
 		(instances
 			(project "GridUp-Modul"
@@ -10886,7 +10898,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "a13d3429-8757-5393-90bc-3559a4007560")
+		(uuid "67ccf1b9-5d0a-57d9-8672-324e64b76249")
 		(property "Reference" "C13"
 			(at 91.8 103.73 0)
 			(effects
@@ -10936,10 +10948,10 @@
 			)
 		)
 		(pin "1"
-			(uuid "67ccf1b9-5d0a-57d9-8672-324e64b76249")
+			(uuid "dc918e81-a00c-50d0-bd83-61112414f32b")
 		)
 		(pin "2"
-			(uuid "dc918e81-a00c-50d0-bd83-61112414f32b")
+			(uuid "da5b61a7-e8c3-50f2-9411-f067d24f70bf")
 		)
 		(instances
 			(project "GridUp-Modul"
@@ -10958,7 +10970,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "da5b61a7-e8c3-50f2-9411-f067d24f70bf")
+		(uuid "6011c946-a669-5a7a-8268-3d4c5886272d")
 		(property "Reference" "#PWR09"
 			(at 91.44 107.95 0)
 			(hide yes)
@@ -11009,7 +11021,7 @@
 			)
 		)
 		(pin "1"
-			(uuid "6011c946-a669-5a7a-8268-3d4c5886272d")
+			(uuid "776f4f88-6322-56c5-81ea-0492f16362a4")
 		)
 		(instances
 			(project "GridUp-Modul"
@@ -11028,7 +11040,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "776f4f88-6322-56c5-81ea-0492f16362a4")
+		(uuid "aaf9131b-e273-55b1-9a3f-bda0eceffbb5")
 		(property "Reference" "R30"
 			(at 34.29 111.76 0)
 			(effects
@@ -11078,10 +11090,10 @@
 			)
 		)
 		(pin "1"
-			(uuid "aaf9131b-e273-55b1-9a3f-bda0eceffbb5")
+			(uuid "4609786f-f2fd-5793-a2e5-04ba703ab7cb")
 		)
 		(pin "2"
-			(uuid "4609786f-f2fd-5793-a2e5-04ba703ab7cb")
+			(uuid "02ce1120-d453-5803-a28b-479e5f42441d")
 		)
 		(instances
 			(project "GridUp-Modul"
@@ -11100,7 +11112,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "02ce1120-d453-5803-a28b-479e5f42441d")
+		(uuid "7ffe3685-4e46-5702-bf33-d0369c31f886")
 		(property "Reference" "#PWR10"
 			(at 35.56 105.41 0)
 			(hide yes)
@@ -11146,7 +11158,7 @@
 			)
 		)
 		(pin "1"
-			(uuid "7ffe3685-4e46-5702-bf33-d0369c31f886")
+			(uuid "f5e4a6b4-7d2f-5fa1-b238-9165a0739304")
 		)
 		(instances
 			(project "GridUp-Modul"
@@ -11165,7 +11177,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "f5e4a6b4-7d2f-5fa1-b238-9165a0739304")
+		(uuid "fae05819-de34-5ad7-991a-632e36953c98")
 		(property "Reference" "R31"
 			(at 34.29 124.46 0)
 			(effects
@@ -11215,10 +11227,10 @@
 			)
 		)
 		(pin "1"
-			(uuid "fae05819-de34-5ad7-991a-632e36953c98")
+			(uuid "92c8b028-b6a5-56e3-958f-f5b417f935c9")
 		)
 		(pin "2"
-			(uuid "92c8b028-b6a5-56e3-958f-f5b417f935c9")
+			(uuid "6e2104a4-bcf9-5ad3-b6a0-150614b3d5f8")
 		)
 		(instances
 			(project "GridUp-Modul"
@@ -11237,7 +11249,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "6e2104a4-bcf9-5ad3-b6a0-150614b3d5f8")
+		(uuid "b05e9659-bae3-558e-9a45-d5ef09620bb5")
 		(property "Reference" "#PWR11"
 			(at 35.56 129.54 0)
 			(hide yes)
@@ -11288,7 +11300,7 @@
 			)
 		)
 		(pin "1"
-			(uuid "b05e9659-bae3-558e-9a45-d5ef09620bb5")
+			(uuid "6c831dff-0fee-5c29-8ba1-62300a1ed4a9")
 		)
 		(instances
 			(project "GridUp-Modul"
@@ -11307,7 +11319,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "6c831dff-0fee-5c29-8ba1-62300a1ed4a9")
+		(uuid "397d818b-38cd-50a3-a3c0-0e07a07c5049")
 		(property "Reference" "C20"
 			(at 45.72 124.46 0)
 			(effects
@@ -11357,10 +11369,10 @@
 			)
 		)
 		(pin "1"
-			(uuid "397d818b-38cd-50a3-a3c0-0e07a07c5049")
+			(uuid "f7130f5c-5dfb-5d5e-91db-48ec0ab777c9")
 		)
 		(pin "2"
-			(uuid "f7130f5c-5dfb-5d5e-91db-48ec0ab777c9")
+			(uuid "aaad21f8-4dc3-59b6-a9f2-76e2265b086a")
 		)
 		(instances
 			(project "GridUp-Modul"
@@ -11379,7 +11391,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "aaad21f8-4dc3-59b6-a9f2-76e2265b086a")
+		(uuid "bfd8e735-48a5-5357-aa12-0c6b786a3f16")
 		(property "Reference" "#PWR12"
 			(at 46.99 129.54 0)
 			(hide yes)
@@ -11430,7 +11442,7 @@
 			)
 		)
 		(pin "1"
-			(uuid "bfd8e735-48a5-5357-aa12-0c6b786a3f16")
+			(uuid "5e61e879-625c-5431-adf2-3f4d04d18736")
 		)
 		(instances
 			(project "GridUp-Modul"
@@ -11449,7 +11461,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "5e61e879-625c-5431-adf2-3f4d04d18736")
+		(uuid "3486d838-7d00-5e12-9c41-63f475aa8917")
 		(property "Reference" "U2"
 			(at 35.56 167.64 0)
 			(effects
@@ -11499,16 +11511,16 @@
 			)
 		)
 		(pin "1"
-			(uuid "3486d838-7d00-5e12-9c41-63f475aa8917")
-		)
-		(pin "2"
 			(uuid "43f995d5-0d48-5d53-9ccb-c1922c4af808")
 		)
-		(pin "3"
+		(pin "2"
 			(uuid "de7747fb-33f0-5a89-85b2-3d6bf9ccc227")
 		)
-		(pin "4"
+		(pin "3"
 			(uuid "309e1fb3-be83-507c-a8d4-804ea858df9b")
+		)
+		(pin "4"
+			(uuid "d44a3cf6-37dc-552f-9602-eff61e6369cb")
 		)
 		(instances
 			(project "GridUp-Modul"
@@ -11527,7 +11539,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "d44a3cf6-37dc-552f-9602-eff61e6369cb")
+		(uuid "e6e441d6-9825-5b6c-a9d4-21452be28a4a")
 		(property "Reference" "#PWR13"
 			(at 72.39 176.53 0)
 			(hide yes)
@@ -11578,7 +11590,7 @@
 			)
 		)
 		(pin "1"
-			(uuid "e6e441d6-9825-5b6c-a9d4-21452be28a4a")
+			(uuid "55994576-2d36-59fd-b8ee-c1249476867d")
 		)
 		(instances
 			(project "GridUp-Modul"
@@ -11597,7 +11609,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "55994576-2d36-59fd-b8ee-c1249476867d")
+		(uuid "5af43cb2-5ca9-53ff-8384-264122565433")
 		(property "Reference" "#PWR14"
 			(at 72.39 147.32 0)
 			(hide yes)
@@ -11643,7 +11655,7 @@
 			)
 		)
 		(pin "1"
-			(uuid "5af43cb2-5ca9-53ff-8384-264122565433")
+			(uuid "63c5d7c7-9e71-5da5-969a-cd443bfe3244")
 		)
 		(instances
 			(project "GridUp-Modul"
@@ -11662,7 +11674,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "63c5d7c7-9e71-5da5-969a-cd443bfe3244")
+		(uuid "a2a8d199-4ef9-51c6-b167-1e6838075d90")
 		(property "Reference" "C2"
 			(at 44.45 152.4 0)
 			(effects
@@ -11712,10 +11724,10 @@
 			)
 		)
 		(pin "1"
-			(uuid "a2a8d199-4ef9-51c6-b167-1e6838075d90")
+			(uuid "a08a429c-05bc-5776-9959-4d3240488b56")
 		)
 		(pin "2"
-			(uuid "a08a429c-05bc-5776-9959-4d3240488b56")
+			(uuid "8168bb6c-4752-5d98-9209-fb682fd10084")
 		)
 		(instances
 			(project "GridUp-Modul"
@@ -11734,7 +11746,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "8168bb6c-4752-5d98-9209-fb682fd10084")
+		(uuid "d8f6b00d-628c-58ee-a2f4-b586ef7a0810")
 		(property "Reference" "#PWR15"
 			(at 54.61 157.48 0)
 			(hide yes)
@@ -11785,7 +11797,7 @@
 			)
 		)
 		(pin "1"
-			(uuid "d8f6b00d-628c-58ee-a2f4-b586ef7a0810")
+			(uuid "8807a4cb-3d95-53ac-b8f9-0390c1b0bb4f")
 		)
 		(instances
 			(project "GridUp-Modul"
@@ -11804,7 +11816,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "8807a4cb-3d95-53ac-b8f9-0390c1b0bb4f")
+		(uuid "53b077c3-cbfc-542f-9efb-84c3ff6fb197")
 		(property "Reference" "U3"
 			(at 35.56 203.5 0)
 			(effects
@@ -11854,28 +11866,28 @@
 			)
 		)
 		(pin "5"
-			(uuid "53b077c3-cbfc-542f-9efb-84c3ff6fb197")
-		)
-		(pin "8"
 			(uuid "81deb974-e26e-5cec-9435-5b00b77a88f0")
 		)
-		(pin "1"
+		(pin "8"
 			(uuid "dfcdec9e-37b7-5c04-af7b-93499df8de28")
 		)
-		(pin "4"
+		(pin "1"
 			(uuid "c71db97f-4426-5566-adbb-942d57d4446b")
 		)
-		(pin "3"
+		(pin "4"
 			(uuid "d4176fb8-0b2b-5885-8bef-110fc06bf6b6")
 		)
-		(pin "2"
+		(pin "3"
 			(uuid "a2a0b7ae-d0ef-5e3c-873d-68792d900b67")
 		)
-		(pin "6"
+		(pin "2"
 			(uuid "924cad6d-351b-52fa-9160-8e00fc0da17e")
 		)
-		(pin "7"
+		(pin "6"
 			(uuid "d371c6fe-da0c-51f5-bc52-ca67fb28e370")
+		)
+		(pin "7"
+			(uuid "64f1546b-ca66-5523-878a-acdff24888e4")
 		)
 		(instances
 			(project "GridUp-Modul"
@@ -11894,7 +11906,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "64f1546b-ca66-5523-878a-acdff24888e4")
+		(uuid "463e2095-47b1-52c2-a406-37b6b28ec20e")
 		(property "Reference" "#PWR16"
 			(at 64.77 182.88 0)
 			(hide yes)
@@ -11940,7 +11952,7 @@
 			)
 		)
 		(pin "1"
-			(uuid "463e2095-47b1-52c2-a406-37b6b28ec20e")
+			(uuid "e93cf279-edf7-5109-b965-dab729ac83ec")
 		)
 		(instances
 			(project "GridUp-Modul"
@@ -11959,7 +11971,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "e93cf279-edf7-5109-b965-dab729ac83ec")
+		(uuid "384d36a3-c6e4-521d-baf0-bbc44db74d22")
 		(property "Reference" "#PWR17"
 			(at 72.39 207.01 0)
 			(hide yes)
@@ -12010,7 +12022,7 @@
 			)
 		)
 		(pin "1"
-			(uuid "384d36a3-c6e4-521d-baf0-bbc44db74d22")
+			(uuid "478fe8e2-8789-5d2d-a443-61dc27108e7d")
 		)
 		(instances
 			(project "GridUp-Modul"
@@ -12029,7 +12041,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "478fe8e2-8789-5d2d-a443-61dc27108e7d")
+		(uuid "e7eaaf03-72f6-58b7-86f3-0951ec558a88")
 		(property "Reference" "#PWR18"
 			(at 52.07 189.23 90)
 			(hide yes)
@@ -12075,7 +12087,7 @@
 			)
 		)
 		(pin "1"
-			(uuid "e7eaaf03-72f6-58b7-86f3-0951ec558a88")
+			(uuid "e2a4a6aa-72e1-5f28-a201-15e779b105c4")
 		)
 		(instances
 			(project "GridUp-Modul"
@@ -12094,7 +12106,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "e2a4a6aa-72e1-5f28-a201-15e779b105c4")
+		(uuid "f9110e36-199d-560f-b9be-7df73909a123")
 		(property "Reference" "#PWR19"
 			(at 46.99 194.31 270)
 			(hide yes)
@@ -12140,7 +12152,7 @@
 			)
 		)
 		(pin "1"
-			(uuid "f9110e36-199d-560f-b9be-7df73909a123")
+			(uuid "8e8bb77b-8484-5036-9047-3acbbcda745b")
 		)
 		(instances
 			(project "GridUp-Modul"
@@ -12159,7 +12171,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "8e8bb77b-8484-5036-9047-3acbbcda745b")
+		(uuid "a5762061-0e6d-55a3-89ed-c69f61fa92be")
 		(property "Reference" "R2"
 			(at 107.03 177.8 0)
 			(effects
@@ -12209,10 +12221,10 @@
 			)
 		)
 		(pin "1"
-			(uuid "a5762061-0e6d-55a3-89ed-c69f61fa92be")
+			(uuid "6e36f32a-873c-5704-8d7f-f07bb14eb5df")
 		)
 		(pin "2"
-			(uuid "6e36f32a-873c-5704-8d7f-f07bb14eb5df")
+			(uuid "e9a7b12c-0fe8-512d-b3c9-029ae00b96b7")
 		)
 		(instances
 			(project "GridUp-Modul"
@@ -12231,7 +12243,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "e9a7b12c-0fe8-512d-b3c9-029ae00b96b7")
+		(uuid "0b1cb7fa-d61c-5eec-b9fc-816910f6bb2f")
 		(property "Reference" "#PWR20"
 			(at 115.57 172.72 0)
 			(hide yes)
@@ -12277,7 +12289,7 @@
 			)
 		)
 		(pin "1"
-			(uuid "0b1cb7fa-d61c-5eec-b9fc-816910f6bb2f")
+			(uuid "f3086791-2b8d-5357-a1a3-0ae5678e898d")
 		)
 		(instances
 			(project "GridUp-Modul"
@@ -12296,7 +12308,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "f3086791-2b8d-5357-a1a3-0ae5678e898d")
+		(uuid "72ad729c-864b-5881-bedc-1b6574fdda11")
 		(property "Reference" "R3"
 			(at 94.33 182.88 0)
 			(effects
@@ -12346,10 +12358,10 @@
 			)
 		)
 		(pin "1"
-			(uuid "72ad729c-864b-5881-bedc-1b6574fdda11")
+			(uuid "04e68c6f-34c4-5dc6-8c64-5241f8f22990")
 		)
 		(pin "2"
-			(uuid "04e68c6f-34c4-5dc6-8c64-5241f8f22990")
+			(uuid "1c0d5398-9e6a-5127-ba32-8fd71758960b")
 		)
 		(instances
 			(project "GridUp-Modul"
@@ -12368,7 +12380,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "1c0d5398-9e6a-5127-ba32-8fd71758960b")
+		(uuid "bf46a43c-2a6c-5ddb-ab4d-3693d605090f")
 		(property "Reference" "#PWR21"
 			(at 102.87 177.8 0)
 			(hide yes)
@@ -12414,7 +12426,7 @@
 			)
 		)
 		(pin "1"
-			(uuid "bf46a43c-2a6c-5ddb-ab4d-3693d605090f")
+			(uuid "f757054b-9b3e-53ae-a8c9-ed222d2cc729")
 		)
 		(instances
 			(project "GridUp-Modul"
@@ -12433,7 +12445,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "f757054b-9b3e-53ae-a8c9-ed222d2cc729")
+		(uuid "9bc15a4e-d854-5ebf-b1e5-2d758a0fecec")
 		(property "Reference" "J9"
 			(at 263 49 0)
 			(effects
@@ -12483,16 +12495,16 @@
 			)
 		)
 		(pin "1"
-			(uuid "9bc15a4e-d854-5ebf-b1e5-2d758a0fecec")
-		)
-		(pin "2"
 			(uuid "fd5f3555-f29a-59c4-b40e-2a1be1b2c380")
 		)
-		(pin "3"
+		(pin "2"
 			(uuid "638b6f49-9473-5b83-8f22-4d9e9b5874c6")
 		)
-		(pin "4"
+		(pin "3"
 			(uuid "e97f8b27-1453-53dc-83f2-eed44a09e090")
+		)
+		(pin "4"
+			(uuid "e0425659-c8a7-5fc9-b8b7-82f142b18fb3")
 		)
 		(instances
 			(project "GridUp-Modul"
@@ -12511,7 +12523,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "e0425659-c8a7-5fc9-b8b7-82f142b18fb3")
+		(uuid "08734740-2d5b-5c13-bc0b-d7b1b9c60dc7")
 		(property "Reference" "U4"
 			(at 233.68 73.66 0)
 			(effects
@@ -12561,28 +12573,28 @@
 			)
 		)
 		(pin "8"
-			(uuid "08734740-2d5b-5c13-bc0b-d7b1b9c60dc7")
-		)
-		(pin "5"
 			(uuid "b5abe098-a7de-54f3-bf4b-8de10aa4d5fa")
 		)
-		(pin "4"
+		(pin "5"
 			(uuid "65221c26-bc8c-5f31-b3cf-040f1985d44f")
 		)
-		(pin "3"
+		(pin "4"
 			(uuid "00c2c641-57d3-5927-a40b-b17b0fd07141")
 		)
-		(pin "2"
+		(pin "3"
 			(uuid "3379e777-77a4-5978-bb84-86055d613755")
 		)
-		(pin "1"
+		(pin "2"
 			(uuid "67c2f825-a03d-541d-993a-5d44276ae9a5")
 		)
-		(pin "7"
+		(pin "1"
 			(uuid "21190257-d2a9-5ce1-bbb4-91e3a932cf17")
 		)
-		(pin "6"
+		(pin "7"
 			(uuid "8aec549d-fc6f-554d-92de-91cb8620277d")
+		)
+		(pin "6"
+			(uuid "7e4695f9-4dab-57e9-98e8-703fb8d04a17")
 		)
 		(instances
 			(project "GridUp-Modul"
@@ -12601,7 +12613,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "7e4695f9-4dab-57e9-98e8-703fb8d04a17")
+		(uuid "3f6f8c1b-49b5-553b-a1f4-922c3f4e3e4b")
 		(property "Reference" "#PWR22"
 			(at 256.54 69.85 0)
 			(hide yes)
@@ -12647,7 +12659,7 @@
 			)
 		)
 		(pin "1"
-			(uuid "3f6f8c1b-49b5-553b-a1f4-922c3f4e3e4b")
+			(uuid "e90a2607-c577-5bef-9ba6-2dcde83bd0da")
 		)
 		(instances
 			(project "GridUp-Modul"
@@ -12666,7 +12678,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "e90a2607-c577-5bef-9ba6-2dcde83bd0da")
+		(uuid "538bee4a-79f6-5c73-8fba-f8b4284291cd")
 		(property "Reference" "#PWR23"
 			(at 256.54 100.33 0)
 			(hide yes)
@@ -12717,7 +12729,7 @@
 			)
 		)
 		(pin "1"
-			(uuid "538bee4a-79f6-5c73-8fba-f8b4284291cd")
+			(uuid "d543d7ef-87fa-5aed-bbc1-cd32bc180710")
 		)
 		(instances
 			(project "GridUp-Modul"
@@ -12736,7 +12748,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "d543d7ef-87fa-5aed-bbc1-cd32bc180710")
+		(uuid "41b12b2a-157d-5250-a6ed-2954e8093f5f")
 		(property "Reference" "J7"
 			(at 289.56 83.82 0)
 			(effects
@@ -12746,8 +12758,8 @@
 				(justify left)
 			)
 		)
-		(property "Value" "RS-485 klemens 1 B / 2 GND / 3 A"
-			(at 278 100.33 0)
+		(property "Value" "RS-485 klemens"
+			(at 294.2 91.21 0)
 			(effects
 				(font
 					(size 1.7 1.7)
@@ -12786,13 +12798,13 @@
 			)
 		)
 		(pin "1"
-			(uuid "41b12b2a-157d-5250-a6ed-2954e8093f5f")
-		)
-		(pin "2"
 			(uuid "fb73e7d6-9798-5f0d-8766-56e364665073")
 		)
-		(pin "3"
+		(pin "2"
 			(uuid "ca55fde1-3892-5ee0-82eb-9dcd289aa147")
+		)
+		(pin "3"
+			(uuid "1d7ff7ec-b1b7-513d-b493-09200cde1253")
 		)
 		(instances
 			(project "GridUp-Modul"
@@ -12811,7 +12823,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "1d7ff7ec-b1b7-513d-b493-09200cde1253")
+		(uuid "1fcd54fb-fa9f-502d-ba05-cb92b582141d")
 		(property "Reference" "R40"
 			(at 267.5 92.37 0)
 			(effects
@@ -12861,10 +12873,10 @@
 			)
 		)
 		(pin "1"
-			(uuid "1fcd54fb-fa9f-502d-ba05-cb92b582141d")
+			(uuid "6e1d9525-1140-53b0-bfc2-4b1270046e12")
 		)
 		(pin "2"
-			(uuid "6e1d9525-1140-53b0-bfc2-4b1270046e12")
+			(uuid "2bb8c529-7f94-5d36-abc9-afdcb13616a1")
 		)
 		(instances
 			(project "GridUp-Modul"
@@ -12883,7 +12895,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "2bb8c529-7f94-5d36-abc9-afdcb13616a1")
+		(uuid "d1d3501c-5194-58f4-9771-8dcff259ac62")
 		(property "Reference" "#PWR24"
 			(at 281.94 90.17 90)
 			(hide yes)
@@ -12929,7 +12941,7 @@
 			)
 		)
 		(pin "1"
-			(uuid "d1d3501c-5194-58f4-9771-8dcff259ac62")
+			(uuid "7ef2dad8-e024-5273-b93c-3eadd76f0a2d")
 		)
 		(instances
 			(project "GridUp-Modul"
@@ -12948,7 +12960,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "7ef2dad8-e024-5273-b93c-3eadd76f0a2d")
+		(uuid "fae6252d-70fb-542d-b946-bad0af22061f")
 		(property "Reference" "J8"
 			(at 262.9 131.6 0)
 			(effects
@@ -12998,10 +13010,10 @@
 			)
 		)
 		(pin "1"
-			(uuid "fae6252d-70fb-542d-b946-bad0af22061f")
+			(uuid "594e7e93-d28e-5671-acac-0773187da302")
 		)
 		(pin "2"
-			(uuid "594e7e93-d28e-5671-acac-0773187da302")
+			(uuid "2861416e-7a1f-5f3d-b8a5-66cfc5a011c1")
 		)
 		(instances
 			(project "GridUp-Modul"
@@ -13020,7 +13032,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "2861416e-7a1f-5f3d-b8a5-66cfc5a011c1")
+		(uuid "eb38b1ee-bc04-5ab7-a685-0f7ca463de32")
 		(property "Reference" "#PWR25"
 			(at 261.62 138.43 0)
 			(hide yes)
@@ -13071,7 +13083,7 @@
 			)
 		)
 		(pin "1"
-			(uuid "eb38b1ee-bc04-5ab7-a685-0f7ca463de32")
+			(uuid "ded89143-65b7-5d44-9e87-ba3feba0daf9")
 		)
 		(instances
 			(project "GridUp-Modul"
@@ -13090,7 +13102,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "ded89143-65b7-5d44-9e87-ba3feba0daf9")
+		(uuid "deec9dbe-813c-53f5-a19e-00807b8e7959")
 		(property "Reference" "J6"
 			(at 264.16 163.5 0)
 			(effects
@@ -13140,34 +13152,34 @@
 			)
 		)
 		(pin "1"
-			(uuid "deec9dbe-813c-53f5-a19e-00807b8e7959")
-		)
-		(pin "2"
 			(uuid "eef6b5fa-4fff-5d49-adf2-3d115bbed6be")
 		)
-		(pin "3"
+		(pin "2"
 			(uuid "3f35aeeb-8971-5886-8ff0-eb612c3d3f74")
 		)
-		(pin "4"
+		(pin "3"
 			(uuid "5e974af6-4546-5191-b45a-559ba497e1c7")
 		)
-		(pin "5"
+		(pin "4"
 			(uuid "968ebf07-8b07-55cd-a318-6d4032f06b3f")
 		)
-		(pin "6"
+		(pin "5"
 			(uuid "f7234c3d-59da-54e1-a254-f060db6fdf5a")
 		)
-		(pin "7"
+		(pin "6"
 			(uuid "32afa8bd-e919-502b-880d-77357808ac4f")
 		)
-		(pin "8"
+		(pin "7"
 			(uuid "6cb10452-2be6-5b59-ad67-750dfc9fee8d")
 		)
-		(pin "9"
+		(pin "8"
 			(uuid "b24a2774-ec74-5230-86dc-fa353e977426")
 		)
-		(pin "10"
+		(pin "9"
 			(uuid "985d5a53-5c8e-5385-bad2-06aa7cd3c82c")
+		)
+		(pin "10"
+			(uuid "267476f4-936e-520d-8542-83276c4ffd6d")
 		)
 		(instances
 			(project "GridUp-Modul"
@@ -13186,7 +13198,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "267476f4-936e-520d-8542-83276c4ffd6d")
+		(uuid "f70c395f-0164-5971-8f24-1a79696df300")
 		(property "Reference" "#PWR26"
 			(at 256.54 161.29 0)
 			(hide yes)
@@ -13232,7 +13244,7 @@
 			)
 		)
 		(pin "1"
-			(uuid "f70c395f-0164-5971-8f24-1a79696df300")
+			(uuid "ef565ae3-9c9d-508e-b727-ec8b7dc03e78")
 		)
 		(instances
 			(project "GridUp-Modul"
@@ -13251,7 +13263,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "ef565ae3-9c9d-508e-b727-ec8b7dc03e78")
+		(uuid "4c49f7b4-b04d-5ebd-bcc6-27b94a7bbb4a")
 		(property "Reference" "#PWR27"
 			(at 276.86 161.29 0)
 			(hide yes)
@@ -13297,7 +13309,7 @@
 			)
 		)
 		(pin "1"
-			(uuid "4c49f7b4-b04d-5ebd-bcc6-27b94a7bbb4a")
+			(uuid "5115429e-37e5-5ac2-a88c-b17bf6ccf4fd")
 		)
 		(instances
 			(project "GridUp-Modul"
@@ -13316,7 +13328,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "5115429e-37e5-5ac2-a88c-b17bf6ccf4fd")
+		(uuid "b77ec459-024d-52a2-a3ac-a797f5193670")
 		(property "Reference" "#PWR28"
 			(at 237.49 168.91 90)
 			(hide yes)
@@ -13362,7 +13374,7 @@
 			)
 		)
 		(pin "1"
-			(uuid "b77ec459-024d-52a2-a3ac-a797f5193670")
+			(uuid "f101c7ae-9540-5e7b-82dd-d001f6dc6007")
 		)
 		(instances
 			(project "GridUp-Modul"
@@ -13381,7 +13393,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "f101c7ae-9540-5e7b-82dd-d001f6dc6007")
+		(uuid "94c90986-65a0-5e2a-b74d-fcbb6e9f02ba")
 		(property "Reference" "#PWR29"
 			(at 288.29 168.91 270)
 			(hide yes)
@@ -13427,7 +13439,7 @@
 			)
 		)
 		(pin "1"
-			(uuid "94c90986-65a0-5e2a-b74d-fcbb6e9f02ba")
+			(uuid "a401baeb-4154-524e-89b5-2f75ae0d67c8")
 		)
 		(instances
 			(project "GridUp-Modul"
@@ -13447,7 +13459,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "a401baeb-4154-524e-89b5-2f75ae0d67c8")
+		(uuid "603d7cc0-f5fc-50f8-8623-c098b6aaf19c")
 		(property "Reference" "J1"
 			(at 33.8 222.25 0)
 			(effects
@@ -13497,13 +13509,13 @@
 			)
 		)
 		(pin "1"
-			(uuid "603d7cc0-f5fc-50f8-8623-c098b6aaf19c")
-		)
-		(pin "2"
 			(uuid "96e049d9-5d51-5e14-a13b-229273a7628f")
 		)
-		(pin "3"
+		(pin "2"
 			(uuid "0d43f23e-cd1b-5ef8-82c6-607fb0abda4f")
+		)
+		(pin "3"
+			(uuid "2ba1da42-f16c-5ab0-8939-ff812f422ca8")
 		)
 		(instances
 			(project "GridUp-Modul"
@@ -13522,7 +13534,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "2ba1da42-f16c-5ab0-8939-ff812f422ca8")
+		(uuid "73547e70-4376-5376-a23e-5d584ff951d8")
 		(property "Reference" "F1"
 			(at 62.23 223.4 270)
 			(effects
@@ -13567,10 +13579,10 @@
 			)
 		)
 		(pin "1"
-			(uuid "73547e70-4376-5376-a23e-5d584ff951d8")
+			(uuid "a049d5e4-4520-5470-9eac-57c4a8635fdb")
 		)
 		(pin "2"
-			(uuid "a049d5e4-4520-5470-9eac-57c4a8635fdb")
+			(uuid "ced0382d-2c0d-5d21-9d8e-1f6b951c3c98")
 		)
 		(instances
 			(project "GridUp-Modul"
@@ -13589,7 +13601,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "ced0382d-2c0d-5d21-9d8e-1f6b951c3c98")
+		(uuid "1df610e1-7591-562b-9136-53ee3ced9a3e")
 		(property "Reference" "U5"
 			(at 76.2 238.1 0)
 			(effects
@@ -13639,19 +13651,19 @@
 			)
 		)
 		(pin "1"
-			(uuid "1df610e1-7591-562b-9136-53ee3ced9a3e")
-		)
-		(pin "2"
 			(uuid "36b071f7-9ba5-5246-b894-435ed63ae3b4")
 		)
-		(pin "3"
+		(pin "2"
 			(uuid "413388b5-8d65-5780-9627-d53df98a7fba")
 		)
-		(pin "4"
+		(pin "3"
 			(uuid "8959bd76-4603-5bb6-8471-091e86b9f397")
 		)
-		(pin "5"
+		(pin "4"
 			(uuid "388f887b-e509-5435-a0ef-0b7dff9b7499")
+		)
+		(pin "5"
+			(uuid "1fc932a0-728d-5d98-b8bf-cb78ea179cd9")
 		)
 		(instances
 			(project "GridUp-Modul"
@@ -13670,7 +13682,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "1fc932a0-728d-5d98-b8bf-cb78ea179cd9")
+		(uuid "783aa0ec-b2fb-5f0c-8c37-1dbe82578b5d")
 		(property "Reference" "RV1"
 			(at 73 222.3 0)
 			(effects
@@ -13720,10 +13732,10 @@
 			)
 		)
 		(pin "1"
-			(uuid "783aa0ec-b2fb-5f0c-8c37-1dbe82578b5d")
+			(uuid "aabcadaa-239d-518b-ae06-3e386acddb78")
 		)
 		(pin "2"
-			(uuid "aabcadaa-239d-518b-ae06-3e386acddb78")
+			(uuid "5efe69fc-ba2c-52c2-ae85-f2f9a5ff0eaa")
 		)
 		(instances
 			(project "GridUp-Modul"
@@ -13742,7 +13754,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "5efe69fc-ba2c-52c2-ae85-f2f9a5ff0eaa")
+		(uuid "47539b0c-6b1a-5eab-8fab-f3401f9d9277")
 		(property "Reference" "#PWR30"
 			(at 53.34 236.22 0)
 			(hide yes)
@@ -13789,7 +13801,7 @@
 			)
 		)
 		(pin "1"
-			(uuid "47539b0c-6b1a-5eab-8fab-f3401f9d9277")
+			(uuid "f1aed309-67d3-5cec-9f6e-393e6f55d77f")
 		)
 		(instances
 			(project "GridUp-Modul"
@@ -13808,7 +13820,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "f1aed309-67d3-5cec-9f6e-393e6f55d77f")
+		(uuid "9c9a5e6a-57c0-54f1-af03-d699fa681152")
 		(property "Reference" "#FLG31"
 			(at 53.34 233.68 0)
 			(hide yes)
@@ -13860,7 +13872,7 @@
 			)
 		)
 		(pin "1"
-			(uuid "9c9a5e6a-57c0-54f1-af03-d699fa681152")
+			(uuid "3a79aac9-502a-5692-84b8-2df8e9365345")
 		)
 		(instances
 			(project "GridUp-Modul"
@@ -13879,7 +13891,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "3a79aac9-502a-5692-84b8-2df8e9365345")
+		(uuid "34d9a374-744f-517a-8245-f509335f9e73")
 		(property "Reference" "#FLG32"
 			(at 71.12 226.06 0)
 			(hide yes)
@@ -13931,7 +13943,7 @@
 			)
 		)
 		(pin "1"
-			(uuid "34d9a374-744f-517a-8245-f509335f9e73")
+			(uuid "26fb62c8-76d4-54d3-8207-11016c5c1544")
 		)
 		(instances
 			(project "GridUp-Modul"
@@ -13950,7 +13962,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "26fb62c8-76d4-54d3-8207-11016c5c1544")
+		(uuid "5b2c6e6c-8f65-50ca-bcd4-d2c03c8172f5")
 		(property "Reference" "#FLG33"
 			(at 68.58 231.14 180)
 			(hide yes)
@@ -14002,7 +14014,7 @@
 			)
 		)
 		(pin "1"
-			(uuid "5b2c6e6c-8f65-50ca-bcd4-d2c03c8172f5")
+			(uuid "99f44b16-62b5-5351-bb0f-91d85c299d43")
 		)
 		(instances
 			(project "GridUp-Modul"
@@ -14021,7 +14033,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "99f44b16-62b5-5351-bb0f-91d85c299d43")
+		(uuid "9e9f13d7-80cf-5ebc-8cbb-fa333c8bb967")
 		(property "Reference" "#PWR34"
 			(at 104.14 231.14 0)
 			(hide yes)
@@ -14067,7 +14079,7 @@
 			)
 		)
 		(pin "1"
-			(uuid "9e9f13d7-80cf-5ebc-8cbb-fa333c8bb967")
+			(uuid "098efc46-35d4-55e2-be6b-593416d0bd7f")
 		)
 		(instances
 			(project "GridUp-Modul"
@@ -14087,7 +14099,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "098efc46-35d4-55e2-be6b-593416d0bd7f")
+		(uuid "85ffdb25-2409-5bf3-8777-59c65102666d")
 		(property "Reference" "D1"
 			(at 118.11 223 0)
 			(effects
@@ -14132,10 +14144,10 @@
 			)
 		)
 		(pin "1"
-			(uuid "85ffdb25-2409-5bf3-8777-59c65102666d")
+			(uuid "75105212-69c7-532b-b21d-bd7665d0ce8d")
 		)
 		(pin "2"
-			(uuid "75105212-69c7-532b-b21d-bd7665d0ce8d")
+			(uuid "af603333-b909-5571-a6b1-34e9e153f8cf")
 		)
 		(instances
 			(project "GridUp-Modul"
@@ -14154,7 +14166,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "af603333-b909-5571-a6b1-34e9e153f8cf")
+		(uuid "88967b25-4472-554f-9817-feb59090eb52")
 		(property "Reference" "U6"
 			(at 248.92 222.6 0)
 			(effects
@@ -14199,13 +14211,13 @@
 			)
 		)
 		(pin "1"
-			(uuid "88967b25-4472-554f-9817-feb59090eb52")
-		)
-		(pin "2"
 			(uuid "84499f69-7249-5b41-bc80-b3de0bdd8d5d")
 		)
-		(pin "3"
+		(pin "2"
 			(uuid "eb1d70f5-a928-58e1-9b71-56ed2dc9a45c")
+		)
+		(pin "3"
+			(uuid "3c617ba3-a573-5ea7-a9e2-595bdfab4008")
 		)
 		(instances
 			(project "GridUp-Modul"
@@ -14224,7 +14236,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "3c617ba3-a573-5ea7-a9e2-595bdfab4008")
+		(uuid "69606d6c-1105-55bb-bbcf-2d1d730cc8e8")
 		(property "Reference" "#PWR35"
 			(at 251.46 236.22 0)
 			(hide yes)
@@ -14275,7 +14287,7 @@
 			)
 		)
 		(pin "1"
-			(uuid "69606d6c-1105-55bb-bbcf-2d1d730cc8e8")
+			(uuid "16909dca-5e76-5922-b40e-8cd794997eeb")
 		)
 		(instances
 			(project "GridUp-Modul"
@@ -14294,7 +14306,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "16909dca-5e76-5922-b40e-8cd794997eeb")
+		(uuid "64f509f2-0e76-5d7d-9d5b-ee18fed3b9ff")
 		(property "Reference" "#PWR36"
 			(at 220.98 226.06 0)
 			(hide yes)
@@ -14340,7 +14352,7 @@
 			)
 		)
 		(pin "1"
-			(uuid "64f509f2-0e76-5d7d-9d5b-ee18fed3b9ff")
+			(uuid "e238393f-e070-5fdf-995f-074221c0cf15")
 		)
 		(instances
 			(project "GridUp-Modul"
@@ -14359,7 +14371,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "e238393f-e070-5fdf-995f-074221c0cf15")
+		(uuid "f19e1033-bda0-5231-95f8-998247c7cf6c")
 		(property "Reference" "#FLG37"
 			(at 226.06 226.06 0)
 			(hide yes)
@@ -14411,7 +14423,7 @@
 			)
 		)
 		(pin "1"
-			(uuid "f19e1033-bda0-5231-95f8-998247c7cf6c")
+			(uuid "21e4b67f-1f26-5feb-8039-fa6f53c1ea8f")
 		)
 		(instances
 			(project "GridUp-Modul"
@@ -14430,7 +14442,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "21e4b67f-1f26-5feb-8039-fa6f53c1ea8f")
+		(uuid "9363b6fa-9459-5906-8911-f9a9c9cdb727")
 		(property "Reference" "C30"
 			(at 233.3 232 0)
 			(effects
@@ -14480,10 +14492,10 @@
 			)
 		)
 		(pin "1"
-			(uuid "9363b6fa-9459-5906-8911-f9a9c9cdb727")
+			(uuid "a20926e9-3fda-50a2-a8bb-329047aa118c")
 		)
 		(pin "2"
-			(uuid "a20926e9-3fda-50a2-a8bb-329047aa118c")
+			(uuid "f39c0aa2-b1c9-5e61-9d16-a0514693d0fb")
 		)
 		(instances
 			(project "GridUp-Modul"
@@ -14502,7 +14514,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "f39c0aa2-b1c9-5e61-9d16-a0514693d0fb")
+		(uuid "8cacf054-24f1-5ac2-8e7b-643f1f014071")
 		(property "Reference" "#PWR38"
 			(at 233.68 236.22 0)
 			(hide yes)
@@ -14553,7 +14565,7 @@
 			)
 		)
 		(pin "1"
-			(uuid "8cacf054-24f1-5ac2-8e7b-643f1f014071")
+			(uuid "de2dbf3a-14b3-5749-820e-ce1bfc62f908")
 		)
 		(instances
 			(project "GridUp-Modul"
@@ -14572,7 +14584,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "de2dbf3a-14b3-5749-820e-ce1bfc62f908")
+		(uuid "11656c33-eba4-5602-b39b-bb7e5fb43af9")
 		(property "Reference" "#PWR39"
 			(at 271.78 226.06 0)
 			(hide yes)
@@ -14618,7 +14630,7 @@
 			)
 		)
 		(pin "1"
-			(uuid "11656c33-eba4-5602-b39b-bb7e5fb43af9")
+			(uuid "00a4517b-5366-5098-bb16-6250078a2c01")
 		)
 		(instances
 			(project "GridUp-Modul"
@@ -14637,7 +14649,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "00a4517b-5366-5098-bb16-6250078a2c01")
+		(uuid "5a038e94-1bcb-5a90-94d3-890bfba0e35f")
 		(property "Reference" "C31"
 			(at 266.26 232 0)
 			(effects
@@ -14687,10 +14699,10 @@
 			)
 		)
 		(pin "1"
-			(uuid "5a038e94-1bcb-5a90-94d3-890bfba0e35f")
+			(uuid "50b48c96-355a-5d79-9f94-6d14631922dc")
 		)
 		(pin "2"
-			(uuid "50b48c96-355a-5d79-9f94-6d14631922dc")
+			(uuid "f74e7d6e-f511-57e5-9533-a0b385ac79e1")
 		)
 		(instances
 			(project "GridUp-Modul"
@@ -14709,7 +14721,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "f74e7d6e-f511-57e5-9533-a0b385ac79e1")
+		(uuid "de95bc17-44de-5ac6-a3e4-3d3899f6e9ac")
 		(property "Reference" "#PWR40"
 			(at 266.7 236.22 0)
 			(hide yes)
@@ -14760,7 +14772,7 @@
 			)
 		)
 		(pin "1"
-			(uuid "de95bc17-44de-5ac6-a3e4-3d3899f6e9ac")
+			(uuid "fb7a4c78-42d0-5105-8e12-e9a55e3eeb30")
 		)
 		(instances
 			(project "GridUp-Modul"
@@ -14779,7 +14791,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "fb7a4c78-42d0-5105-8e12-e9a55e3eeb30")
+		(uuid "be1362b8-c073-5eb9-acf4-484a0708c932")
 		(property "Reference" "R50"
 			(at 113.03 233.68 0)
 			(effects
@@ -14829,10 +14841,10 @@
 			)
 		)
 		(pin "1"
-			(uuid "be1362b8-c073-5eb9-acf4-484a0708c932")
+			(uuid "54d5a690-9b3c-55f4-b781-5e63bbf55506")
 		)
 		(pin "2"
-			(uuid "54d5a690-9b3c-55f4-b781-5e63bbf55506")
+			(uuid "efd14fd6-8f24-5d56-9f4d-50b0f822b872")
 		)
 		(instances
 			(project "GridUp-Modul"
@@ -14851,7 +14863,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "efd14fd6-8f24-5d56-9f4d-50b0f822b872")
+		(uuid "6a90ef2f-a158-5a6e-ae73-5fa593b1fed0")
 		(property "Reference" "R51"
 			(at 113.03 246.38 0)
 			(effects
@@ -14901,10 +14913,10 @@
 			)
 		)
 		(pin "1"
-			(uuid "6a90ef2f-a158-5a6e-ae73-5fa593b1fed0")
+			(uuid "9a49d279-9c96-5f62-b00c-0f26a81f2c79")
 		)
 		(pin "2"
-			(uuid "9a49d279-9c96-5f62-b00c-0f26a81f2c79")
+			(uuid "f6baf876-63ab-5bab-8bc6-3f245be28619")
 		)
 		(instances
 			(project "GridUp-Modul"
@@ -14923,7 +14935,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "f6baf876-63ab-5bab-8bc6-3f245be28619")
+		(uuid "c43afaf3-1c32-5411-b56c-5ba736d2c0e6")
 		(property "Reference" "#PWR41"
 			(at 114.3 252.73 0)
 			(hide yes)
@@ -14974,7 +14986,7 @@
 			)
 		)
 		(pin "1"
-			(uuid "c43afaf3-1c32-5411-b56c-5ba736d2c0e6")
+			(uuid "76a5f771-498b-505d-b0e1-be202001dd34")
 		)
 		(instances
 			(project "GridUp-Modul"
@@ -14993,7 +15005,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "76a5f771-498b-505d-b0e1-be202001dd34")
+		(uuid "ac01992e-2fed-51a9-a288-004023da37f7")
 		(property "Reference" "R52"
 			(at 134.62 233.68 0)
 			(effects
@@ -15043,10 +15055,10 @@
 			)
 		)
 		(pin "1"
-			(uuid "ac01992e-2fed-51a9-a288-004023da37f7")
+			(uuid "c693d727-6e16-57dc-a82b-36d726295f63")
 		)
 		(pin "2"
-			(uuid "c693d727-6e16-57dc-a82b-36d726295f63")
+			(uuid "25eec150-c622-53aa-b2b5-31de218e381f")
 		)
 		(instances
 			(project "GridUp-Modul"
@@ -15065,7 +15077,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "25eec150-c622-53aa-b2b5-31de218e381f")
+		(uuid "66ede208-8290-5e73-8b38-2d627535c7be")
 		(property "Reference" "C32"
 			(at 130.81 247.65 0)
 			(effects
@@ -15115,10 +15127,10 @@
 			)
 		)
 		(pin "1"
-			(uuid "66ede208-8290-5e73-8b38-2d627535c7be")
+			(uuid "df2bd59c-d875-565d-b3e4-3e3607847094")
 		)
 		(pin "2"
-			(uuid "df2bd59c-d875-565d-b3e4-3e3607847094")
+			(uuid "9f40e739-a8c4-5f38-85db-3af6094416ef")
 		)
 		(instances
 			(project "GridUp-Modul"
@@ -15137,7 +15149,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "9f40e739-a8c4-5f38-85db-3af6094416ef")
+		(uuid "8ba27cd7-cae4-5b8a-970e-966f5f3aab53")
 		(property "Reference" "C33"
 			(at 130.81 257.81 0)
 			(effects
@@ -15187,10 +15199,10 @@
 			)
 		)
 		(pin "1"
-			(uuid "8ba27cd7-cae4-5b8a-970e-966f5f3aab53")
+			(uuid "2d306e0b-f93b-5f56-82bc-8b2ac567b378")
 		)
 		(pin "2"
-			(uuid "2d306e0b-f93b-5f56-82bc-8b2ac567b378")
+			(uuid "ac893244-6b02-5076-8387-6ce00fd71020")
 		)
 		(instances
 			(project "GridUp-Modul"
@@ -15209,7 +15221,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "ac893244-6b02-5076-8387-6ce00fd71020")
+		(uuid "4ed828c3-65de-5a1b-9f81-d86245d56579")
 		(property "Reference" "#PWR42"
 			(at 135.89 260.35 0)
 			(hide yes)
@@ -15260,7 +15272,7 @@
 			)
 		)
 		(pin "1"
-			(uuid "4ed828c3-65de-5a1b-9f81-d86245d56579")
+			(uuid "af01d34d-53a0-5ee7-af86-d7d3f0a3a718")
 		)
 		(instances
 			(project "GridUp-Modul"
@@ -15279,7 +15291,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "af01d34d-53a0-5ee7-af86-d7d3f0a3a718")
+		(uuid "ec550158-e8f7-5eb1-8af4-e0546d69a096")
 		(property "Reference" "R53"
 			(at 144.78 246.38 0)
 			(effects
@@ -15329,10 +15341,10 @@
 			)
 		)
 		(pin "1"
-			(uuid "ec550158-e8f7-5eb1-8af4-e0546d69a096")
+			(uuid "7713c9a5-0fb6-5f90-983a-bd280b1d9d6c")
 		)
 		(pin "2"
-			(uuid "7713c9a5-0fb6-5f90-983a-bd280b1d9d6c")
+			(uuid "5b11e1c0-13a7-5206-97b8-ff65a33df4a4")
 		)
 		(instances
 			(project "GridUp-Modul"
@@ -15351,7 +15363,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "5b11e1c0-13a7-5206-97b8-ff65a33df4a4")
+		(uuid "47325721-398a-5b16-b2ec-b20784545872")
 		(property "Reference" "R54"
 			(at 144.78 256.54 0)
 			(effects
@@ -15401,10 +15413,10 @@
 			)
 		)
 		(pin "1"
-			(uuid "47325721-398a-5b16-b2ec-b20784545872")
+			(uuid "32691433-bc0a-5f41-a1c5-28e38436c426")
 		)
 		(pin "2"
-			(uuid "32691433-bc0a-5f41-a1c5-28e38436c426")
+			(uuid "a65ef00d-bef0-56b2-a05f-425f94a355f0")
 		)
 		(instances
 			(project "GridUp-Modul"
@@ -15423,7 +15435,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "a65ef00d-bef0-56b2-a05f-425f94a355f0")
+		(uuid "be9f512f-4d42-522e-9203-24053e5e173f")
 		(property "Reference" "U7"
 			(at 170.18 260.9 0)
 			(effects
@@ -15468,25 +15480,25 @@
 			)
 		)
 		(pin "1"
-			(uuid "be9f512f-4d42-522e-9203-24053e5e173f")
-		)
-		(pin "2"
 			(uuid "aec6481a-a1c2-5433-a9d8-0984c9b8c9e3")
 		)
-		(pin "3"
+		(pin "2"
 			(uuid "48403b75-4d95-5193-a39c-d3438abb4262")
 		)
-		(pin "4"
+		(pin "3"
 			(uuid "82a490f9-6dde-542e-8d52-9a73de3e02c2")
 		)
-		(pin "5"
+		(pin "4"
 			(uuid "fcd75f04-e084-5579-96ee-464afb0d2969")
 		)
-		(pin "6"
+		(pin "5"
 			(uuid "ed208e63-c8e5-5989-bf30-1b02e9b23c7a")
 		)
-		(pin "7"
+		(pin "6"
 			(uuid "7e35a368-4077-5c6b-b38d-c41133f6e1f5")
+		)
+		(pin "7"
+			(uuid "2ad12671-04d5-5ba4-ae46-a396a14baffe")
 		)
 		(instances
 			(project "GridUp-Modul"
@@ -15505,7 +15517,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "2ad12671-04d5-5ba4-ae46-a396a14baffe")
+		(uuid "21a486d5-5e77-5a29-843a-3fdb1a827c4b")
 		(property "Reference" "#FLG43"
 			(at 161.29 240.03 0)
 			(hide yes)
@@ -15557,7 +15569,7 @@
 			)
 		)
 		(pin "1"
-			(uuid "21a486d5-5e77-5a29-843a-3fdb1a827c4b")
+			(uuid "20bdad31-271d-505d-83f7-875a24c8fc33")
 		)
 		(instances
 			(project "GridUp-Modul"
@@ -15576,7 +15588,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "20bdad31-271d-505d-83f7-875a24c8fc33")
+		(uuid "a0b7473d-b7d2-569f-9f92-df081e2591ce")
 		(property "Reference" "L1"
 			(at 165.08 235.6 270)
 			(effects
@@ -15626,10 +15638,10 @@
 			)
 		)
 		(pin "1"
-			(uuid "a0b7473d-b7d2-569f-9f92-df081e2591ce")
+			(uuid "f4500ac4-f4ba-5f52-b531-bf41de19b0cb")
 		)
 		(pin "2"
-			(uuid "f4500ac4-f4ba-5f52-b531-bf41de19b0cb")
+			(uuid "e40edc3c-b5ad-51bd-a6e6-6631f3aa55f5")
 		)
 		(instances
 			(project "GridUp-Modul"
@@ -15648,7 +15660,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "e40edc3c-b5ad-51bd-a6e6-6631f3aa55f5")
+		(uuid "6afcb8e3-4657-5777-8eed-c43e9da29f39")
 		(property "Reference" "#FLG44"
 			(at 180.34 234.95 0)
 			(hide yes)
@@ -15700,7 +15712,7 @@
 			)
 		)
 		(pin "1"
-			(uuid "6afcb8e3-4657-5777-8eed-c43e9da29f39")
+			(uuid "c4ac4617-e01f-5e8d-9c6a-f3e88f73400c")
 		)
 		(instances
 			(project "GridUp-Modul"
@@ -15719,7 +15731,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "c4ac4617-e01f-5e8d-9c6a-f3e88f73400c")
+		(uuid "75b7be31-ce9c-58ad-a7f7-8a05867bf4b3")
 		(property "Reference" "#PWR45"
 			(at 172.72 252.73 0)
 			(hide yes)
@@ -15770,7 +15782,7 @@
 			)
 		)
 		(pin "1"
-			(uuid "75b7be31-ce9c-58ad-a7f7-8a05867bf4b3")
+			(uuid "92a40fa9-e8e1-58b3-b000-5ce21fec6460")
 		)
 		(instances
 			(project "GridUp-Modul"
@@ -15789,7 +15801,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "92a40fa9-e8e1-58b3-b000-5ce21fec6460")
+		(uuid "db65b341-fbf0-5e17-8467-8fb35d094f32")
 		(property "Reference" "R55"
 			(at 196.85 247.65 0)
 			(effects
@@ -15839,10 +15851,10 @@
 			)
 		)
 		(pin "1"
-			(uuid "db65b341-fbf0-5e17-8467-8fb35d094f32")
+			(uuid "e75c1a31-e85b-503f-bd69-25a342483065")
 		)
 		(pin "2"
-			(uuid "e75c1a31-e85b-503f-bd69-25a342483065")
+			(uuid "8a7e996a-4533-574c-99b3-1cc7d5f3a589")
 		)
 		(instances
 			(project "GridUp-Modul"
@@ -15861,7 +15873,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "8a7e996a-4533-574c-99b3-1cc7d5f3a589")
+		(uuid "238724e3-40a9-557c-b362-9e0e063e5cb1")
 		(property "Reference" "R56"
 			(at 196.85 257.81 0)
 			(effects
@@ -15911,10 +15923,10 @@
 			)
 		)
 		(pin "1"
-			(uuid "238724e3-40a9-557c-b362-9e0e063e5cb1")
+			(uuid "e29d3941-627c-5f6a-9d9d-91e155f85c12")
 		)
 		(pin "2"
-			(uuid "e29d3941-627c-5f6a-9d9d-91e155f85c12")
+			(uuid "d9ff3594-3d21-5c47-b182-ba5aa53fa1d6")
 		)
 		(instances
 			(project "GridUp-Modul"
@@ -15933,7 +15945,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "d9ff3594-3d21-5c47-b182-ba5aa53fa1d6")
+		(uuid "82fef24b-09f5-5dc5-bd98-162ee2f4d21c")
 		(property "Reference" "#PWR46"
 			(at 198.12 264.16 0)
 			(hide yes)
@@ -15984,7 +15996,7 @@
 			)
 		)
 		(pin "1"
-			(uuid "82fef24b-09f5-5dc5-bd98-162ee2f4d21c")
+			(uuid "85940e16-09a0-5b2c-9cfc-6e5d08a68df0")
 		)
 		(instances
 			(project "GridUp-Modul"
@@ -16003,7 +16015,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "85940e16-09a0-5b2c-9cfc-6e5d08a68df0")
+		(uuid "2e3e1b9a-ea1f-5bb0-b4a6-df9a182dd973")
 		(property "Reference" "D2"
 			(at 210.38 240.6 90)
 			(effects
@@ -16053,10 +16065,10 @@
 			)
 		)
 		(pin "1"
-			(uuid "2e3e1b9a-ea1f-5bb0-b4a6-df9a182dd973")
+			(uuid "d909eb2d-4ad1-5519-abf1-e5b98486353f")
 		)
 		(pin "2"
-			(uuid "d909eb2d-4ad1-5519-abf1-e5b98486353f")
+			(uuid "27999632-4c59-58b9-bea4-a193b67c539c")
 		)
 		(instances
 			(project "GridUp-Modul"
