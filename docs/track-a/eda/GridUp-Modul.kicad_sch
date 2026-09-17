@@ -7170,7 +7170,7 @@
 		)
 		(uuid "643dfeec-dc32-5a36-8f80-3c8b7fe9688e")
 	)
-	(text "V_bias = 3V3/2 (CT ön yargı)"
+	(text "V_bias = 3V3/2 = 1,65 V (CT DC ofseti)"
 		(exclude_from_sim no)
 		(at 66.04 121.92 0)
 		(effects

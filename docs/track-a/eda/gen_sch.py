@@ -398,7 +398,7 @@ def build():
     Cv = S.part(C, 'C20', '10 µF', (44.45, 127.0), ref_at=(45.72, 124.46), val_at=(45.72, 127.0))
     S.wire((44.45, nV[1]), Cv.p('1')); S.pin_power(Cv, '2', 'GND', L=1.27); S.junction((44.45, nV[1]))
     S.wire((44.45, nV[1]), (53.34, nV[1]), color=ANA); S.label('V_BIAS', (53.34, nV[1]), 0)
-    S.text('V_bias = 3V3/2 (CT ön yargı)', (66.04, 121.92), SZ_NOTE, italic=True)
+    S.text('V_bias = 3V3/2 = 1,65 V (CT DC ofseti)', (66.04, 121.92), SZ_NOTE, italic=True)
 
     # ================= SOL ALT: I²C sensörler → IO8/IO9 (bus) =================
     S.rect((27.94, 139.7), (121.0, 214.63), I2C, title='I²C / MLX90640 0x33 + SHT31 0x44, tek hat 400 kHz+')
