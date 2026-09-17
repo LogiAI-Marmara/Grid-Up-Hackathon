@@ -276,8 +276,8 @@
   <text x="380" y="404" font-size="10" fill="#607d8b" text-anchor="end" font-weight="700">boost U7 + L</text>
   <rect x="290" y="409" width="92" height="10.5" rx="2" fill="#e8f5e9"/>
   <text x="380" y="417" font-size="10" fill="#607d8b" text-anchor="end">çıkış 4,6 V → D2</text>
-  <rect x="393.5" y="414" width="70" height="10.5" rx="2" fill="#e8f5e9"/>
-  <text x="461.5" y="422" font-size="10" fill="#607d8b" text-anchor="end">dengeleme 2×</text>
+  <rect x="437" y="413.5" width="70" height="10.5" rx="2" fill="#e8f5e9"/>
+  <text x="472" y="421.5" font-size="10" fill="#f57f17" text-anchor="middle">dengeleme 2×</text>
   <rect x="363.5" y="488" width="42.5" height="10.5" rx="2" fill="#e8f5e9"/>
   <text x="404" y="496" font-size="10" fill="#607d8b" text-anchor="end">MAX3485</text>
   <rect x="470" y="508" width="31.5" height="10.5" rx="2" fill="#e8f5e9"/>
