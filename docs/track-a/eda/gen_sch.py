@@ -215,6 +215,8 @@ class Sch:
         self.pwr_n += 1
         lid = self.use('power', name)
         P = self.part(lid, '#PWR%02d' % self.pwr_n, name, at, rot); P.is_power = True
+        if rot == 0 and name != 'GND':   # ok yukarı: değer okun tam üstünde, ortalı (KiCad varsayılanı gibi)
+            P.val_at = (at[0], at[1] - 3.6); P.just = 'center'
         return P
     def flag(self, at, rot=0):
         self.pwr_n += 1
@@ -293,7 +295,9 @@ class Sch:
             def prop(k, v, at, hide):
                 pe = [Sym('property'), k, v, [Sym('at'), g(at[0]), g(at[1]), Sym(pa)]]
                 if hide: pe.append([Sym('hide'), Sym('yes')])
-                pe.append([Sym('effects'), [Sym('font'), [Sym('size'), g(SZ_PROP), g(SZ_PROP)]], [Sym('justify'), Sym(getattr(P, 'just', 'left'))]])
+                fx = [Sym('effects'), [Sym('font'), [Sym('size'), g(SZ_PROP), g(SZ_PROP)]]]
+                if getattr(P, 'just', 'left') != 'center': fx.append([Sym('justify'), Sym(getattr(P, 'just', 'left'))])   # center = justify yok
+                pe.append(fx)
                 return pe
             e.append(prop('Reference', P.ref, ra, ispwr))
             e.append(prop('Value', P.value, va, P.hide_value))
@@ -363,7 +367,7 @@ def build():
     SW1 = S.part(SW, 'SW1', 'Reset', (137.16, en[1]), ref_at=(134.62, en[1] - 3.81), val_at=(133.35, en[1] - 6.35))
     S.wire(SW1.p('2'), n_en); S.junction(n_en)
     S.pin_power(SW1, '1', 'GND', L=2.54, rot=0)
-    S.text('EN: RC + reset butonu', (132.08, en[1] - 11.43), SZ_NOTE, italic=True)
+    S.text('EN: RC + reset butonu', (132.08, en[1] - 17.5), SZ_NOTE, italic=True)
 
     # ================= SOL ÜST: CT ön ucu ×4 → IO4–IO7 =================
     S.rect((27.94, 42.0), (121.0, 136.0), ANA, title='CT ×4 (analizör yoksa) / burden, V_bias, RC → ADC1')

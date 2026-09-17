@@ -6364,7 +6364,7 @@
 	)
 	(text "EN: RC + reset butonu"
 		(exclude_from_sim no)
-		(at 132.08 66.04 0)
+		(at 132.08 59.97 0)
 		(effects
 			(font
 				(size 1.8 1.8)
@@ -9221,16 +9221,14 @@
 				(font
 					(size 1.7 1.7)
 				)
-				(justify left)
 			)
 		)
 		(property "Value" "+3V3"
-			(at 187.96 71.12 0)
+			(at 185.42 66.25 0)
 			(effects
 				(font
 					(size 1.7 1.7)
 				)
-				(justify left)
 			)
 		)
 		(property "Footprint" ""
@@ -9240,7 +9238,6 @@
 				(font
 					(size 1.7 1.7)
 				)
-				(justify left)
 			)
 		)
 		(property "Datasheet" ""
@@ -9250,7 +9247,6 @@
 				(font
 					(size 1.7 1.7)
 				)
-				(justify left)
 			)
 		)
 		(property "Description" ""
@@ -9260,7 +9256,6 @@
 				(font
 					(size 1.7 1.7)
 				)
-				(justify left)
 			)
 		)
 		(pin "1"
@@ -9433,16 +9428,14 @@
 				(font
 					(size 1.7 1.7)
 				)
-				(justify left)
 			)
 		)
 		(property "Value" "+3V3"
-			(at 152.4 68.58 0)
+			(at 149.86 63.71 0)
 			(effects
 				(font
 					(size 1.7 1.7)
 				)
-				(justify left)
 			)
 		)
 		(property "Footprint" ""
@@ -9452,7 +9445,6 @@
 				(font
 					(size 1.7 1.7)
 				)
-				(justify left)
 			)
 		)
 		(property "Datasheet" ""
@@ -9462,7 +9454,6 @@
 				(font
 					(size 1.7 1.7)
 				)
-				(justify left)
 			)
 		)
 		(property "Description" ""
@@ -9472,7 +9463,6 @@
 				(font
 					(size 1.7 1.7)
 				)
-				(justify left)
 			)
 		)
 		(pin "1"
@@ -11295,16 +11285,14 @@
 				(font
 					(size 1.7 1.7)
 				)
-				(justify left)
 			)
 		)
 		(property "Value" "+3V3"
-			(at 35.56 109.22 0)
+			(at 33.02 104.35 0)
 			(effects
 				(font
 					(size 1.7 1.7)
 				)
-				(justify left)
 			)
 		)
 		(property "Footprint" ""
@@ -11314,7 +11302,6 @@
 				(font
 					(size 1.7 1.7)
 				)
-				(justify left)
 			)
 		)
 		(property "Datasheet" ""
@@ -11324,7 +11311,6 @@
 				(font
 					(size 1.7 1.7)
 				)
-				(justify left)
 			)
 		)
 		(property "Description" ""
@@ -11334,7 +11320,6 @@
 				(font
 					(size 1.7 1.7)
 				)
-				(justify left)
 			)
 		)
 		(pin "1"
@@ -11797,16 +11782,14 @@
 				(font
 					(size 1.7 1.7)
 				)
-				(justify left)
 			)
 		)
 		(property "Value" "+3V3"
-			(at 72.39 151.13 0)
+			(at 69.85 146.26 0)
 			(effects
 				(font
 					(size 1.7 1.7)
 				)
-				(justify left)
 			)
 		)
 		(property "Footprint" ""
@@ -11816,7 +11799,6 @@
 				(font
 					(size 1.7 1.7)
 				)
-				(justify left)
 			)
 		)
 		(property "Datasheet" ""
@@ -11826,7 +11808,6 @@
 				(font
 					(size 1.7 1.7)
 				)
-				(justify left)
 			)
 		)
 		(property "Description" ""
@@ -11836,7 +11817,6 @@
 				(font
 					(size 1.7 1.7)
 				)
-				(justify left)
 			)
 		)
 		(pin "1"
@@ -12102,16 +12082,14 @@
 				(font
 					(size 1.7 1.7)
 				)
-				(justify left)
 			)
 		)
 		(property "Value" "+3V3"
-			(at 72.39 190.5 0)
+			(at 69.85 185.63 0)
 			(effects
 				(font
 					(size 1.7 1.7)
 				)
-				(justify left)
 			)
 		)
 		(property "Footprint" ""
@@ -12121,7 +12099,6 @@
 				(font
 					(size 1.7 1.7)
 				)
-				(justify left)
 			)
 		)
 		(property "Datasheet" ""
@@ -12131,7 +12108,6 @@
 				(font
 					(size 1.7 1.7)
 				)
-				(justify left)
 			)
 		)
 		(property "Description" ""
@@ -12141,7 +12117,6 @@
 				(font
 					(size 1.7 1.7)
 				)
-				(justify left)
 			)
 		)
 		(pin "1"
@@ -12454,16 +12429,14 @@
 				(font
 					(size 1.7 1.7)
 				)
-				(justify left)
 			)
 		)
 		(property "Value" "+3V3"
-			(at 102.87 176.53 0)
+			(at 100.33 171.66 0)
 			(effects
 				(font
 					(size 1.7 1.7)
 				)
-				(justify left)
 			)
 		)
 		(property "Footprint" ""
@@ -12473,7 +12446,6 @@
 				(font
 					(size 1.7 1.7)
 				)
-				(justify left)
 			)
 		)
 		(property "Datasheet" ""
@@ -12483,7 +12455,6 @@
 				(font
 					(size 1.7 1.7)
 				)
-				(justify left)
 			)
 		)
 		(property "Description" ""
@@ -12493,7 +12464,6 @@
 				(font
 					(size 1.7 1.7)
 				)
-				(justify left)
 			)
 		)
 		(pin "1"
@@ -12596,16 +12566,14 @@
 				(font
 					(size 1.7 1.7)
 				)
-				(justify left)
 			)
 		)
 		(property "Value" "+3V3"
-			(at 115.57 181.61 0)
+			(at 113.03 176.74 0)
 			(effects
 				(font
 					(size 1.7 1.7)
 				)
-				(justify left)
 			)
 		)
 		(property "Footprint" ""
@@ -12615,7 +12583,6 @@
 				(font
 					(size 1.7 1.7)
 				)
-				(justify left)
 			)
 		)
 		(property "Datasheet" ""
@@ -12625,7 +12592,6 @@
 				(font
 					(size 1.7 1.7)
 				)
-				(justify left)
 			)
 		)
 		(property "Description" ""
@@ -12635,7 +12601,6 @@
 				(font
 					(size 1.7 1.7)
 				)
-				(justify left)
 			)
 		)
 		(pin "1"
@@ -13430,16 +13395,14 @@
 				(font
 					(size 1.7 1.7)
 				)
-				(justify left)
 			)
 		)
 		(property "Value" "+3V3"
-			(at 256.54 165.1 0)
+			(at 254 160.23 0)
 			(effects
 				(font
 					(size 1.7 1.7)
 				)
-				(justify left)
 			)
 		)
 		(property "Footprint" ""
@@ -13449,7 +13412,6 @@
 				(font
 					(size 1.7 1.7)
 				)
-				(justify left)
 			)
 		)
 		(property "Datasheet" ""
@@ -13459,7 +13421,6 @@
 				(font
 					(size 1.7 1.7)
 				)
-				(justify left)
 			)
 		)
 		(property "Description" ""
@@ -13469,7 +13430,6 @@
 				(font
 					(size 1.7 1.7)
 				)
-				(justify left)
 			)
 		)
 		(pin "1"
@@ -13500,16 +13460,14 @@
 				(font
 					(size 1.7 1.7)
 				)
-				(justify left)
 			)
 		)
 		(property "Value" "+5V"
-			(at 276.86 165.1 0)
+			(at 274.32 160.23 0)
 			(effects
 				(font
 					(size 1.7 1.7)
 				)
-				(justify left)
 			)
 		)
 		(property "Footprint" ""
@@ -13519,7 +13477,6 @@
 				(font
 					(size 1.7 1.7)
 				)
-				(justify left)
 			)
 		)
 		(property "Datasheet" ""
@@ -13529,7 +13486,6 @@
 				(font
 					(size 1.7 1.7)
 				)
-				(justify left)
 			)
 		)
 		(property "Description" ""
@@ -13539,7 +13495,6 @@
 				(font
 					(size 1.7 1.7)
 				)
-				(justify left)
 			)
 		)
 		(pin "1"
@@ -14011,16 +13966,14 @@
 				(font
 					(size 1.7 1.7)
 				)
-				(justify left)
 			)
 		)
 		(property "Value" "Earth_Protective"
-			(at 53.34 240.03 0)
+			(at 50.8 235.16 0)
 			(effects
 				(font
 					(size 1.7 1.7)
 				)
-				(justify left)
 			)
 		)
 		(property "Footprint" ""
@@ -14030,7 +13983,6 @@
 				(font
 					(size 1.7 1.7)
 				)
-				(justify left)
 			)
 		)
 		(property "Datasheet" ""
@@ -14040,7 +13992,6 @@
 				(font
 					(size 1.7 1.7)
 				)
-				(justify left)
 			)
 		)
 		(property "Description" ""
@@ -14050,7 +14001,6 @@
 				(font
 					(size 1.7 1.7)
 				)
-				(justify left)
 			)
 		)
 		(pin "1"
@@ -14582,16 +14532,14 @@
 				(font
 					(size 1.7 1.7)
 				)
-				(justify left)
 			)
 		)
 		(property "Value" "+5V"
-			(at 158.75 229.87 0)
+			(at 156.21 225 0)
 			(effects
 				(font
 					(size 1.7 1.7)
 				)
-				(justify left)
 			)
 		)
 		(property "Footprint" ""
@@ -14601,7 +14549,6 @@
 				(font
 					(size 1.7 1.7)
 				)
-				(justify left)
 			)
 		)
 		(property "Datasheet" ""
@@ -14611,7 +14558,6 @@
 				(font
 					(size 1.7 1.7)
 				)
-				(justify left)
 			)
 		)
 		(property "Description" ""
@@ -14621,7 +14567,6 @@
 				(font
 					(size 1.7 1.7)
 				)
-				(justify left)
 			)
 		)
 		(pin "1"
@@ -14865,16 +14810,14 @@
 				(font
 					(size 1.7 1.7)
 				)
-				(justify left)
 			)
 		)
 		(property "Value" "+3V3"
-			(at 208.28 229.87 0)
+			(at 205.74 225 0)
 			(effects
 				(font
 					(size 1.7 1.7)
 				)
-				(justify left)
 			)
 		)
 		(property "Footprint" ""
@@ -14884,7 +14827,6 @@
 				(font
 					(size 1.7 1.7)
 				)
-				(justify left)
 			)
 		)
 		(property "Datasheet" ""
@@ -14894,7 +14836,6 @@
 				(font
 					(size 1.7 1.7)
 				)
-				(justify left)
 			)
 		)
 		(property "Description" ""
@@ -14904,7 +14845,6 @@
 				(font
 					(size 1.7 1.7)
 				)
-				(justify left)
 			)
 		)
 		(pin "1"
