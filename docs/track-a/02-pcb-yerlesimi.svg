@@ -272,11 +272,11 @@
   <text x="612" y="508" font-size="10" fill="#607d8b" text-anchor="middle">Eaton HV1030 Ø10,5 × 31,5 yatık / arka yüz</text>
   <rect x="503.8" y="514" width="214.5" height="10.5" rx="2" fill="#e8f5e9"/>
   <text x="612" y="522" font-size="10" fill="#607d8b" text-anchor="middle">10 F 2,7 V ×2 → 5 F 4,6 V / 02-bom §2.5</text>
-  <line x1="428" y1="376" x2="384" y2="400" stroke="#607d8b" stroke-width="1"/>
-  <rect x="307" y="396" width="72" height="10.5" rx="2" fill="#e8f5e9"/>
-  <text x="380" y="404" font-size="10" fill="#607d8b" text-anchor="end" font-weight="700">boost U7 + L</text>
-  <rect x="291" y="409" width="88" height="10.5" rx="2" fill="#e8f5e9"/>
-  <text x="380" y="417" font-size="10" fill="#607d8b" text-anchor="end">çıkış 4,6 V → D2</text>
+  <line x1="428" y1="376" x2="417.6" y2="384.8" stroke="#607d8b" stroke-width="1"/>
+  <rect x="340.6" y="380.8" width="72" height="10.5" rx="2" fill="#e8f5e9"/>
+  <text x="413.6" y="388.8" font-size="10" fill="#607d8b" text-anchor="end" font-weight="700">boost U7 + L</text>
+  <rect x="324.6" y="393.8" width="88" height="10.5" rx="2" fill="#e8f5e9"/>
+  <text x="413.6" y="401.8" font-size="10" fill="#607d8b" text-anchor="end">çıkış 4,6 V → D2</text>
   <rect x="438" y="413.5" width="66" height="10.5" rx="2" fill="#e8f5e9"/>
   <text x="472" y="421.5" font-size="10" fill="#f57f17" text-anchor="middle">dengeleme 2×</text>
   <rect x="409.8" y="459.2" width="38.5" height="10.5" rx="2" fill="#e8f5e9"/>
