@@ -92,7 +92,7 @@ L(px(65, 66)[0], px(65, 66)[1], '+5V / GND', 10, SUB); L(px(95, 66)[0], px(95, 6
 x, y = px(91, 23.6); L(x, y + 30, 'F1 (SMD)', 10, SUB, 'middle')
 x, y = px(100, 23.5); L(x, y + 44, 'MOV Ø7', 10, SUB, 'middle')
 x, y = px(91.6, 4.5); L(x, y - 42, '230 V klemens', 11, '#37474f', 'middle'); L(x, y - 57, '3 kutup L/N/PE, 5,08 mm', 10, SUB, 'middle')
-x, y = px(73.25, 37.5); L(x, y - 2, 'LDO', 9, SUB, 'middle'); L(x, y + 9, '3,3 V', 9, SUB, 'middle')
+x, y = px(73.25, 37.5); svg.text(x, y - 2, 'LDO', 9, '#ad1457', 'middle', '700'); svg.text(x, y + 9, '3,3 V', 9, '#ad1457', 'middle', '700')
 x, y = px(78.9, 40.3); svg.text(x, y + 3, 'D1', 8, '#ad1457', 'middle', '700')   # kutu içi (OR diyotu)
 x, y = px(78.9, 36.3); svg.text(x, y + 3, 'D2', 8, '#ad1457', 'middle', '700')
 x, y = px(62.5, 45); svg.leader(x, y, px(65, 48.5)[0], px(65, 48.5)[1], ['R_şarj 22 Ω'], 10, SUB, 'start', dot=False, halo=BG)
