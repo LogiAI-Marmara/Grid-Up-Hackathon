@@ -150,7 +150,7 @@
       <text x="16" y="78" class="s">İşgücü: 1 teknisyen</text>
       <text x="16" y="96" class="s">Planlı kesinti: yok</text>
       <text x="16" y="114" class="s">Panoda yeni delik: yok</text>
-      <text x="16" y="132" class="s">Yeni kablo: 230 V + anten pigtail (2 adet)</text>
+      <text x="16" y="132" class="s">Yeni kablo: 230 V + anten pigtail (+ analizör varsa RS-485)</text>
       <text x="16" y="160" class="r">5000 panoluk yaygınlaştırmada kesintisiz</text>
       <text x="16" y="176" class="r">montaj ölçeklenebilirliğin ön koşulu (T5, §6.2)</text>
     </g>
