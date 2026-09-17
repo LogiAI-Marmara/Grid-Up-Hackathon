@@ -100,7 +100,7 @@ L(x, y - 4, '2× süperkapasitör seri', 11, '#f57f17', 'middle', '700')
 L(x, y + 10, 'Eaton HV1030 Ø10,5 × 31,5 yatık / arka yüz', 10, SUB, 'middle')
 L(x, y + 24, '10 F 2,7 V ×2 → 5 F 4,6 V / 02-bom §2.5', 10, SUB, 'middle')
 x, y = px(43.5, 33); svg.leader(x, y, px(38, 30)[0], px(38, 30)[1], ['boost U7 + L', '→ 4,6 V → D2'], 10, SUB, 'end', dot=False, halo=BG)
-x, y = px(53, 28.5); L(x - 6, y + 4, 'dengeleme 2×', 10, SUB, 'end')
+x, y = px(48, 27.75); L(x - 6, y + 4, 'dengeleme 2×', 10, SUB, 'end')
 x, y = px(41.25, 18); L(x - 6, y, 'MAX3485', 10, SUB, 'end')
 x, y = px(48, 16); L(x + 8, y + 4, '120 Ω', 10, SUB)
 x, y = px(5, 18.6); L(x, y - 70, 'RS-485', 11, '#2e7d32', 'middle'); L(x, y + 54, 'A/B/GND', 10, '#2e7d32', 'middle')
@@ -158,7 +158,7 @@ comment = """    PCB / kart yerleşimi / (T2 "kart yapısı"). Ölçek 1 mm = 8 
     Arka yüz (Z 0 ←): ESP32-S3-WROOM-1U 18 × 19,2 × 3,2 (10–28, 40,8–60) / RAC05-05SK/277 31,7 × 26,7 × 21,8 (64–95,7, 42–68,7) /
       F1 (88–94,1, 22,25–25) / MOV 7 × 4 × 8 (96,5–103,5, 21,5–25,5) / 230 V klemens 3p 5,08 (84–99,25, 0,5–8,5) /
       LDO AP7361C SOT-223 (70–76,5, 34–41) / D1 (76,75–81, 39–41,65) / D2 (76,75–81, 35–37,65) / R_şarj (60,5–62,5, 44,5–45,5) / bölücü (77,5–79,5, 28–30,5) /
-      boost U7 (43,5–46, 36–38) + L 3×3 (43,5–46,5, 31,5–34,5) / dengeleme R (52–54, 28–31,5) /
+      boost U7 (43,5–46, 36–38) + L 3×3 (43,5–46,5, 31,5–34,5) / dengeleme R (48–50, 26–29,5) /
       2× süperkap Eaton HV1030 Ø10,5 × 31,5 yatık, eksen Y, merkezler (61, 17,75) (72, 17,75), Y 2–33,5 / MAX3485 SOIC-8 (41,25–46,25, 14–20) / 120 Ω (47,5–48,5, 15–17) /
       RS-485 klemens 3p (1–9, 11–26,25) / R_burden ×4 (25–36, 14–15) + bias (37–39, 13–15) / CT klemens 8p 3,5 (25–53, 0,5–7,5) / genişleme 2×5 (11–24, 6,25–11,25).
     Kart: M3 Ø3,2 (7, 7) (103, 7) (7, 63) (103, 63) → kutu dikmeleri Ø6 kutu (12, 12) vb.; köşelerde Ø8 boşluk (kapak vida direği Ø7); izolasyon yarığı 1 mm (81,5–82,5, Y 0–40); 230 V bölgesi X ≥ 82.

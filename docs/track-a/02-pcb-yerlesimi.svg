@@ -9,7 +9,7 @@
     Arka yüz (Z 0 ←): ESP32-S3-WROOM-1U 18 × 19,2 × 3,2 (10–28, 40,8–60) / RAC05-05SK/277 31,7 × 26,7 × 21,8 (64–95,7, 42–68,7) /
       F1 (88–94,1, 22,25–25) / MOV 7 × 4 × 8 (96,5–103,5, 21,5–25,5) / 230 V klemens 3p 5,08 (84–99,25, 0,5–8,5) /
       LDO AP7361C SOT-223 (70–76,5, 34–41) / D1 (76,75–81, 39–41,65) / D2 (76,75–81, 35–37,65) / R_şarj (60,5–62,5, 44,5–45,5) / bölücü (77,5–79,5, 28–30,5) /
-      boost U7 (43,5–46, 36–38) + L 3×3 (43,5–46,5, 31,5–34,5) / dengeleme R (52–54, 28–31,5) /
+      boost U7 (43,5–46, 36–38) + L 3×3 (43,5–46,5, 31,5–34,5) / dengeleme R (48–50, 26–29,5) /
       2× süperkap Eaton HV1030 Ø10,5 × 31,5 yatık, eksen Y, merkezler (61, 17,75) (72, 17,75), Y 2–33,5 / MAX3485 SOIC-8 (41,25–46,25, 14–20) / 120 Ω (47,5–48,5, 15–17) /
       RS-485 klemens 3p (1–9, 11–26,25) / R_burden ×4 (25–36, 14–15) + bias (37–39, 13–15) / CT klemens 8p 3,5 (25–53, 0,5–7,5) / genişleme 2×5 (11–24, 6,25–11,25).
     Kart: M3 Ø3,2 (7, 7) (103, 7) (7, 63) (103, 63) → kutu dikmeleri Ø6 kutu (12, 12) vb.; köşelerde Ø8 boşluk (kapak vida direği Ø7); izolasyon yarığı 1 mm (81,5–82,5, Y 0–40); 230 V bölgesi X ≥ 82.
@@ -83,22 +83,22 @@
 <polyline points="716,416 716,408" stroke="#ad1457"/>
 <polyline points="716,408 700,408" stroke="#ad1457"/>
 <polyline points="700,408 700,416" stroke="#ad1457"/>
-<polyline points="448,352 468,352" stroke="#ad1457"/>
-<polyline points="468,352 468,336" stroke="#ad1457"/>
-<polyline points="468,336 448,336" stroke="#ad1457"/>
-<polyline points="448,336 448,352" stroke="#ad1457"/>
-<polyline points="448,388 472,388" stroke="#ad1457"/>
-<polyline points="472,388 472,364" stroke="#ad1457"/>
-<polyline points="472,364 448,364" stroke="#ad1457"/>
-<polyline points="448,364 448,388" stroke="#ad1457"/>
-<polyline points="496,416 512,416" stroke="#f9a825"/>
-<polyline points="512,416 512,408" stroke="#f9a825"/>
-<polyline points="512,408 496,408" stroke="#f9a825"/>
-<polyline points="496,408 496,416" stroke="#f9a825"/>
-<polyline points="496,396 512,396" stroke="#f9a825"/>
-<polyline points="512,396 512,388" stroke="#f9a825"/>
-<polyline points="512,388 496,388" stroke="#f9a825"/>
-<polyline points="496,388 496,396" stroke="#f9a825"/>
+<polyline points="428,352 448,352" stroke="#ad1457"/>
+<polyline points="448,352 448,336" stroke="#ad1457"/>
+<polyline points="448,336 428,336" stroke="#ad1457"/>
+<polyline points="428,336 428,352" stroke="#ad1457"/>
+<polyline points="428,388 452,388" stroke="#ad1457"/>
+<polyline points="452,388 452,364" stroke="#ad1457"/>
+<polyline points="452,364 428,364" stroke="#ad1457"/>
+<polyline points="428,364 428,388" stroke="#ad1457"/>
+<polyline points="464,432 480,432" stroke="#f9a825"/>
+<polyline points="480,432 480,424" stroke="#f9a825"/>
+<polyline points="480,424 464,424" stroke="#f9a825"/>
+<polyline points="464,424 464,432" stroke="#f9a825"/>
+<polyline points="464,412 480,412" stroke="#f9a825"/>
+<polyline points="480,412 480,404" stroke="#f9a825"/>
+<polyline points="480,404 464,404" stroke="#f9a825"/>
+<polyline points="464,404 464,412" stroke="#f9a825"/>
 <polyline points="600.176,624 595,624 589,624 582.368,624 575.296,624 568,624 560.704,624 553.632,624 547,624 541,624 535.824,624" stroke="#f9a825"/>
 <polyline points="535.824,372 541,372 547,372 553.632,372 560.704,372 568,372 575.296,372 582.368,372 589,372 595,372 600.176,372" stroke="#f9a825"/>
 <polyline points="526,624 526,372" stroke="#f9a825"/>
@@ -275,8 +275,8 @@
   <text x="380" y="404" font-size="10" fill="#607d8b" text-anchor="end" font-weight="700">boost U7 + L</text>
   <rect x="312" y="409" width="70" height="10.5" rx="2" fill="#e8f5e9"/>
   <text x="380" y="417" font-size="10" fill="#607d8b" text-anchor="end">→ 4,6 V → D2</text>
-  <rect x="430" y="408" width="70" height="10.5" rx="2" fill="#e8f5e9"/>
-  <text x="498" y="416" font-size="10" fill="#607d8b" text-anchor="end">dengeleme 2×</text>
+  <rect x="390" y="414" width="70" height="10.5" rx="2" fill="#e8f5e9"/>
+  <text x="458" y="422" font-size="10" fill="#607d8b" text-anchor="end">dengeleme 2×</text>
   <rect x="363.5" y="488" width="42.5" height="10.5" rx="2" fill="#e8f5e9"/>
   <text x="404" y="496" font-size="10" fill="#607d8b" text-anchor="end">MAX3485</text>
   <rect x="470" y="508" width="31.5" height="10.5" rx="2" fill="#e8f5e9"/>

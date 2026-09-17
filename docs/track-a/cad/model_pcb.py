@@ -95,8 +95,8 @@ def run(_ctx):
     box('Bolucu2', 77.5, 28, 79.5, 29, 0, -0.6)
     box('Boost U7', 43.5, 36, 46, 38, 0, -1)                   # TPS61099 WSON-6 (MLX ekseninin disinda, arka yuz)
     box('L_boost', 43.5, 31.5, 46.5, 34.5, 0, -1.5)               # 2,2 uH 3x3
-    box('R_bal1', 52, 28, 54, 29, 0, -0.6)
-    box('R_bal2', 52, 30.5, 54, 31.5, 0, -0.6)
+    box('R_bal1', 48, 26, 50, 27, 0, -0.6)
+    box('R_bal2', 48, 28.5, 50, 29.5, 0, -0.6)
     # superkap: 2x Eaton HV1030 (O10.5 x 31.5, 10 F 2,7 V) seri, yatik, eksen Y; merkezler x 61 / 72, y 17.75 (Y 2..33.5), govde Z 0..-10.5
     pi = comp.constructionPlanes.createInput(); pi.setByOffset(comp.xZConstructionPlane, V('17.75 mm'))
     pl = comp.constructionPlanes.add(pi)

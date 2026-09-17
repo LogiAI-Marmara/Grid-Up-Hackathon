@@ -463,14 +463,14 @@
 <polyline points="206,174 206,162" stroke="#ad1457"/>
 <polyline points="206,162 194,162" stroke="#ad1457"/>
 <polyline points="194,162 194,174" stroke="#ad1457"/>
-<polyline points="228,188 236,188" stroke="#f9a825"/>
-<polyline points="236,188 236,184" stroke="#f9a825"/>
-<polyline points="236,184 228,184" stroke="#f9a825"/>
-<polyline points="228,184 228,188" stroke="#f9a825"/>
-<polyline points="228,178 236,178" stroke="#f9a825"/>
-<polyline points="236,178 236,174" stroke="#f9a825"/>
-<polyline points="236,174 228,174" stroke="#f9a825"/>
-<polyline points="228,174 228,178" stroke="#f9a825"/>
+<polyline points="212,196 220,196" stroke="#f9a825"/>
+<polyline points="220,196 220,192" stroke="#f9a825"/>
+<polyline points="220,192 212,192" stroke="#f9a825"/>
+<polyline points="212,192 212,196" stroke="#f9a825"/>
+<polyline points="212,186 220,186" stroke="#f9a825"/>
+<polyline points="220,186 220,182" stroke="#f9a825"/>
+<polyline points="220,182 212,182" stroke="#f9a825"/>
+<polyline points="212,182 212,186" stroke="#f9a825"/>
 <polyline points="280.088,292 277.5,292 274.5,292 271.184,292 267.648,292 264,292 260.352,292 256.816,292 253.5,292 250.5,292 247.912,292" stroke="#f9a825"/>
 <polyline points="247.912,166 250.5,166 253.5,166 256.816,166 260.352,166 264,166 267.648,166 271.184,166 274.5,166 277.5,166 280.088,166" stroke="#f9a825"/>
 <polyline points="243,292 243,166" stroke="#f9a825"/>
