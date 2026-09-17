@@ -141,7 +141,7 @@ svg.add('\n'.join(g))
 ic_col = {n: col_of(n) for n in {pl['body'] for pl in M['ic']}}
 svg.view(M['ic'], ox, oy, S, (0, -80), stroke=INK, sw=1.4, colors=ic_col)
 svg.text(C(60, 42.5)[0], C(60, 42.5)[1] + 34, 'MLX90640', 11, DARK, 'middle', '700')
-svg.text(C(12, 36)[0], C(12, 36)[1] + 22, 'SHT31', 10, '#1565c0', 'middle')
+svg.text(C(12, 36)[0], C(12, 36)[1] - 13, 'SHT31', 10, '#1565c0', 'middle')   # karenin üstünde (altı RS-485 kutusuna giriyordu)
 svg.text(C(24, 55.4)[0], C(24, 55.4)[1], 'ESP32-S3', 10, '#455a64', 'middle')
 svg.text(C(84.85, 60.35)[0], C(84.85, 60.35)[1], 'RAC05', 10, '#ad1457', 'middle')
 svg.text(C(71.5, 22.75)[0], C(71.5, 22.75)[1], '2× süperkap.', 10, '#f57f17', 'middle')
