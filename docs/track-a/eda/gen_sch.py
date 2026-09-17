@@ -441,8 +441,8 @@ def build():
     Cm1 = S.part(C, 'C2', '100 nF', (52.07, n_vdd[1] + 3.81), ref_at=(45.72, n_vdd[1] + 2.54), val_at=(43.18, n_vdd[1] + 5.08))
     S.wire((52.07, n_vdd[1]), Cm1.p('1')); Pc = S.pin_power(Cm1, '2', 'GND')
     Pc.val_at = (Cm1.p('2')[0] - 2.0, Cm1.p('2')[1] + 2.54 + 1.27); Pc.just = 'right'   # GND etiketi solda (sağda U2 kutusu)
-    S.text('termal dizi 32×24, ≤23 mA', (30.5, 177.0), SZ_NOTE, italic=True)
-    S.text('görüş açısı 110°×75°', (30.5, 179.8), SZ_NOTE, italic=True)
+    S.text('termal dizi 32×24, ≤23 mA', (36.0, 177.0), SZ_NOTE, italic=True)
+    S.text('görüş açısı 110°×75°', (36.0, 179.8), SZ_NOTE, italic=True)
     U3 = S.part(SHT, 'U3', 'SHT31-DIS-B', (69.85, 196.85), ref_at=(35.56, 203.5), val_at=(35.56, 206.0),
                 footprint='Sensor_Humidity:Sensirion_DFN-8-1EP_2.5x2.5mm_P0.5mm_EP1.1x1.7mm')
     v3 = U3.p('VDD'); n3 = (v3[0], v3[1] - 1.27); S.wire(v3, n3, (62.23, n3[1]), color=net_color('+3V3')); S.power('+3V3', (62.23, n3[1]))   # ok solda: U2 GND ile karşı karşıya durmasın

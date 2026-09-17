@@ -7198,7 +7198,7 @@
 	)
 	(text "termal dizi 32×24, ≤23 mA"
 		(exclude_from_sim no)
-		(at 30.5 177 0)
+		(at 36 177 0)
 		(effects
 			(font
 				(size 1.8 1.8)
@@ -7210,7 +7210,7 @@
 	)
 	(text "görüş açısı 110°×75°"
 		(exclude_from_sim no)
-		(at 30.5 179.8 0)
+		(at 36 179.8 0)
 		(effects
 			(font
 				(size 1.8 1.8)
