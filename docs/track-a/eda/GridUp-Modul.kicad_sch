@@ -12856,7 +12856,7 @@
 		(dnp no)
 		(uuid "ca55fde1-3892-5ee0-82eb-9dcd289aa147")
 		(property "Reference" "J8"
-			(at 261.62 128.27 0)
+			(at 262.9 131.6 0)
 			(effects
 				(font
 					(size 1.7 1.7)
@@ -12865,7 +12865,7 @@
 			)
 		)
 		(property "Value" "SMA panel"
-			(at 261.62 138.43 0)
+			(at 262.9 134.4 0)
 			(effects
 				(font
 					(size 1.7 1.7)
