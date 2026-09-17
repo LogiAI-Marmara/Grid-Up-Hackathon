@@ -38,11 +38,11 @@ svg.text(x, y + 30, 'alt yarıda frezelenmiş yarık (slot)', 10, '#607d8b', 'mi
 svg.text(x, y + 44, 'RAC05 bariyeri sınırın üstünde', 10, '#607d8b', 'middle')
 # IR pencere ekseni Ø15 keepout (kutu penceresi) / çizim notu
 x, y = px(55, 37.5)
-svg.add('<circle cx="%g" cy="%g" r="60" fill="none" stroke="#c62828" stroke-width="2" stroke-dasharray="6 3"/>' % (x, y))
+svg.add('<circle cx="%g" cy="%g" r="60" fill="none" stroke="#c62828" stroke-width="1.5"/>' % (x, y))
 # M3 keepout Ø5,5
 for (mx, my) in [(7, 7), (103, 7), (7, 63), (103, 63)]:
     x, y = px(mx, my)
-    svg.add('<circle cx="%g" cy="%g" r="22" fill="none" stroke="#78909c" stroke-width="1" stroke-dasharray="3 2"/>' % (x, y))
+    svg.add('<circle cx="%g" cy="%g" r="22" fill="none" stroke="#78909c" stroke-width="1"/>' % (x, y))
 svg.text(OX + 90, OY + 20, 'M3 × 4 (7, 7) / kutu dikmeleri Ø6', 10, '#607d8b')
 
 # ---- arka yüz parçaları (kart üzerinden, kesikli)
@@ -118,7 +118,8 @@ svg.add('<rect x="%d" y="%d" width="460" height="560" fill="#fff" stroke="#90a4a
 svg.text(NX + 16, NY + 28, 'Yerleşim kuralları', 13, INK, weight='700')
 notes = [
     ('Bakış:', ' ön yüz = kutu penceresine bakan taraf.'),
-    (None, 'Düz = ön yüz parçası, kesikli = arka yüz (kart üzerinden).'),
+    (None, 'Düz = ön yüz parçası, kesikli = arka yüz (kart üzerinden);'),
+    (None, 'ince düz halka = boş bırakılacak alan (IR ekseni, M3 çevresi).'),
     ('Ön yüz', ' (pencere ile PCB arası 6 mm): yalnız alçak'),
     (None, 'parçalar / MLX90640 (TO-39, 6 mm), SHT31, LED,'),
     (None, 'pasifler. IR pencere ekseninde Ø15 boş alan.'),

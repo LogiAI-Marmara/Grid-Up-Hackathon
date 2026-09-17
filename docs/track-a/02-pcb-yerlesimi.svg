@@ -32,11 +32,11 @@
   <text x="848" y="336" font-size="10" fill="#607d8b" text-anchor="middle">izolasyon sınırı ≥ 6 mm creepage</text>
   <text x="848" y="350" font-size="10" fill="#607d8b" text-anchor="middle">alt yarıda frezelenmiş yarık (slot)</text>
   <text x="848" y="364" font-size="10" fill="#607d8b" text-anchor="middle">RAC05 bariyeri sınırın üstünde</text>
-  <circle cx="520" cy="340" r="60" fill="none" stroke="#c62828" stroke-width="2" stroke-dasharray="6 3"/>
-  <circle cx="136" cy="584" r="22" fill="none" stroke="#78909c" stroke-width="1" stroke-dasharray="3 2"/>
-  <circle cx="904" cy="584" r="22" fill="none" stroke="#78909c" stroke-width="1" stroke-dasharray="3 2"/>
-  <circle cx="136" cy="136" r="22" fill="none" stroke="#78909c" stroke-width="1" stroke-dasharray="3 2"/>
-  <circle cx="904" cy="136" r="22" fill="none" stroke="#78909c" stroke-width="1" stroke-dasharray="3 2"/>
+  <circle cx="520" cy="340" r="60" fill="none" stroke="#c62828" stroke-width="1.5"/>
+  <circle cx="136" cy="584" r="22" fill="none" stroke="#78909c" stroke-width="1"/>
+  <circle cx="904" cy="584" r="22" fill="none" stroke="#78909c" stroke-width="1"/>
+  <circle cx="136" cy="136" r="22" fill="none" stroke="#78909c" stroke-width="1"/>
+  <circle cx="904" cy="136" r="22" fill="none" stroke="#78909c" stroke-width="1"/>
   <text x="170" y="100" font-size="10" fill="#607d8b">M3 × 4 (7, 7) / kutu dikmeleri Ø6</text>
   <g fill="none" stroke-width="1.8" stroke-dasharray="6 3" stroke-linejoin="round">
 <polyline points="160,313.6 304,313.6" stroke="#546e7a"/>
@@ -300,28 +300,29 @@
   <rect x="1000" y="80" width="460" height="560" fill="#fff" stroke="#90a4ae" stroke-width="2"/>
   <text x="1016" y="108" font-size="13" fill="#263238" font-weight="700">Yerleşim kuralları</text>
   <text x="1016" y="136" font-size="12" fill="#37474f"><tspan font-weight="700">Bakış:</tspan> ön yüz = kutu penceresine bakan taraf.</text>
-  <text x="1016" y="152" font-size="12" fill="#37474f">Düz = ön yüz parçası, kesikli = arka yüz (kart üzerinden).</text>
-  <text x="1016" y="174" font-size="12" fill="#37474f"><tspan font-weight="700">Ön yüz</tspan> (pencere ile PCB arası 6 mm): yalnız alçak</text>
-  <text x="1016" y="190" font-size="12" fill="#37474f">parçalar / MLX90640 (TO-39, 6 mm), SHT31, LED,</text>
-  <text x="1016" y="206" font-size="12" fill="#37474f">pasifler. IR pencere ekseninde Ø15 boş alan.</text>
-  <text x="1016" y="228" font-size="12" fill="#37474f"><tspan font-weight="700">Arka yüz</tspan> (39 mm derinlik): ESP32 modülü, RAC05 (21,8 mm),</text>
-  <text x="1016" y="244" font-size="12" fill="#37474f">2× süperkap yatık (Ø10,5 × 31,5) + boost, klemensler,</text>
-  <text x="1016" y="260" font-size="12" fill="#37474f">MAX3485. Kablolar kutunun alt yüzünden, klemens sırasıyla girer.</text>
-  <text x="1016" y="282" font-size="12" fill="#37474f"><tspan font-weight="700">Güvenlik:</tspan> 230 V birincil bölge sağ şeritte (x ≥ 82),</text>
-  <text x="1016" y="298" font-size="12" fill="#37474f">≥ 6 mm creepage + alt yarıda 1 mm yarık (Y 0–40);</text>
-  <text x="1016" y="314" font-size="12" fill="#37474f">RAC05'in izolasyon bariyeri sınırı köprüler.</text>
-  <text x="1016" y="330" font-size="12" fill="#37474f">Sigorta + MOV birincil tarafta.</text>
-  <text x="1016" y="352" font-size="12" fill="#37474f"><tspan font-weight="700">Isı:</tspan> SHT31 kartın sol kenarında, RAC05 ve LDO'dan en</text>
-  <text x="1016" y="368" font-size="12" fill="#37474f">uzak noktada; çevresinde ısı yarığı. MLX90640 kendi</text>
-  <text x="1016" y="384" font-size="12" fill="#37474f">sıcaklığını ölçer (Ta), ısıdan uzak.</text>
-  <text x="1016" y="406" font-size="12" fill="#37474f"><tspan font-weight="700">RF:</tspan> ESP32 kart kenarında, U.FL pigtail kısa; dahili</text>
-  <text x="1016" y="422" font-size="12" fill="#37474f">anten kullanılmadığı için keepout yok.</text>
-  <text x="1016" y="444" font-size="12" fill="#37474f"><tspan font-weight="700">Katman:</tspan> 2 katman, alt katman GND dolgu; birincil</text>
-  <text x="1016" y="460" font-size="12" fill="#37474f">bölgede dolgu yok (yalıtım).</text>
-  <text x="1016" y="482" font-size="12" fill="#37474f"><tspan font-weight="700">Montaj:</tspan> 4× M3 delik (7, 7) vb. → kutu dikmeleri Ø6, kutu (12, 12);</text>
-  <text x="1016" y="498" font-size="12" fill="#37474f">kart kutuda (5, 5) ofsetli, ön yüzü kapaktan 5 mm geride.</text>
-  <text x="1016" y="520" font-size="12" fill="#37474f"><tspan font-weight="700">Konum uyumu:</tspan> MLX (55, 37,5) / SHT31 (7, 31) / LED (25, 65)</text>
-  <text x="1016" y="536" font-size="12" fill="#37474f">[model, Y yukarı] = kutu koordinatı − 5 mm.</text>
+  <text x="1016" y="152" font-size="12" fill="#37474f">Düz = ön yüz parçası, kesikli = arka yüz (kart üzerinden);</text>
+  <text x="1016" y="168" font-size="12" fill="#37474f">ince düz halka = boş bırakılacak alan (IR ekseni, M3 çevresi).</text>
+  <text x="1016" y="190" font-size="12" fill="#37474f"><tspan font-weight="700">Ön yüz</tspan> (pencere ile PCB arası 6 mm): yalnız alçak</text>
+  <text x="1016" y="206" font-size="12" fill="#37474f">parçalar / MLX90640 (TO-39, 6 mm), SHT31, LED,</text>
+  <text x="1016" y="222" font-size="12" fill="#37474f">pasifler. IR pencere ekseninde Ø15 boş alan.</text>
+  <text x="1016" y="244" font-size="12" fill="#37474f"><tspan font-weight="700">Arka yüz</tspan> (39 mm derinlik): ESP32 modülü, RAC05 (21,8 mm),</text>
+  <text x="1016" y="260" font-size="12" fill="#37474f">2× süperkap yatık (Ø10,5 × 31,5) + boost, klemensler,</text>
+  <text x="1016" y="276" font-size="12" fill="#37474f">MAX3485. Kablolar kutunun alt yüzünden, klemens sırasıyla girer.</text>
+  <text x="1016" y="298" font-size="12" fill="#37474f"><tspan font-weight="700">Güvenlik:</tspan> 230 V birincil bölge sağ şeritte (x ≥ 82),</text>
+  <text x="1016" y="314" font-size="12" fill="#37474f">≥ 6 mm creepage + alt yarıda 1 mm yarık (Y 0–40);</text>
+  <text x="1016" y="330" font-size="12" fill="#37474f">RAC05'in izolasyon bariyeri sınırı köprüler.</text>
+  <text x="1016" y="346" font-size="12" fill="#37474f">Sigorta + MOV birincil tarafta.</text>
+  <text x="1016" y="368" font-size="12" fill="#37474f"><tspan font-weight="700">Isı:</tspan> SHT31 kartın sol kenarında, RAC05 ve LDO'dan en</text>
+  <text x="1016" y="384" font-size="12" fill="#37474f">uzak noktada; çevresinde ısı yarığı. MLX90640 kendi</text>
+  <text x="1016" y="400" font-size="12" fill="#37474f">sıcaklığını ölçer (Ta), ısıdan uzak.</text>
+  <text x="1016" y="422" font-size="12" fill="#37474f"><tspan font-weight="700">RF:</tspan> ESP32 kart kenarında, U.FL pigtail kısa; dahili</text>
+  <text x="1016" y="438" font-size="12" fill="#37474f">anten kullanılmadığı için keepout yok.</text>
+  <text x="1016" y="460" font-size="12" fill="#37474f"><tspan font-weight="700">Katman:</tspan> 2 katman, alt katman GND dolgu; birincil</text>
+  <text x="1016" y="476" font-size="12" fill="#37474f">bölgede dolgu yok (yalıtım).</text>
+  <text x="1016" y="498" font-size="12" fill="#37474f"><tspan font-weight="700">Montaj:</tspan> 4× M3 delik (7, 7) vb. → kutu dikmeleri Ø6, kutu (12, 12);</text>
+  <text x="1016" y="514" font-size="12" fill="#37474f">kart kutuda (5, 5) ofsetli, ön yüzü kapaktan 5 mm geride.</text>
+  <text x="1016" y="536" font-size="12" fill="#37474f"><tspan font-weight="700">Konum uyumu:</tspan> MLX (55, 37,5) / SHT31 (7, 31) / LED (25, 65)</text>
+  <text x="1016" y="552" font-size="12" fill="#37474f">[model, Y yukarı] = kutu koordinatı − 5 mm.</text>
   <text x="1016" y="606" font-size="10" fill="#607d8b">Kaynak: Fusion 360 GridUp-PCB.f3d / üretim çizimi değildir (§1.4).</text>
   <text x="1016" y="622" font-size="10" fill="#607d8b">Pasif değerler 03-baglanti-semasi ile aynı.</text>
 </svg>
