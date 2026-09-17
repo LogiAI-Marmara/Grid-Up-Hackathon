@@ -5990,7 +5990,7 @@
 		(at 165.1 85.09 180)
 		(effects
 			(font
-				(size 2 2)
+				(size 1.7 1.7)
 				(color 230 120 0 1)
 			)
 			(justify right bottom)
@@ -6013,7 +6013,7 @@
 		(at 165.1 107.95 180)
 		(effects
 			(font
-				(size 2 2)
+				(size 1.7 1.7)
 				(color 0 132 0 1)
 			)
 			(justify right bottom)
@@ -6036,7 +6036,7 @@
 		(at 165.1 110.49 180)
 		(effects
 			(font
-				(size 2 2)
+				(size 1.7 1.7)
 				(color 0 132 0 1)
 			)
 			(justify right bottom)
@@ -6059,7 +6059,7 @@
 		(at 205.74 87.63 0)
 		(effects
 			(font
-				(size 2 2)
+				(size 1.7 1.7)
 				(color 106 27 154 1)
 			)
 			(justify left bottom)
@@ -6082,7 +6082,7 @@
 		(at 205.74 90.17 0)
 		(effects
 			(font
-				(size 2 2)
+				(size 1.7 1.7)
 				(color 106 27 154 1)
 			)
 			(justify left bottom)
@@ -6105,7 +6105,7 @@
 		(at 205.74 77.47 0)
 		(effects
 			(font
-				(size 2 2)
+				(size 1.7 1.7)
 				(color 106 27 154 1)
 			)
 			(justify left bottom)
@@ -6128,7 +6128,7 @@
 		(at 205.74 80.01 0)
 		(effects
 			(font
-				(size 2 2)
+				(size 1.7 1.7)
 				(color 106 27 154 1)
 			)
 			(justify left bottom)
@@ -6416,7 +6416,7 @@
 		(at 60.96 66.04 0)
 		(effects
 			(font
-				(size 2 2)
+				(size 1.7 1.7)
 				(color 230 120 0 1)
 			)
 			(justify left bottom)
@@ -6503,7 +6503,7 @@
 		(at 119.38 91.44 90)
 		(effects
 			(font
-				(size 2 2)
+				(size 1.7 1.7)
 				(color 230 120 0 1)
 			)
 			(justify left bottom)
@@ -6586,7 +6586,7 @@
 		(at 60.96 81.28 0)
 		(effects
 			(font
-				(size 2 2)
+				(size 1.7 1.7)
 				(color 230 120 0 1)
 			)
 			(justify left bottom)
@@ -6673,7 +6673,7 @@
 		(at 116.84 93.98 90)
 		(effects
 			(font
-				(size 2 2)
+				(size 1.7 1.7)
 				(color 230 120 0 1)
 			)
 			(justify left bottom)
@@ -6756,7 +6756,7 @@
 		(at 60.96 96.52 0)
 		(effects
 			(font
-				(size 2 2)
+				(size 1.7 1.7)
 				(color 230 120 0 1)
 			)
 			(justify left bottom)
@@ -6843,7 +6843,7 @@
 		(at 114.3 96.52 90)
 		(effects
 			(font
-				(size 2 2)
+				(size 1.7 1.7)
 				(color 230 120 0 1)
 			)
 			(justify left bottom)
@@ -6926,7 +6926,7 @@
 		(at 60.96 111.76 0)
 		(effects
 			(font
-				(size 2 2)
+				(size 1.7 1.7)
 				(color 230 120 0 1)
 			)
 			(justify left bottom)
@@ -7001,7 +7001,7 @@
 		(at 104.14 100.33 0)
 		(effects
 			(font
-				(size 2 2)
+				(size 1.7 1.7)
 				(color 230 120 0 1)
 			)
 			(justify left bottom)
@@ -7116,7 +7116,7 @@
 		(at 53.34 120.65 0)
 		(effects
 			(font
-				(size 2 2)
+				(size 1.7 1.7)
 				(color 230 120 0 1)
 			)
 			(justify left bottom)
@@ -7439,7 +7439,7 @@
 		(at 125.73 102.87 0)
 		(effects
 			(font
-				(size 2 2)
+				(size 1.7 1.7)
 				(color 21 101 192 1)
 			)
 			(justify left bottom)
@@ -7450,7 +7450,7 @@
 		(at 134.62 105.41 0)
 		(effects
 			(font
-				(size 2 2)
+				(size 1.7 1.7)
 				(color 21 101 192 1)
 			)
 			(justify left bottom)
@@ -7558,7 +7558,7 @@
 		(at 248.92 48.26 180)
 		(effects
 			(font
-				(size 2 2)
+				(size 1.7 1.7)
 				(color 106 27 154 1)
 			)
 			(justify right bottom)
@@ -7581,7 +7581,7 @@
 		(at 248.92 50.8 180)
 		(effects
 			(font
-				(size 2 2)
+				(size 1.7 1.7)
 				(color 106 27 154 1)
 			)
 			(justify right bottom)
@@ -7604,7 +7604,7 @@
 		(at 248.92 53.34 180)
 		(effects
 			(font
-				(size 2 2)
+				(size 1.7 1.7)
 				(color 106 27 154 1)
 			)
 			(justify right bottom)
@@ -7627,7 +7627,7 @@
 		(at 248.92 55.88 180)
 		(effects
 			(font
-				(size 2 2)
+				(size 1.7 1.7)
 				(color 106 27 154 1)
 			)
 			(justify right bottom)
@@ -7801,7 +7801,7 @@
 		(at 205.74 82.55 0)
 		(effects
 			(font
-				(size 2 2)
+				(size 1.7 1.7)
 				(color 106 27 154 1)
 			)
 			(justify left bottom)
@@ -7812,7 +7812,7 @@
 		(at 205.74 92.71 0)
 		(effects
 			(font
-				(size 2 2)
+				(size 1.7 1.7)
 				(color 106 27 154 1)
 			)
 			(justify left bottom)
@@ -7823,7 +7823,7 @@
 		(at 205.74 85.09 0)
 		(effects
 			(font
-				(size 2 2)
+				(size 1.7 1.7)
 				(color 106 27 154 1)
 			)
 			(justify left bottom)
@@ -8066,7 +8066,7 @@
 		(at 252.73 173.99 180)
 		(effects
 			(font
-				(size 2 2)
+				(size 1.7 1.7)
 				(color 21 101 192 1)
 			)
 			(justify right bottom)
@@ -8089,7 +8089,7 @@
 		(at 275.59 173.99 0)
 		(effects
 			(font
-				(size 2 2)
+				(size 1.7 1.7)
 				(color 21 101 192 1)
 			)
 			(justify left bottom)
@@ -8112,7 +8112,7 @@
 		(at 252.73 176.53 180)
 		(effects
 			(font
-				(size 2 2)
+				(size 1.7 1.7)
 				(color 0 132 0 1)
 			)
 			(justify right bottom)
@@ -8135,7 +8135,7 @@
 		(at 275.59 176.53 0)
 		(effects
 			(font
-				(size 2 2)
+				(size 1.7 1.7)
 				(color 0 132 0 1)
 			)
 			(justify left bottom)
@@ -8349,7 +8349,7 @@
 		(at 100.33 228.6 0)
 		(effects
 			(font
-				(size 2 2)
+				(size 1.7 1.7)
 				(color 140 0 0 1)
 			)
 			(justify left bottom)
@@ -8567,7 +8567,7 @@
 		(at 116.84 242.57 0)
 		(effects
 			(font
-				(size 2 2)
+				(size 1.7 1.7)
 				(color 230 120 0 1)
 			)
 			(justify left bottom)

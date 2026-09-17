@@ -178,7 +178,7 @@ def new_uuid():   # deterministik: aynı girdi → aynı dosya (diff sadece ger�
     return str(uuid.uuid5(uuid.UUID(ROOT_UUID), 'gridup-%d' % _uuid_n[0]))
 FONT = lambda: [Sym('effects'), [Sym('font'), [Sym('size'), Sym('1.27'), Sym('1.27')]]]
 # Yazı boyutları (mm). Hedef: doküman 1200 px genişlikte gömülünce etiket ≥ 8 px (içerik genişliği ~290 mm).
-SZ_LABEL, SZ_PROP, SZ_NOTE, SZ_HEAD, SZ_TITLE, SZ_PIN, SZ_PINNUM = 2.0, 1.7, 1.8, 2.2, 3.2, 1.6, 1.3
+SZ_LABEL, SZ_PROP, SZ_NOTE, SZ_HEAD, SZ_TITLE, SZ_PIN, SZ_PINNUM = 1.7, 1.7, 1.8, 2.2, 3.2, 1.6, 1.3
 # Net tipine göre renk (tel + etiket): elle SVG'deki lejantla aynı mantık
 COL = {'3V3': (198, 40, 40), '5V': (140, 0, 0), 'GND': (70, 70, 70), 'I2C': (21, 101, 192), 'UART': (106, 27, 154),
        'ANA': (230, 120, 0), 'DEF': (0, 132, 0)}
