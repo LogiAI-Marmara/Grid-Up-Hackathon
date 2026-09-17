@@ -212,8 +212,8 @@
   <text x="480" y="244" font-size="11" fill="#37474f" text-anchor="middle" font-weight="700">MLX90640ESF-BAA-000-TU</text>
   <rect x="357" y="250" width="246" height="10.5" rx="2" fill="#e8f5e9"/>
   <text x="480" y="258" font-size="10" fill="#607d8b" text-anchor="middle">TO-39 Ø9,3 / I²C 0x33 / merkez (55, 37,5) mm</text>
-  <rect x="368" y="264" width="224" height="10.5" rx="2" fill="#e8f5e9"/>
-  <text x="480" y="272" font-size="10" fill="#c62828" text-anchor="middle">Ø15 IR pencere ekseni / yüksek parça yok</text>
+  <rect x="343.2" y="264" width="273.5" height="10.5" rx="2" fill="#e8f5e9"/>
+  <text x="480" y="272" font-size="10" fill="#c62828" text-anchor="middle">Ø15 IR pencere ekseni / ön yüzde yüksek parça yok</text>
   <rect x="238" y="284" width="136" height="10.5" rx="2" fill="#e8f5e9"/>
   <text x="372" y="292" font-size="10" fill="#607d8b" text-anchor="end">2× 4,7k pull-up + 100 nF</text>
   <rect x="184" y="371.2" width="76.6" height="11.6" rx="2" fill="#e8f5e9"/>

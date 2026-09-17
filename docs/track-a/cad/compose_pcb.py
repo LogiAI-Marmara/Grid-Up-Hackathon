@@ -66,7 +66,7 @@ SUB = '#607d8b'
 x, y = px(50, 49)
 L(x, y - 4, 'MLX90640ESF-BAA-000-TU', 11, '#37474f', 'middle', '700')
 L(x, y + 10, 'TO-39 Ø9,3 / I²C 0x33 / merkez (55, 37,5) mm', 10, SUB, 'middle')
-L(x, y + 24, 'Ø15 IR pencere ekseni / yüksek parça yok', 10, '#c62828', 'middle')
+L(x, y + 24, 'Ø15 IR pencere ekseni / ön yüzde yüksek parça yok', 10, '#c62828', 'middle')
 x, y = px(37.5, 44)
 L(x - 8, y + 4, '2× 4,7k pull-up + 100 nF', 10, SUB, 'end')
 x, y = px(7, 31)
