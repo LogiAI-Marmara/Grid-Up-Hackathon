@@ -137,13 +137,13 @@ def mlx90640_symbol():
             prop('Datasheet', 'https://www.melexis.com/en/product/MLX90640/', 0, True),
             prop('Description', 'Termal dizi 32x24, 110x75 derece, I2C 0x33', 0, True),
             [Sym('symbol'), 'MLX90640_0_1',
-             [Sym('rectangle'), [Sym('start'), Sym('-7.62'), Sym('7.62')], [Sym('end'), Sym('7.62'), Sym('-7.62')],
+             [Sym('rectangle'), [Sym('start'), Sym('-10.16'), Sym('10.16')], [Sym('end'), Sym('10.16'), Sym('-10.16')],
               [Sym('stroke'), [Sym('width'), Sym('0.254')], [Sym('type'), Sym('default')]], [Sym('fill'), [Sym('type'), Sym('background')]]],
-             [Sym('circle'), [Sym('center'), Sym('0'), Sym('0')], [Sym('radius'), Sym('4.5')],
+             [Sym('circle'), [Sym('center'), Sym('0'), Sym('0')], [Sym('radius'), Sym('4.0')],
               [Sym('stroke'), [Sym('width'), Sym('0.254')], [Sym('type'), Sym('default')]], [Sym('fill'), [Sym('type'), Sym('none')]]]],
             [Sym('symbol'), 'MLX90640_1_1',
-             pin('power_in', 0, 10.16, 270, 'VDD', '1'), pin('power_in', 0, -10.16, 90, 'GND', '2'),
-             pin('bidirectional', 10.16, 2.54, 180, 'SDA', '3'), pin('input', 10.16, -2.54, 180, 'SCL', '4')]]
+             pin('power_in', 0, 12.7, 270, 'VDD', '1'), pin('power_in', 0, -12.7, 90, 'GND', '2'),
+             pin('bidirectional', 12.7, 2.54, 180, 'SDA', '3'), pin('input', 12.7, -2.54, 180, 'SCL', '4')]]
 
 # ---------------- şema ----------------
 def g(v): return Sym('%g' % round(v, 4))
@@ -408,18 +408,21 @@ def build():
     S.rect((27.94, 139.7), (121.0, 214.63), I2C, title='I²C / MLX90640 0x33 + SHT31 0x44, tek hat 400 kHz+')
     BX_SDA, BX_SCL = 124.46, 127.0
     sda_pin, scl_pin = U1.p('IO8'), U1.p('IO9')
-    U2 = S.part('GridUp:MLX90640', 'U2', 'MLX90640ESF-BAA', (69.85, 163.83), ref_at=(48.26, 163.83), val_at=(43.18, 166.37),
+    U2 = S.part('GridUp:MLX90640', 'U2', 'MLX90640ESF-BAA', (69.85, 163.83), ref_at=(35.56, 167.64), val_at=(35.56, 170.18),
                 footprint='Package_TO_SOT_THT:TO-39-4')
     S.pin_power(U2, 'GND', 'GND')
     vdd = U2.p('VDD'); n_vdd = (69.85, vdd[1] - 3.81); S.wire(vdd, n_vdd); S.power('+3V3', n_vdd)
-    S.wire(n_vdd, (57.15, n_vdd[1])); S.junction(n_vdd)
-    Cm1 = S.part(C, 'C2', '100 nF', (57.15, n_vdd[1] + 3.81), ref_at=(50.8, n_vdd[1] + 2.54), val_at=(48.26, n_vdd[1] + 5.08))
-    S.wire((57.15, n_vdd[1]), Cm1.p('1')); S.pin_power(Cm1, '2', 'GND')
+    S.wire(n_vdd, (52.07, n_vdd[1])); S.junction(n_vdd)
+    Cm1 = S.part(C, 'C2', '100 nF', (52.07, n_vdd[1] + 3.81), ref_at=(45.72, n_vdd[1] + 2.54), val_at=(43.18, n_vdd[1] + 5.08))
+    S.wire((52.07, n_vdd[1]), Cm1.p('1')); S.pin_power(Cm1, '2', 'GND')
     S.text('termal dizi 32×24, 110°×75°, ≤23 mA', (33.02, 184.85), SZ_NOTE, italic=True)
     U3 = S.part(SHT, 'U3', 'SHT31-DIS-B', (69.85, 199.39), ref_at=(46.99, 189.23), val_at=(46.99, 191.77),
                 footprint='Sensor_Humidity:Sensirion_DFN-8-1EP_2.5x2.5mm_P0.5mm_EP1.1x1.7mm')
     S.pin_power(U3, 'VDD', '+3V3'); S.pin_power(U3, '8', 'GND')
-    S.pin_power(U3, 'ADDR', 'GND', L=10.16, rot=270); S.pin_power(U3, '~{RESET}', '+3V3', L=15.24, rot=90)
+    Pg = S.pin_power(U3, 'ADDR', 'GND', L=10.16, rot=270); Pv = S.pin_power(U3, '~{RESET}', '+3V3', L=15.24, rot=90)
+    ga, ra = U3.p('ADDR'), U3.p('~{RESET}')
+    Pg.val_at = (ga[0] - 10.16 - 1.27, ga[1] - 2.0); Pg.just = 'center'        # yatay GND: etiket sembolün üstünde
+    Pv.val_at = (ra[0] - 15.24 - 1.27, ra[1] + 3.3); Pv.just = 'center'        # yatay +3V3: etiket sembolün altında
     S.pin_nc(U3, 'ALERT'); S.pin_nc(U3, 'R')
     S.text('sıcaklık + nem (ADDR → GND: 0x44)', (78.74, 212.35), SZ_NOTE, italic=True)
     # bus: SDA x=124,46 (IO8 satırından SHT SDA'ya), SCL x=127 (IO9 satırından SHT SCL'ye)
