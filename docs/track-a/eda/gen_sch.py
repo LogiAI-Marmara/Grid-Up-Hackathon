@@ -551,7 +551,7 @@ def build():
                 footprint='TerminalBlock_Phoenix:TerminalBlock_Phoenix_MKDS-3-3-5.08_1x03_P5.08mm_Horizontal')
     J1.just = 'right'   # aynalı sembol: hiza da aynalanır (bkz. CT klemensleri)
     pL, pN, pPE = J1.p('1'), J1.p('2'), J1.p('3')
-    F1 = S.part(FU, 'F1', 'sigorta', (62.23, pL[1]), rot=90, ref_at=(62.23, pL[1] - 6.6), val_at=(62.23, pL[1] - 4.1)); F1.just = 'center'   # yazı sigortanın tam üstünde
+    F1 = S.part(FU, 'F1', 'sigorta', (62.23, pL[1]), rot=90, ref_at=(62.23, pL[1] - 5.2), val_at=(62.23, pL[1] - 2.7)); F1.just = 'center'   # yazı sigortanın tam üstünde
     S.wire(pL, F1.p('1'), color=COL['5V'])
     U5 = S.part(RAC, 'U5', 'RAC05-05SK/277', (88.9, pN[1]), ref_at=(76.2, pL[1] + 9.5), val_at=(76.2, pL[1] + 12.0),
                 footprint='Converter_ACDC:Converter_ACDC_RECOM_RAC05-xxSK_THT')

@@ -13500,7 +13500,7 @@
 		(dnp no)
 		(uuid "96e049d9-5d51-5e14-a13b-229273a7628f")
 		(property "Reference" "F1"
-			(at 62.23 222 270)
+			(at 62.23 223.4 270)
 			(effects
 				(font
 					(size 1.7 1.7)
@@ -13508,7 +13508,7 @@
 			)
 		)
 		(property "Value" "sigorta"
-			(at 62.23 224.5 270)
+			(at 62.23 225.9 270)
 			(effects
 				(font
 					(size 1.7 1.7)
