@@ -509,7 +509,7 @@ def build():
     S.wire(m_sda, (BX_SDA, m_sda[1]), color=I2C); S.junction((BX_SDA, m_sda[1]))
     S.wire(m_scl, (BX_SCL, m_scl[1]), color=I2C); S.junction((BX_SCL, m_scl[1]))     # SDA dikeyini keser → atlama
     S.wire(s_sda, (BX_SDA, s_sda[1]), color=I2C); S.wire(s_scl, (BX_SCL, s_scl[1]), color=I2C)
-    S.label('SDA', (BX_SDA + 1.27, sda_pin[1]), 0); S.label('SCL', (BX_SCL + 1.27 + 6.35, scl_pin[1]), 0)
+    S.label('SDA', (BX_SCL + 1.27 + 6.35, sda_pin[1]), 0); S.label('SCL', (BX_SCL + 1.27 + 6.35, scl_pin[1]), 0)   # ikisi aynı x, alt alta; dikey tel kesmesin
     # pull-up'lar 2× 4,7 kΩ → 3V3
     for i, (x, bx, net) in enumerate([(113.03, BX_SDA, 'SDA'), (100.33, BX_SCL, 'SCL')]):   # SDA sağda/üstte, SCL solda/altta → yatay teller gövde kesmez
         yb = 184.15 + i * 5.08

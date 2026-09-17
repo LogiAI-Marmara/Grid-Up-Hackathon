@@ -7222,7 +7222,7 @@
 		(uuid "d4c1d73a-5359-50d9-879d-bb4b754e6df1")
 	)
 	(label "SDA"
-		(at 125.73 102.87 0)
+		(at 134.62 102.87 0)
 		(effects
 			(font
 				(size 1.7 1.7)
