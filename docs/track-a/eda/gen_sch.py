@@ -389,7 +389,7 @@ def build():
     S.wire(Ren.p('2'), n_en); S.pin_power(Ren, '1', '+3V3')
     Cen = S.part(C, 'C1', '1 µF', (149.86, en[1] + 3.81), ref_at=(143.51, en[1] + 2.54), val_at=(142.24, en[1] + 5.08))
     S.wire(n_en, Cen.p('1')); S.pin_power(Cen, '2', 'GND')
-    SW1 = S.part(SW, 'SW1', 'Reset', (137.16, en[1]), ref_at=(134.62, en[1] - 3.81), val_at=(133.35, en[1] - 6.35))
+    SW1 = S.part(SW, 'SW1', 'Reset', (140.97, en[1]), ref_at=(138.43, en[1] - 3.81), val_at=(137.16, en[1] - 6.35))
     S.wire(SW1.p('2'), n_en); S.junction(n_en)
     S.pin_power(SW1, '1', 'GND', L=2.54, rot=0)
     S.text('EN: RC + reset butonu', (132.08, en[1] - 17.5), SZ_NOTE, italic=True)
