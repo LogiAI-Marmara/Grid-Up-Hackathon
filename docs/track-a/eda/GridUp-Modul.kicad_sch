@@ -14065,7 +14065,7 @@
 		(dnp no)
 		(uuid "99f44b16-62b5-5351-bb0f-91d85c299d43")
 		(property "Reference" "D1"
-			(at 118.11 221.6 0)
+			(at 118.11 223 0)
 			(effects
 				(font
 					(size 1.7 1.7)
@@ -14073,7 +14073,7 @@
 			)
 		)
 		(property "Value" "Schottky (OR)"
-			(at 118.11 224.1 0)
+			(at 118.11 225.4 0)
 			(effects
 				(font
 					(size 1.7 1.7)
