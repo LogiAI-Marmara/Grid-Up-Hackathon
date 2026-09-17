@@ -438,7 +438,7 @@ def build():
     S.pin_power(U2, 'GND', 'GND')
     vdd = U2.p('VDD'); n_vdd = (69.85, vdd[1] - 3.81); S.wire(vdd, n_vdd); S.power('+3V3', n_vdd)
     S.wire(n_vdd, (52.07, n_vdd[1])); S.junction(n_vdd)
-    Cm1 = S.part(C, 'C2', '100 nF', (52.07, n_vdd[1] + 3.81), ref_at=(45.72, n_vdd[1] + 2.54), val_at=(43.18, n_vdd[1] + 5.08))
+    Cm1 = S.part(C, 'C2', '100 nF', (52.07, n_vdd[1] + 3.81), ref_at=(44.45, n_vdd[1] + 2.54), val_at=(41.66, n_vdd[1] + 6.1))
     S.wire((52.07, n_vdd[1]), Cm1.p('1')); Pc = S.pin_power(Cm1, '2', 'GND')
     Pc.val_at = (Cm1.p('2')[0] - 2.0, Cm1.p('2')[1] + 2.54 + 1.27); Pc.just = 'right'   # GND etiketi solda (sağda U2 kutusu)
     S.text('termal dizi 32×24, ≤23 mA', (30.5, 179.6), SZ_NOTE, italic=True)

@@ -11791,7 +11791,7 @@
 		(dnp no)
 		(uuid "3486d838-7d00-5e12-9c41-63f475aa8917")
 		(property "Reference" "C2"
-			(at 45.72 149.86 0)
+			(at 44.45 149.86 0)
 			(effects
 				(font
 					(size 1.7 1.7)
@@ -11800,7 +11800,7 @@
 			)
 		)
 		(property "Value" "100 nF"
-			(at 43.18 152.4 0)
+			(at 41.66 153.42 0)
 			(effects
 				(font
 					(size 1.7 1.7)
