@@ -1,0 +1,126 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 800" width="100%" style="max-width:1200px;background:#fff;font-family:Arial,Helvetica,sans-serif;font-size:13px">
+  <!-- 08-sistem-mimarisi — gen_mimari.py üretir; ELLE DÜZENLEME (yeniden üretimde kaybolur). §8. -->
+  <defs>
+    <marker id="arr" markerWidth="10" markerHeight="10" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#546e7a"/></marker>
+    <marker id="arrB" markerWidth="10" markerHeight="10" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#1565c0"/></marker>
+  </defs>
+  <style>
+    .card{fill:#fafafa;stroke:#90a4ae;stroke-width:2}
+    .t{font-size:14px;font-weight:700;fill:#263238}
+    .s{font-size:12px;fill:#37474f}
+    .r{font-size:11px;fill:#607d8b}
+    .zoneP{fill:#e3f2fd;stroke:#1565c0;stroke-width:2}
+    .zoneG{fill:#eceff1;stroke:#546e7a;stroke-width:2}
+    .zoneS{fill:#e8f5e9;stroke:#2e7d32;stroke-width:2}
+    .boxMcu{fill:#c8e6c9;stroke:#2e7d32;stroke-width:2}
+    .boxGuc{fill:#fce4ec;stroke:#ad1457;stroke-width:2}
+    .boxIc{fill:#ffffff;stroke:#455a64;stroke-width:2}
+    .boxOut{fill:#fff3e0;stroke:#ef6c00;stroke-width:2}
+    .actor{fill:none;stroke:#546e7a;stroke-width:1.5;stroke-dasharray:5 4}
+    .zh{font-size:16px;font-weight:700;fill:#263238}
+  </style>
+  <rect x="40" y="100" width="380" height="580" rx="10" class="zoneP"/>
+  <rect x="60" y="145" width="340" height="165" rx="8" class="boxIc"/>
+  <rect x="60" y="280" width="340" height="18" rx="0" fill="none" stroke="#1565c0" stroke-width="1.5" stroke-dasharray="5 4"/>
+  <rect x="60" y="325" width="340" height="150" rx="8" class="boxMcu"/>
+  <rect x="60" y="490" width="340" height="95" rx="8" class="boxGuc"/>
+  <rect x="60" y="600" width="340" height="60" rx="8" class="boxIc"/>
+  <rect x="500" y="100" width="280" height="580" rx="10" class="zoneG"/>
+  <rect x="520" y="170" width="240" height="220" rx="8" class="boxIc"/>
+  <rect x="860" y="100" width="700" height="580" rx="10" class="zoneS"/>
+  <rect x="880" y="145" width="660" height="80" rx="8" class="boxIc"/>
+  <rect x="880" y="240" width="660" height="80" rx="8" class="boxIc"/>
+  <rect x="880" y="335" width="660" height="80" rx="8" class="boxMcu"/>
+  <rect x="880" y="435" width="210" height="130" rx="8" class="boxOut"/>
+  <rect x="1110" y="435" width="210" height="130" rx="8" class="boxIc"/>
+  <rect x="1340" y="435" width="200" height="130" rx="8" class="boxIc"/>
+  <rect x="1110" y="580" width="210" height="80" rx="8" class="boxIc"/>
+  <rect x="900" y="578" width="170" height="28" rx="6" class="actor"/>
+  <rect x="1370" y="578" width="140" height="28" rx="6" class="actor"/>
+  <line x1="230" y1="310" x2="230" y2="322" stroke="#546e7a" stroke-width="2" marker-end="url(#arr)"/>
+  <line x1="95" y1="490" x2="95" y2="478" stroke="#ad1457" stroke-width="2" marker-end="url(#arr)"/>
+  <line x1="365" y1="478" x2="365" y2="596" stroke="#546e7a" stroke-width="2" marker-end="url(#arr)"/>
+  <line x1="402" y1="630" x2="496" y2="630" stroke="#1565c0" stroke-width="2.5" marker-end="url(#arrB)"/>
+  <line x1="760" y1="200" x2="876" y2="200" stroke="#546e7a" stroke-width="2.5" marker-end="url(#arr)"/>
+  <line x1="1210" y1="225" x2="1210" y2="237" stroke="#546e7a" stroke-width="2" marker-end="url(#arr)"/>
+  <line x1="1210" y1="320" x2="1210" y2="332" stroke="#546e7a" stroke-width="2" marker-end="url(#arr)"/>
+  <line x1="985" y1="415" x2="985" y2="432" stroke="#546e7a" stroke-width="2" marker-end="url(#arr)"/>
+  <line x1="1215" y1="415" x2="1215" y2="432" stroke="#546e7a" stroke-width="2" marker-end="url(#arr)"/>
+  <line x1="1440" y1="415" x2="1440" y2="432" stroke="#546e7a" stroke-width="2" marker-end="url(#arr)"/>
+  <line x1="1215" y1="565" x2="1215" y2="577" stroke="#546e7a" stroke-width="2" marker-end="url(#arr)"/>
+  <line x1="985" y1="565" x2="985" y2="576" stroke="#546e7a" stroke-width="2" marker-end="url(#arr)"/>
+  <line x1="1440" y1="565" x2="1440" y2="576" stroke="#546e7a" stroke-width="2" marker-end="url(#arr)"/>
+  <text x="800" y="36" text-anchor="middle" font-size="24" font-weight="700" fill="#263238">Sistem mimarisi / uçtan uca veri akışı</text>
+  <text x="800" y="62" text-anchor="middle" class="r">Karar kaydı §8'e birebir · T3 + T4 + T6 + T7 · public cloud yok, sunucu on-premise</text>
+  <text x="230" y="128" text-anchor="middle" class="zh">PANO İÇİ</text>
+  <text x="230" y="168" text-anchor="middle" class="t">Sensörler</text>
+  <text x="230" y="190" text-anchor="middle" class="s">Ortam sıcaklık + nem (SHT31)</text>
+  <text x="230" y="208" text-anchor="middle" class="s">Termal dizi MLX90640 (32×24)</text>
+  <text x="230" y="226" text-anchor="middle" class="s">Akım: analizör (Modbus) veya CT ×4</text>
+  <text x="230" y="244" text-anchor="middle" class="s">Ark kaydı: TVOC-2 (okuma)</text>
+  <text x="230" y="262" text-anchor="middle" class="s">Genişleme arayüzü (boş, kesikli)</text>
+  <text x="230" y="293" text-anchor="middle" class="r">PD / akustik için ayrılmış I2C-UART</text>
+  <text x="230" y="348" text-anchor="middle" class="t">MODÜL (ESP32-S3-N8)</text>
+  <text x="230" y="370" text-anchor="middle" class="s">Oku → özetle → eşik → paketle</text>
+  <text x="230" y="388" text-anchor="middle" class="s">Normalde özet, anomalide tam kare</text>
+  <text x="230" y="406" text-anchor="middle" class="s">Modül hüküm VERMEZ (seviye/tip yok)</text>
+  <text x="230" y="428" text-anchor="middle" class="r">Detay: 01 blok şema · akış: 07</text>
+  <text x="230" y="448" text-anchor="middle" class="r">Paket (sözleşme 2): modul_id, zaman</text>
+  <text x="230" y="513" text-anchor="middle" class="t">Besleme</text>
+  <text x="230" y="535" text-anchor="middle" class="s">230 V iç ihtiyaç → 5 V → LDO 3,3 V</text>
+  <text x="230" y="553" text-anchor="middle" class="s">Süperkap yedek (kesintide bildirir)</text>
+  <text x="108" y="488" text-anchor="start" class="r">3,3 V güç</text>
+  <text x="230" y="622" text-anchor="middle" class="t">Dış anten (U.FL → SMA)</text>
+  <text x="230" y="642" text-anchor="middle" class="r">Metal pano içi anten çalışmaz (§7.4)</text>
+  <text x="373" y="540" text-anchor="start" class="r">RF</text>
+  <text x="460" y="600" text-anchor="middle" class="s">kablosuz</text>
+  <text x="460" y="616" text-anchor="middle" class="r">2,4 GHz</text>
+  <text x="460" y="650" text-anchor="middle" class="r">birkaç m</text>
+  <text x="640" y="128" text-anchor="middle" class="zh">SAHA GATEWAY</text>
+  <text x="640" y="152" text-anchor="middle" class="r">Trafo binası içi · 230 V</text>
+  <text x="640" y="196" text-anchor="middle" class="t">Gateway</text>
+  <text x="640" y="220" text-anchor="middle" class="s">Modüllerden kablosuz toplar</text>
+  <text x="640" y="238" text-anchor="middle" class="s">Mevcut altyapıyla</text>
+  <text x="640" y="256" text-anchor="middle" class="s">merkeze iletir</text>
+  <text x="640" y="286" text-anchor="middle" class="r">Boyut kısıtı yok (§7.4)</text>
+  <text x="640" y="304" text-anchor="middle" class="r">Kendi gateway'imiz önerilir;</text>
+  <text x="640" y="320" text-anchor="middle" class="r">mevcut modem/RTU alternatif</text>
+  <text x="640" y="344" text-anchor="middle" class="r">Detay İZ C kapsamı</text>
+  <text x="640" y="440" text-anchor="middle" class="s">~3 saha × 2 pano × 1–2 modül</text>
+  <text x="640" y="458" text-anchor="middle" class="s">Demo 8–10 · yük 100 (§7.7)</text>
+  <text x="820" y="170" text-anchor="middle" class="s">mevcut</text>
+  <text x="820" y="186" text-anchor="middle" class="s">altyapı</text>
+  <text x="1210" y="128" text-anchor="middle" class="zh">ON-PREMISE SUNUCU (public cloud yok)</text>
+  <text x="1210" y="168" text-anchor="middle" class="t">Toplama servisi (İZ A)</text>
+  <text x="1210" y="190" text-anchor="middle" class="s">Paketi al → doğrula → alindi_zaman ekle → PostgreSQL'e yaz</text>
+  <text x="1210" y="208" text-anchor="middle" class="r">Kod: /toplama · şema: ölçüm (uzun format) + termal kare + modül</text>
+  <text x="1210" y="263" text-anchor="middle" class="t">PostgreSQL</text>
+  <text x="1210" y="285" text-anchor="middle" class="s">Ölçüm satırları (modul_id, zaman, olcum_tipi, deger, kalite)</text>
+  <text x="1210" y="303" text-anchor="middle" class="r">Termal tam kare ayrı tabloda (768 değer) · sözleşme 1</text>
+  <text x="1210" y="358" text-anchor="middle" class="t">Anomali motoru (İZ B)</text>
+  <text x="1210" y="380" text-anchor="middle" class="s">Taban çizgisi (medyan + MAD) → skor + seviye + tip + gerekce</text>
+  <text x="1210" y="398" text-anchor="middle" class="r">Çıktı: sözleşme 3 (id, skor, seviye, tip, gerekce, kanit)</text>
+  <text x="985" y="458" text-anchor="middle" class="t">Alarm servisi</text>
+  <text x="985" y="480" text-anchor="middle" class="s">Seviye → kanal</text>
+  <text x="985" y="498" text-anchor="middle" class="s">SMS / WhatsApp</text>
+  <text x="985" y="520" text-anchor="middle" class="r">Tekrar önleme (T7)</text>
+  <text x="985" y="538" text-anchor="middle" class="r">GSM modem / on-prem</text>
+  <text x="1215" y="458" text-anchor="middle" class="t">Okuma API'si</text>
+  <text x="1215" y="480" text-anchor="middle" class="s">REST + JSON</text>
+  <text x="1215" y="498" text-anchor="middle" class="s">Sözleşme 5 (İZ B)</text>
+  <text x="1215" y="520" text-anchor="middle" class="r">/sahalar /moduller</text>
+  <text x="1215" y="538" text-anchor="middle" class="r">/anomaliler /saglik</text>
+  <text x="1440" y="458" text-anchor="middle" class="t">Modbus TCP</text>
+  <text x="1440" y="480" text-anchor="middle" class="s">Register haritası</text>
+  <text x="1440" y="498" text-anchor="middle" class="s">Sözleşme 4 (İZ C)</text>
+  <text x="1440" y="520" text-anchor="middle" class="r">Modül başına 20 reg.</text>
+  <text x="1440" y="538" text-anchor="middle" class="r">→ SCADA</text>
+  <text x="1215" y="603" text-anchor="middle" class="t">Monitoring (İZ C)</text>
+  <text x="1215" y="625" text-anchor="middle" class="s">Saha/pano/modül ağacı</text>
+  <text x="1215" y="643" text-anchor="middle" class="s">Isı haritası + alarm listesi</text>
+  <text x="985" y="597" text-anchor="middle" class="s">operasyon ekibi</text>
+  <text x="1440" y="597" text-anchor="middle" class="s">SCADA</text>
+  <text x="800" y="712" text-anchor="middle" class="r">Veri politikası (§7.4): normalde özet (maks, konum, bölge ort.) · anomali anında tam kare (768) kanıt olarak · eşik merkezden güncellenir (100 saha gezilmez, T5)</text>
+  <text x="800" y="732" text-anchor="middle" class="r">Sınır: modül anomali hükmü vermez (§7.4 satır 304) · ark tespiti yok, TVOC-2 kaydı okunur (§7.1 satır 230) · WhatsApp bulutu yerine yerel GSM/on-prem gateway (İZ C)</text>
+  <text x="800" y="762" text-anchor="middle" class="r">İz sahipleri: saha + toplama İZ A · anomali + okuma API İZ B · arayüz + Modbus + alarm + kurulum İZ C · sözleşme değişimi lidere sorulur (§9)</text>
+</svg>
