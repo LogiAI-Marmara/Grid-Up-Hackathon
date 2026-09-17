@@ -12696,7 +12696,7 @@
 		(dnp no)
 		(uuid "9bc15a4e-d854-5ebf-b1e5-2d758a0fecec")
 		(property "Reference" "U4"
-			(at 236.22 73.66 0)
+			(at 233.68 73.66 0)
 			(effects
 				(font
 					(size 1.7 1.7)
@@ -12705,7 +12705,7 @@
 			)
 		)
 		(property "Value" "MAX3485"
-			(at 236.22 76.2 0)
+			(at 233.68 76.2 0)
 			(effects
 				(font
 					(size 1.7 1.7)

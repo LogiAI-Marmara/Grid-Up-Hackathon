@@ -479,7 +479,7 @@ def build():
     for num, net in [('1', 'U0TXD'), ('2', 'U0RXD'), ('3', 'USB_DN'), ('4', 'USB_DP')]: S.pin_label(J9, num, net)
     # RS-485: MAX3485 aynalı (mirror x) → DI / DE / RE / RO sırası ESP IO17 / IO21 / IO18 ile kesişmesiz
     S.rect((222.0, 60.5), (322.0, 116.0), UART, title='RS-485 / Modbus RTU / MAX3485 3,3 V, yarıçift, 120 Ω sonlandırma')
-    U4 = S.part(MAX, 'U4', 'MAX3485', (254.0, 87.63), mirror='x', ref_at=(236.22, 73.66), val_at=(236.22, 76.2),
+    U4 = S.part(MAX, 'U4', 'MAX3485', (254.0, 87.63), mirror='x', ref_at=(233.68, 73.66), val_at=(233.68, 76.2),
                 footprint='Package_SO:SOIC-8_3.9x4.9mm_P1.27mm')
     vcc4, gnd4 = U4.p('VCC'), U4.p('GND')   # aynalı çip: VCC altta, GND üstte → telle yana taşı, semboller normal yönde
     S.wire(gnd4, (gnd4[0], gnd4[1] - 1.27), (267.97, gnd4[1] - 1.27), color=net_color('GND')); S.power('GND', (267.97, gnd4[1] - 1.27), 0)
