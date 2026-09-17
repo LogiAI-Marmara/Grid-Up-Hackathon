@@ -474,6 +474,8 @@ def build():
     S.wire((44.45, nV[1]), Cv.p('1'), color=ANA); S.pin_power(Cv, '2', 'GND', L=1.27); S.junction((44.45, nV[1]))
     S.wire((44.45, nV[1]), (53.34, nV[1]), color=ANA); S.label('V_BIAS', (53.34, nV[1]), 0)
     S.text('V_BIAS = 3V3 / 2 = 1,65 V (CT DC ofseti)', (66.04, 121.92), SZ_NOTE, italic=True)
+    S.text('R_burden = 1,5 V / I_sek,tepe', (66.04, 124.46), SZ_NOTE, italic=True)
+    S.text('(CT oranına göre; CT seçimi 02-bom §2.3)', (66.04, 127.0), SZ_NOTE, italic=True)
 
     # ================= SOL ALT: I²C sensörler → IO8/IO9 (bus) =================
     S.rect((27.94, 139.7), (121.0, 214.63), I2C, title='I²C / MLX90640 0x33 + SHT31 0x44, tek hat 400 kHz+')
@@ -570,14 +572,14 @@ def build():
                 footprint='TerminalBlock_Phoenix:TerminalBlock_Phoenix_MKDS-3-3-5.08_1x03_P5.08mm_Horizontal')
     J1.just = 'right'   # aynalı sembol: hiza da aynalanır (bkz. CT klemensleri)
     pL, pN, pPE = J1.p('1'), J1.p('2'), J1.p('3')
-    F1 = S.part(FU, 'F1', 'sigorta', (62.23, pL[1]), rot=90, ref_at=(62.23, pL[1] - 5.2), val_at=(62.23, pL[1] - 2.7)); F1.just = 'center'   # yazı sigortanın tam üstünde
+    F1 = S.part(FU, 'F1', 'T 1 A', (62.23, pL[1]), rot=90, ref_at=(62.23, pL[1] - 5.2), val_at=(62.23, pL[1] - 2.7)); F1.just = 'center'   # yazı sigortanın tam üstünde
     S.wire(pL, F1.p('1'), color=COL['5V'])
     U5 = S.part(RAC, 'U5', 'RAC05-05SK/277', (88.9, pN[1]), ref_at=(76.2, pL[1] + 9.5), val_at=(76.2, pL[1] + 12.0),
                 footprint='Converter_ACDC:Converter_ACDC_RECOM_RAC05-xxSK_THT')
     ac_l, ac_n = U5.p('AC(L)'), U5.p('AC(N)')
     S.wire(F1.p('2'), (F1.p('2')[0], ac_l[1]), ac_l, color=COL['5V'])
     S.wire(pN, (66.04, pN[1]), (66.04, ac_n[1]), ac_n, color=COL['5V'])
-    RV1 = S.part(RV, 'RV1', 'MOV', (71.12, (ac_l[1] + ac_n[1]) / 2), ref_at=(73.0, ac_l[1] - 6.8), val_at=(73.0, ac_l[1] - 4.3))   # etiketler L hattının üstünde, gövdeden kılavuz çizgi
+    RV1 = S.part(RV, 'RV1', 'MOV 275 V', (71.12, (ac_l[1] + ac_n[1]) / 2), ref_at=(73.0, ac_l[1] - 6.8), val_at=(73.0, ac_l[1] - 4.3))   # etiketler L hattının üstünde, gövdeden kılavuz çizgi
     S.gline((72.5, ac_l[1] + 1.7), (73.8, ac_l[1] - 3.7), COL['GND'], 0.2)
     S.wire((71.12, ac_l[1]), RV1.p('1'), color=COL['5V']); S.wire((71.12, ac_n[1]), RV1.p('2'), color=COL['5V']); S.junction((71.12, ac_l[1])); S.junction((71.12, ac_n[1]))
     S.wire(pPE, (pPE[0] + 2.54, pPE[1]), (pPE[0] + 2.54, pPE[1] + 5.08), color=COL['GND']); PEs = S.power('Earth_Protective', (pPE[0] + 2.54, pPE[1] + 5.08)); PEs.hide_value = True; S.text('PE', (pPE[0] + 4.6, pPE[1] + 7.2), SZ_PROP, color=COL['GND'])
@@ -590,7 +592,7 @@ def build():
     # 5V_RAW → D1 → +5V rayı (ray sağa doğru: D2 dönüşü, +5V, C30, LDO, +3V3)
     nRaw = (vout[0] + 12.7, vout[1]); S.wire(vout, nRaw, color=COL['5V']); S.junction(nRaw)
     S.label('5V_RAW', (vout[0] + 1.27, vout[1]), 0)
-    D1 = S.part(DS, 'D1', 'Schottky (OR)', (nRaw[0] + 6.35, vout[1]), mirror='y', ref_at=(nRaw[0] + 6.35, vout[1] - 5.6), val_at=(nRaw[0] + 6.35, vout[1] - 3.2)); D1.just = 'center'   # diyotun tam üstünde
+    D1 = S.part(DS, 'D1', 'SS34 (OR)', (nRaw[0] + 6.35, vout[1]), mirror='y', ref_at=(nRaw[0] + 6.35, vout[1] - 5.6), val_at=(nRaw[0] + 6.35, vout[1] - 3.2)); D1.just = 'center'   # diyotun tam üstünde
     S.wire(nRaw, D1.p('A'), color=COL['5V'])
     rail_y = vout[1]; ry = rail_y
     U6 = S.part(LDO, 'U6', 'AP7361C-33E 3,3 V / 1 A', (248.92, rail_y), ref_at=(248.92, rail_y - 6.0), val_at=(248.92, rail_y - 3.5),
@@ -648,7 +650,7 @@ def build():
     xf = fb[0] + 6.35   # FB dönüşü gövdeden uzak insin
     S.wire(fb, (xf, fb[1]), (xf, nF[1]), nF)
     xD = 208.28
-    D2 = S.part(DS, 'D2', 'D2', (xD, ry + 12.7), rot=270, ref_at=(xD + 2.1, ry + 13.3), hide_value=True)
+    D2 = S.part(DS, 'D2', 'SS34', (xD, ry + 12.7), rot=270, ref_at=(xD + 2.1, ry + 12.0), val_at=(xD + 2.1, ry + 14.6))
     S.wire((xv, vb[1]), (xD, vb[1]), D2.p('A'), color=COL['5V']); S.wire(D2.p('K'), (xD, ry), color=COL['5V']); S.junction((xD, ry))
     # ---------- notlar (besleme) ----------
     S.text('PE → panonun koruma iletkeni; kutu metal ise gövde PE', (30.48, pPE[1] + 15.5), SZ_NOTE, italic=True)
