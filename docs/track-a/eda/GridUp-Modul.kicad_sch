@@ -9007,21 +9007,21 @@
 		(dnp no)
 		(uuid "665e91c2-f1a6-5ad8-9c34-8fac3bbd0de1")
 		(property "Reference" "U1"
-			(at 156.21 132.08 0)
+			(at 183 131.5 0)
 			(effects
 				(font
 					(size 1.7 1.7)
 				)
-				(justify left)
+				(justify right)
 			)
 		)
 		(property "Value" "ESP32-S3-WROOM-1U-N8"
-			(at 156.21 134.62 0)
+			(at 183 134 0)
 			(effects
 				(font
 					(size 1.7 1.7)
 				)
-				(justify left)
+				(justify right)
 			)
 		)
 		(property "Footprint" "RF_Module:ESP32-S3-WROOM-1U"
@@ -9031,7 +9031,7 @@
 				(font
 					(size 1.7 1.7)
 				)
-				(justify left)
+				(justify right)
 			)
 		)
 		(property "Datasheet" ""
@@ -9041,7 +9041,7 @@
 				(font
 					(size 1.7 1.7)
 				)
-				(justify left)
+				(justify right)
 			)
 		)
 		(property "Description" ""
@@ -9051,7 +9051,7 @@
 				(font
 					(size 1.7 1.7)
 				)
-				(justify left)
+				(justify right)
 			)
 		)
 		(pin "1"

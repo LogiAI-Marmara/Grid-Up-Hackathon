@@ -373,8 +373,9 @@ def build():
 
     # ================= ORTA: ESP32-S3 =================
     S.rect((130.0, 42.0), (222.0, 150.0), COL['DEF'], title='ESP32-S3-WROOM-1U-N8 / Wi-Fi/BLE, U.FL anten')
-    U1 = S.part(ESP, 'U1', 'ESP32-S3-WROOM-1U-N8', (185.42, 100.33), ref_at=(156.21, 132.08), val_at=(156.21, 134.62),
+    U1 = S.part(ESP, 'U1', 'ESP32-S3-WROOM-1U-N8', (185.42, 100.33), ref_at=(183.0, 131.5), val_at=(183.0, 134.0),
                 footprint='RF_Module:ESP32-S3-WROOM-1U')
+    U1.just = 'right'   # ref/val GND teline sağdan dayalı
     S.pin_power(U1, '3V3', '+3V3'); S.pin_power(U1, '40', 'GND')      # 3V3 üst, GND alt (1/40/41 aynı nokta)
     for k, v in {'IO1': 'VSENSE', 'IO10': 'GPIO10', 'IO11': 'GPIO11'}.items(): S.pin_label(U1, k, v)
     for k, v in {'USB_D-': 'USB_DN', 'USB_D+': 'USB_DP', 'TXD0': 'U0TXD', 'RXD0': 'U0RXD'}.items(): S.pin_label(U1, k, v)
