@@ -436,7 +436,7 @@ def build():
     U2 = S.part('GridUp:MLX90640', 'U2', 'MLX90640ESF-BAA', (69.85, 163.83), ref_at=(35.56, 167.64), val_at=(35.56, 170.18),
                 footprint='Package_TO_SOT_THT:TO-39-4')
     S.pin_power(U2, 'GND', 'GND')
-    vdd = U2.p('VDD'); n_vdd = (69.85, vdd[1] - 3.81); S.wire(vdd, n_vdd); S.power('+3V3', n_vdd)
+    vdd = U2.p('VDD'); n_vdd = (69.85, vdd[1] - 1.27); S.wire(vdd, n_vdd); S.power('+3V3', n_vdd)
     S.wire(n_vdd, (52.07, n_vdd[1])); S.junction(n_vdd)
     Cm1 = S.part(C, 'C2', '100 nF', (52.07, n_vdd[1] + 3.81), ref_at=(44.45, n_vdd[1] + 2.54), val_at=(41.66, n_vdd[1] + 6.1))
     S.wire((52.07, n_vdd[1]), Cm1.p('1')); Pc = S.pin_power(Cm1, '2', 'GND')
