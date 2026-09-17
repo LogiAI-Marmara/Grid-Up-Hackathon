@@ -132,7 +132,7 @@
       <rect x="0" y="0" width="350" height="200" rx="10" class="hi"/>
       <circle cx="30" cy="30" r="20" fill="#e65100"/><text x="30" y="38" text-anchor="middle" class="num">7</text>
       <text x="62" y="36" class="t">Ekrandan kapsama doğrulanır</text>
-      <g transform="translate(256,56)" class="ico"><rect x="0" y="0" width="80" height="50" rx="3"/><rect x="8" y="8" width="64" height="34" fill="#e3f2fd" stroke="#1565c0"/><line x1="16" y1="18" x2="64" y2="18" stroke="#e65100" stroke-width="4"/><line x1="16" y1="30" x2="64" y2="30" stroke="#e65100" stroke-width="4"/><circle cx="82" cy="46" r="13" fill="#fff" stroke="#2e7d32" stroke-width="2"/><path d="M75 46 l5 5 l10 -11" fill="none" stroke="#2e7d32" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/></g>
+      <g transform="translate(256,56)" class="ico"><rect x="0" y="0" width="80" height="50" rx="3"/><rect x="8" y="8" width="64" height="34" fill="#e3f2fd" stroke="#1565c0"/><line x1="16" y1="18" x2="64" y2="18" stroke="#e65100" stroke-width="4"/><line x1="16" y1="30" x2="64" y2="30" stroke="#e65100" stroke-width="4"/><circle cx="80" cy="46" r="10" fill="#fff" stroke="#2e7d32" stroke-width="2"/><path d="M74.5 46 l4 4 l8 -9" fill="none" stroke="#2e7d32" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></g>
       <text x="16" y="70" class="s">Termal görüntü canlı izlenir: klemens</text>
       <text x="16" y="88" class="s">sırası kadraj içinde mi? Değilse modül</text>
       <text x="16" y="106" class="s">kaydırılır, tekrar bakılır.</text>
