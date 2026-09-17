@@ -624,12 +624,12 @@ def build():
     C32 = S.part(CP, 'C32', 'HV 10 F', (xs, ry + 20.32), ref_at=(xs - 2.54, ry + 19.05), val_at=(xs - 1.9, ry + 21.59)); C32.just = 'right'
     nM = (xs, ry + 24.13); S.wire(nC, C32.p('1')); S.wire(C32.p('2'), nM); S.junction(nM)
     C33 = S.part(CP, 'C33', 'HV 10 F', (xs, ry + 30.48), ref_at=(xs - 2.54, ry + 29.21), val_at=(xs - 1.9, ry + 31.75)); C33.just = 'right'
-    nG = (xs, ry + 34.29); S.wire(nM, C33.p('1')); S.wire(C33.p('2'), nG); S.junction(nG); S.power('GND', nG, 0)
+    nG = (xs, ry + 34.29); S.wire(nM, C33.p('1')); S.wire(C33.p('2'), nG, color=COL['GND']); S.junction(nG); S.power('GND', nG, 0)
     xb = xs + 10.16   # dengeleme dirençleri (hücre başına 10 k); süperkap etiketlerine yer kalsın diye 10 mm sağda
     R53 = S.part(R, 'R53', '10k', (xb, ry + 20.32), ref_at=(xb + 1.27, ry + 17.78), val_at=(xb + 1.27, ry + 20.32))
     R54 = S.part(R, 'R54', '10k', (xb, ry + 30.48), ref_at=(xb + 1.27, ry + 27.94), val_at=(xb + 1.27, ry + 30.48))
     S.wire((xb, nC[1]), R53.p('1')); S.wire(R53.p('2'), (xb, nM[1]), nM); S.junction((xb, nC[1])); S.junction((xb, nM[1]))
-    S.wire((xb, nM[1]), R54.p('1')); S.wire(R54.p('2'), (xb, nG[1]), nG)
+    S.wire((xb, nM[1]), R54.p('1')); S.wire(R54.p('2'), (xb, nG[1]), nG, color=COL['GND'])
     # boost U7: VI/EN sol, SW/VOUT/FB sağ, GND alt. Gövde küçük → pin adları küçük yazı (VOUT/GND üst üste binmesin)
     S.libsyms[BOOST] = scale_pin_fonts(S.libsyms[BOOST], 1.1, 1.0)
     ux = 170.18

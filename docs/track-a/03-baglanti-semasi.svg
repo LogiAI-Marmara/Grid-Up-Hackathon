@@ -3739,7 +3739,15 @@ stroke-linecap:round; stroke-linejoin:round;">
 <path d="M133.35 242.57 L133.35 245.11" />
 <path d="M143.51 252.73 L133.35 252.73" />
 <path d="M143.51 252.73 L143.51 255.27" />
+</g>
+<g style="fill:none; 
+stroke:#464646; stroke-width:0.1524; stroke-opacity:1; 
+stroke-linecap:round; stroke-linejoin:round;">
 <path d="M143.51 262.89 L133.35 262.89" />
+</g>
+<g style="fill:none; 
+stroke:#009600; stroke-width:0.1524; stroke-opacity:1; 
+stroke-linecap:round; stroke-linejoin:round;">
 <path d="M143.51 242.57 L143.51 245.11" />
 <path d="M133.35 242.57 L143.51 242.57" />
 </g>
