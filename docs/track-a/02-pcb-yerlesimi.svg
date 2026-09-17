@@ -223,8 +223,8 @@
   <rect x="184" y="400" width="130.5" height="10.5" rx="2" fill="#e8f5e9"/>
   <text x="186" y="408" font-size="10" fill="#607d8b">ısı kaynaklarından uzak</text>
   <path d="M92 348 h72 v72" fill="none" stroke="#1565c0" stroke-width="2"/>
-  <rect x="170" y="354" width="147" height="10.5" rx="2" fill="#e8f5e9"/>
-  <text x="172" y="362" font-size="10" fill="#1565c0">ısı yarığı (kart yalıtımı)</text>
+  <rect x="90" y="334" width="147" height="10.5" rx="2" fill="#e8f5e9"/>
+  <text x="92" y="342" font-size="10" fill="#1565c0">ısı yarığı (kart yalıtımı)</text>
   <rect x="290" y="106" width="53.5" height="10.5" rx="2" fill="#e8f5e9"/>
   <text x="292" y="114" font-size="10" fill="#607d8b">durum LED</text>
   <rect x="276.2" y="196.8" width="119.5" height="10.5" rx="2" fill="#e8f5e9"/>
