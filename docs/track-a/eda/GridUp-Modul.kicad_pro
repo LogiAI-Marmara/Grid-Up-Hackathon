@@ -6,7 +6,8 @@
   "schematic": {
     "drawing": {
       "default_font": "KiCad Font",
-      "hop_over_size_choice": 2
+      "hop_over_size_choice": 2,
+      "text_offset_ratio": 0.3
     },
     "legacy_lib_dir": "",
     "legacy_lib_list": []

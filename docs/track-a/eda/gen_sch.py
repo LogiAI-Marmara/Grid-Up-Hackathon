@@ -671,6 +671,6 @@ if __name__ == '__main__':
     if not os.path.exists(pro):
         with open(pro, 'w', encoding='utf-8', newline='') as fh:
             json.dump({"meta": {"filename": PROJECT + ".kicad_pro", "version": 3},
-                       "schematic": {"drawing": {"default_font": "KiCad Font", "hop_over_size_choice": 2}, "legacy_lib_dir": "", "legacy_lib_list": []},   # hop_over 0 = atlama yayı kapalı
+                       "schematic": {"drawing": {"default_font": "KiCad Font", "hop_over_size_choice": 2, "text_offset_ratio": 0.3}, "legacy_lib_dir": "", "legacy_lib_list": []},   # hop_over 0 = atlama yayı kapalı
                        "sheets": [[ROOT_UUID, "Root"]], "text_variables": {}}, fh, indent=2, ensure_ascii=False)
     print('yazıldı', out, len(S.parts), 'parça', len(S.items), 'öğe')
