@@ -1,184 +1,262 @@
 #!/usr/bin/env python3
-"""08-sistem-mimarisi.svg üreteci — karar kaydı §8'e birebir.
+"""08-sistem-mimarisi.svg üreteci — karar kaydı §8 (mimari) + §9 (sözleşmeler) + üç izin main/PR'daki gerçek kodu.
 
-Zincir: PANO (sensörler -> MODÜL -> anten + besleme) -> kablosuz -> SAHA GATEWAY
--> mevcut altyapı -> ON-PREMISE SUNUCU (toplama -> PostgreSQL -> anomali motoru
--> alarm / okuma API'si + monitoring / Modbus TCP -> SCADA).
+Zincir: PANO İÇİ (sensörler → modül → anten, besleme) → kablosuz → SAHA GATEWAY → mevcut altyapı
+→ ON-PREMISE SUNUCU (toplama → PostgreSQL → anomali motoru → okuma API'si → alarm / monitoring / Modbus TCP → SCADA).
 
-Kapsam: T3 (yazılım mimarisi) + T4 (monitoring) + T6 (on-prem) + T7 (alarm).
-Lider kararıyla tamamı İZ A (İZ B/C katmanları §8'e sadık kalınarak çizilir).
+Kaynaklar (metinler buradan, uydurma yok):
+  gridup-proje-karar-kaydi.md §8–§11 · sozlesmeler/README.md · toplama/toplama/uygulama.py (İZ A)
+  analiz/README.md (İZ B, K1–K3, 4 katman, olay modeli, API :8080) · PR #2 docs/operasyon-yuzu-dokumantasyonu.md
+  (İZ C: arayüz :80, Modbus :5020, alarm Telegram, docker-compose) · modul-sim (sentetik üreteç, 7 senaryo).
 
-Kural: elle SVG düzenlemesi yok — değiştir, üret, kontrol et:
+Kural: elle SVG düzenlemesi yok — bu dosyayı değiştir, üret, tarayıcıda kontrol et:
     python gen_mimari.py [../08-sistem-mimarisi.svg]
-    python3 temp/kontrol.py   # XML + metin taşması (Arial metriği) + kırık link
+Üreteç metin genişliklerini Arial metriğiyle (PIL) ölçer; kutudan taşan metin varsa hata verir.
 
-Stil: 09-montaj-adimlari.svg ile aynı sınıflar (t/s/r, zone, box).
-Kurallar (cad/README): font Arial/Helvetica, ayraç " / ", LF satır sonu.
+Stil: 09-montaj-adimlari.svg ile aynı aile (Arial, ayraç " / ", LF).
 """
+import sys, os
 
-import sys
+W, H = 1600, 912
+try:
+    from PIL import ImageFont
+    _F = ImageFont.truetype('arial.ttf', 100); _FB = ImageFont.truetype('arialbd.ttf', 100)
+    def tw(s, size, bold=False): return (_FB if bold else _F).getlength(s) / 100 * size
+except Exception:   # PIL yoksa ölçüm atlanır
+    def tw(s, size, bold=False): return 0
 
-C = dict(
-    PANO_X=40, PANO_W=380, GW_X=500, GW_W=280, SRV_X=860, SRV_W=700,
-    TOP=100, H=580,
-)
-
-STIL = """\
-    .card{fill:#fafafa;stroke:#90a4ae;stroke-width:2}
+SZ = dict(t=14, s=12, r=11, zh=16, baslik=24)
+CSS = """\
+    text{font-family:Arial,Helvetica,sans-serif}
+    .baslik{font-size:24px;font-weight:700;fill:#263238}
+    .alt{font-size:13px;fill:#607d8b}
+    .zh{font-size:16px;font-weight:700;fill:#263238}
     .t{font-size:14px;font-weight:700;fill:#263238}
     .s{font-size:12px;fill:#37474f}
     .r{font-size:11px;fill:#607d8b}
+    .w{font-size:11px;font-weight:700;fill:#c62828}
     .zoneP{fill:#e3f2fd;stroke:#1565c0;stroke-width:2}
     .zoneG{fill:#eceff1;stroke:#546e7a;stroke-width:2}
     .zoneS{fill:#e8f5e9;stroke:#2e7d32;stroke-width:2}
+    .boxIc{fill:#ffffff;stroke:#455a64;stroke-width:2}
     .boxMcu{fill:#c8e6c9;stroke:#2e7d32;stroke-width:2}
     .boxGuc{fill:#fce4ec;stroke:#ad1457;stroke-width:2}
-    .boxIc{fill:#ffffff;stroke:#455a64;stroke-width:2}
     .boxOut{fill:#fff3e0;stroke:#ef6c00;stroke-width:2}
+    .boxSim{fill:#ffffff;stroke:#1565c0;stroke-width:1.5;stroke-dasharray:6 4}
+    .boxSoz{fill:#fffde7;stroke:#f9a825;stroke-width:1.5}
     .actor{fill:none;stroke:#546e7a;stroke-width:1.5;stroke-dasharray:5 4}
-    .zh{font-size:16px;font-weight:700;fill:#263238}"""
+    .lbl{font-size:11px;fill:#455a64}"""
 
-# (x, y, metin, sınıf, anchor) — tüm metinler burada, koordinat hesabı test edilebilir.
-METINLER = [
-    # başlık
-    (800, 36, "Sistem mimarisi / uçtan uca veri akışı", "baslik", "middle"),
-    (800, 62, "Karar kaydı §8'e birebir · T3 + T4 + T6 + T7 · public cloud yok, sunucu on-premise", "r", "middle"),
-    # pano
-    (230, 128, "PANO İÇİ", "zh", "middle"),
-    (230, 168, "Sensörler", "t", "middle"),
-    (230, 190, "Ortam sıcaklık + nem (SHT31)", "s", "middle"),
-    (230, 208, "Termal dizi MLX90640 (32×24)", "s", "middle"),
-    (230, 226, "Akım: analizör (Modbus) veya CT ×4", "s", "middle"),
-    (230, 244, "Ark kaydı: TVOC-2 (okuma)", "s", "middle"),
-    (230, 262, "Genişleme arayüzü (boş, kesikli)", "s", "middle"),
-    (230, 293, "PD / akustik için ayrılmış I2C-UART", "r", "middle"),
-    (230, 348, "MODÜL (ESP32-S3-N8)", "t", "middle"),
-    (230, 370, "Oku → özetle → eşik → paketle", "s", "middle"),
-    (230, 388, "Normalde özet, anomalide tam kare", "s", "middle"),
-    (230, 406, "Modül hüküm VERMEZ (seviye/tip yok)", "s", "middle"),
-    (230, 428, "Detay: 01 blok şema · akış: 07", "r", "middle"),
-    (230, 448, "Paket (sözleşme 2): modul_id, zaman", "r", "middle"),
-    (230, 513, "Besleme", "t", "middle"),
-    (230, 535, "230 V iç ihtiyaç → 5 V → LDO 3,3 V", "s", "middle"),
-    (230, 553, "Süperkap yedek (kesintide bildirir)", "s", "middle"),
-    (108, 488, "3,3 V güç", "r", "start"),
-    (230, 622, "Dış anten (U.FL → SMA)", "t", "middle"),
-    (230, 642, "Metal pano içi anten çalışmaz (§7.4)", "r", "middle"),
-    (373, 540, "RF", "r", "start"),
-    (460, 600, "kablosuz", "s", "middle"),
-    (460, 616, "2,4 GHz", "r", "middle"),
-    (460, 650, "birkaç m", "r", "middle"),
-    # gateway
-    (640, 128, "SAHA GATEWAY", "zh", "middle"),
-    (640, 152, "Trafo binası içi · 230 V", "r", "middle"),
-    (640, 196, "Gateway", "t", "middle"),
-    (640, 220, "Modüllerden kablosuz toplar", "s", "middle"),
-    (640, 238, "Mevcut altyapıyla", "s", "middle"),
-    (640, 256, "merkeze iletir", "s", "middle"),
-    (640, 286, "Boyut kısıtı yok (§7.4)", "r", "middle"),
-    (640, 304, "Kendi gateway'imiz önerilir;", "r", "middle"),
-    (640, 320, "mevcut modem/RTU alternatif", "r", "middle"),
-    (640, 344, "Detay İZ C kapsamı", "r", "middle"),
-    (640, 440, "~3 saha × 2 pano × 1–2 modül", "s", "middle"),
-    (640, 458, "Demo 8–10 · yük 100 (§7.7)", "s", "middle"),
-    (820, 170, "mevcut", "s", "middle"),
-    (820, 186, "altyapı", "s", "middle"),
-    # sunucu
-    (1210, 128, "ON-PREMISE SUNUCU (public cloud yok)", "zh", "middle"),
-    (1210, 168, "Toplama servisi (İZ A)", "t", "middle"),
-    (1210, 190, "Paketi al → doğrula → alindi_zaman ekle → PostgreSQL'e yaz", "s", "middle"),
-    (1210, 208, "Kod: /toplama · şema: ölçüm (uzun format) + termal kare + modül", "r", "middle"),
-    (1210, 263, "PostgreSQL", "t", "middle"),
-    (1210, 285, "Ölçüm satırları (modul_id, zaman, olcum_tipi, deger, kalite)", "s", "middle"),
-    (1210, 303, "Termal tam kare ayrı tabloda (768 değer) · sözleşme 1", "r", "middle"),
-    (1210, 358, "Anomali motoru (İZ B)", "t", "middle"),
-    (1210, 380, "Taban çizgisi (medyan + MAD) → skor + seviye + tip + gerekce", "s", "middle"),
-    (1210, 398, "Çıktı: sözleşme 3 (id, skor, seviye, tip, gerekce, kanit)", "r", "middle"),
-    (985, 458, "Alarm servisi", "t", "middle"),
-    (985, 480, "Seviye → kanal", "s", "middle"),
-    (985, 498, "SMS / WhatsApp", "s", "middle"),
-    (985, 520, "Tekrar önleme (T7)", "r", "middle"),
-    (985, 538, "GSM modem / on-prem", "r", "middle"),
-    (1215, 458, "Okuma API'si", "t", "middle"),
-    (1215, 480, "REST + JSON", "s", "middle"),
-    (1215, 498, "Sözleşme 5 (İZ B)", "s", "middle"),
-    (1215, 520, "/sahalar /moduller", "r", "middle"),
-    (1215, 538, "/anomaliler /saglik", "r", "middle"),
-    (1440, 458, "Modbus TCP", "t", "middle"),
-    (1440, 480, "Register haritası", "s", "middle"),
-    (1440, 498, "Sözleşme 4 (İZ C)", "s", "middle"),
-    (1440, 520, "Modül başına 20 reg.", "r", "middle"),
-    (1440, 538, "→ SCADA", "r", "middle"),
-    (1215, 603, "Monitoring (İZ C)", "t", "middle"),
-    (1215, 625, "Saha/pano/modül ağacı", "s", "middle"),
-    (1215, 643, "Isı haritası + alarm listesi", "s", "middle"),
-    (985, 597, "operasyon ekibi", "s", "middle"),
-    (1440, 597, "SCADA", "s", "middle"),
-    # alt notlar
-    (800, 712, "Veri politikası (§7.4): normalde özet (maks, konum, bölge ort.) · anomali anında tam kare (768) kanıt olarak · eşik merkezden güncellenir (100 saha gezilmez, T5)", "r", "middle"),
-    (800, 732, "Sınır: modül anomali hükmü vermez (§7.4 satır 304) · ark tespiti yok, TVOC-2 kaydı okunur (§7.1 satır 230) · WhatsApp bulutu yerine yerel GSM/on-prem gateway (İZ C)", "r", "middle"),
-    (800, 762, "İz sahipleri: saha + toplama İZ A · anomali + okuma API İZ B · arayüz + Modbus + alarm + kurulum İZ C · sözleşme değişimi lidere sorulur (§9)", "r", "middle"),
-]
-
-KUTULAR = [  # (x, y, w, h, sınıf) — bölge + kutu + aktör çerçeveleri
-    (40, 100, 380, 580, "zoneP"), (60, 145, 340, 165, "boxIc"),
-    (60, 280, 340, 18, "kesikli"), (60, 325, 340, 150, "boxMcu"),
-    (60, 490, 340, 95, "boxGuc"), (60, 600, 340, 60, "boxIc"),
-    (500, 100, 280, 580, "zoneG"), (520, 170, 240, 220, "boxIc"),
-    (860, 100, 700, 580, "zoneS"), (880, 145, 660, 80, "boxIc"),
-    (880, 240, 660, 80, "boxIc"), (880, 335, 660, 80, "boxMcu"),
-    (880, 435, 210, 130, "boxOut"), (1110, 435, 210, 130, "boxIc"),
-    (1340, 435, 200, 130, "boxIc"), (1110, 580, 210, 80, "boxIc"),
-    (900, 578, 170, 28, "actor"), (1370, 578, 140, 28, "actor"),
-]
-
-OKLAR = [  # (x1, y1, x2, y2, renk) — renk: g=gri, m=mavi, p=pembe(güç)
-    (230, 310, 230, 322, "g"), (95, 490, 95, 478, "p"),
-    (365, 478, 365, 596, "g"), (402, 630, 496, 630, "m"),
-    (760, 200, 876, 200, "g"), (1210, 225, 1210, 237, "g"),
-    (1210, 320, 1210, 332, "g"), (985, 415, 985, 432, "g"),
-    (1215, 415, 1215, 432, "g"), (1440, 415, 1440, 432, "g"),
-    (1215, 565, 1215, 577, "g"), (985, 565, 985, 576, "g"),
-    (1440, 565, 1440, 576, "g"),
-]
-
-RENK = {"g": "#546e7a", "m": "#1565c0", "p": "#ad1457"}
-OK = {"g": "arr", "m": "arrB", "p": "arr"}
+L = []          # svg parçaları
+HATA = []       # taşma raporu
 
 
-def uret() -> str:
-    L = ['<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 800" width="100%"'
-         ' style="max-width:1200px;background:#fff;font-family:Arial,Helvetica,sans-serif;font-size:13px">']
-    L.append("  <!-- 08-sistem-mimarisi — gen_mimari.py üretir; ELLE DÜZENLEME (yeniden üretimde kaybolur). §8. -->")
+def esc(s): return s.replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;')
+
+
+def text(x, y, s, cls='s', anchor='start', maxw=None):
+    L.append(f'  <text x="{x}" y="{y}" text-anchor="{anchor}" class="{cls}">{esc(s)}</text>')
+    if maxw:
+        w = tw(s, SZ.get(cls, 12), cls in ('t', 'zh', 'baslik', 'w'))
+        if w > maxw: HATA.append(f'{s[:40]!r}: {w:.0f} > {maxw} px')
+
+
+def rect(x, y, w, h, cls, rx=8):
+    L.append(f'  <rect x="{x}" y="{y}" width="{w}" height="{h}" rx="{rx}" class="{cls}"/>')
+
+
+LH = {'t': 20, 's': 17, 'r': 15, 'w': 16}
+def bh(lines, pad=10): return 22 + sum(LH[c] for _, c in lines) + pad
+
+
+def box(x, y, w, cls, title, lines, pad=10, h=None):
+    """Başlık + satırlar; satır = (metin, sınıf). Yükseklik içerikten. Döner: (x, y, w, h)."""
+    lh = LH
+    hh = bh(lines, pad)
+    if h is None: h = hh
+    rect(x, y, w, h, cls)
+    cx = x + w / 2
+    text(cx, y + 20, title, 't', 'middle', w - 12)
+    yy = y + 22
+    for s, c in lines:
+        yy += lh[c]
+        text(cx, yy, s, c, 'middle', w - 12)
+    return x, y, w, h
+
+
+def arrow(x1, y1, x2, y2, col='#546e7a', sw=2, dash=None, mk='arr'):
+    d = f' stroke-dasharray="{dash}"' if dash else ''
+    L.append(f'  <line x1="{x1}" y1="{y1}" x2="{x2}" y2="{y2}" stroke="{col}" stroke-width="{sw}"{d} marker-end="url(#{mk})"/>')
+
+
+def line(x1, y1, x2, y2, col='#546e7a', sw=2, dash=None):
+    d = f' stroke-dasharray="{dash}"' if dash else ''
+    L.append(f'  <line x1="{x1}" y1="{y1}" x2="{x2}" y2="{y2}" stroke="{col}" stroke-width="{sw}"{d}/>')
+
+
+def uret():
+    del L[:]; del HATA[:]
+    L.append(f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {W} {H}" width="100%"'
+             ' style="max-width:1200px;background:#fff;font-family:Arial,Helvetica,sans-serif">')
+    L.append('  <!-- 08-sistem-mimarisi / eda/gen_mimari.py üretir; ELLE DÜZENLEME (yeniden üretimde kaybolur). Karar kaydı §8–§11. -->')
     L.append('  <defs>')
-    L.append('    <marker id="arr" markerWidth="10" markerHeight="10" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#546e7a"/></marker>')
-    L.append('    <marker id="arrB" markerWidth="10" markerHeight="10" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#1565c0"/></marker>')
+    for mid, col in (('arr', '#546e7a'), ('arrB', '#1565c0'), ('arrG', '#2e7d32'), ('arrO', '#ef6c00')):
+        L.append(f'    <marker id="{mid}" markerWidth="10" markerHeight="10" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="{col}"/></marker>')
     L.append('  </defs>')
-    L.append('  <style>')
-    L.append(STIL)
-    L.append('  </style>')
-    for x, y, w, h, sn in KUTULAR:
-        if sn == "kesikli":
-            L.append(f'  <rect x="{x}" y="{y}" width="{w}" height="{h}" rx="0" fill="none"'
-                     f' stroke="#1565c0" stroke-width="1.5" stroke-dasharray="5 4"/>')
-        else:
-            L.append(f'  <rect x="{x}" y="{y}" width="{w}" height="{h}" rx="{10 if sn.startswith("zone") else 8 if sn != "actor" else 6}" class="{sn}"/>')
-    for x1, y1, x2, y2, r in OKLAR:
-        L.append(f'  <line x1="{x1}" y1="{y1}" x2="{x2}" y2="{y2}" stroke="{RENK[r]}"'
-                 f' stroke-width="{2.5 if ((x2 - x1) > 50 or r == "m") else 2}" marker-end="url(#{OK[r]})"/>')
-    for x, y, m, sn, an in METINLER:
-        if sn == "baslik":
-            L.append(f'  <text x="{x}" y="{y}" text-anchor="{an}" font-size="24" font-weight="700" fill="#263238">{m}</text>')
-        elif sn == "zh":
-            L.append(f'  <text x="{x}" y="{y}" text-anchor="{an}" class="zh">{m}</text>')
-        else:
-            L.append(f'  <text x="{x}" y="{y}" text-anchor="{an}" class="{sn}">{m}</text>')
+    L.append('  <style>'); L.append(CSS); L.append('  </style>')
+
+    # ---------- başlık ----------
+    text(800, 36, 'Sistem mimarisi / uçtan uca veri akışı', 'baslik', 'middle')
+    text(800, 58, 'Karar kaydı §8 mimari + §9 sözleşmeler; kutular üç izin repodaki gerçek servisleri (main + PR #2) / public cloud yok, sunucu on-premise', 'alt', 'middle', 1500)
+
+    # ---------- bölge çerçeveleri ----------
+    ZP = (30, 80, 420, 560); ZG = (470, 80, 250, 560); ZS = (740, 80, 830, 560)
+    rect(*ZP, 'zoneP', 10); rect(*ZG, 'zoneG', 10); rect(*ZS, 'zoneS', 10)
+    text(240, 104, 'PANO İÇİ / donanım (İZ A)', 'zh', 'middle')
+    text(595, 104, 'SAHA GATEWAY', 'zh', 'middle')
+    text(1155, 104, 'ON-PREMISE SUNUCU / docker-compose (deploy, İZ C)', 'zh', 'middle')
+
+    # ---------- PANO ---------- (kutular bölge yüksekliğine eşit aralıkla dağıtılır)
+    px, pw = 50, 380
+    P_S = [('Ortam sıcaklık + nem / SHT31 (I²C 0x44)', 's'),
+           ('Termal dizi 32×24 / MLX90640 (I²C 0x33)', 's'),
+           ('Akım L1 L2 L3 N / analizör (RS-485 Modbus) veya CT ×4', 's'),
+           ('Ark kaydı / TVOC-2 trip-diag. (RS-485, yalnız okuma)', 's'),
+           ('Genişleme 2×5: I²C / UART / ADC, PD-akustik için boş', 'r')]
+    P_M = [('Oku → özetle → eşik → paketle (sözleşme ②)', 's'),
+           ('Akım 1–5 s (10 s ort.) / termal özet 10–30 s / ortam 30–60 s', 's'),
+           ('Normalde termal özet; anomali anında tam kare (768)', 's'),
+           ('Hüküm VERMEZ: seviye/tip yok, eşik merkezden güncellenir', 's'),
+           ('modul_durum: besleme sebeke/yedek, sinyal dBm, sürüm', 'r'),
+           ('Ayrıntı: 01 blok şema / 03 bağlantı / 07 yazılım akışı', 'r')]
+    P_G = [('230 V iç ihtiyaç → RAC05 5 V → LDO 3,3 V (03 §3.4)', 's'),
+           ('Yedek: 2× süperkap 10 F seri + boost, ~5 dk @ 50 mA', 's'),
+           ('Kesintide "besleme: yedek" paketi gider (senaryo 7)', 'r')]
+    P_A = [('Wi-Fi 2,4 GHz → gateway; metal pano içinde anten çalışmaz (§7.4)', 's')]
+    P_X = [('Donanım üretimi yok → aynı ② paketini üretir, 7 arıza senaryosu', 's'),
+           ('toplama servisine doğrudan POST /paket (gateway yolu atlanır)', 'r')]
+    hs = [bh(P_S), bh(P_M), bh(P_G), bh(P_A), bh(P_X)]
+    top, bot = 118, ZP[1] + ZP[3] - 14
+    gap = (bot - top - sum(hs)) / 4
+    assert gap >= 14, 'PANO bölgesi taştı'
+    y = top
+    bS = box(px, y, pw, 'boxIc', 'Sensörler', P_S); y += hs[0] + gap
+    arrow(240, y - gap + 4, 240, y - 4, '#546e7a')
+    bM = box(px, y, pw, 'boxMcu', 'MODÜL / ESP32-S3-WROOM-1U', P_M); y += hs[1] + gap
+    bG = box(px, y, pw, 'boxGuc', 'Besleme', P_G); y += hs[2] + gap
+    bA = box(px, y, pw, 'boxIc', 'Dış anten / U.FL → SMA panel', P_A); y += hs[3] + gap
+    bSim = box(px, y, pw, 'boxSim', 'Hackathon: modul-sim (İZ A, sentetik üreteç)', P_X)
+    # besleme → modül (güç, pembe)
+    line(px + 30, bG[1], px + 30, bM[1] + bM[3] + 4); arrow(px + 30, bM[1] + bM[3] + 4, px + 30, bM[1] + bM[3] + 4 - 0.1, '#ad1457', 1)
+    text(px + 36, bG[1] - 5, '3,3 V', 'lbl', 'start')
+
+    # ---------- GATEWAY ----------
+    gx, gw = 485, 220
+    bGW = box(gx, 150, gw, 'boxIc', 'Gateway', [
+        ('Trafo binası içi, 230 V', 's'),
+        ('Modüllerden Wi-Fi ile toplar', 's'),
+        ('Mevcut altyapı (GSM/fiber)', 's'),
+        ('ile merkeze HTTP iletir', 's'),
+        ('Boyut kısıtı yok (§7.4)', 'r'),
+        ('Kendi gateway; mevcut', 'r'),
+        ('modem/RTU alternatif', 'r')])
+    text(595, 350, 'Ölçek (§7.7)', 't', 'middle')
+    text(595, 370, '~3 saha × 2 pano × 1–2 modül', 's', 'middle', 230)
+    text(595, 387, 'demo 8–10 modül / yük testi 100', 's', 'middle', 230)
+    text(595, 404, '(analiz.yuk: 10 / 50 / 100)', 'r', 'middle')
+    # kablosuz ok: anten → gateway
+    ay = bA[1] + bA[3] / 2
+    arrow(px + pw + 2, ay, gx - 4, ay, '#1565c0', 2.5, mk='arrB')
+    # gateway → sunucu
+    gy = 160   # toplama kutusunun ortası
+    arrow(gx + gw + 2, gy, 758, gy, '#546e7a', 2.5)
+    # simülatör → toplama (kesikli, gateway'i atlar)
+    sy = bSim[1] + bSim[3] / 2
+    line(px + pw + 2, sy, 730, sy, '#1565c0', 1.5, '6 4'); line(730, sy, 730, 180, '#1565c0', 1.5, '6 4'); arrow(730, 180, 758, 180, '#1565c0', 1.5, '6 4', 'arrB')
+    text(735, sy - 6, 'POST /paket', 'lbl', 'end')
+
+    # ---------- SUNUCU ----------
+    sx, sw_ = 758, 795
+    bT = box(sx, 118, sw_, 'boxIc', 'Toplama servisi / FastAPI (İZ A, /toplama)', [
+        ('POST /paket: sözleşme ② şemasıyla doğrula (hata → 400 + gerekçe) → alindi_zaman damgala → PostgreSQL', 's'),
+        ('GET /saglik / modül saati ile alindi_zaman farkı = saat kayması sinyali (senaryo 7)', 'r')])
+    y = bT[1] + bT[3] + 8; arrow(1155, y, 1155, y + 12)
+    bP = box(sx, y + 16, sw_, 'boxIc', 'PostgreSQL / şema: toplama/migrations + analiz/100', [
+        ('olcum (uzun-dar, ① modul_id zaman olcum_tipi deger kalite) / termal_kare (768 × int16, 0,1 °C) / modul_durum', 's'),
+        ('anomali + anomali_gecis (olay günlüğü) / tarama_imleci / hacim ~60 satır/sn @ 100 modül', 'r')])
+    y = bP[1] + bP[3] + 8
+    # motor (sol) ve okuma API (sağ)
+    mx, mw = sx, 470; ax, aw = sx + 490, sw_ - 490
+    arrow(mx + mw / 2, y, mx + mw / 2, y + 12); arrow(ax + aw / 2, y, ax + aw / 2, y + 12)
+    bAn = box(mx, y + 16, mw, 'boxMcu', 'Anomali motoru (İZ B, python -m analiz tara)', [
+        ('Periyodik tarama 30 s, imleç alindi_zaman (geri sarılabilir, K1)', 's'),
+        ('4 katman: 0 sensör sağlığı → 1 mutlak sınır → 2 taban (medyan+MAD, 14 g)', 's'),
+        ('→ 3 ilişki (I²R artığı, faz, modül↔modül bastırma); ML yok', 's'),
+        ('Çıktı ③: skor, seviye, tip, gerekce, kanit; olay + histerezis 30 dk (K3)', 'r')])
+    bAp = box(ax, y + 16, aw, 'boxIc', 'Okuma API / FastAPI :8080 (İZ B)', [
+        ('Sözleşme ⑤ REST+JSON: /sahalar /moduller', 's'),
+        ('/moduller/{id}/seri /termal/kare/{id}', 's'),
+        ('/anomaliler (+onayla) /gecisler /saglik', 's'),
+        ('İZ C tüketir; OpenAPI /docs', 'r')], h=bAn[3])
+    # motor → PostgreSQL geri yazım (anomali)
+    line(mx + 40, bAn[1], mx + 40, bAn[1] - 8); arrow(mx + 40, bAn[1] - 8, mx + 40, bP[1] + bP[3] + 2, '#2e7d32', 1.5, mk='arrG')
+    text(mx + 46, bAn[1] - 6, 'anomali yaz', 'lbl', 'start')
+    y = bAn[1] + bAn[3] + 8
+    # tüketiciler
+    cw = 250; cx1, cx2, cx3 = sx, sx + 272, sx + 544
+    for cx in (cx1 + cw / 2, cx2 + cw / 2, cx3 + cw / 2):
+        line(ax + aw / 2, bAp[1] + bAp[3], ax + aw / 2, y - 2); line(cx1 + cw / 2, y - 2, cx3 + cw / 2, y - 2); arrow(cx, y - 2, cx, y + 12)
+    bAl = box(cx1, y + 16, cw, 'boxOut', 'Alarm servisi (İZ C, /alarm)', [
+        ('/anomaliler dinler; uyarı, kritik →', 's'),
+        ('Telegram Bot mesajı (gerekçe dahil)', 's'),
+        ('Anti-flapping 300 s (T7)', 'r'),
+        ('Kayıt: SMS/WhatsApp; uygulama Telegram', 'r')])
+    bMo = box(cx2, y + 16, cw, 'boxIc', 'Monitoring / nginx :80 (İZ C)', [
+        ('Saha → pano → modül ağacı, 6 metrik', 's'),
+        ('32×24 ısı haritası, sıcak nokta', 's'),
+        ('Alarm kartı + operatör onayı (T4)', 'r'),
+        ('POST /anomaliler/{id}/onayla, günlük', 'r')], h=bAl[3])
+    bMb = box(cx3, y + 16, cw, 'boxIc', 'Modbus TCP :5020 (İZ C, /modbus)', [
+        ('Sözleşme ④: modül başına 20 reg.', 's'),
+        ('100 + (N−1)×20; çarpan 0,1', 's'),
+        ('sıc. nem L1-3 N termal seviye', 'r'),
+        ('besleme RSSI ark; API\'den senkron', 'r')], h=bAl[3])
+    y = bAl[1] + bAl[3] + 6
+    for bx, lbl in ((bAl, 'operasyon ekibi (Telegram)'), (bMo, 'operatör tarayıcısı'), (bMb, 'SCADA / RTU')):
+        cx = bx[0] + bx[2] / 2
+        arrow(cx, y, cx, y + 10)
+        rect(bx[0] + 25, y + 12, bx[2] - 50, 24, 'actor', 6); text(cx, y + 28, lbl, 's', 'middle', bx[2] - 60)
+    assert y + 40 <= ZS[1] + ZS[3] - 4, 'SUNUCU bölgesi taştı: %d' % (y + 40)
+
+    # ---------- sözleşmeler şeridi ----------
+    yb = 664
+    text(30, yb, 'Sözleşmeler (§9, /sozlesmeler): izler arası sınır, değişimi lidere sorulur', 't', 'start')
+    soz = [('① Ölçüm kaydı', 'A → B', 'modul_id, zaman, olcum_tipi, deger, birim, kalite', 'olcum_kaydi.schema.json'),
+           ('② Modül paketi', 'A → A (toplama)', 'olcumler[], termal_ozet, termal_kare, modul_durum', 'modul_paketi.schema.json'),
+           ('③ Anomali çıktısı', 'B → C', 'id, skor, seviye, tip, gerekce, kanit, durum', 'anomali.schema.json'),
+           ('④ Modbus haritası', 'C → SCADA', 'modül başına 20 register, çarpanlı tam sayı', 'sozlesme_4_modbus.json (PR #2)'),
+           ('⑤ Okuma API\'si', 'B → C', 'REST+JSON, 10 uç (/sahalar … /saglik)', 'sozlesme_5_api.json (PR #2)')]
+    bw = 300
+    for i, (t, yon, ic, dosya) in enumerate(soz):
+        x = 30 + i * (bw + 10)
+        rect(x, yb + 10, bw, 74, 'boxSoz', 6)
+        text(x + 10, yb + 30, t, 't', 'start', bw - 90); text(x + bw - 10, yb + 30, yon, 'r', 'end')
+        text(x + 10, yb + 50, ic, 's', 'start', bw - 20); text(x + 10, yb + 68, dosya, 'r', 'start', bw - 20)
+    # ortak sözlük
+    text(30, yb + 108, 'Ortak sözlük (§10, enums.py): olcum_tipi 9 değer / seviye normal-izle-uyari-kritik / tip 8 değer / kalite iyi-supheli-yok / durum acik-onaylandi-kapandi / modul_id {saha}-{pano}-{modul} / zaman UTC ISO 8601', 'r', 'start', 1540)
+    # alt notlar
+    text(30, yb + 132, 'Veri politikası (§7.4): normalde özet (maks, konum, bölge ort.) / anomali anında tam kare kanıt olarak / modül hüküm vermez (§7.4 satır 304) / ark tespiti yok, TVOC-2 kaydı okunur (§7.1 satır 230)', 'r', 'start', 1540)
+    text(30, yb + 150, 'Sahipler: saha + modul-sim + toplama İZ A / anomali motoru + okuma API İZ B / arayüz + Modbus + alarm + deploy İZ C / on-prem: tüm servisler docker-compose ile tek sunucuda, public cloud yok (T6)', 'r', 'start', 1540)
+    text(30, yb + 168, 'Kaynak: gridup-proje-karar-kaydi.md §8–§11, sozlesmeler/README.md, analiz/README.md, PR #2 docs/operasyon-yuzu-dokumantasyonu.md. Üretim: eda/gen_mimari.py', 'r', 'start', 1540)
+
     L.append('</svg>')
-    return "\n".join(L) + "\n"
+    return '\n'.join(L) + '\n'
 
 
-if __name__ == "__main__":
-    cikti = sys.argv[1] if len(sys.argv) > 1 else "../08-sistem-mimarisi.svg"
-    with open(cikti, "w", encoding="utf-8", newline="") as f:
-        f.write(uret())
-    print(f"yazıldı: {cikti} ({len(METINLER)} metin, {len(KUTULAR)} kutu, {len(OKLAR)} ok)")
+if __name__ == '__main__':
+    cikti = sys.argv[1] if len(sys.argv) > 1 else os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '08-sistem-mimarisi.svg')
+    svg = uret()
+    if HATA:
+        print('TAŞMA:'); [print('  ', h) for h in HATA]; sys.exit(1)
+    with open(cikti, 'w', encoding='utf-8', newline='\n') as f: f.write(svg)
+    print('yazıldı:', cikti, len(svg), 'bayt')
