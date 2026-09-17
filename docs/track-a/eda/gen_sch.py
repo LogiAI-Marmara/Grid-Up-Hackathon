@@ -560,33 +560,29 @@ def build():
     S.wire(pN, (66.04, pN[1]), (66.04, ac_n[1]), ac_n, color=COL['5V'])
     RV1 = S.part(RV, 'RV1', 'MOV', (71.12, (ac_l[1] + ac_n[1]) / 2), ref_at=(72.39, ac_l[1] - 0.5), val_at=(72.39, ac_n[1] + 0.5))
     S.wire((71.12, ac_l[1]), RV1.p('1'), color=COL['5V']); S.wire((71.12, ac_n[1]), RV1.p('2'), color=COL['5V']); S.junction((71.12, ac_l[1])); S.junction((71.12, ac_n[1]))
-    S.wire(pPE, (pPE[0] + 2.54, pPE[1]), (pPE[0] + 2.54, pPE[1] + 5.08), color=COL['GND']); S.power('Earth_Protective', (pPE[0] + 2.54, pPE[1] + 5.08))
+    S.wire(pPE, (pPE[0] + 2.54, pPE[1]), (pPE[0] + 2.54, pPE[1] + 5.08), color=COL['GND']); PEs = S.power('Earth_Protective', (pPE[0] + 2.54, pPE[1] + 5.08)); PEs.hide_value = True; S.text('PE', (pPE[0] + 4.6, pPE[1] + 7.2), SZ_PROP, color=COL['GND'])
     S.flag((pPE[0] + 2.54, pPE[1] + 2.54)); S.junction((pPE[0] + 2.54, pPE[1] + 2.54))   # PE dış kaynak
     S.flag((F1.p('2')[0] + 2.54, ac_l[1])); S.junction((F1.p('2')[0] + 2.54, ac_l[1]))   # L dış kaynak (ERC)
     S.flag((66.04, ac_n[1]), rot=180); S.junction((66.04, ac_n[1]))                     # N dış kaynak (ERC)
-    S.text('PE → panonun koruma iletkeni; kutu metal ise gövde PE', (30.48, pPE[1] + 12.7), SZ_NOTE, italic=True)
     S.pin_nc(U5, 'NC')
     vout = U5.p('+Vout'); S.pin_power(U5, '-Vout', 'GND', L=2.54, rot=0)
-    # 5V_RAW → D1 → +5V rayı
+    # 5V_RAW → D1 → +5V rayı (ray sağa doğru: D2 dönüşü, +5V, C30, LDO, +3V3)
     nRaw = (vout[0] + 12.7, vout[1]); S.wire(vout, nRaw, color=COL['5V']); S.junction(nRaw)
     S.label('5V_RAW', (vout[0] + 1.27, vout[1]), 0)
-    D1 = S.part(DS, 'D1', 'Schottky (OR)', (nRaw[0] + 6.35, vout[1]), mirror='y', ref_at=(nRaw[0] + 2.54, vout[1] - 6.35), val_at=(nRaw[0] + 2.54, vout[1] - 3.81))
+    D1 = S.part(DS, 'D1', 'Schottky (OR)', (nRaw[0] + 6.35, vout[1]), mirror='y', ref_at=(nRaw[0] + 2.54, vout[1] - 7.0), val_at=(nRaw[0] + 2.54, vout[1] - 4.5))
     S.wire(nRaw, D1.p('A'), color=COL['5V'])
-    rail_y = vout[1]
-    U6 = S.part(LDO, 'U6', 'AP7361C-33E 3,3 V / 1 A', (185.42, rail_y), ref_at=(177.8, rail_y + 16.5), val_at=(177.8, rail_y + 19.0),
+    rail_y = vout[1]; ry = rail_y
+    U6 = S.part(LDO, 'U6', 'AP7361C-33E 3,3 V / 1 A', (248.92, rail_y), ref_at=(241.3, rail_y + 14.0), val_at=(241.3, rail_y + 16.5),
                 footprint='Package_TO_SOT_SMD:SOT-223-3_TabPin2')
     vi, vo = U6.p('VI'), U6.p('VO')
     S.wire(D1.p('K'), vi, color=COL['5V'])
     S.pin_power(U6, 'GND', 'GND')
-    x5 = 156.21; S.power('+5V', (x5, rail_y)); S.junction((x5, rail_y)); S.flag((x5 + 5.08, rail_y)); S.junction((x5 + 5.08, rail_y))
-    Ci = S.part(C, 'C30', '10 µF', (166.37, rail_y + 3.81), ref_at=(167.64, rail_y + 1.27), val_at=(167.64, rail_y + 3.81))
-    S.wire((166.37, rail_y), Ci.p('1'), color=COL['5V']); S.pin_power(Ci, '2', 'GND'); S.junction((166.37, rail_y))
+    x5 = 218.44; S.power('+5V', (x5, rail_y)); S.junction((x5, rail_y)); S.flag((x5 + 5.08, rail_y)); S.junction((x5 + 5.08, rail_y))
+    Ci = S.part(C, 'C30', '10 µF', (231.14, rail_y + 3.81), ref_at=(232.41, rail_y + 1.27), val_at=(232.41, rail_y + 3.81))
+    S.wire((231.14, rail_y), Ci.p('1'), color=COL['5V']); S.pin_power(Ci, '2', 'GND'); S.junction((231.14, rail_y))
     n3 = (vo[0] + 7.62, vo[1]); S.wire(vo, n3, color=COL['3V3']); S.junction(n3); S.power('+3V3', (n3[0] + 5.08, rail_y)); S.wire(n3, (n3[0] + 5.08, rail_y), color=COL['3V3'])
     Co = S.part(C, 'C31', '10 µF', (n3[0], rail_y + 3.81), ref_at=(n3[0] + 1.27, rail_y + 1.27), val_at=(n3[0] + 1.27, rail_y + 3.81))
     S.wire(n3, Co.p('1'), color=COL['3V3']); S.pin_power(Co, '2', 'GND')
-    S.text('3V3 rayı → ESP32 / MLX90640 / SHT31 / RS-485 / CT bias / genişleme', (n3[0] + 22.0, rail_y + 16.5), SZ_NOTE, italic=True)
-    S.text('Bütçe: ESP32 Wi-Fi tepe ~350 mA + MLX 23 mA + SHT31 <2 mA + RS-485 ~10 mA', (n3[0] + 22.0, rail_y + 19.0), SZ_NOTE, italic=True)
-    S.text('→ 5 V/1 A modül; LDO dropout ≈0,3 V (yedekte ray 4,3 V)', (n3[0] + 22.0, rail_y + 21.5), SZ_NOTE, italic=True)
     # besleme algılama bölücü (D1 öncesi) → VSENSE etiketi (IO1)
     xd = nRaw[0]
     Rd1 = S.part(R, 'R50', '100k', (xd, rail_y + 7.62), ref_at=(xd + 1.27, rail_y + 5.08), val_at=(xd + 1.27, rail_y + 7.62))
@@ -595,9 +591,8 @@ def build():
     Rd2 = S.part(R, 'R51', '47k', (xd, rail_y + 20.32), ref_at=(xd + 1.27, rail_y + 17.78), val_at=(xd + 1.27, rail_y + 20.32))
     S.wire(nS, Rd2.p('1'), color=ANA); S.pin_power(Rd2, '2', 'GND')
     S.wire(nS, (xd + 5.08, nS[1]), color=ANA); S.label('VSENSE', (xd + 5.08, nS[1]), 0)
-    S.text('100k/47k → GPIO1 ADC1_CH0: şebeke var/yok → modul_durum.besleme', (35.56, rail_y + 32.5), SZ_NOTE, italic=True)
     # süperkap yedek: ray → R_şarj → C32 + C33 (2× HV 2,7 V seri, dengeleme R53/R54) → GND; C_sc → U7 boost 4,6 V → D2 → ray
-    xs = 133.35; ry = rail_y
+    xs = 133.35
     S.junction((xs, ry))
     Rs = S.part(R, 'R52', 'R_şarj 22 Ω', (xs, ry + 7.62), ref_at=(xs + 1.27, ry + 5.08), val_at=(xs + 1.27, ry + 7.62))
     S.wire((xs, ry), Rs.p('1'), color=COL['5V'])
@@ -606,33 +601,45 @@ def build():
     nM = (xs, ry + 24.13); S.wire(nC, C32.p('1')); S.wire(C32.p('2'), nM); S.junction(nM)
     C33 = S.part(CP, 'C33', 'HV 10 F', (xs, ry + 30.48), ref_at=(xs - 2.54, ry + 29.21), val_at=(xs - 2.54, ry + 31.75)); C33.just = 'right'
     nG = (xs, ry + 34.29); S.wire(nM, C33.p('1')); S.wire(C33.p('2'), nG); S.junction(nG); S.power('GND', nG, 0)
-    xb = xs + 6.35   # dengeleme dirençleri (hücre başına 10 k)
+    xb = xs + 10.16   # dengeleme dirençleri (hücre başına 10 k); süperkap etiketlerine yer kalsın diye 10 mm sağda
     R53 = S.part(R, 'R53', '10k', (xb, ry + 20.32), ref_at=(xb + 1.27, ry + 17.78), val_at=(xb + 1.27, ry + 20.32))
     R54 = S.part(R, 'R54', '10k', (xb, ry + 30.48), ref_at=(xb + 1.27, ry + 27.94), val_at=(xb + 1.27, ry + 30.48))
     S.wire((xb, nC[1]), R53.p('1')); S.wire(R53.p('2'), (xb, nM[1]), nM); S.junction((xb, nC[1])); S.junction((xb, nM[1]))
     S.wire((xb, nM[1]), R54.p('1')); S.wire(R54.p('2'), (xb, nG[1]), nG)
-    # boost U7: VI/EN sol, SW/VOUT/FB sağ, GND alt
-    U7 = S.part(BOOST, 'U7', 'TPS61099 4,6 V', (154.94, ry + 19.05), ref_at=(146.5, ry + 26.0), val_at=(146.5, ry + 30.0),
-                footprint='Package_SON:WSON-6-1EP_2x2mm_P0.65mm_EP1x1.6mm')
+    # boost U7: VI/EN sol, SW/VOUT/FB sağ, GND alt. Gövde küçük → pin adları küçük yazı (VOUT/GND üst üste binmesin)
+    S.libsyms[BOOST] = scale_pin_fonts(S.libsyms[BOOST], 1.1, 1.0)
+    ux = 170.18
+    U7 = S.part(BOOST, 'U7', 'TPS61099 4,6 V', (ux, ry + 19.05), ref_at=(ux, ry + 32.3), val_at=(ux, ry + 35.0),
+                footprint='Package_SON:WSON-6-1EP_2x2mm_P0.65mm_EP1x1.6mm'); U7.just = 'center'   # GND sembolünün altında, ortalı
     vi, en, sw, vb, fb = U7.p('VI'), U7.p('EN'), U7.p('SW'), U7.p('VOUT'), U7.p('FB')
-    S.wire(nC, vi); S.junction(vi); S.wire(vi, en)                       # EN = VI (hep açık; Vin < Vout iken yükseltir)
+    S.wire(nC, (xb, nC[1]), vi); S.junction(vi); S.wire(vi, en)         # EN = VI (hep açık; Vin < Vout iken yükseltir)
     S.flag((vi[0] - 3.81, vi[1])); S.junction((vi[0] - 3.81, vi[1]))     # süperkap düğümü: dış kaynak (ERC)
-    L1 = S.part(IND, 'L1', '2,2 µH', (154.94, ry + 8.89), rot=90, ref_at=(149.86, ry + 7.0), val_at=(153.0, ry + 7.0))
+    L1 = S.part(IND, 'L1', '2,2 µH', (ux, ry + 8.89), rot=90, ref_at=(ux - 5.1, ry + 7.0), val_at=(ux - 1.9, ry + 7.0))
     S.wire(vi, (vi[0], ry + 8.89), L1.p('1')); S.wire(L1.p('2'), (sw[0], ry + 8.89), sw)
     S.flag((sw[0], ry + 8.89)); S.junction((sw[0], ry + 8.89))                # SW kütüphanede power_in tanımlı → ERC için bayrak
     S.pin_power(U7, '1', 'GND')
-    xv = 166.37   # VOUT düğümü: FB bölücü + D2
+    xv = 195.58   # VOUT düğümü: FB bölücü + D2
     S.wire(vb, (xv, vb[1]), color=COL['5V']); S.junction((xv, vb[1]))
     R55 = S.part(R, 'R55', 'R_fb1', (xv, ry + 21.59), ref_at=(xv + 1.27, ry + 19.05), val_at=(xv + 1.27, ry + 21.59))
     R56 = S.part(R, 'R56', 'R_fb2', (xv, ry + 31.75), ref_at=(xv + 1.27, ry + 29.21), val_at=(xv + 1.27, ry + 31.75))
     S.wire((xv, vb[1]), R55.p('1')); nF = (xv, ry + 27.94); S.wire(R55.p('2'), nF); S.junction(nF); S.wire(nF, R56.p('1')); S.pin_power(R56, '2', 'GND')
-    S.wire(fb, (fb[0] + 1.27, fb[1]), (fb[0] + 1.27, nF[1]), nF)
-    D2 = S.part(DS, 'D2', 'D2', (176.53, ry + 12.7), rot=270, ref_at=(178.6, ry + 14.5), hide_value=True)
-    S.wire((xv, vb[1]), D2.p('A'), color=COL['5V']); S.wire(D2.p('K'), (D2.p('K')[0], ry), color=COL['5V']); S.junction((D2.p('K')[0], ry))
-    S.text('C32/C33: 2× Eaton HV1030-2R7106-R (10 F, 2,7 V) seri = 5 F; float 4,6 V (+85 °C\'de 2,3 V/hücre, derating)', (175.26, ry + 25.4), SZ_NOTE, italic=True)
-    S.text('U7 boost 0,7–5,5 V giriş → 4,6 V → D2; kesintide ~50 J → ~5 dk @ 50 mA (yalnız alarm paketi; 02-bom §2.5)', (175.26, ry + 27.94), SZ_NOTE, italic=True)
-    S.text('süperkap → boost → D2 → 5 V rayı: şebeke varken D2 ters, boost boşta', (175.26, ry + 30.48), SZ_NOTE, italic=True)
-    S.text('GND: tek yıldız noktası RAC05 çıkışında', (66.04, rail_y + 21.59), SZ_NOTE, italic=True)
+    xf = fb[0] + 6.35   # FB dönüşü gövdeden uzak insin
+    S.wire(fb, (xf, fb[1]), (xf, nF[1]), nF)
+    xD = 208.28
+    D2 = S.part(DS, 'D2', 'D2', (xD, ry + 12.7), rot=270, ref_at=(xD + 2.1, ry + 14.5), hide_value=True)
+    S.wire((xv, vb[1]), (xD, vb[1]), D2.p('A'), color=COL['5V']); S.wire(D2.p('K'), (xD, ry), color=COL['5V']); S.junction((xD, ry))
+    # ---------- notlar (besleme) ----------
+    S.text('PE → panonun koruma iletkeni; kutu metal ise gövde PE', (30.48, pPE[1] + 15.5), SZ_NOTE, italic=True)
+    S.text('GND: tek yıldız noktası RAC05 çıkışında', (30.48, pPE[1] + 18.3), SZ_NOTE, italic=True)
+    S.text('100k/47k → GPIO1 ADC1_CH0: şebeke var/yok → modul_durum.besleme', (35.56, rail_y + 32.5), SZ_NOTE, italic=True)
+    xn = 214.0
+    S.text('3V3 rayı → ESP32 / MLX90640 / SHT31 / RS-485 / CT bias / genişleme', (xn, ry + 24.0), SZ_NOTE, italic=True)
+    S.text('Bütçe: ESP32 Wi-Fi tepe ~350 mA + MLX 23 mA + SHT31 <2 mA + RS-485 ~10 mA', (xn, ry + 26.5), SZ_NOTE, italic=True)
+    S.text('→ 5 V/1 A modül; LDO dropout ≈0,3 V (yedekte ray 4,3 V)', (xn, ry + 29.0), SZ_NOTE, italic=True)
+    S.text('C32/C33: 2× Eaton HV1030-2R7106-R (10 F, 2,7 V) seri = 5 F; float 4,6 V', (xn, ry + 33.0), SZ_NOTE, italic=True)
+    S.text('(+85 °C\'de 2,3 V/hücre, derating); U7 boost 0,7–5,5 V giriş → 4,6 V → D2', (xn, ry + 35.5), SZ_NOTE, italic=True)
+    S.text('kesintide ~50 J → ~5 dk @ 50 mA (yalnız alarm paketi; 02-bom §2.5)', (xn, ry + 38.0), SZ_NOTE, italic=True)
+    S.text('süperkap → boost → D2 → 5 V rayı: şebeke varken D2 ters, boost boşta', (xn, ry + 40.5), SZ_NOTE, italic=True)
 
     # ---------- notlar ----------
     S.text('Notlar: pin atamaları 03 §3.1 ile aynı; tabloda olmayan tek ekleme GPIO1 besleme algılama. Pasif değerler tipik başlangıç değerleridir.', (35.56, 273.0), SZ_NOTE)
