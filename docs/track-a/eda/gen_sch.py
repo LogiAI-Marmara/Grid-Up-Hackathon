@@ -372,6 +372,7 @@ def build():
         y0 = 54.61 + k * 15.24
         J = S.part(C02, 'J%d' % (2 + k), nm, (43.18, y0), mirror='y', ref_at=(53.34, y0 - 1.5), val_at=(33.02, y0 - 1.27),
                    footprint='TerminalBlock_Phoenix:TerminalBlock_Phoenix_MKDS-3-2-5.08_1x02_P5.08mm_Horizontal')
+        J.just = 'right'   # aynalı sembolde KiCad hizayı da aynalar: 'right' → metin sağa akar, çerçeve içinde kalır
         hot = J.p('1'); ret = J.p('2')
         nA = (60.96, hot[1]); S.wire(hot, nA, color=ANA)
         Rb = S.part(R, 'R%d' % (10 + k), 'R_burden', (60.96, hot[1] + 3.81), ref_at=(62.23, hot[1] + 1.27), val_at=(62.23, hot[1] + 3.81))
@@ -481,10 +482,11 @@ def build():
     # ================= ALT: Besleme =================
     S.rect((25.4, 216.4), (322.0, 280.0), COL['5V'], title='Besleme / 230 V iç ihtiyaç → RAC05 5 V → D1 (OR) → 5 V rayı → LDO 3V3; yedek: 2× süperkap seri → boost 4,6 V → D2; algılama D1 öncesi (§3.4, §7.3)')
     yL = 228.6
-    J1 = S.part(C03, 'J1', 'İç ihtiyaç L / N / PE', (43.18, yL + 2.54), mirror='y', ref_at=(36.83, yL - 6.35), val_at=(46.99, yL - 3.81),
+    J1 = S.part(C03, 'J1', 'İç ihtiyaç L / N / PE', (43.18, yL + 2.54), mirror='y', ref_at=(36.83, yL - 6.35), val_at=(33.5, yL - 3.81),
                 footprint='TerminalBlock_Phoenix:TerminalBlock_Phoenix_MKDS-3-3-5.08_1x03_P5.08mm_Horizontal')
+    J1.just = 'right'   # aynalı sembol: hiza da aynalanır (bkz. CT klemensleri)
     pL, pN, pPE = J1.p('1'), J1.p('2'), J1.p('3')
-    F1 = S.part(FU, 'F1', 'sigorta', (58.42, pL[1]), rot=90, ref_at=(55.88, pL[1] - 5.08), val_at=(53.34, pL[1] - 2.54))
+    F1 = S.part(FU, 'F1', 'sigorta', (58.42, pL[1]), rot=90, ref_at=(62.5, pL[1] - 7.62), val_at=(61.0, pL[1] - 5.08))
     S.wire(pL, F1.p('1'), color=COL['5V'])
     U5 = S.part(RAC, 'U5', 'RAC05-05SK/277', (88.9, pN[1]), ref_at=(76.2, pL[1] + 9.5), val_at=(76.2, pL[1] + 12.0),
                 footprint='Converter_ACDC:Converter_ACDC_RECOM_RAC05-xxSK_THT')
