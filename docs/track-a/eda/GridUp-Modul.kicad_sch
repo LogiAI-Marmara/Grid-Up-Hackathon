@@ -6005,6 +6005,7 @@
 		(stroke
 			(width 0)
 			(type default)
+			(color 0 132 0 1)
 		)
 		(uuid "cdee1da3-739f-579f-9e42-49033019027d")
 	)
@@ -6013,6 +6014,7 @@
 		(effects
 			(font
 				(size 2 2)
+				(color 0 132 0 1)
 			)
 			(justify right bottom)
 		)
@@ -6026,6 +6028,7 @@
 		(stroke
 			(width 0)
 			(type default)
+			(color 0 132 0 1)
 		)
 		(uuid "404b5311-c06b-5dcd-b670-9328a4501a95")
 	)
@@ -6034,6 +6037,7 @@
 		(effects
 			(font
 				(size 2 2)
+				(color 0 132 0 1)
 			)
 			(justify right bottom)
 		)
@@ -8100,6 +8104,7 @@
 		(stroke
 			(width 0)
 			(type default)
+			(color 0 132 0 1)
 		)
 		(uuid "6d7fb118-4707-55a5-9d53-8c8974a99c0c")
 	)
@@ -8108,6 +8113,7 @@
 		(effects
 			(font
 				(size 2 2)
+				(color 0 132 0 1)
 			)
 			(justify right bottom)
 		)
@@ -8121,6 +8127,7 @@
 		(stroke
 			(width 0)
 			(type default)
+			(color 0 132 0 1)
 		)
 		(uuid "077c1912-ef35-56b6-aba1-5989c7c67acb")
 	)
@@ -8129,6 +8136,7 @@
 		(effects
 			(font
 				(size 2 2)
+				(color 0 132 0 1)
 			)
 			(justify left bottom)
 		)
@@ -8999,7 +9007,7 @@
 		(dnp no)
 		(uuid "665e91c2-f1a6-5ad8-9c34-8fac3bbd0de1")
 		(property "Reference" "U1"
-			(at 195.58 132.08 0)
+			(at 156.21 132.08 0)
 			(effects
 				(font
 					(size 1.7 1.7)
@@ -9008,7 +9016,7 @@
 			)
 		)
 		(property "Value" "ESP32-S3-WROOM-1U-N8"
-			(at 195.58 134.62 0)
+			(at 156.21 134.62 0)
 			(effects
 				(font
 					(size 1.7 1.7)

@@ -190,6 +190,7 @@ def net_color(name):
     if n in ('SDA', 'SCL'): return COL['I2C']
     if n.startswith(('U1', 'U0', 'USB', 'DE_RE')): return COL['UART']
     if n.startswith(('CT_', 'VSENSE', 'V_BIAS')): return COL['ANA']
+    if n.startswith('GPIO'): return COL['DEF']   # genişleme: 'diğer' yeşili
     return None
 def color_node(c, a=1.0): return [Sym('color'), Sym(str(c[0])), Sym(str(c[1])), Sym(str(c[2])), Sym('%g' % a)]
 
@@ -372,7 +373,7 @@ def build():
 
     # ================= ORTA: ESP32-S3 =================
     S.rect((130.0, 42.0), (222.0, 150.0), COL['DEF'], title='ESP32-S3-WROOM-1U-N8 / Wi-Fi/BLE, U.FL anten')
-    U1 = S.part(ESP, 'U1', 'ESP32-S3-WROOM-1U-N8', (185.42, 100.33), ref_at=(195.58, 132.08), val_at=(195.58, 134.62),
+    U1 = S.part(ESP, 'U1', 'ESP32-S3-WROOM-1U-N8', (185.42, 100.33), ref_at=(156.21, 132.08), val_at=(156.21, 134.62),
                 footprint='RF_Module:ESP32-S3-WROOM-1U')
     S.pin_power(U1, '3V3', '+3V3'); S.pin_power(U1, '40', 'GND')      # 3V3 üst, GND alt (1/40/41 aynı nokta)
     for k, v in {'IO1': 'VSENSE', 'IO10': 'GPIO10', 'IO11': 'GPIO11'}.items(): S.pin_label(U1, k, v)
