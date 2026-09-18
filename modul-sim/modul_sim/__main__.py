@@ -18,6 +18,14 @@ must not have to fit in memory.
 `--dogrula` validates every packet against `modul_paketi.schema.json` on the way
 out and exits non-zero if anything failed, which is what makes "the generator
 emits contract-shaped data" a checked claim rather than an assertion.
+
+A blind set for track B is a run where only some modules carry the fault, plus
+the label file that says which (`analiz/README.md`, "Etiket dosyası formatı"):
+
+    python -m modul_sim --senaryo gevsek_klemens --modul 20 --sure 720         --senaryo-oran 0.3 --etiket etiket.json > kor.ndjson
+
+The data goes to the database; `etiket.json` stays with the producer until the
+detector's output is frozen.
 """
 
 from __future__ import annotations
@@ -94,6 +102,25 @@ def ayristir(argv: list[str] | None = None) -> argparse.Namespace:
         help="minutes the fault takes to reach full strength (default: 55%% of the run)",
     )
     ayristirici.add_argument(
+        "--senaryo-modul",
+        default=None,
+        metavar="ID[,ID...]",
+        help="inject the scenario only into these module ids (e.g. TR041-P01-M1,TR042-P02-M2); the rest stay clean",
+    )
+    ayristirici.add_argument(
+        "--senaryo-oran",
+        type=float,
+        default=None,
+        metavar="0-1",
+        help="inject the scenario into this fraction of the fleet, chosen deterministically from the seed; the rest stay clean",
+    )
+    ayristirici.add_argument(
+        "--etiket",
+        default=None,
+        metavar="PATH",
+        help="write the blind-test label file (track B format: senaryolar, kritik_esik, temiz_moduller) here when the run ends",
+    )
+    ayristirici.add_argument(
         "--dogrula", action="store_true", help="validate every packet against modul_paketi.schema.json"
     )
     ayristirici.add_argument("--sessiz", action="store_true", help="do not print the run summary to stderr")
@@ -126,7 +153,8 @@ def ozet_yaz(ozet: KosuOzeti, filo: Filo, akis) -> None:
     if ayar.senaryo_ad:
         print(
             f"  scenario: {ayar.senaryo_ad} from {filo.senaryo_baslangic:%Y-%m-%dT%H:%M:%SZ} "
-            f"ramping over {filo.senaryo_sure_s / 60:.0f} min",
+            f"ramping over {filo.senaryo_sure_s / 60:.0f} min, "
+            f"in {len(filo.senaryo_moduller)} of {len(filo.moduller)} module(s)",
             file=akis,
         )
     if ozet.kalite_supheli or ozet.kalite_yok:
@@ -143,15 +171,28 @@ def main(argv: list[str] | None = None) -> int:
         senaryolari_listele(sys.stdout)
         return 0
 
-    ayar = KosuAyar(
-        modul_sayisi=secenek.modul,
-        sure_dk=secenek.sure,
-        tohum=secenek.tohum,
-        senaryo_ad=secenek.senaryo,
-        baslangic=secenek.baslangic,
-        senaryo_bas_s=None if secenek.senaryo_bas is None else secenek.senaryo_bas * 60.0,
-        senaryo_sure_s=None if secenek.senaryo_sure is None else secenek.senaryo_sure * 60.0,
-    )
+    if (secenek.senaryo_modul or secenek.senaryo_oran is not None) and not secenek.senaryo:
+        print("modul_sim: --senaryo-modul / --senaryo-oran need --senaryo", file=sys.stderr)
+        return 2
+    try:
+        ayar = KosuAyar(
+            modul_sayisi=secenek.modul,
+            sure_dk=secenek.sure,
+            tohum=secenek.tohum,
+            senaryo_ad=secenek.senaryo,
+            baslangic=secenek.baslangic,
+            senaryo_bas_s=None if secenek.senaryo_bas is None else secenek.senaryo_bas * 60.0,
+            senaryo_sure_s=None if secenek.senaryo_sure is None else secenek.senaryo_sure * 60.0,
+            senaryo_moduller=(
+                tuple(p.strip() for p in secenek.senaryo_modul.split(",") if p.strip())
+                if secenek.senaryo_modul
+                else None
+            ),
+            senaryo_oran=secenek.senaryo_oran,
+        )
+    except ValueError as hata:
+        print(f"modul_sim: {hata}", file=sys.stderr)
+        return 2
 
     hatalari_bul = None
     if secenek.dogrula:
@@ -159,7 +200,11 @@ def main(argv: list[str] | None = None) -> int:
 
         hatalari_bul = paket_hatalari
 
-    filo = Filo(ayar)
+    try:
+        filo = Filo(ayar)
+    except ValueError as hata:
+        print(f"modul_sim: {hata}", file=sys.stderr)
+        return 2
     ozet = KosuOzeti()
     gecersiz = 0
     cikti = sys.stdout
@@ -191,6 +236,13 @@ def main(argv: list[str] | None = None) -> int:
     except KeyboardInterrupt:  # pragma: no cover - interactive
         print("modul_sim: interrupted", file=sys.stderr)
         return 130
+
+    if secenek.etiket:
+        with open(secenek.etiket, "w", encoding="utf-8", newline="\n") as dosya:
+            json.dump(filo.etiket(), dosya, ensure_ascii=False, indent=2)
+            dosya.write("\n")
+        if not secenek.sessiz:
+            print(f"modul_sim: label file written to {secenek.etiket}", file=sys.stderr)
 
     if not secenek.sessiz:
         ozet_yaz(ozet, filo, sys.stderr)
