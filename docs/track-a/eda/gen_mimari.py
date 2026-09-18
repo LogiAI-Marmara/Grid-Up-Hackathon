@@ -247,7 +247,8 @@ def uret():
     # alt notlar
     text(30, yb + 132, 'Veri politikası (§7.4): normalde özet (maks, konum, bölge ort.) / anomali anında tam kare kanıt olarak / modülde basit eşik, hüküm merkezde (§7.4 satır 304) / ark tespiti yok, TVOC-2 kaydı okunur (§7.1 satır 230)', 'r', 'start', 1540)
     text(30, yb + 150, 'Sahipler: saha + modul-sim + toplama İZ A / anomali motoru + okuma API İZ B / arayüz + Modbus + alarm + deploy İZ C / on-prem: tüm servisler docker-compose ile tek sunucuda, public cloud yok (T6)', 'r', 'start', 1540)
-    text(30, yb + 168, 'Kaynak: gridup-proje-karar-kaydi.md §8–§11, sozlesmeler/README.md, analiz/README.md, PR #2 docs/operasyon-yuzu-dokumantasyonu.md. Üretim: eda/gen_mimari.py', 'r', 'start', 1540)
+    text(30, yb + 168, 'Durum (18 Eyl): gerçek zincir modul-sim → toplama → PostgreSQL → analiz → :8080 (main). Hedef, henüz bağlı değil: İZ C servisleri mock API :8000/api okuyor (:8080 değil); PR #2 compose yalnız arayüz+modbus+alarm+mock', 'r', 'start', 1540)
+    text(30, yb + 186, '(toplama/analiz/PostgreSQL yok); gateway ve pano donanımı yok. Kaynak: karar kaydı §8–§11, sozlesmeler/README, analiz/README, PR #2 docs/operasyon-yuzu-dokumantasyonu.md. Üretim: eda/gen_mimari.py', 'r', 'start', 1540)
 
     L.append('</svg>')
     return '\n'.join(L) + '\n'

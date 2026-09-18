@@ -176,5 +176,6 @@
   <text x="30" y="772" text-anchor="start" class="r">Ortak sözlük (§10, enums.py): olcum_tipi 9 değer / seviye normal-izle-uyari-kritik / tip 8 değer / kalite iyi-supheli-yok / durum acik-onaylandi-kapandi / modul_id {saha}-{pano}-{modul} / zaman UTC ISO 8601</text>
   <text x="30" y="796" text-anchor="start" class="r">Veri politikası (§7.4): normalde özet (maks, konum, bölge ort.) / anomali anında tam kare kanıt olarak / modülde basit eşik, hüküm merkezde (§7.4 satır 304) / ark tespiti yok, TVOC-2 kaydı okunur (§7.1 satır 230)</text>
   <text x="30" y="814" text-anchor="start" class="r">Sahipler: saha + modul-sim + toplama İZ A / anomali motoru + okuma API İZ B / arayüz + Modbus + alarm + deploy İZ C / on-prem: tüm servisler docker-compose ile tek sunucuda, public cloud yok (T6)</text>
-  <text x="30" y="832" text-anchor="start" class="r">Kaynak: gridup-proje-karar-kaydi.md §8–§11, sozlesmeler/README.md, analiz/README.md, PR #2 docs/operasyon-yuzu-dokumantasyonu.md. Üretim: eda/gen_mimari.py</text>
+  <text x="30" y="832" text-anchor="start" class="r">Durum (18 Eyl): gerçek zincir modul-sim → toplama → PostgreSQL → analiz → :8080 (main). Hedef, henüz bağlı değil: İZ C servisleri mock API :8000/api okuyor (:8080 değil); PR #2 compose yalnız arayüz+modbus+alarm+mock</text>
+  <text x="30" y="850" text-anchor="start" class="r">(toplama/analiz/PostgreSQL yok); gateway ve pano donanımı yok. Kaynak: karar kaydı §8–§11, sozlesmeler/README, analiz/README, PR #2 docs/operasyon-yuzu-dokumantasyonu.md. Üretim: eda/gen_mimari.py</text>
 </svg>
