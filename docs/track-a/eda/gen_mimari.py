@@ -123,10 +123,10 @@ def uret():
            ('Akım L1 L2 L3 N / analizör (RS-485 Modbus) veya CT ×4', 's'),
            ('Ark kaydı / TVOC-2 trip-diag. (RS-485, yalnız okuma)', 's'),
            ('Genişleme 2×5: I²C / UART / ADC, PD-akustik için boş', 'r')]
-    P_M = [('Oku → özetle → eşik → paketle (sözleşme ②)', 's'),
-           ('Akım 1–5 s (10 s ort.) / termal özet 10–30 s / ortam 30–60 s', 's'),
-           ('Normalde termal özet; anomali anında tam kare (768)', 's'),
-           ('Hüküm vermez (seviye/tip yok); basit eşik, merkezden güncellenir', 's'),
+    P_M = [('Oku → özetle → paketle (sözleşme ②)', 's'),
+           ('Paket 30 s: akım (2 s alt örnek, 30 s ort.) + termal / ortam 60 s', 's'),
+           ('Her pakette termal özet + tam kare (768; entegrasyon kararı)', 's'),
+           ('Hüküm vermez (seviye/tip yok); tespit merkezde (§7.4 satır 304)', 's'),
            ('modul_durum: besleme sebeke/yedek, sinyal dBm, sürüm', 'r'),
            ('Ayrıntı: 01 blok şema / 03 bağlantı / 07 yazılım akışı', 'r')]
     P_G = [('230 V iç ihtiyaç → RAC05 5 V → LDO 3,3 V (03 §3.4)', 's'),
@@ -243,9 +243,9 @@ def uret():
         text(x + 10, yb + 30, t, 't', 'start', bw - 90); text(x + bw - 10, yb + 30, yon, 'r', 'end')
         text(x + 10, yb + 50, ic, 's', 'start', bw - 20); text(x + 10, yb + 68, dosya, 'r', 'start', bw - 20)
     # ortak sözlük
-    text(30, yb + 108, 'Ortak sözlük (§10, enums.py): olcum_tipi 9 değer / seviye normal-izle-uyari-kritik / tip 8 değer / kalite iyi-supheli-yok / durum acik-onaylandi-kapandi / modul_id {saha}-{pano}-{modul} / zaman UTC ISO 8601', 'r', 'start', 1540)
+    text(30, yb + 108, 'Ortak sözlük (§10, enums.py): olcum_tipi 9 değer / seviye normal-izle-uyari-kritik / tip 9 değer (asiri_yuk dahil) / kalite iyi-supheli-yok / durum acik-onaylandi-kapandi / modul_id {saha}-{pano}-{modul} / zaman UTC ISO 8601', 'r', 'start', 1540)
     # alt notlar
-    text(30, yb + 132, 'Veri politikası (§7.4): normalde özet (maks, konum, bölge ort.) / anomali anında tam kare kanıt olarak / modülde basit eşik, hüküm merkezde (§7.4 satır 304) / ark tespiti yok, TVOC-2 kaydı okunur (§7.1 satır 230)', 'r', 'start', 1540)
+    text(30, yb + 132, 'Veri politikası (entegrasyon kararı, 17 Eyl): her pakette özet (maks, konum, bölge ort.) + tam kare (768, DB int16); §7.4 eşik kapısı kaldırıldı, hüküm merkezde (satır 304) / ark tespiti yok, TVOC-2 kaydı okunur (§7.1 satır 230)', 'r', 'start', 1540)
     text(30, yb + 150, 'Sahipler: saha + modul-sim + toplama İZ A / anomali motoru + okuma API İZ B / arayüz + Modbus + alarm + deploy İZ C / on-prem: tüm servisler docker-compose ile tek sunucuda, public cloud yok (T6)', 'r', 'start', 1540)
     text(30, yb + 168, 'Durum (18 Eyl): gerçek zincir modul-sim → toplama → PostgreSQL → analiz → :8080 (main). Hedef, henüz bağlı değil: İZ C servisleri mock API :8000/api okuyor (:8080 değil); PR #2 compose yalnız arayüz+modbus+alarm+mock', 'r', 'start', 1540)
     text(30, yb + 186, '(toplama/analiz/PostgreSQL yok); gateway ve pano donanımı yok. Kaynak: karar kaydı §8–§11, sozlesmeler/README, analiz/README, PR #2 docs/operasyon-yuzu-dokumantasyonu.md. Üretim: eda/gen_mimari.py', 'r', 'start', 1540)
