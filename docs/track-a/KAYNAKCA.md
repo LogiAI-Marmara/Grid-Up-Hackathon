@@ -162,9 +162,9 @@ tek adımda cevaplanması.
 |---|---|
 | **Kaynak** | Texas Instruments *TPS61099x Synchronous Boost Converter with Ultra-Low Quiescent Current* veri sayfası |
 | **URL** | `ti.com/lit/ds/symlink/tps61099.pdf` |
-| **Yer** | §7.3 Recommended Operating Conditions |
-| **Alınan değerler** | VIN **0,7–5,5 V**; VOUT 1,8–5,5 V; **L (bobin) MIN 0,7 / NOM 2,2 / MAX 2,86 µH**; CIN 1,0/10 µF; COUT 10/20/100 µF; **TJ −40…+125 °C**; WSON-6 |
-| **Dokümandaki değer** | Çıkış **4,6 V** (FB bölücü), bobin **2,2 µH** |
+| **Yer** | §7.3 Recommended Operating Conditions; §6.5 Electrical Characteristics (V_REF); §8.2.2.2 Programming the Output Voltage |
+| **Alınan değerler** | VIN **0,7–5,5 V**; VOUT 1,8–5,5 V; **L (bobin) MIN 0,7 / NOM 2,2 / MAX 2,86 µH**; CIN 1,0/10 µF; COUT 10/20/100 µF; **TJ −40…+125 °C**; WSON-6; **V_REF (FB) 0,98 / 1,00 / 1,02 V**; V_OUT = V_REF × (1 + R1/R2); R2 akımı FB kaçağının (≤ 50 nA) ≥ 100 katı; örnek 1 MΩ / 249 kΩ (5 V) |
+| **Dokümandaki değer** | Çıkış **4,6 V**: R55 = **360 kΩ**, R56 = **100 kΩ** → 1,0 × (1 + 3,6) = 4,6 V, bölücü akımı 10 µA (≥ 5 µA ✓); bobin **2,2 µH** |
 | **Durum** | **OKUNDU** (§7.3 tablosu birebir; ilk yazılan 4,7 µH spesifikasyon dışıydı → 2,2 µH'ye düzeltildi) |
 | **Kullanıldığı yer** | §2.1 (5b), §2.5, 03 §3.4, `eda/gen_sch.py` (U7 + L1) |
 

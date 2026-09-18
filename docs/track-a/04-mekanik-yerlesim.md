@@ -180,6 +180,7 @@ emin olunmalıdır; kutunun geri kalanı opak olabilir.
 | Koruma | IP54 muhafaza (§7.5 satır 317) | ✓ Korunuyor (IR pencere ile) |
 | Bileşen sıcaklık aralığı | Endüstriyel, −40…+85 °C (§7.5 satır 318) | ✓ BOM'daki tüm bileşenler uyumlu |
 | Termal sensör konumu | Kutunun **yüzeyinde, dışa bakan yuvada** (§7.5 satır 319) | ✓ IR pencere ile |
+| Kutu malzemesi | — (karar kaydında belirtilmemiş) | UV/ısı dayanımlı **PC** veya **alüminyum döküm**; metal seçilirse gövde PE'ye bağlanır (03 besleme notu). IR pencere her durumda ayrı parça (§4.4) |
 
 **Muhafaza gerekçesi (§7.5 satır 317):** Pano zaten IP 2X (dahili tip) veya IP 54 (harici tip)
 düzeyindedir; modül için gerekçe **toz ve temas koruması**dır.
@@ -219,7 +220,8 @@ kesit X = 60 düzleminden alınmıştır. Altı görünüş: **A** ön yüz — 
 arkadaki hacimli parçalar (RAC05, süperkapasitör yatık); **C** iç görünüş — kapak açık, PCB 110 × 70 ve
 230 V bölgesi, arka yüz parçaları kesikli; **D** arka yüz — DIN klips, oval M5 yuvalar, köşe mıknatıs
 pedleri (yalnız hizalama, §4.8); **E** alt yüz — RS-485, SMA, CT, 230 V (PCB klemensleriyle aynı
-sıra: soldan sağa);
+sıra: soldan sağa; her giriş kendi klemensine yakın, 230 V sağ uçta alçak gerilim girişlerinden ayrı; genişleme
+başlığı için kutuda ilgili yüzde kör tapa);
 **F** izometrik. PCB kutu içinde (5, 5, 39,4) mm; kart üstü konumlar
 [02-pcb-yerlesimi.svg](02-pcb-yerlesimi.svg)'de PCB koordinatıyla verilir. Üretim çizimi değildir — §1.4.)*
 

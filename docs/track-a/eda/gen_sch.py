@@ -3,7 +3,7 @@
 # geometrisinden hesaplanır. Netler: 03-pinout.md §3.1–3.6 (I²C GPIO8/9, CT GPIO4–7 ADC1, UART1 GPIO17/18
 # + DE/RE GPIO21, besleme algılama GPIO1, genişleme GPIO10/11; RAC05 → D1 → 5 V → LDO 3V3; süperkap 2× HV seri + R_şarj → boost 4,6 V → D2).
 # Kullanım: python gen_sch.py [--kicad-symbols DIR] → GridUp-Modul.kicad_sch + GridUp-Modul.kicad_pro
-import os, sys, json, math, uuid, re
+import os, sys, json, math, uuid, re, copy
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 SYMDIR = None
@@ -137,13 +137,84 @@ def mlx90640_symbol():
             prop('Datasheet', 'https://www.melexis.com/en/product/MLX90640/', 0, True),
             prop('Description', 'Termal dizi 32x24, 110x75 derece, I2C 0x33', 0, True),
             [Sym('symbol'), 'MLX90640_0_1',
-             [Sym('rectangle'), [Sym('start'), Sym('-7.62'), Sym('7.62')], [Sym('end'), Sym('7.62'), Sym('-7.62')],
+             [Sym('rectangle'), [Sym('start'), Sym('-10.16'), Sym('10.16')], [Sym('end'), Sym('10.16'), Sym('-10.16')],
               [Sym('stroke'), [Sym('width'), Sym('0.254')], [Sym('type'), Sym('default')]], [Sym('fill'), [Sym('type'), Sym('background')]]],
-             [Sym('circle'), [Sym('center'), Sym('0'), Sym('0')], [Sym('radius'), Sym('4.5')],
+             [Sym('circle'), [Sym('center'), Sym('0'), Sym('0')], [Sym('radius'), Sym('4.0')],
               [Sym('stroke'), [Sym('width'), Sym('0.254')], [Sym('type'), Sym('default')]], [Sym('fill'), [Sym('type'), Sym('none')]]]],
             [Sym('symbol'), 'MLX90640_1_1',
-             pin('power_in', 0, 10.16, 270, 'VDD', '1'), pin('power_in', 0, -10.16, 90, 'GND', '2'),
-             pin('bidirectional', 10.16, 2.54, 180, 'SDA', '3'), pin('input', 10.16, -2.54, 180, 'SCL', '4')]]
+             pin('power_in', 0, 12.7, 270, 'VDD', '1'), pin('power_in', 0, -12.7, 90, 'GND', '2'),
+             pin('bidirectional', 12.7, 2.54, 180, 'SDA', '3'), pin('input', 12.7, -2.54, 180, 'SCL', '4')]]
+
+def sht31_symbol():
+    """Kütüphane sembolü (Sensor_Humidity:SHT31-DIS) çok sıkışık / aynı pin numaralarıyla geniş özel sembol."""
+    def prop(k, v, y, hide=False):
+        e = [Sym('property'), k, v, [Sym('at'), Sym('0'), Sym(str(y)), Sym('0')]]
+        if hide: e.append([Sym('hide'), Sym('yes')])
+        e.append([Sym('effects'), [Sym('font'), [Sym('size'), Sym('1.27'), Sym('1.27')]]])
+        return e
+    def pin(t, x, y, a, nm, num):
+        return [Sym('pin'), Sym(t), Sym('line'), [Sym('at'), Sym(str(x)), Sym(str(y)), Sym(str(a))], [Sym('length'), Sym('2.54')],
+                [Sym('name'), nm, [Sym('effects'), [Sym('font'), [Sym('size'), Sym('1.27'), Sym('1.27')]]]],
+                [Sym('number'), num, [Sym('effects'), [Sym('font'), [Sym('size'), Sym('1.27'), Sym('1.27')]]]]]
+    return [Sym('symbol'), 'GridUp:SHT31', [Sym('pin_names'), [Sym('offset'), Sym('1.016')]],
+            [Sym('exclude_from_sim'), Sym('no')], [Sym('in_bom'), Sym('yes')], [Sym('on_board'), Sym('yes')],
+            prop('Reference', 'U', 11.43), prop('Value', 'SHT31-DIS-B', -11.43),
+            prop('Footprint', 'Sensor_Humidity:Sensirion_DFN-8-1EP_2.5x2.5mm_P0.5mm_EP1.1x1.7mm', 0, True),
+            prop('Datasheet', 'https://sensirion.com/products/catalog/SHT31-DIS-B', 0, True),
+            prop('Description', 'Sicaklik + nem, I2C 0x44/0x45', 0, True),
+            [Sym('symbol'), 'SHT31_0_1',
+             [Sym('rectangle'), [Sym('start'), Sym('-7.62'), Sym('7.62')], [Sym('end'), Sym('7.62'), Sym('-7.62')],
+              [Sym('stroke'), [Sym('width'), Sym('0.254')], [Sym('type'), Sym('default')]], [Sym('fill'), [Sym('type'), Sym('background')]]]],
+            [Sym('symbol'), 'SHT31_1_1',
+             pin('power_in', 0, 10.16, 270, 'VDD', '5'), pin('power_in', 0, -10.16, 90, 'VSS', '8'),
+             pin('bidirectional', 10.16, 5.08, 180, 'SDA', '1'), pin('input', 10.16, 0, 180, 'SCL', '4'), pin('output', 10.16, -5.08, 180, 'ALERT', '3'),
+             pin('input', -10.16, 5.08, 0, 'ADDR', '2'), pin('input', -10.16, 0, 0, '~{RESET}', '6'), pin('passive', -10.16, -5.08, 0, 'R', '7')]]
+
+def max3485_symbol():
+    """Kütüphane sembolü (Interface_UART:MAX3485) aynalanınca içi karışıyor / sade kutu, aynı pin numaraları."""
+    def prop(k, v, y, hide=False):
+        e = [Sym('property'), k, v, [Sym('at'), Sym('0'), Sym(str(y)), Sym('0')]]
+        if hide: e.append([Sym('hide'), Sym('yes')])
+        e.append([Sym('effects'), [Sym('font'), [Sym('size'), Sym('1.27'), Sym('1.27')]]])
+        return e
+    def pin(t, x, y, a, nm, num):
+        return [Sym('pin'), Sym(t), Sym('line'), [Sym('at'), Sym(str(x)), Sym(str(y)), Sym(str(a))], [Sym('length'), Sym('2.54')],
+                [Sym('name'), nm, [Sym('effects'), [Sym('font'), [Sym('size'), Sym('1.27'), Sym('1.27')]]]],
+                [Sym('number'), num, [Sym('effects'), [Sym('font'), [Sym('size'), Sym('1.27'), Sym('1.27')]]]]]
+    return [Sym('symbol'), 'GridUp:MAX3485', [Sym('pin_names'), [Sym('offset'), Sym('1.016')]],
+            [Sym('exclude_from_sim'), Sym('no')], [Sym('in_bom'), Sym('yes')], [Sym('on_board'), Sym('yes')],
+            prop('Reference', 'U', 13.97), prop('Value', 'MAX3485', -13.97),
+            prop('Footprint', 'Package_SO:SOIC-8_3.9x4.9mm_P1.27mm', 0, True),
+            prop('Datasheet', 'https://www.analog.com/media/en/technical-documentation/data-sheets/MAX3483-MAX3491.pdf', 0, True),
+            prop('Description', 'RS-485 alici-verici 3,3 V yaricift', 0, True),
+            [Sym('symbol'), 'MAX3485_0_1',
+             [Sym('rectangle'), [Sym('start'), Sym('-7.62'), Sym('10.16')], [Sym('end'), Sym('7.62'), Sym('-10.16')],
+              [Sym('stroke'), [Sym('width'), Sym('0.254')], [Sym('type'), Sym('default')]], [Sym('fill'), [Sym('type'), Sym('background')]]]],
+            [Sym('symbol'), 'MAX3485_1_1',
+             pin('power_in', 0, 12.7, 270, 'VCC', '8'), pin('power_in', 0, -12.7, 90, 'GND', '5'),
+             pin('input', -10.16, 5.08, 0, 'DI', '4'), pin('input', -10.16, 0, 0, 'DE', '3'), pin('input', -10.16, -2.54, 0, '~{RE}', '2'), pin('output', -10.16, -5.08, 0, 'RO', '1'),
+             pin('bidirectional', 10.16, -2.54, 180, 'B', '7'), pin('bidirectional', 10.16, -7.62, 180, 'A', '6')]]
+
+def rac05_symbol():
+    """Converter_ACDC:RAC05-05SK kopyası; NC pini (3) kütüphanede gizli / 0 mm: diğer pinler gibi görünür yap
+    (sağda 2,54 mm bacak, pasif tip → sadece şemadaki mavi X görünür, kütüphane uyuşmazlığı uyarısı yok).
+    DC simgesi (kesikli+düz çizgi) NC yazısının altında kalmasın diye 2 mm sola.
+    lib_symbol sığ kopya döndürür (pin/polyline listeleri önbellekle ortak); bu fonksiyon iki kez çağrıldığından
+    (şema + GridUp.kicad_sym) kaydırma birikmesin diye derin kopya."""
+    sym = scale_pin_fonts(copy.deepcopy(lib_symbol('Converter_ACDC', 'RAC05-05SK')), SZ_PIN, SZ_PINNUM)
+    for unit in find(sym, 'symbol'):
+        for pin in find(unit, 'pin'):
+            if find1(pin, 'name')[1] == 'NC':
+                pin[:] = [x for x in pin if not (isinstance(x, list) and x and x[0] == Sym('hide'))]
+                pin[1] = Sym('passive')
+                find1(pin, 'at')[1:] = [Sym('10.16'), Sym('0'), Sym('180')]
+        for pl in find(unit, 'polyline'):
+            pts = find1(pl, 'pts')
+            xs_ = [float(xy[1]) for xy in pts[1:]]
+            if min(xs_) > 0 and max(xs_) - min(xs_) < 4:   # sağ yarıdaki kısa yatay çizgiler = DC simgesi
+                for xy in pts[1:]: xy[1] = Sym('%g' % (float(xy[1]) - 2.0))
+    sym[1] = 'GridUp:RAC05-05SK'
+    return sym
 
 # ---------------- şema ----------------
 def g(v): return Sym('%g' % round(v, 4))
@@ -153,7 +224,7 @@ def new_uuid():   # deterministik: aynı girdi → aynı dosya (diff sadece ger�
     return str(uuid.uuid5(uuid.UUID(ROOT_UUID), 'gridup-%d' % _uuid_n[0]))
 FONT = lambda: [Sym('effects'), [Sym('font'), [Sym('size'), Sym('1.27'), Sym('1.27')]]]
 # Yazı boyutları (mm). Hedef: doküman 1200 px genişlikte gömülünce etiket ≥ 8 px (içerik genişliği ~290 mm).
-SZ_LABEL, SZ_PROP, SZ_NOTE, SZ_HEAD, SZ_TITLE, SZ_PIN, SZ_PINNUM = 2.0, 1.7, 1.8, 2.2, 3.2, 1.6, 1.3
+SZ_LABEL, SZ_PROP, SZ_NOTE, SZ_HEAD, SZ_TITLE, SZ_PIN, SZ_PINNUM = 1.7, 1.7, 1.8, 2.2, 3.2, 1.6, 1.3
 # Net tipine göre renk (tel + etiket): elle SVG'deki lejantla aynı mantık
 COL = {'3V3': (198, 40, 40), '5V': (140, 0, 0), 'GND': (70, 70, 70), 'I2C': (21, 101, 192), 'UART': (106, 27, 154),
        'ANA': (230, 120, 0), 'DEF': (0, 132, 0)}
@@ -165,6 +236,7 @@ def net_color(name):
     if n in ('SDA', 'SCL'): return COL['I2C']
     if n.startswith(('U1', 'U0', 'USB', 'DE_RE')): return COL['UART']
     if n.startswith(('CT_', 'VSENSE', 'V_BIAS')): return COL['ANA']
+    if n.startswith('GPIO'): return COL['DEF']   # genişleme: 'diğer' yeşili
     return None
 def color_node(c, a=1.0): return [Sym('color'), Sym(str(c[0])), Sym(str(c[1])), Sym(str(c[2])), Sym('%g' % a)]
 
@@ -215,6 +287,8 @@ class Sch:
         self.pwr_n += 1
         lid = self.use('power', name)
         P = self.part(lid, '#PWR%02d' % self.pwr_n, name, at, rot); P.is_power = True
+        if rot == 0 and name != 'GND':   # ok yukarı: değer okun tam üstünde, ortalı (KiCad varsayılanı gibi)
+            P.val_at = (at[0], at[1] - 3.6); P.just = 'center'
         return P
     def flag(self, at, rot=0):
         self.pwr_n += 1
@@ -243,13 +317,13 @@ class Sch:
                            [Sym('uuid'), new_uuid()]])
     def nc(self, at):
         self.items.append([Sym('no_connect'), [Sym('at'), g(at[0]), g(at[1])], [Sym('uuid'), new_uuid()]])
-    def text(self, s, at, size=SZ_NOTE, bold=False, italic=False, rot=0, color=None):
+    def text(self, s, at, size=SZ_NOTE, bold=False, italic=False, rot=0, color=None, just='left'):
         font = [Sym('font'), [Sym('size'), g(size), g(size)]]
         if bold: font.append([Sym('bold'), Sym('yes')])
         if italic: font.append([Sym('italic'), Sym('yes')])
         if color: font.append(color_node(color))
         self.items.append([Sym('text'), s, [Sym('exclude_from_sim'), Sym('no')], [Sym('at'), g(at[0]), g(at[1]), Sym(str(rot))],
-                           [Sym('effects'), font, [Sym('justify'), Sym('left'), Sym('bottom')]], [Sym('uuid'), new_uuid()]])
+                           [Sym('effects'), font, [Sym('justify'), Sym(just), Sym('bottom')]], [Sym('uuid'), new_uuid()]])
     def rect(self, a, b, color=(120, 120, 120), tint=0.08, title=None):
         # kicad-cli SVG alfa uygulamıyor → dolgu açık ton (beyaza doğru karıştırılmış), çerçeve tam renk
         fill = tuple(int(round(255 - (255 - c) * tint)) for c in color)
@@ -293,7 +367,9 @@ class Sch:
             def prop(k, v, at, hide):
                 pe = [Sym('property'), k, v, [Sym('at'), g(at[0]), g(at[1]), Sym(pa)]]
                 if hide: pe.append([Sym('hide'), Sym('yes')])
-                pe.append([Sym('effects'), [Sym('font'), [Sym('size'), g(SZ_PROP), g(SZ_PROP)]], [Sym('justify'), Sym(getattr(P, 'just', 'left'))]])
+                fx = [Sym('effects'), [Sym('font'), [Sym('size'), g(SZ_PROP), g(SZ_PROP)]]]
+                if getattr(P, 'just', 'left') != 'center': fx.append([Sym('justify'), Sym(getattr(P, 'just', 'left'))])   # center = justify yok
+                pe.append(fx)
                 return pe
             e.append(prop('Reference', P.ref, ra, ispwr))
             e.append(prop('Value', P.value, va, P.hide_value))
@@ -317,11 +393,11 @@ def build():
        Ana hatlar tel: I²C bus (SDA x=124,46 / SCL x=127), CT_L1…N, UART1 ↔ MAX3485. Etiket: VSENSE, V_BIAS, 5V_RAW,
        servis/genişleme başlıkları (aynı ad = aynı net). Kaçınılmaz kesişmeler kicad-cli --draw-hop-over ile atlama yayı."""
     S = Sch()
-    S.libsyms['GridUp:MLX90640'] = mlx90640_symbol()
+    S.libsyms['GridUp:MLX90640'] = mlx90640_symbol(); S.libsyms['GridUp:SHT31'] = sht31_symbol(); S.libsyms['GridUp:MAX3485'] = max3485_symbol()
     R = S.use('Device', 'R'); C = S.use('Device', 'C'); CP = S.use('Device', 'C_Polarized')
     DS = S.use('Device', 'D_Schottky'); FU = S.use('Device', 'Fuse'); RV = S.use('Device', 'Varistor')
-    ESP = S.use('RF_Module', 'ESP32-S3-WROOM-1'); SHT = S.use('Sensor_Humidity', 'SHT31-DIS')
-    MAX = S.use('Interface_UART', 'MAX3485'); RAC = S.use('Converter_ACDC', 'RAC05-05SK')
+    ESP = S.use('RF_Module', 'ESP32-S3-WROOM-1'); SHT = 'GridUp:SHT31'
+    MAX = 'GridUp:MAX3485'; RAC = 'GridUp:RAC05-05SK'; S.libsyms[RAC] = rac05_symbol()
     LDO = S.use('Regulator_Linear', 'AP7361C-33E'); SW = S.use('Switch', 'SW_Push')
     BOOST = S.use('Regulator_Switching', 'TPS61099DRV'); IND = S.use('Device', 'L')
     C02 = S.use('Connector_Generic', 'Conn_01x02'); C03 = S.use('Connector_Generic', 'Conn_01x03')
@@ -343,8 +419,9 @@ def build():
 
     # ================= ORTA: ESP32-S3 =================
     S.rect((130.0, 42.0), (222.0, 150.0), COL['DEF'], title='ESP32-S3-WROOM-1U-N8 / Wi-Fi/BLE, U.FL anten')
-    U1 = S.part(ESP, 'U1', 'ESP32-S3-WROOM-1U-N8', (185.42, 100.33), ref_at=(195.58, 132.08), val_at=(195.58, 134.62),
+    U1 = S.part(ESP, 'U1', 'ESP32-S3-WROOM-1U-N8', (185.42, 100.33), ref_at=(171.2, 131.5), val_at=(183.0, 134.0),
                 footprint='RF_Module:ESP32-S3-WROOM-1U')
+    U1.just = 'right'   # ref/val GND teline sağdan dayalı
     S.pin_power(U1, '3V3', '+3V3'); S.pin_power(U1, '40', 'GND')      # 3V3 üst, GND alt (1/40/41 aynı nokta)
     for k, v in {'IO1': 'VSENSE', 'IO10': 'GPIO10', 'IO11': 'GPIO11'}.items(): S.pin_label(U1, k, v)
     for k, v in {'USB_D-': 'USB_DN', 'USB_D+': 'USB_DP', 'TXD0': 'U0TXD', 'RXD0': 'U0RXD'}.items(): S.pin_label(U1, k, v)
@@ -360,10 +437,10 @@ def build():
     S.wire(Ren.p('2'), n_en); S.pin_power(Ren, '1', '+3V3')
     Cen = S.part(C, 'C1', '1 µF', (149.86, en[1] + 3.81), ref_at=(143.51, en[1] + 2.54), val_at=(142.24, en[1] + 5.08))
     S.wire(n_en, Cen.p('1')); S.pin_power(Cen, '2', 'GND')
-    SW1 = S.part(SW, 'SW1', 'Reset', (137.16, en[1]), ref_at=(134.62, en[1] - 3.81), val_at=(133.35, en[1] - 6.35))
+    SW1 = S.part(SW, 'SW1', 'Reset', (140.97, en[1]), ref_at=(138.43, en[1] - 3.81), val_at=(137.16, en[1] - 6.35))
     S.wire(SW1.p('2'), n_en); S.junction(n_en)
     S.pin_power(SW1, '1', 'GND', L=2.54, rot=0)
-    S.text('EN: RC + reset butonu', (132.08, en[1] - 11.43), SZ_NOTE, italic=True)
+    S.text('EN: RC + reset butonu', (132.08, en[1] - 17.5), SZ_NOTE, italic=True)
 
     # ================= SOL ÜST: CT ön ucu ×4 → IO4–IO7 =================
     S.rect((27.94, 42.0), (121.0, 136.0), ANA, title='CT ×4 (analizör yoksa) / burden, V_bias, RC → ADC1')
@@ -376,14 +453,14 @@ def build():
         hot = J.p('1'); ret = J.p('2')
         nA = (60.96, hot[1]); S.wire(hot, nA, color=ANA)
         Rb = S.part(R, 'R%d' % (10 + k), 'R_burden', (60.96, hot[1] + 3.81), ref_at=(62.23, hot[1] + 1.27), val_at=(62.23, hot[1] + 3.81))
-        S.wire(nA, Rb.p('1')); S.junction(nA)
+        S.wire(nA, Rb.p('1'), color=ANA); S.junction(nA)
         nB2 = Rb.p('2'); S.wire(ret, (54.61, ret[1]), (54.61, nB2[1]), nB2, color=ANA); S.junction(nB2)   # CT dönüş → V_bias
         vb = (nB2[0], nB2[1] + 3.81); S.wire(nB2, vb, color=ANA); S.label('V_BIAS', vb, 0)
         Rr = S.part(R, 'R%d' % (20 + k), '1k', (76.2, hot[1]), rot=90, ref_at=(70.5, hot[1] - 2.0), val_at=(78.0, hot[1] - 2.0))
-        S.wire(nA, Rr.p('1'))
-        nB = (88.9, hot[1]); S.wire(Rr.p('2'), nB); S.junction(nB)
-        Cr = S.part(C, 'C%d' % (10 + k), '100 nF', (88.9, hot[1] + 3.81), ref_at=(90.17, hot[1] + 1.27), val_at=(90.17, hot[1] + 3.81))
-        S.wire(nB, Cr.p('1')); S.pin_power(Cr, '2', 'GND')
+        S.wire(nA, Rr.p('1'), color=ANA)
+        nB = (88.9, hot[1]); S.wire(Rr.p('2'), nB, color=ANA); S.junction(nB)
+        Cr = S.part(C, 'C%d' % (10 + k), '100 nF', (88.9, hot[1] + 3.81), ref_at=(91.8, hot[1] + 3.4), val_at=(91.8, hot[1] + 6.0))   # yazı çifti kapasitör ortasında
+        S.wire(nB, Cr.p('1'), color=ANA); S.pin_power(Cr, '2', 'GND')
         tx = trunk_x[k]; pe = U1.p(pin)
         S.wire(nB, (tx, hot[1]), (tx, pe[1]), pe, color=ANA)          # satır → dikey → ESP pini
         if abs(pe[1] - hot[1]) > 6:  S.label(['CT_L1', 'CT_L2', 'CT_L3', 'CT_N'][k], (tx, pe[1] - 1.27), 90)   # dikey gövde üstünde
@@ -391,33 +468,42 @@ def build():
     # V_bias = 3V3/2: 2× 100 kΩ + 10 µF (CT ön yargı)
     Rv1 = S.part(R, 'R30', '100k', (33.02, 114.3), ref_at=(34.29, 111.76), val_at=(34.29, 114.3))
     S.pin_power(Rv1, '1', '+3V3', L=2.54)
-    nV = (33.02, 120.65); S.wire(Rv1.p('2'), nV)
+    nV = (33.02, 120.65); S.wire(Rv1.p('2'), nV, color=ANA)
     Rv2 = S.part(R, 'R31', '100k', (33.02, 127.0), ref_at=(34.29, 124.46), val_at=(34.29, 127.0))
-    S.wire(nV, Rv2.p('1')); S.pin_power(Rv2, '2', 'GND', L=1.27)
-    S.wire(nV, (44.45, nV[1])); S.junction(nV)
+    S.wire(nV, Rv2.p('1'), color=ANA); S.pin_power(Rv2, '2', 'GND', L=1.27)
+    S.wire(nV, (44.45, nV[1]), color=ANA); S.junction(nV)
     Cv = S.part(C, 'C20', '10 µF', (44.45, 127.0), ref_at=(45.72, 124.46), val_at=(45.72, 127.0))
-    S.wire((44.45, nV[1]), Cv.p('1')); S.pin_power(Cv, '2', 'GND', L=1.27); S.junction((44.45, nV[1]))
+    S.wire((44.45, nV[1]), Cv.p('1'), color=ANA); S.pin_power(Cv, '2', 'GND', L=1.27); S.junction((44.45, nV[1]))
     S.wire((44.45, nV[1]), (53.34, nV[1]), color=ANA); S.label('V_BIAS', (53.34, nV[1]), 0)
-    S.text('V_bias = 3V3/2 (CT ön yargı)', (66.04, 121.92), SZ_NOTE, italic=True)
+    S.text('V_BIAS = 3V3 / 2 = 1,65 V (CT DC ofseti)', (66.04, 121.92), SZ_NOTE, italic=True)
+    S.text('R_burden = 1,5 V / CT sekonder tepe akımı', (66.04, 124.46), SZ_NOTE, italic=True)
+    S.text('(CT oranına göre; CT senaryosu 02-bom §2.3)', (66.04, 127.0), SZ_NOTE, italic=True)
 
     # ================= SOL ALT: I²C sensörler → IO8/IO9 (bus) =================
     S.rect((27.94, 139.7), (121.0, 214.63), I2C, title='I²C / MLX90640 0x33 + SHT31 0x44, tek hat 400 kHz+')
     BX_SDA, BX_SCL = 124.46, 127.0
     sda_pin, scl_pin = U1.p('IO8'), U1.p('IO9')
-    U2 = S.part('GridUp:MLX90640', 'U2', 'MLX90640ESF-BAA', (69.85, 163.83), ref_at=(48.26, 163.83), val_at=(43.18, 166.37),
+    U2 = S.part('GridUp:MLX90640', 'U2', 'MLX90640ESF-BAA', (69.85, 163.83), ref_at=(35.56, 167.64), val_at=(35.56, 170.18),
                 footprint='Package_TO_SOT_THT:TO-39-4')
     S.pin_power(U2, 'GND', 'GND')
-    vdd = U2.p('VDD'); n_vdd = (69.85, vdd[1] - 3.81); S.wire(vdd, n_vdd); S.power('+3V3', n_vdd)
-    S.wire(n_vdd, (57.15, n_vdd[1])); S.junction(n_vdd)
-    Cm1 = S.part(C, 'C2', '100 nF', (57.15, n_vdd[1] + 3.81), ref_at=(50.8, n_vdd[1] + 2.54), val_at=(48.26, n_vdd[1] + 5.08))
-    S.wire((57.15, n_vdd[1]), Cm1.p('1')); S.pin_power(Cm1, '2', 'GND')
-    S.text('termal dizi 32×24, 110°×75°, ≤23 mA', (33.02, 184.85), SZ_NOTE, italic=True)
-    U3 = S.part(SHT, 'U3', 'SHT31-DIS-B', (69.85, 199.39), ref_at=(46.99, 189.23), val_at=(46.99, 191.77),
+    vdd = U2.p('VDD'); n_vdd = (69.85, vdd[1] - 1.27); S.wire(vdd, n_vdd, color=COL['3V3']); S.power('+3V3', n_vdd)
+    S.wire(n_vdd, (52.07, n_vdd[1]), color=COL['3V3']); S.junction(n_vdd)
+    Cm1 = S.part(C, 'C2', '100 nF', (52.07, n_vdd[1] + 3.81), ref_at=(44.45, n_vdd[1] + 2.54), val_at=(41.66, n_vdd[1] + 6.1))
+    S.wire((52.07, n_vdd[1]), Cm1.p('1'), color=COL['3V3']); Pc = S.pin_power(Cm1, '2', 'GND')
+    Pc.val_at = (Cm1.p('2')[0] - 2.0, Cm1.p('2')[1] + 2.54 + 1.27); Pc.just = 'right'   # GND etiketi solda (sağda U2 kutusu)
+    S.text('termal dizi 32×24, ≤23 mA', (30.5, 179.6), SZ_NOTE, italic=True)
+    S.text('görüş açısı 110°×75°', (30.5, 182.4), SZ_NOTE, italic=True)
+    U3 = S.part(SHT, 'U3', 'SHT31-DIS-B', (69.85, 196.85), ref_at=(35.56, 203.5), val_at=(35.56, 206.0),
                 footprint='Sensor_Humidity:Sensirion_DFN-8-1EP_2.5x2.5mm_P0.5mm_EP1.1x1.7mm')
-    S.pin_power(U3, 'VDD', '+3V3'); S.pin_power(U3, '8', 'GND')
-    S.pin_power(U3, 'ADDR', 'GND', L=10.16, rot=270); S.pin_power(U3, '~{RESET}', '+3V3', L=15.24, rot=90)
+    v3 = U3.p('VDD'); n3 = (v3[0], v3[1] - 1.27); S.wire(v3, n3, (62.23, n3[1]), color=net_color('+3V3')); S.power('+3V3', (62.23, n3[1]))   # ok solda: U2 GND ile karşı karşıya durmasın
+    S.pin_power(U3, '8', 'GND')
+    Pg = S.pin_power(U3, 'ADDR', 'GND', L=10.16, rot=270); Pv = S.pin_power(U3, '~{RESET}', '+3V3', L=15.24, rot=90)
+    ga, ra = U3.p('ADDR'), U3.p('~{RESET}')
+    Pg.val_at = (ga[0] - 10.16 - 1.27, ga[1] - 2.0); Pg.just = 'center'        # yatay GND: etiket sembolün üstünde
+    Pv.val_at = (ra[0] - 15.24 - 1.27, ra[1] + 3.3); Pv.just = 'center'        # yatay +3V3: etiket sembolün altında
     S.pin_nc(U3, 'ALERT'); S.pin_nc(U3, 'R')
-    S.text('sıcaklık + nem (ADDR → GND: 0x44)', (78.74, 212.35), SZ_NOTE, italic=True)
+    S.text('sıcaklık + nem', (119.5, 209.5), SZ_NOTE, italic=True, just='right')
+    S.text('ADDR → GND: 0x44', (119.5, 212.35), SZ_NOTE, italic=True, just='right')
     # bus: SDA x=124,46 (IO8 satırından SHT SDA'ya), SCL x=127 (IO9 satırından SHT SCL'ye)
     m_sda, m_scl, s_sda, s_scl = U2.p('SDA'), U2.p('SCL'), U3.p('SDA'), U3.p('SCL')
     S.wire(sda_pin, (BX_SDA, sda_pin[1]), (BX_SDA, s_sda[1]), color=I2C)
@@ -425,152 +511,166 @@ def build():
     S.wire(m_sda, (BX_SDA, m_sda[1]), color=I2C); S.junction((BX_SDA, m_sda[1]))
     S.wire(m_scl, (BX_SCL, m_scl[1]), color=I2C); S.junction((BX_SCL, m_scl[1]))     # SDA dikeyini keser → atlama
     S.wire(s_sda, (BX_SDA, s_sda[1]), color=I2C); S.wire(s_scl, (BX_SCL, s_scl[1]), color=I2C)
-    S.label('SDA', (BX_SDA + 1.27, sda_pin[1]), 0); S.label('SCL', (BX_SCL + 1.27 + 6.35, scl_pin[1]), 0)
+    S.label('SDA', (BX_SCL + 1.27 + 6.35, sda_pin[1]), 0); S.label('SCL', (BX_SCL + 1.27 + 6.35, scl_pin[1]), 0)   # ikisi aynı x, alt alta; dikey tel kesmesin
     # pull-up'lar 2× 4,7 kΩ → 3V3
-    for i, (x, bx, net) in enumerate([(100.33, BX_SDA, 'SDA'), (113.03, BX_SCL, 'SCL')]):
+    for i, (x, bx, net) in enumerate([(113.03, BX_SDA, 'SDA'), (100.33, BX_SCL, 'SCL')]):   # SDA sağda/üstte, SCL solda/altta → yatay teller gövde kesmez
         yb = 184.15 + i * 5.08
-        Rp = S.part(R, 'R%d' % (2 + i), '4,7k', (x, yb - 3.81), ref_at=(x - 8.0, yb - 6.35), val_at=(x - 8.0, yb - 3.81))
+        Rp = S.part(R, 'R%d' % (2 + i), '4,7k', (x, yb - 3.81), ref_at=(x - 6.0, yb - 6.35), val_at=(x - 6.6, yb - 3.81))
         S.pin_power(Rp, '1', '+3V3', L=1.27)
         S.wire(Rp.p('2'), (x, yb), (bx, yb), color=I2C); S.junction((bx, yb))
-    S.text('2× 4,7 kΩ pull-up → 3V3', (88.9, 194.35), SZ_NOTE, italic=True)
 
     # ================= SAĞ SÜTUN =================
     # servis başlığı (etiket / sahada bağlı değil)
     S.rect((222.0, 42.0), (322.0, 58.0), UART, title='Servis başlığı / USB + UART0, sahada bağlı değil')
-    J9 = S.part(C04, 'J9', 'Servis USB/UART0', (259.08, 50.8), ref_at=(263.0, 48.0), val_at=(263.0, 57.0),
+    J9 = S.part(C04, 'J9', 'Servis USB/UART0', (259.08, 50.8), ref_at=(263.0, 49.0), val_at=(263.0, 52.0),
                 footprint='Connector_PinHeader_2.54mm:PinHeader_1x04_P2.54mm_Vertical')
     for num, net in [('1', 'U0TXD'), ('2', 'U0RXD'), ('3', 'USB_DN'), ('4', 'USB_DP')]: S.pin_label(J9, num, net)
     # RS-485: MAX3485 aynalı (mirror x) → DI / DE / RE / RO sırası ESP IO17 / IO21 / IO18 ile kesişmesiz
     S.rect((222.0, 60.5), (322.0, 116.0), UART, title='RS-485 / Modbus RTU / MAX3485 3,3 V, yarıçift, 120 Ω sonlandırma')
-    U4 = S.part(MAX, 'U4', 'MAX3485', (254.0, 87.63), mirror='x', ref_at=(236.22, 73.66), val_at=(236.22, 76.2),
+    U4 = S.part(MAX, 'U4', 'MAX3485', (254.0, 87.63), ref_at=(233.68, 73.66), val_at=(233.68, 76.2),
                 footprint='Package_SO:SOIC-8_3.9x4.9mm_P1.27mm')
-    S.pin_power(U4, 'VCC', '+3V3', L=2.54, rot=90); S.pin_power(U4, 'GND', 'GND', L=2.54, rot=270)   # aynalı çip: güç sembolleri yatay
+    S.pin_power(U4, 'VCC', '+3V3'); S.pin_power(U4, 'GND', 'GND')
     di, de, re_, ro = U4.p('DI'), U4.p('DE'), U4.p('~{RE}'), U4.p('RO')
     p17, p18, p21 = U1.p('IO17'), U1.p('IO18'), U1.p('IO21')
     S.wire(p17, di, color=UART)                                                     # IO17 (U1TXD) → DI, düz
     n_de = (de[0] - 3.81, de[1]); n_re = (re_[0] - 3.81, re_[1])
     S.wire(de, n_de, n_re, re_, color=UART); S.junction(n_re)
-    S.wire(p21, (222.25, p21[1]), (222.25, n_re[1]), n_re, color=UART)              # IO21 (DE/RE) → RE+DE
-    S.wire(p18, (226.06, p18[1]), (226.06, ro[1]), ro, color=UART)                  # IO18 (U1RXD) → RO
+    S.wire(p21, (226.06, p21[1]), (226.06, n_re[1]), n_re, color=UART)              # IO21 (DE/RE) → RE+DE
+    S.wire(p18, (232.41, p18[1]), (232.41, ro[1]), ro, color=UART)                  # IO18 (U1RXD) → RO
     S.label('U1TXD', (205.74, p17[1]), 0); S.label('DE_RE', (205.74, p21[1]), 0); S.label('U1RXD', (205.74, p18[1]), 0)
     A, B = U4.p('A'), U4.p('B')
-    J7 = S.part(C03, 'J7', 'RS-485 klemens B / GND / A', (287.02, (A[1] + B[1]) / 2), ref_at=(284.48, min(A[1], B[1]) - 6.35), val_at=(279.4, max(A[1], B[1]) + 5.08),
+    ym = (A[1] + B[1]) / 2
+    J7 = S.part(C03, 'J7', 'RS-485 klemens', (292.1, ym), ref_at=(290.3, min(A[1], B[1]) - 3.6), val_at=(294.2, ym - 1.5),
                 footprint='TerminalBlock_Phoenix:TerminalBlock_Phoenix_MKDS-3-3-5.08_1x03_P5.08mm_Horizontal')
+    S.text('1 B / 2 GND / 3 A', (295.5, ym + 2.3), SZ_PROP, color=(0, 100, 100))   # değerin 2. satırı (KiCad değeri tek satır)
     pT, pG, pB = J7.p('1'), J7.p('2'), J7.p('3')       # üst / orta / alt
     top, bot = (B, A) if B[1] < A[1] else (A, B)
     S.wire(top, (pT[0], top[1]), pT, color=UART); S.wire(bot, (pB[0], bot[1]), pB, color=UART)
-    Rt = S.part(R, 'R40', '120 Ω', (271.78, (A[1] + B[1]) / 2), ref_at=(273.05, min(A[1], B[1]) - 0.5), val_at=(273.05, max(A[1], B[1]) + 0.5))
-    S.wire((271.78, top[1]), Rt.p('1')); S.wire((271.78, bot[1]), Rt.p('2')); S.junction((271.78, top[1])); S.junction((271.78, bot[1]))
-    S.pin_power(J7, '2', 'GND', L=7.62, rot=270)
-    S.text('→ enerji analizörü (slave 1, akım) / TVOC-2 (slave 2, yalnız trip-diag.)', (236.22, 110.0), SZ_NOTE, italic=True)
+    Rt = S.part(R, 'R40', '120 Ω', (274.32, (A[1] + B[1]) / 2), ref_at=(267.5, min(A[1], B[1]) + 2.2), val_at=(270.5, max(A[1], B[1]) + 3.2))
+    S.wire((274.32, top[1]), Rt.p('1'), color=UART); S.wire((274.32, bot[1]), Rt.p('2'), color=UART); S.junction((274.32, top[1])); S.junction((274.32, bot[1]))
+    Pj = S.pin_power(J7, '2', 'GND', L=7.62, rot=270); Pj.val_at = (pG[0] - 7.62 + 0.8, pG[1] - 1.1); Pj.just = 'center'   # yatay GND: etiket B/A telleri arasında
+    S.text('hat: enerji analizörü (akım) / TVOC-2 (yalnız trip-diag.); ayrı slave adresleri', (236.22, 110.0), SZ_NOTE, italic=True)
     S.text('A/B bükümlü çift, ekranlı; son cihazda 2. 120 Ω', (236.22, 113.0), SZ_NOTE, italic=True)
     # anten
     S.rect((222.0, 119.0), (322.0, 150.0), COL['DEF'], title='Anten / U.FL pigtail → SMA panel → dış anten (pano dış yüzü)')
-    J8 = S.part(COAX, 'J8', 'SMA panel', (259.08, 133.35), ref_at=(261.62, 128.27), val_at=(261.62, 138.43), footprint='Connector_Coaxial:SMA_Amphenol_132134_Vertical')
+    J8 = S.part(COAX, 'J8', 'SMA panel', (259.08, 133.35), ref_at=(262.9, 131.6), val_at=(262.9, 134.4), footprint='Connector_Coaxial:SMA_Amphenol_132134_Vertical')
     S.pin_nc(J8, '1'); S.pin_power(J8, '2', 'GND')
-    S.text('U.FL pigtail (modül konnektörü) / RF, şemada net değil; mevcut kablo girişinden', (236.22, 147.5), SZ_NOTE, italic=True)
+    S.text('U.FL pigtail (modül konnektörü) / RF, şemada net değil; mevcut kablo girişinden', (228.6, 147.5), SZ_NOTE, italic=True)
     # genişleme
     S.rect((222.0, 153.0), (322.0, 190.0), COL['DEF'], title='Genişleme 2×5 (boş) / PD / akustik için ayrılmış (§7.1); kör tapa')
     J6 = S.part(C25, 'J6', 'Genişleme 2×5', (262.89, 173.99), ref_at=(264.16, 163.5), val_at=(257.81, 184.0), footprint='Connector_PinHeader_2.54mm:PinHeader_2x05_P2.54mm_Vertical')
     for num, name, dx in [('1', '+3V3', -3.81), ('2', '+5V', 3.81)]:
         a0 = J6.p(num); b0 = (a0[0] + dx, a0[1]); c0 = (b0[0], b0[1] - 5.08)
         S.wire(a0, b0, c0, color=net_color(name)); S.power(name, c0)
-    S.pin_power(J6, '3', 'GND', L=20.32, rot=0); S.pin_power(J6, '4', 'GND', L=11.43, rot=0)
+    g3 = S.pin_power(J6, '3', 'GND', L=22.86, rot=270); g4 = S.pin_power(J6, '4', 'GND', L=15.24, rot=90)   # yatay GND, düz gider
+    p3, p4 = J6.p('3'), J6.p('4')
+    g3.val_at = (p3[0] - 22.86 - 1.3, p3[1] - 1.6); g3.just = 'center'
+    g4.val_at = (p4[0] + 15.24 + 1.3, p4[1] - 1.6); g4.just = 'center'
     S.pin_label(J6, '5', 'SDA'); S.pin_label(J6, '6', 'SCL'); S.pin_label(J6, '7', 'GPIO10'); S.pin_label(J6, '8', 'GPIO11')
     S.pin_nc(J6, '9'); S.pin_nc(J6, '10')
 
     # ================= ALT: Besleme =================
     S.rect((25.4, 216.4), (322.0, 280.0), COL['5V'], title='Besleme / 230 V iç ihtiyaç → RAC05 5 V → D1 (OR) → 5 V rayı → LDO 3V3; yedek: 2× süperkap seri → boost 4,6 V → D2; algılama D1 öncesi (§3.4, §7.3)')
     yL = 228.6
-    J1 = S.part(C03, 'J1', 'İç ihtiyaç L / N / PE', (43.18, yL + 2.54), mirror='y', ref_at=(36.83, yL - 6.35), val_at=(33.5, yL - 3.81),
+    J1 = S.part(C03, 'J1', 'İç ihtiyaç L / N / PE', (43.18, yL + 2.54), mirror='y', ref_at=(33.8, yL - 6.35), val_at=(30.5, yL - 3.81),
                 footprint='TerminalBlock_Phoenix:TerminalBlock_Phoenix_MKDS-3-3-5.08_1x03_P5.08mm_Horizontal')
     J1.just = 'right'   # aynalı sembol: hiza da aynalanır (bkz. CT klemensleri)
     pL, pN, pPE = J1.p('1'), J1.p('2'), J1.p('3')
-    F1 = S.part(FU, 'F1', 'sigorta', (58.42, pL[1]), rot=90, ref_at=(62.5, pL[1] - 7.62), val_at=(61.0, pL[1] - 5.08))
+    F1 = S.part(FU, 'F1', 'T 1 A', (62.23, pL[1]), rot=90, ref_at=(62.23, pL[1] - 5.2), val_at=(62.23, pL[1] - 2.7)); F1.just = 'center'   # yazı sigortanın tam üstünde
     S.wire(pL, F1.p('1'), color=COL['5V'])
     U5 = S.part(RAC, 'U5', 'RAC05-05SK/277', (88.9, pN[1]), ref_at=(76.2, pL[1] + 9.5), val_at=(76.2, pL[1] + 12.0),
                 footprint='Converter_ACDC:Converter_ACDC_RECOM_RAC05-xxSK_THT')
     ac_l, ac_n = U5.p('AC(L)'), U5.p('AC(N)')
     S.wire(F1.p('2'), (F1.p('2')[0], ac_l[1]), ac_l, color=COL['5V'])
     S.wire(pN, (66.04, pN[1]), (66.04, ac_n[1]), ac_n, color=COL['5V'])
-    RV1 = S.part(RV, 'RV1', 'MOV', (71.12, (ac_l[1] + ac_n[1]) / 2), ref_at=(72.39, ac_l[1] - 0.5), val_at=(72.39, ac_n[1] + 0.5))
-    S.wire((71.12, ac_l[1]), RV1.p('1')); S.wire((71.12, ac_n[1]), RV1.p('2')); S.junction((71.12, ac_l[1])); S.junction((71.12, ac_n[1]))
-    S.wire(pPE, (pPE[0] + 2.54, pPE[1]), (pPE[0] + 2.54, pPE[1] + 5.08), color=COL['GND']); S.power('Earth_Protective', (pPE[0] + 2.54, pPE[1] + 5.08))
+    RV1 = S.part(RV, 'RV1', 'MOV 275 V', (71.12, (ac_l[1] + ac_n[1]) / 2), ref_at=(73.0, ac_l[1] - 6.3), val_at=(77.4, ac_l[1] - 6.3))   # etiketler L hattının üstünde, gövdeden kılavuz çizgi
+    S.gline((72.5, ac_l[1] + 1.7), (73.9, ac_l[1] - 5.6), COL['GND'], 0.2)
+    S.wire((71.12, ac_l[1]), RV1.p('1'), color=COL['5V']); S.wire((71.12, ac_n[1]), RV1.p('2'), color=COL['5V']); S.junction((71.12, ac_l[1])); S.junction((71.12, ac_n[1]))
+    S.wire(pPE, (pPE[0] + 2.54, pPE[1]), (pPE[0] + 2.54, pPE[1] + 5.08), color=COL['GND']); PEs = S.power('Earth_Protective', (pPE[0] + 2.54, pPE[1] + 5.08)); PEs.hide_value = True; S.text('PE', (pPE[0] + 4.6, pPE[1] + 7.2), SZ_PROP, color=COL['GND'])
     S.flag((pPE[0] + 2.54, pPE[1] + 2.54)); S.junction((pPE[0] + 2.54, pPE[1] + 2.54))   # PE dış kaynak
-    S.flag((F1.p('2')[0] + 2.54, ac_l[1])); S.junction((F1.p('2')[0] + 2.54, ac_l[1]))   # L dış kaynak (ERC)
+    S.flag((F1.p('2')[0] + 2.54, ac_l[1])); S.junction((F1.p('2')[0] + 2.54, ac_l[1]))   # L dış kaynak (ERC); sigorta sonrası net
     S.flag((66.04, ac_n[1]), rot=180); S.junction((66.04, ac_n[1]))                     # N dış kaynak (ERC)
-    S.text('PE → panonun koruma iletkeni; kutu metal ise gövde PE', (30.48, pPE[1] + 12.7), SZ_NOTE, italic=True)
     S.pin_nc(U5, 'NC')
-    vout = U5.p('+Vout'); S.pin_power(U5, '-Vout', 'GND', L=2.54, rot=0)
-    # 5V_RAW → D1 → +5V rayı
+    vout = U5.p('+Vout'); Pg5 = S.pin_power(U5, '-Vout', 'GND', L=2.54, rot=0)
+    Pg5.val_at = (U5.p('-Vout')[0] + 2.54, U5.p('-Vout')[1] + 4.2); Pg5.just = 'center'   # GND yazısı üçgenin altında, ortalı
+    # 5V_RAW → D1 → +5V rayı (ray sağa doğru: D2 dönüşü, +5V, C30, LDO, +3V3)
     nRaw = (vout[0] + 12.7, vout[1]); S.wire(vout, nRaw, color=COL['5V']); S.junction(nRaw)
     S.label('5V_RAW', (vout[0] + 1.27, vout[1]), 0)
-    D1 = S.part(DS, 'D1', 'Schottky (OR)', (nRaw[0] + 6.35, vout[1]), mirror='y', ref_at=(nRaw[0] + 2.54, vout[1] - 6.35), val_at=(nRaw[0] + 2.54, vout[1] - 3.81))
+    D1 = S.part(DS, 'D1', 'SS34 (OR)', (nRaw[0] + 6.35, vout[1]), mirror='y', ref_at=(nRaw[0] + 6.35, vout[1] - 5.6), val_at=(nRaw[0] + 6.35, vout[1] - 3.2)); D1.just = 'center'   # diyotun tam üstünde
     S.wire(nRaw, D1.p('A'), color=COL['5V'])
-    rail_y = vout[1]
-    U6 = S.part(LDO, 'U6', 'AP7361C-33E 3,3 V / 1 A', (185.42, rail_y), ref_at=(177.8, rail_y + 16.5), val_at=(177.8, rail_y + 19.0),
-                footprint='Package_TO_SOT_SMD:SOT-223-3_TabPin2')
+    rail_y = vout[1]; ry = rail_y
+    U6 = S.part(LDO, 'U6', 'AP7361C-33E 3,3 V / 1 A', (248.92, rail_y), ref_at=(248.92, rail_y - 6.0), val_at=(248.92, rail_y - 3.5),
+                footprint='Package_TO_SOT_SMD:SOT-223-3_TabPin2'); U6.just = 'center'   # yazılar kutunun üstünde, ortalı
     vi, vo = U6.p('VI'), U6.p('VO')
     S.wire(D1.p('K'), vi, color=COL['5V'])
-    S.pin_power(U6, 'GND', 'GND')
-    x5 = 156.21; S.power('+5V', (x5, rail_y)); S.junction((x5, rail_y)); S.flag((x5 + 5.08, rail_y)); S.junction((x5 + 5.08, rail_y))
-    Ci = S.part(C, 'C30', '10 µF', (166.37, rail_y + 3.81), ref_at=(167.64, rail_y + 1.27), val_at=(167.64, rail_y + 3.81))
-    S.wire((166.37, rail_y), Ci.p('1')); S.pin_power(Ci, '2', 'GND'); S.junction((166.37, rail_y))
+    Pg6 = S.pin_power(U6, 'GND', 'GND'); Pg6.val_at = (U6.p('GND')[0] + 1.7, U6.p('GND')[1] + 2.54 + 1.3)   # GND yazısı sembole yakın
+    x5 = 218.44; S.power('+5V', (x5, rail_y)); S.junction((x5, rail_y)); S.flag((x5 + 5.08, rail_y)); S.junction((x5 + 5.08, rail_y))
+    Ci = S.part(C, 'C30', '10 µF', (231.14, rail_y + 3.81), ref_at=(233.3, rail_y + 3.4), val_at=(233.3, rail_y + 6.0))
+    S.wire((231.14, rail_y), Ci.p('1'), color=COL['5V']); Pgi = S.pin_power(Ci, '2', 'GND'); S.junction((231.14, rail_y))
+    Pgi.val_at = (Ci.p('2')[0] + 1.7, Ci.p('2')[1] + 2.54 + 1.3)
     n3 = (vo[0] + 7.62, vo[1]); S.wire(vo, n3, color=COL['3V3']); S.junction(n3); S.power('+3V3', (n3[0] + 5.08, rail_y)); S.wire(n3, (n3[0] + 5.08, rail_y), color=COL['3V3'])
-    Co = S.part(C, 'C31', '10 µF', (n3[0], rail_y + 3.81), ref_at=(n3[0] + 1.27, rail_y + 1.27), val_at=(n3[0] + 1.27, rail_y + 3.81))
-    S.wire(n3, Co.p('1')); S.pin_power(Co, '2', 'GND')
-    S.text('3V3 rayı → ESP32 / MLX90640 / SHT31 / RS-485 / CT bias / genişleme', (n3[0] + 22.0, rail_y + 16.5), SZ_NOTE, italic=True)
-    S.text('Bütçe: ESP32 Wi-Fi tepe ~350 mA + MLX 23 mA + SHT31 <2 mA + RS-485 ~10 mA', (n3[0] + 22.0, rail_y + 19.0), SZ_NOTE, italic=True)
-    S.text('→ 5 V/1 A modül; LDO dropout ≈0,3 V (yedekte ray 4,3 V)', (n3[0] + 22.0, rail_y + 21.5), SZ_NOTE, italic=True)
+    Co = S.part(C, 'C31', '10 µF', (n3[0], rail_y + 3.81), ref_at=(n3[0] + 2.1, rail_y + 3.4), val_at=(n3[0] + 2.1, rail_y + 6.0))
+    S.wire(n3, Co.p('1'), color=COL['3V3']); Pgo = S.pin_power(Co, '2', 'GND'); Pgo.val_at = (Co.p('2')[0] + 1.7, Co.p('2')[1] + 2.54 + 1.3)
     # besleme algılama bölücü (D1 öncesi) → VSENSE etiketi (IO1)
     xd = nRaw[0]
     Rd1 = S.part(R, 'R50', '100k', (xd, rail_y + 7.62), ref_at=(xd + 1.27, rail_y + 5.08), val_at=(xd + 1.27, rail_y + 7.62))
-    S.wire(nRaw, Rd1.p('1'))
-    nS = (xd, rail_y + 13.97); S.wire(Rd1.p('2'), nS); S.junction(nS)
+    S.wire(nRaw, Rd1.p('1'), color=COL['5V'])
+    nS = (xd, rail_y + 13.97); S.wire(Rd1.p('2'), nS, color=ANA); S.junction(nS)
     Rd2 = S.part(R, 'R51', '47k', (xd, rail_y + 20.32), ref_at=(xd + 1.27, rail_y + 17.78), val_at=(xd + 1.27, rail_y + 20.32))
-    S.wire(nS, Rd2.p('1')); S.pin_power(Rd2, '2', 'GND')
+    S.wire(nS, Rd2.p('1'), color=ANA); Pg51 = S.pin_power(Rd2, '2', 'GND'); Pg51.val_at = (Rd2.p('2')[0] + 1.7, Rd2.p('2')[1] + 2.54 + 1.3)
     S.wire(nS, (xd + 5.08, nS[1]), color=ANA); S.label('VSENSE', (xd + 5.08, nS[1]), 0)
-    S.text('100k/47k → GPIO1 ADC1_CH0: şebeke var/yok → modul_durum.besleme', (35.56, rail_y + 32.5), SZ_NOTE, italic=True)
     # süperkap yedek: ray → R_şarj → C32 + C33 (2× HV 2,7 V seri, dengeleme R53/R54) → GND; C_sc → U7 boost 4,6 V → D2 → ray
-    xs = 133.35; ry = rail_y
+    xs = 133.35
     S.junction((xs, ry))
-    Rs = S.part(R, 'R52', 'R_şarj 22 Ω', (xs, ry + 7.62), ref_at=(xs + 1.27, ry + 5.08), val_at=(xs + 1.27, ry + 7.62))
-    S.wire((xs, ry), Rs.p('1'))
+    Rs = S.part(R, 'R52', 'R_şarj 22 Ω', (xs, ry + 7.62), ref_at=(xs + 1.27, ry + 5.08), val_at=(xs - 0.4, ry + 7.62))   # Arial'da ortalı yazı sağa kayıyor → sola telafi
+    S.wire((xs, ry), Rs.p('1'), color=COL['5V'])
     nC = (xs, ry + 13.97); S.wire(Rs.p('2'), nC); S.junction(nC)
-    C32 = S.part(CP, 'C32', 'HV 10 F', (xs, ry + 20.32), ref_at=(xs - 2.54, ry + 19.05), val_at=(xs - 2.54, ry + 21.59)); C32.just = 'right'
+    C32 = S.part(CP, 'C32', 'HV 10 F', (xs, ry + 20.32), ref_at=(xs - 2.54, ry + 19.05), val_at=(xs - 1.9, ry + 21.59)); C32.just = 'right'
     nM = (xs, ry + 24.13); S.wire(nC, C32.p('1')); S.wire(C32.p('2'), nM); S.junction(nM)
-    C33 = S.part(CP, 'C33', 'HV 10 F', (xs, ry + 30.48), ref_at=(xs - 2.54, ry + 29.21), val_at=(xs - 2.54, ry + 31.75)); C33.just = 'right'
-    nG = (xs, ry + 34.29); S.wire(nM, C33.p('1')); S.wire(C33.p('2'), nG); S.junction(nG); S.power('GND', nG, 0)
-    xb = xs + 6.35   # dengeleme dirençleri (hücre başına 10 k)
+    C33 = S.part(CP, 'C33', 'HV 10 F', (xs, ry + 30.48), ref_at=(xs - 2.54, ry + 29.21), val_at=(xs - 1.9, ry + 31.75)); C33.just = 'right'
+    nG = (xs, ry + 34.29); S.wire(nM, C33.p('1')); S.wire(C33.p('2'), nG, color=COL['GND']); S.junction(nG); S.power('GND', nG, 0)
+    xb = xs + 10.16   # dengeleme dirençleri (hücre başına 10 k); süperkap etiketlerine yer kalsın diye 10 mm sağda
     R53 = S.part(R, 'R53', '10k', (xb, ry + 20.32), ref_at=(xb + 1.27, ry + 17.78), val_at=(xb + 1.27, ry + 20.32))
     R54 = S.part(R, 'R54', '10k', (xb, ry + 30.48), ref_at=(xb + 1.27, ry + 27.94), val_at=(xb + 1.27, ry + 30.48))
     S.wire((xb, nC[1]), R53.p('1')); S.wire(R53.p('2'), (xb, nM[1]), nM); S.junction((xb, nC[1])); S.junction((xb, nM[1]))
-    S.wire((xb, nM[1]), R54.p('1')); S.wire(R54.p('2'), (xb, nG[1]), nG)
-    # boost U7: VI/EN sol, SW/VOUT/FB sağ, GND alt
-    U7 = S.part(BOOST, 'U7', 'TPS61099 4,6 V', (154.94, ry + 19.05), ref_at=(146.5, ry + 26.0), val_at=(146.5, ry + 30.0),
-                footprint='Package_SON:WSON-6-1EP_2x2mm_P0.65mm_EP1x1.6mm')
+    S.wire((xb, nM[1]), R54.p('1')); S.wire(R54.p('2'), (xb, nG[1]), nG, color=COL['GND'])
+    # boost U7: VI/EN sol, SW/VOUT/FB sağ, GND alt. Gövde küçük → pin adları küçük yazı (VOUT/GND üst üste binmesin)
+    S.libsyms[BOOST] = scale_pin_fonts(S.libsyms[BOOST], 1.1, 1.0)
+    ux = 170.18
+    U7 = S.part(BOOST, 'U7', 'TPS61099 4,6 V', (ux, ry + 19.05), ref_at=(ux, ry + 32.3), val_at=(ux, ry + 35.0),
+                footprint='Package_SON:WSON-6-1EP_2x2mm_P0.65mm_EP1x1.6mm'); U7.just = 'center'   # GND sembolünün altında, ortalı
     vi, en, sw, vb, fb = U7.p('VI'), U7.p('EN'), U7.p('SW'), U7.p('VOUT'), U7.p('FB')
-    S.wire(nC, vi); S.junction(vi); S.wire(vi, en)                       # EN = VI (hep açık; Vin < Vout iken yükseltir)
+    S.wire(nC, (xb, nC[1]), vi); S.junction(vi); S.wire(vi, en)         # EN = VI (hep açık; Vin < Vout iken yükseltir)
     S.flag((vi[0] - 3.81, vi[1])); S.junction((vi[0] - 3.81, vi[1]))     # süperkap düğümü: dış kaynak (ERC)
-    L1 = S.part(IND, 'L1', '2,2 µH', (154.94, ry + 8.89), rot=90, ref_at=(149.86, ry + 7.0), val_at=(153.0, ry + 7.0))
+    L1 = S.part(IND, 'L1', '2,2 µH', (ux, ry + 8.89), rot=90, ref_at=(ux - 5.1, ry + 7.0), val_at=(ux - 1.9, ry + 7.0))
     S.wire(vi, (vi[0], ry + 8.89), L1.p('1')); S.wire(L1.p('2'), (sw[0], ry + 8.89), sw)
     S.flag((sw[0], ry + 8.89)); S.junction((sw[0], ry + 8.89))                # SW kütüphanede power_in tanımlı → ERC için bayrak
     S.pin_power(U7, '1', 'GND')
-    xv = 166.37   # VOUT düğümü: FB bölücü + D2
+    xv = 195.58   # VOUT düğümü: FB bölücü + D2
     S.wire(vb, (xv, vb[1]), color=COL['5V']); S.junction((xv, vb[1]))
-    R55 = S.part(R, 'R55', 'R_fb1', (xv, ry + 21.59), ref_at=(xv + 1.27, ry + 19.05), val_at=(xv + 1.27, ry + 21.59))
-    R56 = S.part(R, 'R56', 'R_fb2', (xv, ry + 31.75), ref_at=(xv + 1.27, ry + 29.21), val_at=(xv + 1.27, ry + 31.75))
+    R55 = S.part(R, 'R55', '360k', (xv, ry + 21.59), ref_at=(xv + 1.27, ry + 19.05), val_at=(xv + 1.27, ry + 21.59))
+    R56 = S.part(R, 'R56', '100k', (xv, ry + 31.75), ref_at=(xv + 1.27, ry + 29.21), val_at=(xv + 1.27, ry + 31.75))
     S.wire((xv, vb[1]), R55.p('1')); nF = (xv, ry + 27.94); S.wire(R55.p('2'), nF); S.junction(nF); S.wire(nF, R56.p('1')); S.pin_power(R56, '2', 'GND')
-    S.wire(fb, (fb[0] + 1.27, fb[1]), (fb[0] + 1.27, nF[1]), nF)
-    D2 = S.part(DS, 'D2', 'D2', (176.53, ry + 12.7), rot=270, ref_at=(178.6, ry + 14.5), hide_value=True)
-    S.wire((xv, vb[1]), D2.p('A'), color=COL['5V']); S.wire(D2.p('K'), (D2.p('K')[0], ry), color=COL['5V']); S.junction((D2.p('K')[0], ry))
-    S.text('C32/C33: 2× Eaton HV1030-2R7106-R (10 F, 2,7 V) seri = 5 F; float 4,6 V (+85 °C\'de 2,3 V/hücre, derating)', (175.26, ry + 25.4), SZ_NOTE, italic=True)
-    S.text('U7 boost 0,7–5,5 V giriş → 4,6 V → D2; kesintide ~50 J → ~5 dk @ 50 mA (yalnız alarm paketi; 02-bom §2.5)', (175.26, ry + 27.94), SZ_NOTE, italic=True)
-    S.text('süperkap → boost → D2 → 5 V rayı: şebeke varken D2 ters, boost boşta', (175.26, ry + 30.48), SZ_NOTE, italic=True)
-    S.text('GND: tek yıldız noktası RAC05 çıkışında', (66.04, rail_y + 21.59), SZ_NOTE, italic=True)
+    xf = fb[0] + 6.35   # FB dönüşü gövdeden uzak insin
+    S.wire(fb, (xf, fb[1]), (xf, nF[1]), nF)
+    xD = 208.28
+    D2 = S.part(DS, 'D2', 'SS34', (xD, ry + 12.7), rot=270, ref_at=(xD + 2.1, ry + 12.0), val_at=(xD + 2.1, ry + 14.6))
+    S.wire((xv, vb[1]), (xD, vb[1]), D2.p('A'), color=COL['5V']); S.wire(D2.p('K'), (xD, ry), color=COL['5V']); S.junction((xD, ry))
+    # ---------- notlar (besleme) ----------
+    S.text('PE → panonun koruma iletkeni; kutu metal ise gövde PE', (30.48, pPE[1] + 15.5), SZ_NOTE, italic=True)
+    S.text('GND: tek yıldız noktası RAC05 çıkışında', (30.48, pPE[1] + 18.3), SZ_NOTE, italic=True)
+    S.text('100k/47k → GPIO1 ADC1_CH0: şebeke var/yok → modul_durum.besleme', (35.56, rail_y + 32.5), SZ_NOTE, italic=True)
+    xn = 214.0
+    S.text('3V3 rayı → ESP32 / MLX90640 / SHT31 / RS-485 / CT bias / genişleme', (xn, ry + 24.0), SZ_NOTE, italic=True)
+    S.text('Bütçe: ESP32 Wi-Fi tepe ~350 mA + MLX 23 mA + SHT31 <2 mA + RS-485 ~10 mA', (xn, ry + 26.5), SZ_NOTE, italic=True)
+    S.text('→ 5 V/1 A modül; LDO dropout ≈0,3 V (yedekte ray 4,3 V)', (xn, ry + 29.0), SZ_NOTE, italic=True)
+    S.text('C32/C33: 2× Eaton HV1030-2R7106-R (10 F, 2,7 V) seri = 5 F; float ≈4,7 V (ray)', (xn, ry + 33.0), SZ_NOTE, italic=True)
+    S.text('+85 °C derate 4,6 V (2,3 V/hücre); U7 boost 0,7–5,5 V giriş → 4,6 V → D2', (xn, ry + 35.5), SZ_NOTE, italic=True)
+    S.text('kesintide ~50 J → ~5 dk @ 50 mA (yalnız alarm paketi; 02-bom §2.5)', (xn, ry + 38.0), SZ_NOTE, italic=True)
+    S.text('şebeke varken D2 ters, boost boşta; FB: V_OUT = 1,0 V × (1 + R55/R56) = 4,6 V', (xn, ry + 40.5), SZ_NOTE, italic=True)
 
     # ---------- notlar ----------
-    S.text('Notlar: pin atamaları 03 §3.1 ile aynı; tabloda olmayan tek ekleme GPIO1 besleme algılama. Pasif değerler tipik başlangıç değerleridir.', (35.56, 273.0), SZ_NOTE)
+    S.text('Notlar: pin atamaları 03 §3.1 tablosuyla aynı (GPIO1 besleme algılama dahil). Pasif değerler tipik başlangıç değerleridir.', (35.56, 273.0), SZ_NOTE)
     S.text('Analizör varsa CT ön ucu boş kalır (hedef senaryo, 02-bom §2.3). Kavramsal şema / üretim çizimi değildir (§1.4). Üretim: eda/gen_sch.py → kicad-cli (ERC + SVG).', (35.56, 276.0), SZ_NOTE)
     return S
 
@@ -578,7 +678,10 @@ if __name__ == '__main__':
     S = build()
     with open(os.path.join(HERE, 'GridUp.kicad_sym'), 'w', encoding='utf-8', newline='') as fh:   # özel sembol kütüphanesi (MLX90640)
         ms = list(mlx90640_symbol()); ms[1] = 'MLX90640'
-        fh.write(ser([Sym('kicad_symbol_lib'), [Sym('version'), Sym('20241209')], [Sym('generator'), 'gen_sch'], [Sym('generator_version'), '10.0'], ms]) + '\n')
+        hs = list(sht31_symbol()); hs[1] = 'SHT31'
+        xs = list(max3485_symbol()); xs[1] = 'MAX3485'
+        rs = list(rac05_symbol()); rs[1] = 'RAC05-05SK'
+        fh.write(ser([Sym('kicad_symbol_lib'), [Sym('version'), Sym('20241209')], [Sym('generator'), 'gen_sch'], [Sym('generator_version'), '10.0'], ms, hs, xs, rs]) + '\n')
     libs = ['Device', 'power', 'RF_Module', 'Sensor_Humidity', 'Interface_UART', 'Converter_ACDC', 'Regulator_Linear', 'Regulator_Switching', 'Switch', 'Connector', 'Connector_Generic']
     with open(os.path.join(HERE, 'sym-lib-table'), 'w', encoding='utf-8', newline='') as fh:
         fh.write('(sym_lib_table\n  (version 7)\n')
@@ -595,6 +698,6 @@ if __name__ == '__main__':
     if not os.path.exists(pro):
         with open(pro, 'w', encoding='utf-8', newline='') as fh:
             json.dump({"meta": {"filename": PROJECT + ".kicad_pro", "version": 3},
-                       "schematic": {"drawing": {"default_font": "KiCad Font"}, "legacy_lib_dir": "", "legacy_lib_list": []},
+                       "schematic": {"drawing": {"default_font": "KiCad Font", "hop_over_size_choice": 2, "text_offset_ratio": 0.3}, "legacy_lib_dir": "", "legacy_lib_list": []},   # hop_over 0 = atlama yayı kapalı
                        "sheets": [[ROOT_UUID, "Root"]], "text_variables": {}}, fh, indent=2, ensure_ascii=False)
     print('yazıldı', out, len(S.parts), 'parça', len(S.items), 'öğe')

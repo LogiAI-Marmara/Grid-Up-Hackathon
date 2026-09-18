@@ -1,8 +1,14 @@
-# EDA kaynağı ve şema üreteci (KiCad)
+# EDA kaynağı ve şema üreteçleri
 
 `docs/track-a/03-baglanti-semasi.svg` bu klasördeki **KiCad şematiğinden** üretilir: gerçek bir `.kicad_sch`
 (ERC'den geçmiş, netlist'i 03-pinout §3.1 ile otomatik doğrulanmış) → `kicad-cli` → gömülebilir SVG.
 `cad/` klasörüyle aynı felsefe: **elle çizim yok, kaynak model var.** (Önceki elle yazılmış SVG git geçmişinde: `f5bf9be` ve öncesi.)
+
+`docs/track-a/08-sistem-mimarisi.svg` bu klasördeki **`gen_mimari.py`** ile üretilir (karar kaydı §8 mimari + §9 sözleşmeler;
+Pano → Gateway → On-prem zinciri; T3 + T4 + T6 + T7). Kutu içerikleri üç izin repodaki gerçek servislerinden alınmıştır
+(toplama/, analiz/README.md, PR #2 operasyon-yuzu-dokumantasyonu.md, modul-sim/). Kutular `box()` yardımcısıyla
+içerikten boyutlanır; her metin Arial metriğiyle (PIL) ölçülür, kutudan taşan varsa üretim hata verir. Düzenleme
+script'te yapılır, SVG'ye elle el değmez.
 
 ## Dosyalar
 
@@ -14,6 +20,7 @@
 | `verify_netlist.py` | Netlist'i beklenen bağlantılarla karşılaştırır: 103 kontrol (GPIO atamaları, güç rayları, D1/D2 yönü, süperkap zinciri + boost, 120 Ω, EN RC, V_bias, CT kanalları). Tek başına: `python verify_netlist.py GridUp-Modul.net`. |
 | `svg_min.py` | kicad-cli SVG'sini gömülebilir yapar (2 MB → ~280 KB): çizgi-font yollarını atar, KiCad'in yazdığı gizli `<text>`'i Arial/Helvetica ile görünür yapar (renk = grubun stroke rengi), viewBox'ı içeriğe kırpar, koordinatları yuvarlar, tarih damgasını siler (deterministik). |
 | `build.py` | Zincir: `gen_sch.py` → ERC → netlist + `verify_netlist.py` → SVG → `svg_min.py`. |
+| `gen_mimari.py` | 08 üreteci: bölge / kutu / ok yardımcıları + taşma denetimi → `../08-sistem-mimarisi.svg`. Tek başına: `python gen_mimari.py [CIKTI]`. |
 | `erc-raporu.txt` | Son ERC çıktısı (`--severity-all`): 0 hata, 0 uyarı. |
 | `../03-baglanti-semasi.svg` | Çıktı (dokümandaki şema). `build.py --out=PATH` ile başka yere de yazılabilir. |
 
