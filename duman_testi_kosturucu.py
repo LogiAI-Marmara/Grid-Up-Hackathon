@@ -57,6 +57,8 @@ def api_saglik_bekle(api_url: str, azami_sure_sn: float = 30.0) -> bool:
         time.sleep(1.5)
 
     print("❌ API zaman aşımı süresinde hazır hale gelmedi!")
+    print("💡 İpucu: Docker Desktop'ın açık olduğunu ve 'deploy/docker-compose.yml' (veya baslat.ps1) servislerinin çalıştığını doğrulayın.")
+    print("   FastAPI Okuma API'sinin 'http://127.0.0.1:8080/saglik' adresinde yanıt vermesi gerekmektedir.")
     return False
 
 def tohumla_ve_tara(dsn: str, repo_kok: str):
@@ -152,7 +154,13 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--azami-imlec-gecikme-sn", type=float, default=7200.0)
     args = parser.parse_args(argv)
 
-    repo_kok = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "repo", "Grid-Up-Hackathon"))
+    dosya_dizini = os.path.dirname(os.path.abspath(__file__))
+    olasi_yollar = [
+        os.path.join(dosya_dizini, "repo", "Grid-Up-Hackathon"),
+        os.path.abspath(os.path.join(dosya_dizini, "..", "repo", "Grid-Up-Hackathon")),
+        dosya_dizini,
+    ]
+    repo_kok = next((p for p in olasi_yollar if os.path.exists(os.path.join(p, "analiz"))), dosya_dizini)
 
     print("=======================================================")
     print("🔥 GRID UP ENTEGRASYON DUMAN TESTİ KOŞTURUCUSU (İZ C)")
