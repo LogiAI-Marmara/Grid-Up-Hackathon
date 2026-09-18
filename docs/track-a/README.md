@@ -20,7 +20,7 @@ kart yapısı, giriş-çıkış bağlantıları, bağlantı şemaları, temel bi
 | 4 | [Mekanik yerleşim ve görüş hattı](04-mekanik-yerlesim.md) | Kutu ölçüsü, panodaki konum, kadraj krokisi ([yerleşim](04-yerlesim-krokisi.svg) · [kutu](04-kutu-krokisi.svg)), sabitleme | T1, T2 |
 | 5 | [Saha koşulları gerekçesi](05-saha-kosullari.md) | Sıcaklık, nem, IP, manyetik alan, kısa devre darbesi, yabancı cisim | T1, T2 · kriter 3 |
 | 6 | [Montaj prosedürü](06-montaj-proseduru.md) | 7 adım, süre, "kesinti yok" gerekçesi + [adım akışı](09-montaj-adimlari.svg) | T1 · kriter 3 |
-| 7 | [Modül yazılım akış diyagramı](07-yazilim-akis.md) | Uyan → oku → özetle → eşik kontrol → gönder | T3 (modül kısmı) |
+| 7 | [Modül yazılım akış diyagramı](07-yazilim-akis.md) | Uyan → oku → özetle → paketle → gönder | T3 (modül kısmı) |
 | — | [**Kaynakça**](KAYNAKCA.md) | Dokümanlarda geçen her dış teknik değerin kaynağı, doküman no/sayfa/URL ve **doğrulama durumu** (okundu / özet / atıf / seçim) | — |
 
 ---
@@ -59,7 +59,9 @@ Bu tablo, "bu doküman neden böyle yazılmış" sorusunun cevabıdır. Atıflar
    dışa bakar halde.
 5. **Mıknatıs + CT uyarısı** (§7.5 satır 337): güçlü mıknatıs akım trafolarının yakınına konmaz.
 6. **Örnekleme tablosu** (§7.2): akım 1–5 sn (10 sn ort.), termal özet 10–30 sn, tam kare yalnız
-   anomali anında, ortam/nem 30–60 sn, ark olay bazlı.
+   anomali anında, ortam/nem 30–60 sn, ark olay bazlı. **Entegrasyon kararıyla (17 Eyl, madde 2)
+   değişti:** paket ve termal 30 sn, tam kare her pakette; karar kaydı henüz güncellenmedi, kod ve
+   [7. doküman §7.2–7.3](07-yazilim-akis.md) yeni değeri taşır.
 7. **Ark tespiti iddiası yok** (§7.1 satır 230): ark algılamayı biz yapmıyoruz; TVOC-2 kaydını
    okuyoruz. "Tespit" diye yazmak yanlış beyan olur.
 

@@ -127,8 +127,9 @@ belirtilir (Melexis datasheet §11.2.2.5.4).
 
 ### Mikrodenetleyici — ESP32-S3-WROOM-1U-N8
 
-**Ne yapar:** Sensörleri okur, örnekleme takvimini işletir, termal özeti çıkarır, eşik mantığını
-çalıştırır, paketi kurar ve gönderir. Ayrıca Modbus isteklerini yürütür.
+**Ne yapar:** Sensörleri okur, örnekleme takvimini işletir, 768 değerlik termal kareyi özetler,
+özet + kareyi paketler ve gönderir. Ayrıca RS-485 hattında Modbus master olarak analizör ve
+TVOC-2'yi sorgular.
 
 **`1U` — harici anten konnektörü:** Pano metal bir muhafazadır ve içindeki anten çalışmaz. Antenin
 kablo ile panonun dışına çıkarılması gerekir; bu nedenle PCB anteni yerine harici konnektörlü
@@ -140,9 +141,12 @@ varyantları (R8/R16V, Octal SPI PSRAM) **−40…+65 °C** aralığında çalı
 (§7.5 satır 318) PSRAM'siz varyant seçilmiştir. 768 değerlik termal kare yaklaşık 3 KB olduğundan
 PSRAM'e ihtiyaç yoktur; kısıt ek maliyet getirmez.
 
-**Neden gerekli:** Haberleşme iki kademelidir ve veri politikası (normalde özet, anomali anında tam
-kare) **modülün anomaliyi kendi başına tanıyabilmesini zorunlu kılar** (§7.4 satır 304). Bu nedenle
-modülde bir işlemci bulunmak zorundadır.
+**Neden gerekli:** Modül sensörleri kendi takviminde okur, MLX90640'ın 768 ham değerini
+kalibre edip özetler, Modbus sorgularını yürütür, `modul_durum`'u (besleme, sinyal) üretir ve
+paketi Wi-Fi ile gönderir; bunların hiçbiri pasif bir sensör düğümüyle yapılamaz. Karar kaydı
+§7.4 satır 304'teki *"modülün anomaliyi kendi başına tanıması"* şartı entegrasyon kararıyla
+kalktı (tam kare her pakette gider; [7. doküman §7.3](07-yazilim-akis.md)); işlemci gereksinimi
+bundan bağımsızdır.
 
 ### Enerji analizörü / split-core CT — akım kanalı
 
@@ -282,7 +286,7 @@ Ayrıntılı pin seviyesi bağlantılar [3. dokümanda](03-pinout.md) verilmişt
 | İzleme arayüzü, Modbus TCP sunucusu, alarm | İZ C |
 | On-prem kurulum | İZ C `/deploy` |
 
-**Önemli mimari sınır:** Modül **anomali hükmü vermez.** Eşik mantığı yalnızca *"bu çevrimde tam
-kare kanıt da eklensin mi"* kararını verir; `seviye` ve `tip` alanları pakette hiç bulunmaz. Asıl
-tespit merkezdeki anomali motorundadır (§7.4 satır 304). Bu ayrım [7. dokümanın](07-yazilim-akis.md)
+**Önemli mimari sınır:** Modül **anomali hükmü vermez.** Özet + tam kareyi her pakette gönderir;
+`seviye` ve `tip` alanları pakette hiç bulunmaz. Asıl tespit merkezdeki anomali motorundadır
+(§7.4 satır 304). Bu ayrım [7. dokümanın](07-yazilim-akis.md)
 konusudur.
