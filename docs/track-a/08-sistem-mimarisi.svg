@@ -45,10 +45,10 @@
   <line x1="240" y1="237.0" x2="240" y2="246.25" stroke="#546e7a" stroke-width="2" marker-end="url(#arr)"/>
   <rect x="50" y="250.25" width="380" height="130" rx="8" class="boxMcu"/>
   <text x="240.0" y="270.25" text-anchor="middle" class="t">MODÜL / ESP32-S3-WROOM-1U</text>
-  <text x="240.0" y="289.25" text-anchor="middle" class="s">Oku → özetle → eşik → paketle (sözleşme ②)</text>
-  <text x="240.0" y="306.25" text-anchor="middle" class="s">Akım 1–5 s (10 s ort.) / termal özet 10–30 s / ortam 30–60 s</text>
-  <text x="240.0" y="323.25" text-anchor="middle" class="s">Normalde termal özet; anomali anında tam kare (768)</text>
-  <text x="240.0" y="340.25" text-anchor="middle" class="s">Hüküm vermez (seviye/tip yok); basit eşik, merkezden güncellenir</text>
+  <text x="240.0" y="289.25" text-anchor="middle" class="s">Oku → özetle → paketle (sözleşme ②)</text>
+  <text x="240.0" y="306.25" text-anchor="middle" class="s">Paket 30 s: akım (2 s alt örnek, 30 s ort.) + termal / ortam 60 s</text>
+  <text x="240.0" y="323.25" text-anchor="middle" class="s">Her pakette termal özet + tam kare (768; entegrasyon kararı)</text>
+  <text x="240.0" y="340.25" text-anchor="middle" class="s">Hüküm vermez (seviye/tip yok); tespit merkezde (§7.4 satır 304)</text>
   <text x="240.0" y="355.25" text-anchor="middle" class="r">modul_durum: besleme sebeke/yedek, sinyal dBm, sürüm</text>
   <text x="240.0" y="370.25" text-anchor="middle" class="r">Ayrıntı: 01 blok şema / 03 bağlantı / 07 yazılım akışı</text>
   <rect x="50" y="397.5" width="380" height="81" rx="8" class="boxGuc"/>
@@ -173,8 +173,8 @@
   <text x="1560" y="694" text-anchor="end" class="r">B → C</text>
   <text x="1280" y="714" text-anchor="start" class="s">REST+JSON, 10 uç + /gecisler (İZ B ekledi)</text>
   <text x="1280" y="732" text-anchor="start" class="r">sozlesme_5_api.json (PR #2)</text>
-  <text x="30" y="772" text-anchor="start" class="r">Ortak sözlük (§10, enums.py): olcum_tipi 9 değer / seviye normal-izle-uyari-kritik / tip 8 değer / kalite iyi-supheli-yok / durum acik-onaylandi-kapandi / modul_id {saha}-{pano}-{modul} / zaman UTC ISO 8601</text>
-  <text x="30" y="796" text-anchor="start" class="r">Veri politikası (§7.4): normalde özet (maks, konum, bölge ort.) / anomali anında tam kare kanıt olarak / modülde basit eşik, hüküm merkezde (§7.4 satır 304) / ark tespiti yok, TVOC-2 kaydı okunur (§7.1 satır 230)</text>
+  <text x="30" y="772" text-anchor="start" class="r">Ortak sözlük (§10, enums.py): olcum_tipi 9 değer / seviye normal-izle-uyari-kritik / tip 9 değer (asiri_yuk dahil) / kalite iyi-supheli-yok / durum acik-onaylandi-kapandi / modul_id {saha}-{pano}-{modul} / zaman UTC ISO 8601</text>
+  <text x="30" y="796" text-anchor="start" class="r">Veri politikası (entegrasyon kararı, 17 Eyl): her pakette özet (maks, konum, bölge ort.) + tam kare (768, DB int16); §7.4 eşik kapısı kaldırıldı, hüküm merkezde (satır 304) / ark tespiti yok, TVOC-2 kaydı okunur (§7.1 satır 230)</text>
   <text x="30" y="814" text-anchor="start" class="r">Sahipler: saha + modul-sim + toplama İZ A / anomali motoru + okuma API İZ B / arayüz + Modbus + alarm + deploy İZ C / on-prem: tüm servisler docker-compose ile tek sunucuda, public cloud yok (T6)</text>
   <text x="30" y="832" text-anchor="start" class="r">Durum (18 Eyl): gerçek zincir modul-sim → toplama → PostgreSQL → analiz → :8080 (main). Hedef, henüz bağlı değil: İZ C servisleri mock API :8000/api okuyor (:8080 değil); PR #2 compose yalnız arayüz+modbus+alarm+mock</text>
   <text x="30" y="850" text-anchor="start" class="r">(toplama/analiz/PostgreSQL yok); gateway ve pano donanımı yok. Kaynak: karar kaydı §8–§11, sozlesmeler/README, analiz/README, PR #2 docs/operasyon-yuzu-dokumantasyonu.md. Üretim: eda/gen_mimari.py</text>

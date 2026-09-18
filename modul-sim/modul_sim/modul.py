@@ -7,12 +7,15 @@ send* — and the code is organised so the reader can follow that order.
 Two things here are firmware decisions rather than simulation details, and both
 are visible to the rest of the system:
 
-* **What goes in which packet.** Currents every cycle, thermal summary every
-  other cycle, ambient and humidity once a minute, arc only when it happens.
-  Section 7.2.
-* **When the 768-value frame is attached.** `EsikAyar`, evaluated on board.
-  Section 7.4: the module has to recognise the anomaly itself, or it could not
-  know when to send the evidence.
+* **What goes in which packet.** Currents, thermal summary and the full thermal
+  frame every cycle (30 s), ambient and humidity once a minute, arc only when
+  it happens. Section 7.2, as amended by the integration decision of 17 Sep
+  (item 2: packet and thermal cadence aligned at 30 s).
+* **The 768-value frame is attached unconditionally.** Section 7.4 originally
+  gated it behind an on-board threshold (summary normally, frame only on a
+  trigger); the integration decision dropped the gate so the detector sees
+  every frame. `EsikAyar` remains as the configuration slot for that policy
+  but is not evaluated here. Track A document 7 section 7.3 records the change.
 """
 
 from __future__ import annotations
@@ -87,7 +90,6 @@ class Modul:
 
         self._sayac = 0  # packets emitted, drives the sampling schedule
         self._ark_sayaci = 0
-        self._son_kare_an: datetime | None = None
         self._son_deger: dict[OlcumTipi, float] = {}
         self._sinyal_kayma = YavasKayma(random.Random(ayar.tohum ^ 0x5EED4), ayar.saglik.sinyal_salinim, 1800.0)
         self._baslangic = baslangic
@@ -137,32 +139,6 @@ class Modul:
         deger = _kirp(ham, tip)
         self._son_deger[tip] = deger
         return deger, kalite
-
-    def _kare_gerekli(self, ozet: TermalOzet, kabin_c: float, an: datetime, ark: bool) -> str | None:
-        """On-board threshold logic. Returns the trigger reason, or None.
-
-        Three independent triggers plus the arc override, and a rate limit. See
-        `EsikAyar` for why absolute temperature alone is not enough.
-        """
-        e = self.ayar.esik
-        sebepler = []
-        if ark and e.ark_kare:
-            sebepler.append("ark")
-        if ozet.maks >= e.maks_c:
-            sebepler.append(f"maks {ozet.maks:.1f}>={e.maks_c:.1f}")
-        if ozet.maks - ozet.ortalama >= e.delta_c:
-            sebepler.append(f"delta {ozet.maks - ozet.ortalama:.1f}>={e.delta_c:.1f}")
-        if ozet.maks - kabin_c >= e.kabin_delta_c:
-            sebepler.append(f"kabin_delta {ozet.maks - kabin_c:.1f}>={e.kabin_delta_c:.1f}")
-        if not sebepler:
-            return None
-        # Rate limit: a module stuck in a fault would otherwise spend its whole
-        # uplink budget retransmitting 768 values. An arc trip ignores it —
-        # that is the one frame the operator will certainly want.
-        if "ark" not in sebepler and self._son_kare_an is not None:
-            if (an - self._son_kare_an).total_seconds() < e.min_aralik_s:
-                return None
-        return ", ".join(sebepler)
 
     # -- the tick ---------------------------------------------------------
 
@@ -224,14 +200,16 @@ class Modul:
         modul_an = an + timedelta(seconds=kayma_s)
         zaman = zaman_yaz(modul_an)
 
-        # 7 — thermal array: unconditional full frame on every sampling instant (integration item 2)
+        # 7 — thermal array. Full frame on every cycle, unconditionally
+        #     (integration decision of 17 Sep, item 2). The on-board trigger
+        #     that used to gate the frame is gone; the detector wants them all.
         termal_ozet_veri = None
         termal_kare = None
         kare_sebebi = None
         ozet: TermalOzet | None = None
         if not b.dusuk_guc:
-            # Sub-sample averaging: sensor reads faster and averages into one frame
-            # to reduce temporal sensor noise (integration item 2).
+            # Sub-sample averaging: sensor reads faster (termal_okuma_s) and
+            # averages into one frame to reduce temporal sensor noise.
             alt_termal_adim = max(int(o.paket_s / getattr(o, "termal_okuma_s", 6)), 1)
             kare_toplam = [0.0] * TERMAL_PIKSEL
             for _ in range(alt_termal_adim):
@@ -260,7 +238,6 @@ class Modul:
             }
             termal_kare = kare
             kare_sebebi = "surekli"
-            self._son_kare_an = an
 
         # 8 — assemble the measurement rows
         olcumler: list[dict] = []

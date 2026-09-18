@@ -28,7 +28,8 @@ flowchart TB
 
         subgraph GUC["Besleme"]
             PSU["AC/DC modül<br/>RECOM RAC05-05SK/277<br/>230 V → 5 V · −40…+90 °C*"]
-            SC["Yedek depo<br/>Süperkapasitör<br/>(float şarjlı)"]
+            SC["Yedek depo<br/>2× süperkapasitör seri<br/>(float şarjlı)"]
+            BST["Boost çevirici<br/>TPS61099 → 4,6 V<br/>(yalnız kesintide)"]
             LDO["3.3 V regülatör<br/>(LDO — MCU ve sensörler)"]
         end
 
@@ -49,7 +50,8 @@ flowchart TB
 
     PSU -->|"5 V"| LDO
     PSU -->|"float şarj"| SC
-    SC -->|"kesintide"| LDO
+    SC -.->|"kesintide"| BST
+    BST -.->|"D2 → 5 V rayı"| LDO
     LDO -->|"3.3 V"| MCU
 
     MCU -->|"U.FL kablosu"| ANT
@@ -63,7 +65,7 @@ flowchart TB
     class T,TH,EXT sensor
     class AN,CT,ARC olcum
     class MCU,RX mcu
-    class PSU,SC,LDO,ANT guc
+    class PSU,SC,BST,LDO,ANT guc
     class GWA disi
 ```
 
@@ -127,8 +129,9 @@ belirtilir (Melexis datasheet §11.2.2.5.4).
 
 ### Mikrodenetleyici — ESP32-S3-WROOM-1U-N8
 
-**Ne yapar:** Sensörleri okur, örnekleme takvimini işletir, termal özeti çıkarır, eşik mantığını
-çalıştırır, paketi kurar ve gönderir. Ayrıca Modbus isteklerini yürütür.
+**Ne yapar:** Sensörleri okur, örnekleme takvimini işletir, 768 değerlik termal kareyi özetler,
+özet + kareyi paketler ve gönderir. Ayrıca RS-485 hattında Modbus master olarak analizör ve
+TVOC-2'yi sorgular.
 
 **`1U` — harici anten konnektörü:** Pano metal bir muhafazadır ve içindeki anten çalışmaz. Antenin
 kablo ile panonun dışına çıkarılması gerekir; bu nedenle PCB anteni yerine harici konnektörlü
@@ -140,9 +143,12 @@ varyantları (R8/R16V, Octal SPI PSRAM) **−40…+65 °C** aralığında çalı
 (§7.5 satır 318) PSRAM'siz varyant seçilmiştir. 768 değerlik termal kare yaklaşık 3 KB olduğundan
 PSRAM'e ihtiyaç yoktur; kısıt ek maliyet getirmez.
 
-**Neden gerekli:** Haberleşme iki kademelidir ve veri politikası (normalde özet, anomali anında tam
-kare) **modülün anomaliyi kendi başına tanıyabilmesini zorunlu kılar** (§7.4 satır 304). Bu nedenle
-modülde bir işlemci bulunmak zorundadır.
+**Neden gerekli:** Modül sensörleri kendi takviminde okur, MLX90640'ın 768 ham değerini
+kalibre edip özetler, Modbus sorgularını yürütür, `modul_durum`'u (besleme, sinyal) üretir ve
+paketi Wi-Fi ile gönderir; bunların hiçbiri pasif bir sensör düğümüyle yapılamaz. Karar kaydı
+§7.4 satır 304'teki *"modülün anomaliyi kendi başına tanıması"* şartı entegrasyon kararıyla
+kalktı (tam kare her pakette gider; [7. doküman §7.3](07-yazilim-akis.md)); işlemci gereksinimi
+bundan bağımsızdır.
 
 ### Enerji analizörü / split-core CT — akım kanalı
 
@@ -248,7 +254,7 @@ tanımlı, ölçüm kaydı uzun formatta tutuluyor ve dedektör arayüzü sabit.
 | **RS-485** | Enerji analizörü, TVOC-2 | Modbus okuma hattı |
 | **UART** | RS-485 alıcı-verici | Modbus istekleri |
 | **Analog** | Split-core CT ×4 (analizör yoksa) | Akım kanalı alternatifi |
-| **Besleme** | AC/DC modül 5 V → LDO 3,3 V → MCU ve sensörler; süperkapasitör → kesintide LDO girişini besler | Güç hattı |
+| **Besleme** | AC/DC modül 5 V → LDO 3,3 V → MCU ve sensörler; kesintide süperkapasitör → boost (TPS61099, 4,6 V) → D2 → 5 V rayı → LDO ([3. doküman §3.4](03-pinout.md)) | Güç hattı |
 | **RF** | U.FL → panel SMA anten → gateway | Kablosuz hat |
 
 Ayrıntılı pin seviyesi bağlantılar [3. dokümanda](03-pinout.md) verilmiştir.
@@ -282,7 +288,7 @@ Ayrıntılı pin seviyesi bağlantılar [3. dokümanda](03-pinout.md) verilmişt
 | İzleme arayüzü, Modbus TCP sunucusu, alarm | İZ C |
 | On-prem kurulum | İZ C `/deploy` |
 
-**Önemli mimari sınır:** Modül **anomali hükmü vermez.** Eşik mantığı yalnızca *"bu çevrimde tam
-kare kanıt da eklensin mi"* kararını verir; `seviye` ve `tip` alanları pakette hiç bulunmaz. Asıl
-tespit merkezdeki anomali motorundadır (§7.4 satır 304). Bu ayrım [7. dokümanın](07-yazilim-akis.md)
+**Önemli mimari sınır:** Modül **anomali hükmü vermez.** Özet + tam kareyi her pakette gönderir;
+`seviye` ve `tip` alanları pakette hiç bulunmaz. Asıl tespit merkezdeki anomali motorundadır
+(§7.4 satır 304). Bu ayrım [7. dokümanın](07-yazilim-akis.md)
 konusudur.

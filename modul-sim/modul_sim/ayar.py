@@ -5,10 +5,10 @@ kinds of setting live side by side and should not be confused:
 
 * **Physical parameters** (rated feeder current, thermal time constant, weather)
   describe the world. Changing them changes what "normal" looks like.
-* **Module settings** (`EsikAyar`) describe the firmware. They are the
-  counterpart of "send a setting from the centre to the module" in section 7.4
-  of the decision record: the full thermal frame is evidence, and when the
-  module attaches it is a policy the operator owns, not a constant.
+* **Module settings** (`EsikAyar`, `OrneklemeAyar`) describe the firmware.
+  They are the counterpart of "send a setting from the centre to the module"
+  in section 7.4 of the decision record: cadence and policy are things the
+  operator owns, not constants.
 """
 
 from __future__ import annotations
@@ -25,11 +25,15 @@ from .sozlesme import TERMAL_SATIR, TERMAL_SUTUN
 
 @dataclass(frozen=True)
 class EsikAyar:
-    """On-board threshold logic — decides when the 768-value frame is attached.
+    """On-board threshold policy — **not evaluated since the integration decision.**
 
-    Section 7.4: normal traffic carries the summary only, and the module has to
-    recognise the anomaly itself, otherwise it cannot know when to send the
-    frame. Three independent triggers, because a hot spot is not always hot in
+    Section 7.4 of the decision record gated the 768-value frame behind this
+    logic: summary only in normal traffic, frame when a trigger fired. The
+    integration decision of 17 Sep (item 2) made the frame unconditional on
+    every 30 s cycle, so `Modul.ilerle` no longer consults these values. The
+    dataclass is kept as the configuration slot and the documented policy, so
+    that re-enabling the gate is a change in one place. The original design:
+    three independent triggers, because a hot spot is not always hot in
     absolute terms:
 
     * `maks_c` — absolute hot-pixel temperature.
@@ -54,14 +58,15 @@ class EsikAyar:
 
 @dataclass(frozen=True)
 class OrneklemeAyar:
-    """Sampling periods, seconds. Section 7.2 of the decision record.
-
-    Integration item 2: packet cadence and thermal frame generation are aligned
-    at 30 seconds. The sensor reads faster (termal_okuma_s) and averages sub-samples
-    into one frame to lower temporal noise.
+    """Sampling periods, seconds. Section 7.2 of the decision record, as
+    amended by the integration decision of 17 Sep (item 2): packet cadence and
+    thermal frame generation are aligned at 30 seconds, and the frame goes in
+    every packet. The sensor reads faster (termal_okuma_s) and averages
+    sub-samples into one frame to lower temporal noise. Track A document 7
+    section 7.2 is the table form of these values.
     """
 
-    paket_s: int = 30  # 30 s cadence per integration item 2
+    paket_s: int = 30  # packet period; also the current-averaging window
     akim_okuma_s: int = 2  # sub-samples averaged into one recorded value
     termal_okuma_s: int = 6  # sensor reads faster (5 sub-samples) and averages to reduce noise
     termal_s: int = 30  # thermal summary and frame: 30 s
