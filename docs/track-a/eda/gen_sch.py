@@ -3,7 +3,7 @@
 # geometrisinden hesaplanır. Netler: 03-pinout.md §3.1–3.6 (I²C GPIO8/9, CT GPIO4–7 ADC1, UART1 GPIO17/18
 # + DE/RE GPIO21, besleme algılama GPIO1, genişleme GPIO10/11; RAC05 → D1 → 5 V → LDO 3V3; süperkap 2× HV seri + R_şarj → boost 4,6 V → D2).
 # Kullanım: python gen_sch.py [--kicad-symbols DIR] → GridUp-Modul.kicad_sch + GridUp-Modul.kicad_pro
-import os, sys, json, math, uuid, re
+import os, sys, json, math, uuid, re, copy
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 SYMDIR = None
@@ -198,8 +198,10 @@ def max3485_symbol():
 def rac05_symbol():
     """Converter_ACDC:RAC05-05SK kopyası; NC pini (3) kütüphanede gizli / 0 mm: diğer pinler gibi görünür yap
     (sağda 2,54 mm bacak, pasif tip → sadece şemadaki mavi X görünür, kütüphane uyuşmazlığı uyarısı yok).
-    DC simgesi (kesikli+düz çizgi) NC yazısının altında kalmasın diye 1 mm sola."""
-    sym = scale_pin_fonts(lib_symbol('Converter_ACDC', 'RAC05-05SK'), SZ_PIN, SZ_PINNUM)
+    DC simgesi (kesikli+düz çizgi) NC yazısının altında kalmasın diye 2 mm sola.
+    lib_symbol sığ kopya döndürür (pin/polyline listeleri önbellekle ortak); bu fonksiyon iki kez çağrıldığından
+    (şema + GridUp.kicad_sym) kaydırma birikmesin diye derin kopya."""
+    sym = scale_pin_fonts(copy.deepcopy(lib_symbol('Converter_ACDC', 'RAC05-05SK')), SZ_PIN, SZ_PINNUM)
     for unit in find(sym, 'symbol'):
         for pin in find(unit, 'pin'):
             if find1(pin, 'name')[1] == 'NC':
@@ -210,7 +212,7 @@ def rac05_symbol():
             pts = find1(pl, 'pts')
             xs_ = [float(xy[1]) for xy in pts[1:]]
             if min(xs_) > 0 and max(xs_) - min(xs_) < 4:   # sağ yarıdaki kısa yatay çizgiler = DC simgesi
-                for xy in pts[1:]: xy[1] = Sym('%g' % (float(xy[1]) - 1.0))
+                for xy in pts[1:]: xy[1] = Sym('%g' % (float(xy[1]) - 2.0))
     sym[1] = 'GridUp:RAC05-05SK'
     return sym
 

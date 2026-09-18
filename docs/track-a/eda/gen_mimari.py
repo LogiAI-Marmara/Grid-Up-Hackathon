@@ -138,7 +138,7 @@ def uret():
     hs = [bh(P_S), bh(P_M), bh(P_G), bh(P_A), bh(P_X)]
     top, bot = 118, ZP[1] + ZP[3] - 14
     gap = (bot - top - sum(hs)) / 4
-    assert gap >= 14, 'PANO bölgesi taştı'
+    if gap < 14: raise SystemExit('PANO bölgesi taştı')
     y = top
     bS = box(px, y, pw, 'boxIc', 'Sensörler', P_S); y += hs[0] + gap
     arrow(240, y - gap + 4, 240, y - 4, '#546e7a')
@@ -226,7 +226,7 @@ def uret():
         cx = bx[0] + bx[2] / 2
         arrow(cx, y, cx, y + 10)
         rect(bx[0] + 25, y + 12, bx[2] - 50, 24, 'actor', 6); text(cx, y + 28, lbl, 's', 'middle', bx[2] - 60)
-    assert y + 40 <= ZS[1] + ZS[3] - 4, 'SUNUCU bölgesi taştı: %d' % (y + 40)
+    if y + 40 > ZS[1] + ZS[3] - 4: raise SystemExit('SUNUCU bölgesi taştı: %d' % (y + 40))
 
     # ---------- sözleşmeler şeridi ----------
     yb = 664
