@@ -9,6 +9,7 @@ firmware akışından türetilmiştir. Kod tarafı PR #1 ile teslim edilmiş, en
 > **Politika notu (entegrasyon kararı, 17 Eyl 2026, madde 2):** Karar kaydı §7.4'teki *"normalde
 > özet, anomali anında tam kare"* politikası entegrasyonda değiştirildi: **tam kare her paketle
 > gider**, paket ve termal çevrimi **30 sn**'ye hizalandı, modül içi eşik kapısı kaldırıldı.
+> Belge: [`entegrasyon-gorev-dagilimi.md`](../../entegrasyon-gorev-dagilimi.md) §2.4 ve İZ A madde 2.
 > Gerekçe ve etkisi §7.3'te. Karar kaydı §7.2 / §7.4 henüz bu karara göre güncellenmedi (lider).
 
 > **Kapsam notu — mikrodenetleyici kodu (T3):** Brief T3 *"mikrodenetleyici kodları"* der. Bu
@@ -95,12 +96,13 @@ anomaliyi kendi başına tanıyabilmesi"* şartının karşılığıydı.
 politika geri istenirse tek noktadan takılsın diye ve merkezden modüle ayar gönderme kavramının
 (§7.4 satır 304, T5) yeri belli olsun diye korunmuştur.
 
-**Neden değişti (repodaki kayıt):** Anomali motoru her olaya *olayın anındaki* kareyi kanıt
-olarak bağlar (`kanit.kare_id`: değerlendirme anından önceki en yeni kare; `analiz/README`
-"Evidence frame at the event's time (10)" ve "(11)"). Modül kendi eşiğiyle kare seçerken, merkezin
-başka kanaldan (akım, faz dengesizliği, nem) açtığı olayın anında kare olmayabiliyordu. Kare her
-30 sn geldiğinde bu boşluk kalmaz. Entegrasyon belgesinin kendisi repoda değil; karar commit
-`3b83483` ve `toplama/migrations/004` başlığında kayıtlı.
+**Neden değişti** ([`entegrasyon-gorev-dagilimi.md`](../../entegrasyon-gorev-dagilimi.md) §2.4, İZ A
+madde 2–3): *"Eski politikanın dayanağı ölçülmemişti."* Belgenin saydığı üç kazanım: (1) modül içi
+eşik mantığı ortadan kalkar, varlık sebebi karenin ne zaman gönderileceğine karar vermekti;
+(2) kanıt karesinin *"en yakını hangisi"* sorunu kalkar, her olay anının kendi karesi vardır
+(`kanit.kare_id`, `analiz/README` 10–11); (3) geçmişe dönük yeniden tarama gerçekten mümkün olur,
+eski politikada geçmiş veri o zamanki eşiğin gönderdikleriyle sınırlıydı. Uygulama: commit
+`3b83483`, `toplama/migrations/004`.
 
 **Maliyeti:** kare başına 768 × int16 = **1 536 B** (DB'de, `toplama/migrations/004`; JSONB olarak
 tutulsaydı 100 modülde ~430 MB/gün olacağı için ikili biçime geçildi); tel üzerinde JSON ≈ 3–4 KB.
