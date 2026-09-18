@@ -1,0 +1,28 @@
+# Git ignore rules for İZ C
+
+# Environment files and credentials (Madde 15)
+.env
+*.env
+.env.*
+!.env.example
+
+# State persistence files
+alarm_state.json
+test_alarm_state.json
+*.state.json
+
+# Python & build artifacts
+.venv/
+venv/
+env/
+
+# Python bytecode and caches
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.pyc
+
+# OS specific
+Thumbs.db
+.DS_Store

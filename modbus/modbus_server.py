@@ -4,6 +4,8 @@ Grid Up Hackathon - İZ C: Modbus TCP Sunucu Servisi
 Sözleşme ④ uyarınca canlı modül verilerini dış SCADA/RTU sistemlerine
 5020 portu üzerinden sunar.
 Başlangıç Adresi = 100 + (N - 1) * 20
+Gerçek API'den (Sözleşme ⑤) beslenir; veri gelmediğinde register'lara sıfır yazılmaz,
+son geçerli durum korunur.
 """
 
 import os
@@ -32,110 +34,153 @@ logging.basicConfig(
 SEVIYE_MAP = {"normal": 0, "izle": 1, "uyari": 2, "kritik": 3}
 BESLEME_MAP = {"sebeke": 0, "yedek": 1}
 
-API_URL = os.getenv("API_URL", "http://localhost:8000/api")
+API_URL = os.getenv("API_URL", "http://localhost:8080").rstrip("/")
 MODBUS_PORT = int(os.getenv("MODBUS_PORT", "5020"))
 MODBUS_HOST = os.getenv("MODBUS_HOST", "0.0.0.0")
+POLL_INTERVAL = float(os.getenv("MODBUS_POLL_INTERVAL", "5.0"))
 
 class ModbusService:
     def __init__(self, max_moduller=10):
         self.max_moduller = max_moduller
         # Her modül için 20 register kapsayan blok (Adres 100'den başlar)
-        total_registers = 100 + (max_moduller * 20)
+        total_registers = 100 + (max_moduller * 20) + 10
         self.registers = [0] * total_registers
 
         # PyModbus Holding Registers (hr) veri alanı
         self.store = ModbusSlaveContext(hr=ModbusSequentialDataBlock(0, self.registers))
         self.context = ModbusServerContext(slaves=self.store, single=True)
+        # Modüllerin son geçerli değerlerini saklama (veri gelmediğinde sıfır yazılmaması için)
+        self.modul_hafizasi: dict[int, list[int]] = {}
 
-    def update_modul_data(self, modul_index: int, data: dict):
+    def update_modul_data(self, modul_index: int, modul_detay: dict, termal_ozet: dict | None = None):
         """
-        Modül verilerini Sözleşme ④'teki çarpan kurallarına göre register'lara yazar.
+        Modül verilerini Sözleşme ④'teki kurallara göre register'lara yazar.
         modul_index: 1-indexed (Örn: Modül 1 -> adres 100, Modül 2 -> adres 120)
+        Veri gelmediğinde/eksik olduğunda sıfır yazılmaz, önceki değer korunur.
         """
         base_addr = 100 + (modul_index - 1) * 20
+        mevcut_degerler = self.modul_hafizasi.get(modul_index, [0] * 20)
 
-        # Termal özet içinden veya doğrudan maksimum sıcaklık alma
-        termal_maks = data.get("termal_maks", 0)
-        if termal_maks == 0 and isinstance(data.get("termal_ozet"), dict):
-            termal_maks = data["termal_ozet"].get("maks", 0)
+        # 1. Uzun format son_olcumler haritası
+        son_olcumler = modul_detay.get("son_olcumler") or []
+        olcumler = {o["olcum_tipi"]: o["deger"] for o in son_olcumler if "olcum_tipi" in o and "deger" in o}
 
-        # Veri dönüşümleri (Çarpan: x10 ölçekleme)
-        ortam_temp = int(round(float(data.get("ortam_sicaklik", 0)) * 10))
-        nem = int(round(float(data.get("nem", 0)) * 10))
-        akim_l1 = int(round(float(data.get("akim_l1", 0)) * 10))
-        akim_l2 = int(round(float(data.get("akim_l2", 0)) * 10))
-        akim_l3 = int(round(float(data.get("akim_l3", 0)) * 10))
-        akim_notr = int(round(float(data.get("akim_notr", 0)) * 10))
-        t_maks = int(round(float(termal_maks) * 10))
-        seviye_enum = SEVIYE_MAP.get(str(data.get("seviye", "normal")).lower(), 0)
-        besleme_enum = BESLEME_MAP.get(str(data.get("besleme", "sebeke")).lower(), 0)
-        rssi = int(data.get("sinyal", -72)) & 0xFFFF
-        ark_sayisi = int(data.get("ark_olay", 0))
+        # 2. Termal Maksimum Sıcaklık
+        termal_maks = None
+        if termal_ozet and "maks" in termal_ozet and termal_ozet["maks"] is not None:
+            termal_maks = termal_ozet["maks"]
+        elif "termal_maks" in olcumler:
+            termal_maks = olcumler["termal_maks"]
 
-        modul_values = [
-            ortam_temp,    # +0: Ortam Sıcaklık (UInt16, x10)
-            nem,           # +1: Nem (UInt16, x10)
-            akim_l1,       # +2: Akım L1 (UInt16, x10)
-            akim_l2,       # +3: Akım L2 (UInt16, x10)
-            akim_l3,       # +4: Akım L3 (UInt16, x10)
-            akim_notr,     # +5: Akım Nötr (UInt16, x10)
-            t_maks,        # +6: Termal Maks (UInt16, x10)
-            seviye_enum,   # +7: Anomali Seviyesi (0-3)
-            besleme_enum,  # +8: Besleme Kaynağı (0: Şebeke, 1: Yedek)
-            rssi,          # +9: RSSI Sinyal (Int16)
-            ark_sayisi     # +10: Ark Olay Sayısı (Sayaç)
-        ] + [0] * 9        # +11..+19: Yedek kanallar
+        # Yeni değerleri hazırla (varsa güncelle, yoksa önceki değeri koru - Madde 20)
+        yeni_degerler = list(mevcut_degerler)
 
-        # Datastore güncelleme (Holding Register işlev kodu: 3)
-        self.store.setValues(3, base_addr, modul_values)
-        logging.debug(f"Modül {modul_index} (Adres {base_addr}) Modbus register'ları güncellendi.")
+        if "ortam_sicaklik" in olcumler and olcumler["ortam_sicaklik"] is not None:
+            yeni_degerler[0] = int(round(float(olcumler["ortam_sicaklik"]) * 10)) & 0xFFFF
+        if "nem" in olcumler and olcumler["nem"] is not None:
+            yeni_degerler[1] = int(round(float(olcumler["nem"]) * 10)) & 0xFFFF
+        if "akim_l1" in olcumler and olcumler["akim_l1"] is not None:
+            yeni_degerler[2] = int(round(float(olcumler["akim_l1"]) * 10)) & 0xFFFF
+        if "akim_l2" in olcumler and olcumler["akim_l2"] is not None:
+            yeni_degerler[3] = int(round(float(olcumler["akim_l2"]) * 10)) & 0xFFFF
+        if "akim_l3" in olcumler and olcumler["akim_l3"] is not None:
+            yeni_degerler[4] = int(round(float(olcumler["akim_l3"]) * 10)) & 0xFFFF
+        if "akim_notr" in olcumler and olcumler["akim_notr"] is not None:
+            yeni_degerler[5] = int(round(float(olcumler["akim_notr"]) * 10)) & 0xFFFF
+        if termal_maks is not None:
+            yeni_degerler[6] = int(round(float(termal_maks) * 10)) & 0xFFFF
+
+        # 3. Anomali Seviyesi
+        if "acik_anomaliler" in modul_detay and modul_detay["acik_anomaliler"] is not None:
+            acik_anomaliler = modul_detay["acik_anomaliler"]
+            en_kotu_seviye = 0
+            for a in acik_anomaliler:
+                s = str(a.get("seviye") or "normal").lower()
+                en_kotu_seviye = max(en_kotu_seviye, SEVIYE_MAP.get(s, 0))
+            yeni_degerler[7] = en_kotu_seviye & 0xFFFF
+        elif "seviye" in modul_detay and modul_detay["seviye"] is not None:
+            seviye_str = str(modul_detay["seviye"]).lower()
+            yeni_degerler[7] = SEVIYE_MAP.get(seviye_str, 0) & 0xFFFF
+
+        # 4. Besleme Durumu
+        if "besleme" in modul_detay and modul_detay["besleme"] is not None:
+            besleme_str = str(modul_detay["besleme"]).lower()
+            yeni_degerler[8] = BESLEME_MAP.get(besleme_str, 0) & 0xFFFF
+
+        # 5. Sinyal (RSSI)
+        if "sinyal" in modul_detay and modul_detay["sinyal"] is not None:
+            yeni_degerler[9] = int(modul_detay["sinyal"]) & 0xFFFF
+
+        if "ark_olay" in olcumler and olcumler["ark_olay"] is not None:
+            yeni_degerler[10] = int(olcumler["ark_olay"]) & 0xFFFF
+
+        # Datastore güncelle ve hafızayı tazele
+        self.modul_hafizasi[modul_index] = yeni_degerler
+        self.store.setValues(3, base_addr, yeni_degerler)
+        logging.debug(f"Modül {modul_index} (Adres {base_addr}) register'ları güncellendi.")
 
 async def sync_data_loop(service: ModbusService):
-    """API'den canlı veri çeken, API yoksa simülasyon uygulayan döngü"""
-    moduller = [
-        (1, "TR041-P01-M1"),
-        (2, "TR041-P01-M2")
-    ]
+    """Gerçek API'den canlı veri çeker, veri gelmediğinde sıfır yazmaz (Madde 20)"""
+    timeout = aiohttp.ClientTimeout(total=5)
 
-    async with aiohttp.ClientSession() as session:
+    async with aiohttp.ClientSession(timeout=timeout) as session:
         while True:
-            for idx, modul_id in moduller:
-                url = f"{API_URL}/moduller/{modul_id}"
-                data_alindi = False
+            try:
+                # 1. Modül listesini API'den al
+                modul_listesi = []
                 try:
-                    async with session.get(url, timeout=aiohttp.ClientTimeout(total=3)) as resp:
+                    async with session.get(f"{API_URL}/moduller?limit={service.max_moduller}") as resp:
                         if resp.status == 200:
-                            data = await resp.json()
-                            service.update_modul_data(idx, data)
-                            data_alindi = True
-                except Exception:
-                    pass
+                            govde = await resp.json()
+                            moduller = govde.get("veriler", [])
+                            modul_listesi = [m["modul_id"] for m in moduller if "modul_id" in m]
+                except Exception as e:
+                    logging.debug(f"Modül listesi alınamadı ({e}), bilinen modüller denenecek...")
 
-                # API'ye ulaşılamadıysa dahili simülasyon fallback
-                if not data_alindi:
-                    sample_data = {
-                        "ortam_sicaklik": 34.7 if idx == 1 else 29.2,
-                        "nem": 45.0 if idx == 1 else 42.0,
-                        "akim_l1": 120.5 if idx == 1 else 118.0,
-                        "akim_l2": 159.4 if idx == 1 else 118.5,
-                        "akim_l3": 119.8 if idx == 1 else 117.9,
-                        "akim_notr": 2.4 if idx == 1 else 0.8,
-                        "termal_maks": 83.5 if idx == 1 else 31.2,
-                        "seviye": "uyari" if idx == 1 else "normal",
-                        "besleme": "sebeke",
-                        "sinyal": -72,
-                        "ark_olay": 0
-                    }
-                    service.update_modul_data(idx, sample_data)
+                if not modul_listesi:
+                    # Fallback varsayılan modül listesi
+                    modul_listesi = ["TR041-P01-M1", "TR041-P01-M2"]
 
-            await asyncio.sleep(4)
+                # 2. Her modül için detay ve termal özet çek
+                for idx, modul_id in enumerate(modul_listesi[:service.max_moduller], start=1):
+                    try:
+                        # Modül detayı (son_olcumler, besleme, sinyal)
+                        modul_detay = None
+                        async with session.get(f"{API_URL}/moduller/{modul_id}") as resp:
+                            if resp.status == 200:
+                                modul_detay = await resp.json()
+
+                        if modul_detay is None:
+                            # Veri gelmediğinde sıfır yazma, geç (Madde 20)
+                            continue
+
+                        # Termal özet
+                        termal_ozet = None
+                        try:
+                            async with session.get(f"{API_URL}/moduller/{modul_id}/termal/son") as resp:
+                                if resp.status == 200:
+                                    termal_ozet = await resp.json()
+                        except Exception:
+                            pass
+
+                        service.update_modul_data(idx, modul_detay, termal_ozet)
+
+                    except Exception as err:
+                        logging.debug(f"Modül {modul_id} güncellenemedi: {err}")
+                        # Veri gelmediğinde sıfır yazılmıyor!
+
+            except Exception as e:
+                logging.error(f"Modbus senkronizasyon döngüsünde hata: {e}")
+
+            await asyncio.sleep(POLL_INTERVAL)
 
 async def main():
     service = ModbusService(max_moduller=10)
     asyncio.create_task(sync_data_loop(service))
 
     logging.info(f"🚀 Modbus TCP SCADA Sunucusu Başlatılıyor: {MODBUS_HOST}:{MODBUS_PORT}")
-    logging.info(f"📋 Sözleşme ④ Register Bloğu: Adres 100 - 139 (Modül 1 ve Modül 2)")
+    logging.info(f"📡 API Kaynağı: {API_URL}")
+    logging.info("📋 Sözleşme ④ Register Bloğu: Adres 100'den itibaren (Modül başına 20 register)")
     await StartAsyncTcpServer(context=service.context, address=(MODBUS_HOST, MODBUS_PORT))
 
 if __name__ == "__main__":

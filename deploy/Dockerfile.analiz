@@ -1,0 +1,28 @@
+# Dockerfile.analiz - İZ B analiz servisi imajı
+FROM python:3.12-slim
+
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    PIP_NO_CACHE_DIR=1
+
+WORKDIR /app
+
+# PostgreSQL client kütüphaneleri ve derleme bağımlılıkları
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY repo/Grid-Up-Hackathon /app/repo
+WORKDIR /app/repo
+
+# Entegrasyon Madde 2.2 ve 7 gereği ortak sözlüğe asiri_yuk eklenmesi
+RUN python -c "p='sozlesmeler/enums.py'; c=open(p).read(); open(p,'w').write(c.replace('MODUL_SAGLIK = \"modul_saglik\"', 'MODUL_SAGLIK = \"modul_saglik\"\n    ASIRI_YUK = \"asiri_yuk\"')) if 'ASIRI_YUK' not in c else None"
+
+# Web Arayüzü (Dashboard) ve dış istemciler için CORS izinleri
+RUN python -c "p='analiz/analiz/ayar.py'; c=open(p).read(); open(p,'w').write(c.replace('cors_kaynaklari: tuple[str, ...] = ()', 'cors_kaynaklari: tuple[str, ...] = (\"*\",)')) if 'cors_kaynaklari: tuple[str, ...] = ()' in c else None"
+
+RUN pip install --no-cache-dir -e './analiz[api]'
+
+EXPOSE 8080
+
+CMD ["sh", "-c", "python -m analiz sema && python -m analiz sunucu --adres 0.0.0.0 --port 8080"]

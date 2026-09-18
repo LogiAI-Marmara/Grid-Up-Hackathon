@@ -4,11 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Grid Up — İZ C: Pano/Hücre Operasyon ve İzleme Merkezi</title>
-    <!-- Google Fonts -->
+    <!-- Modern Dark SCADA Tipografi ve İkonlar -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css?v=20260917_02">
 </head>
 <body>
     <div class="app-wrapper">
@@ -91,6 +91,7 @@
                     <div class="module-title-wrap">
                         <span class="module-code-badge" id="active-module-badge">TR041-P01-M1</span>
                         <h2 id="active-module-name">Giriş Fideri Modülü</h2>
+                        <span class="status-badge badge-normal" id="active-module-status-badge">NORMAL</span>
                     </div>
                     <div class="module-meta">
                         <span class="meta-item">🕒 Son Güncelleme: <strong id="val-time">--:--:--</strong></span>
@@ -123,7 +124,7 @@
                         <div class="card-icon">🔥</div>
                         <div class="card-info">
                             <span class="card-title">Termal Maks. Sıcaklık</span>
-                            <div class="card-value warning"><strong id="val-tmax">--</strong><span class="unit">°C</span></div>
+                            <div class="card-value normal" id="val-tmax-box"><strong id="val-tmax">--</strong><span class="unit">°C</span></div>
                             <span class="card-sub" id="hotspot-coord">Konum: --</span>
                         </div>
                     </div>
@@ -168,6 +169,7 @@
                             <span class="thermal-resolution">768 Piksel (MLX90640 Sensör)</span>
                         </div>
                         <div class="thermal-actions">
+                            <button id="btn-live-thermal" class="btn-sm" style="display:none; background: #2563eb; color: #fff; font-weight: 600;">📷 Canlı Görüntüye Dön</button>
                             <button id="btn-toggle-smooth" class="btn-sm">Pürüzsüzleştirme: Açık</button>
                             <button id="btn-toggle-grid" class="btn-sm">Izgara: Kapalı</button>
                         </div>
@@ -190,15 +192,18 @@
 
                         <!-- Termal Renk Skalası Lejantı -->
                         <div class="thermal-legend-bar">
-                            <span class="legend-val">85°C+ (Aşırı Sıcak)</span>
+                            <span class="legend-val" title="Kritik Sıcaklık: Kırmızı/Işıma">≥85°C (Kritik)</span>
+                            <span class="legend-val mid" title="Uyarı: Turuncu">70°C</span>
                             <div class="legend-gradient"></div>
-                            <span class="legend-val">20°C (Normal/Soğuk)</span>
+                            <span class="legend-val mid" title="Ilık/Çalışma: Yeşil">50°C</span>
+                            <span class="legend-val mid" title="Normal: Camgöbeği">35°C</span>
+                            <span class="legend-val" title="Soğuk/Baz: Mavi">≤20°C (Normal)</span>
                         </div>
                     </div>
 
                     <!-- Canlı Hotspot ve Tanı Bildirim Şeridi -->
                     <div class="thermal-status-banner" id="thermal-status-banner">
-                        <span class="banner-icon">⚠️</span>
+                        <span class="banner-icon" id="banner-icon">✅</span>
                         <div class="banner-text">
                             <strong id="banner-title">Termal Anomali Analizi:</strong>
                             <span id="banner-desc">Sıcak nokta taranıyor...</span>
@@ -249,6 +254,6 @@
     </div>
 
     <!-- Uygulama Scripti -->
-    <script src="app.js"></script>
+    <script src="app.js?v=20260918_07"></script>
 </body>
 </html>

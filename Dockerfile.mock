@@ -1,6 +1,0 @@
-FROM python:3.11-slim
-WORKDIR /app
-COPY mock_api_server.py .
-COPY arayuz ./arayuz
-EXPOSE 8000
-CMD ["python", "mock_api_server.py"]
