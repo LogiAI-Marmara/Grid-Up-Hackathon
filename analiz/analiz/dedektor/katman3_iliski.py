@@ -41,7 +41,7 @@ from ..sozlesme import AKIM_FAZLARI, OlcumTipi, Seviye, Tip
 from .istatistik import medyan
 from .taban import Bulgu, KanalDurumu
 
-__all__ = ["calistir", "Bastirma"]
+__all__ = ["calistir", "Bastirma", "baskin_faz"]
 
 
 @dataclass(frozen=True, slots=True)
@@ -157,7 +157,7 @@ def _akim_sicaklik(pencere: Pencere, durum: KanalDurumu, ayar: Ayar) -> Bulgu | 
         return None
 
     # The load has to be measured for "the load did not do this" to mean anything.
-    faz = _baskin_faz(pencere, durum)
+    faz = baskin_faz(pencere, durum)
     if faz is None:
         return None
     faz_tipi, faz_seri = faz
@@ -170,18 +170,36 @@ def _akim_sicaklik(pencere: Pencere, durum: KanalDurumu, ayar: Ayar) -> Bulgu | 
         # in either direction. Declining is better than a confident wrong answer.
         return None
 
-    # Ambient's share. Optional: a module with a dead ambient sensor still gets
-    # the load comparison, it just credits the air with nothing — which is the
-    # conservative direction, since unexplained heat is then over-stated and the
-    # threshold has to work harder.
-    ortam_bas = ortam_son = None
-    ortam_farki = 0.0
-    if durum.kullanilabilir(OlcumTipi.ORTAM_SICAKLIK):
-        ortam = pencere.seri(OlcumTipi.ORTAM_SICAKLIK)
-        ortam_bas = ortam.baslangic(n)
-        ortam_son = ortam.temsil(n)
-        if ortam_bas is not None and ortam_son is not None:
-            ortam_farki = ortam_son - ortam_bas
+    # Ambient's share. NOT optional, unlike an earlier version of this check.
+    #
+    # D3 fix (post-review): crediting the air with 0 C when the ambient channel
+    # is simply missing or layer-0-vetoed is not conservative, it is wrong in
+    # the dangerous direction. `ortam_farki = 0.0` looks like "assume the room
+    # did not warm up", but it silently also removes ambient from
+    # `yukselme_ilk` (the joint's rise above ambient at the start of the
+    # window), which feeds the I^2 load-explanation term. For an extreme
+    # current ratio (e.g. 300 -> 600 A on a pure overload with no ambient
+    # sensor) that combination can make `aciklanamayan` swing kritik for a
+    # module that is doing nothing but carrying its rated load — exactly the
+    # false positive layer 3 exists to prevent, not manufacture. Reproduced in
+    # tests/test_katmanlar.py::test_akim_sicaklik_ambient_missing_no_finding
+    # (acceptance test A6) before this fix landed.
+    #
+    # Without ambient there is no accounting to do at all: the comparison is
+    # "measured rise minus air's share minus load's share", and one term being
+    # an invented zero rather than a measurement makes the whole equation
+    # unreliable, not merely approximate. So: no ambient channel, or layer 0
+    # vetoed it, and this check does not run — not "runs assuming 0 C".
+    if not durum.kullanilabilir(OlcumTipi.ORTAM_SICAKLIK):
+        return None
+    ortam = pencere.seri(OlcumTipi.ORTAM_SICAKLIK)
+    if ortam.bos:
+        return None
+    ortam_bas = ortam.baslangic(n)
+    ortam_son = ortam.temsil(n)
+    if ortam_bas is None or ortam_son is None:
+        return None
+    ortam_farki = ortam_son - ortam_bas
 
     # The load's share, from I^2 R.
     yukselme_ilk = sicaklik_bas - (ortam_bas if ortam_bas is not None else sicaklik_bas)
@@ -245,7 +263,7 @@ def _akim_sicaklik(pencere: Pencere, durum: KanalDurumu, ayar: Ayar) -> Bulgu | 
     )
 
 
-def _baskin_faz(
+def baskin_faz(
     pencere: Pencere, durum: KanalDurumu
 ) -> tuple[OlcumTipi, Seri] | None:
     """The most heavily loaded usable phase — the one whose heat we would expect.
@@ -255,6 +273,14 @@ def _baskin_faz(
     phase is the strongest candidate explanation, which makes rejecting it the
     strongest form of the argument: if even the busiest phase did not change, the
     load did not cause this.
+
+    Public (not `_`-prefixed) because it is the fast path's definition of
+    "which phase is the load"; kept exported for tests and for any future
+    caller outside this module that needs the same notion at the fast path's
+    own (6-hour) time scale. The slow path (`katman2_taban._yavas_baskin_faz`,
+    decision D1) answers the same question over daily aggregates instead of
+    raw samples and so has its own, structurally different, implementation —
+    documented there.
     """
     en_iyi: tuple[OlcumTipi, Seri] | None = None
     en_yuksek = -1.0

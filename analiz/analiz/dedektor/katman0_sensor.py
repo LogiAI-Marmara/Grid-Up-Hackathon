@@ -85,36 +85,21 @@ def _kanal_sagligi(seri: Seri, pencere: Pencere, ayar: Ayar) -> Bulgu | None:
     if seri.noktalar:
         zaman = seri.noktalar[-1].zaman
 
-    if len(seri.noktalar) < k0.asgari_ornek:
-        # Too few samples to judge. Not "healthy" — unjudged. Returning None
-        # lets the later layers see the channel, and they have their own minimum
-        # sample guards; declaring a fault here would make every cold start a
-        # sensor failure.
-        return None
-
-    # --- 1. the module's own quality flag ---------------------------------
-    toplam = len(seri.noktalar)
-    bozuk_sayisi = sum(1 for n in seri.noktalar if n.kalite is not Kalite.IYI)
-    if bozuk_sayisi / toplam >= k0.kalite_orani:
-        baskin = _baskin_kalite(seri)
-        return Bulgu(
-            tip=Tip.SENSOR_ARIZASI,
-            seviye=k0.kalite_seviye,
-            skor=_skor(k0.kalite_seviye),
-            katman=0,
-            gerekce=kalite_bozuk(seri.olcum_tipi, bozuk_sayisi, toplam, baskin.value),
-            zaman=zaman,
-            kanal=seri.olcum_tipi,
-            kanit={
-                "olcum_tipi": seri.olcum_tipi.value,
-                "pencere": _pencere_kaniti(pencere),
-                "esik": round(k0.kalite_orani, 4),
-                "olculen": round(bozuk_sayisi / toplam, 4),
-                "kalite": baskin.value,
-            },
-        )
-
-    # --- 2. physically impossible values ----------------------------------
+    # --- 1. physically impossible values ------------------------------------
+    #
+    # D3 fix (post-review): this used to run AFTER the minimum-sample early
+    # return below, which meant a module with, say, two samples — one of them
+    # a value the sensor's own physical range rules out — was waved through as
+    # merely "unjudged, too few samples" instead of being caught. The shared DB
+    # CHECK constraint (`OLCUM_ARALIK`) already rejects such rows at the
+    # PostgreSQL layer for anything that goes through the normal write path, so
+    # this in-process check is a second line of defence — for data written by
+    # another path, or for a build running against an older schema — and a
+    # defence that only engages once six samples have accumulated is not a
+    # defence for the case that matters most: catching it immediately.
+    # Verified at the unit level (an out-of-range value cannot be inserted into
+    # Postgres directly, since the schema already rejects it) in
+    # tests/test_katmanlar.py::test_kanal_sagligi_aralik_disi_az_ornekle.
     alt, ust = OLCUM_ARALIK[seri.olcum_tipi]
     for nokta in reversed(seri.noktalar):
         if nokta.deger is None:
@@ -135,6 +120,37 @@ def _kanal_sagligi(seri: Seri, pencere: Pencere, ayar: Ayar) -> Bulgu | None:
                     "olculen": round(float(nokta.deger), 3),
                 },
             )
+
+    if len(seri.noktalar) < k0.asgari_ornek:
+        # Too few samples to judge the remaining, statistical tests. Not
+        # "healthy" — unjudged. Returning None lets the later layers see the
+        # channel, and they have their own minimum sample guards; declaring a
+        # fault here would make every cold start a sensor failure. The range
+        # check above is exempt from this guard on purpose — a single
+        # impossible value does not need six samples to be impossible.
+        return None
+
+    # --- 2. the module's own quality flag -----------------------------------
+    toplam = len(seri.noktalar)
+    bozuk_sayisi = sum(1 for n in seri.noktalar if n.kalite is not Kalite.IYI)
+    if bozuk_sayisi / toplam >= k0.kalite_orani:
+        baskin = _baskin_kalite(seri)
+        return Bulgu(
+            tip=Tip.SENSOR_ARIZASI,
+            seviye=k0.kalite_seviye,
+            skor=_skor(k0.kalite_seviye),
+            katman=0,
+            gerekce=kalite_bozuk(seri.olcum_tipi, bozuk_sayisi, toplam, baskin.value),
+            zaman=zaman,
+            kanal=seri.olcum_tipi,
+            kanit={
+                "olcum_tipi": seri.olcum_tipi.value,
+                "pencere": _pencere_kaniti(pencere),
+                "esik": round(k0.kalite_orani, 4),
+                "olculen": round(bozuk_sayisi / toplam, 4),
+                "kalite": baskin.value,
+            },
+        )
 
     # --- 3. frozen value ---------------------------------------------------
     if seri.olcum_tipi not in k0.donuk_muaf:

@@ -21,6 +21,7 @@ __all__ = [
     "mad",
     "robust_z",
     "egim",
+    "theil_sen",
     "NORMAL_TUTARLILIK",
 ]
 
@@ -95,3 +96,37 @@ def egim(x: Sequence[float], y: Sequence[float]) -> float:
     if payda <= 0.0 or math.isclose(payda, 0.0, abs_tol=1e-12):
         return 0.0
     return pay / payda
+
+
+def theil_sen(x: Sequence[float], y: Sequence[float]) -> float:
+    """Robust trend estimator: the median of every pairwise slope.
+
+    Used by the slow path (`Katman2YavasAyari`, decision D1) in place of
+    `egim`'s ordinary least squares. OLS minimises squared error, so one
+    corrupted point — a thermal-camera glare on one day-bucket, a half day of
+    stale carried-forward ambient data — pulls the whole fitted line toward
+    it, and the slow path's multi-week window gives that one bad bucket weeks
+    to occur in. Theil-Sen's median-of-slopes needs more than half the O(n^2)
+    pairwise slopes corrupted to move at all, which is the guarantee a
+    detector claiming early warning over a period long enough for real data
+    problems to accumulate actually needs.
+
+    O(n^2) pairs is the accepted cost of the robustness and is fine here: the
+    slow path fits daily buckets (tens of points across a few weeks), never
+    raw per-sample data — see `PencereGetirici._yavas_ozetler`.
+
+    Same "undefined returns 0.0, not an error" contract as `egim`: fewer than
+    two usable points, or every x identical, is cold start, not a fault.
+    """
+    n = len(x)
+    if n < 2 or n != len(y):
+        return 0.0
+    egimler = [
+        (y[j] - y[i]) / (x[j] - x[i])
+        for i in range(n)
+        for j in range(i + 1, n)
+        if not math.isclose(x[j], x[i], abs_tol=1e-9)
+    ]
+    if not egimler:
+        return 0.0
+    return medyan(egimler)

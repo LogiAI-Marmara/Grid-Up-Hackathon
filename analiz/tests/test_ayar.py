@@ -159,6 +159,11 @@ def test_seviye_esikleri_her_katmanda_artan_sirada():
             a.katman3.aciklanamayan_uyari,
             a.katman3.aciklanamayan_kritik,
         ),
+        (
+            a.katman2_yavas.asiri_isinma_izle,
+            a.katman2_yavas.asiri_isinma_uyari,
+            a.katman2_yavas.asiri_isinma_kritik,
+        ),
     ]
     for izle, uyari, kritik in ucluler:
         assert izle <= uyari <= kritik

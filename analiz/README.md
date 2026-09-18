@@ -189,8 +189,18 @@ Run in order; the order is not cosmetic.
 |---|---|---|
 | **0** sensor health | `kalite`, frozen values, impossible values, silence, clock drift, backup power, weak signal | `sensor_arizasi`, `modul_saglik` |
 | **1** absolute limits | the value alone | `sicak_nokta`, `ortam_sicaklik_yuksek`, `nem_yuksek`, `faz_dengesizligi`, `ark` |
-| **2** baseline deviation | median + MAD, magnitude **and trend** | `sicak_nokta`, `ortam_sicaklik_yuksek` |
+| **2** baseline deviation (fast, hours) | median + MAD magnitude, capped at `izle` (D2); trend is informational text only | `sicak_nokta`, `ortam_sicaklik_yuksek` |
+| **2** normalized heating (slow, days–weeks, D1) | (hot spot − ambient) / current^n vs its own early-window level, mapped to FIST 4-13 bands | `akim_sicaklik_sapmasi` |
 | **3** relationships | current↔temperature, phase↔phase, pixel↔frame, module↔module | `akim_sicaklik_sapmasi`, `faz_dengesizligi`, `sicak_nokta` |
+
+**Post-review correction (decisions D1–D3, this PR):** layer 2's trend half
+(the old `egilim_izle/uyari/kritik`-driven finding) no longer sets a severity
+on its own — see [D2](#d2--severity-is-an-action-not-a-forecast) below — and a
+second, slower evaluation now runs alongside the original 6-hour window for
+exactly the multi-day fault the fast window structurally cannot see. Layer 3's
+current-vs-temperature check no longer substitutes 0 °C for a missing ambient
+channel (D3). Layer 0's physical-range check now runs before, not after, the
+minimum-sample gate (D3).
 
 Layer 0 runs first because everything after it assumes the numbers are real, and
 its veto is **per channel** — a dead humidity sensor must not blind the thermal
@@ -688,6 +698,20 @@ monotonic sequence and time index the alarm service needs in order not to miss a
 episode are `gridup.anomali.sira` (drawn from the same sequence as `id`, so their
 orderings cannot disagree) and `anomali_son_gorulme_idx`.
 
+**5. (Found during this review's local setup, not on track A's branch text
+itself — recorded here because it fits this section, not because a code
+change was made anywhere shared.) The exported `toplama/migrations/003_termal.sql`
+this checkout's own setup instructions point at (`git archive
+origin/feature/track-a toplama/migrations sozlesmeler`) still declares
+`termal_kare.piksel_verisi JSONB`, while this file's own §11 ("Binary frame
+(11)") and `fikstur.py`/`api.py` have always treated it as `bytea` (int16 LE).
+A local, uncommitted patch to the exported copy (never to the shared
+migration itself) was needed to run this delivery's test suite end to end
+against a real database. Whether track A's actual current schema already
+has the bytea column and this export is simply stale, or whether the
+migration genuinely still says jsonb, was not otherwise determined — flagged
+for track A to confirm, not fixed here.**
+
 Nothing else diverged. Column names, types, enum values, the `[sutun, satir]`
 pixel order, the 768-value row-major frame layout and the `kalite`/`deger`
 relationship all match what this layer was built against.
@@ -695,6 +719,244 @@ relationship all match what this layer was built against.
 **Since the integration phase** the schema and vocabularies are no longer
 restated here at all, so this list cannot grow the same way: a divergence now
 shows up as `tests/test_sozlesme.py` failing against track A's own files.
+
+---
+
+## Post-review corrections (D1–D5)
+
+A technical review of PR #3 after it merged found real bugs and a design gap
+in severity handling. This section records what changed, why, and — for D4 —
+every threshold this package uses, its numeric value, where it comes from,
+and where it is read. It does not touch `docs/izb-karar-kaydi.md`; these are
+implementation corrections downstream of that record, not amendments to it.
+
+### D1 — multi-time-scale detection
+
+The original detection window (`PencereAyari.tespit_sn`, 6 hours) is right for
+a sudden rise and structurally cannot see a fault that grows too slowly to
+accumulate `Katman2Ayari.asgari_delta` worth of rise inside any given 6-hour
+slice — a terminal drifting 45 → 60 °C over 10 days moves about 0.06 °C in any
+six hours of that, which never clears the gate no matter how far the fault has
+actually come by day 10.
+
+A second, independent evaluation now runs alongside the fast one:
+`Katman2YavasAyari` / `dedektor.katman2_taban._yavas_isinma`. It reads
+`Katman2YavasAyari.pencere_sn` (21 days by default) of **daily SQL
+aggregates** (`PencereGetirici._yavas_ozetler`, `date_trunc('day', ...)` +
+`avg`/`max` — never raw samples pulled into Python), computes normalized
+heating `(hot spot − ambient) / current^n` per day, fits a **Theil-Sen**
+(median-of-pairwise-slopes) trend across those daily points — robust to a
+single corrupted day-bucket, unlike an ordinary least-squares fit — and
+compares the module's CURRENT normalized-heating level against ITS OWN level
+from the EARLIEST few qualifying daily buckets in that same window.
+
+**Why not a sliding baseline, and why an early-anchored one instead — the
+crux of D1.** The existing 14-day sliding median/MAD
+(`PencereAyari.taban_sn`/`taban_bosluk_sn`) is exactly the trap the slow path
+exists to avoid: fed a 10-day linear drift, it absorbs the drift as the new
+normal (verified as a regression test,
+`tests/test_zaman_olcekleri.py::test_yavas_isinma_taban_cizgisi_yutulur` —
+median ends up dragged toward the drifted value, robust z stays under the
+fast path's own `izle` threshold). The slow path's reference is instead the
+median of the OLDEST few qualifying buckets inside the SAME window being
+evaluated, recomputed fresh every time rather than carried and updated turn
+to turn. It cannot be poisoned by a fault developing WITHIN the window because
+it never slides forward to re-absorb one. A fault already fully established
+before the window even opens is a real, acknowledged limitation of any
+window-based reference — not unique to this one — which is why the window
+defaults to 21 days rather than the 14-day floor D1 asked for: more runway for
+the early reference to predate a real fault's onset.
+
+Missing ambient, missing/insufficient current data, or layer 0 having vetoed
+either channel: the slow path is skipped for that module that turn, silently
+— no default substituted (see D3 for why that specific failure mode matters).
+
+**Performance.** An unbounded per-turn re-run of this query measurably broke
+the T5 budget (see T5 below) — recomputing a days-scale trend every 30 s buys
+nothing, so `PencereGetirici` now caches each module's slow-path result in
+process memory and only re-queries after `Katman2YavasAyari.yenileme_sn` (1
+hour default) has passed for that module.
+
+### D2 — severity is an action, not a forecast
+
+`izle` = keep watching, `uyari` = plan maintenance, `kritik` = act now.
+Severity must read off the PRESENT, load-normalized condition; a forecast may
+only appear as *text* inside `gerekce`, never as the reason a `Bulgu` carries
+the severity it does.
+
+- **Layer 2's own-history deviation** (`_sapma`, robust z) is capped at
+  `izle` (`skor.esikle_tavanli`) — being unusual for ITS OWN history is not,
+  alone, grounds for more. `Katman2Ayari.z_uyari`/`z_kritik` are kept to
+  shape the score curve within the capped band, not removed.
+- **Layer 2's trend** (`_egilim`, the OLS slope) no longer produces its own
+  finding or severity at all. It survives as `_egilim_bilgisi`: text folded
+  into an already-firing magnitude finding's `gerekce`, gated by the same
+  `asgari_delta`/`asgari_egilim_ornek` as before. `egilim_izle` is now purely
+  the "worth mentioning" floor; `egilim_uyari`/`egilim_kritik` only word the
+  sentence and play no part in `esikle`.
+- **Excess heating over ambient, load-normalized** (layer 3's
+  `_akim_sicaklik`, and the slow path above) is mapped onto FIST 4-13's own
+  bands: 1–10 K not reported, 11–20 → `izle`, 21–40 → `uyari`, >40 → `kritik`.
+- **Difference vs a similar component** (phase-to-phase, pixel-vs-frame,
+  module-vs-peers) is the same FIST 4-13 category, bands 1–3 K not reported,
+  4–15 K → `uyari`, >15 K → `kritik`. Applied where the units allow it
+  (Kelvin comparisons); phase-to-phase stays a current fraction and is NOT
+  force-converted — see the threshold table below for the honest sourcing on
+  each.
+- **A configurable persistence delay** (`OlayAyari.bekleme_sn`, `olay.py`)
+  now gates OPENING a new episode: a qualifying condition must recur across
+  MEASUREMENT-time-advancing turns for `bekleme_sn` (15 minutes default,
+  measured against detector/turn time — see `OlayDeposu._acilmaya_hazir`'s
+  docstring for why turn time and not measurement time) before a fresh
+  episode opens; an already-open episode is unaffected. The arc
+  (`OlayAyari.bekleme_muaf`) is exempt and opens immediately, unchanged —
+  the TVOC-2 is SIL-2 and has already decided.
+
+### D3 — two fixes
+
+1. **Layer 3's current-vs-temperature check** (`_akim_sicaklik`) used to
+   credit a missing ambient channel with 0 °C, which (combined with an
+   extreme current ratio) could report a critical `akim_sicaklik_sapmasi` for
+   a module carrying nothing but a pure overload with no ambient sensor.
+   It now returns no finding at all when the ambient channel is absent or
+   layer-0-vetoed. Acceptance test A6
+   (`tests/test_zaman_olcekleri.py::test_a6_...`) reproduces the scenario.
+2. **Layer 0's physical-range check** used to run after the minimum-sample
+   early return, so a channel with fewer than `Katman0Ayari.asgari_ornek`
+   samples — one of them physically impossible — was waved through as merely
+   "unjudged". The range check now runs first, unconditionally.
+   `tests/test_katmanlar.py::test_kanal_sagligi_aralik_disi_az_ornekle`.
+
+### D5 — new labelled scenarios
+
+`senaryolar.py` gained one slow-developing loose-terminal scenario
+(`senaryo_08_gevsek_klemens_yavas`, days-scale, current and ambient steady —
+the same fault as scenario 1, driven by `Uretec.uret`'s new `yavas_bozucu`
+hook rather than the fast `bozucu` one) and two hard negatives: ambient
+rising over days with the surface following it (load-normalized heating
+stays flat), and a sustained ~40% load increase over days with the
+temperature rise consistent with I² (`asiri_yuk`'s own fault, not a loose
+terminal — must never surface as `akim_sicaklik_sapmasi`). These are the
+labelled/regression set (section 2.7); metrics from it are reported as
+"labelled set", never "blind test" — see the [Kör test protokolü](#kör-test-protokolü)
+section for the difference.
+
+### D4 — threshold traceability
+
+Every threshold, window and exponent in `ayar.py`, its default, its basis,
+and where it is used. Basis is one of: **FIST 4-13** (U.S. Bureau of
+Reclamation, infrared inspection of electrical equipment), **vendor
+example** (a manufacturer's published model, not a standard), or
+**engineering default, unverified** (a deliberate, documented choice with no
+external citation — never invented as one).
+
+**`VeritabaniAyari`**
+
+| Field | Value | Basis | Used in |
+|---|---|---|---|
+| `sorgu_zaman_asimi_ms` | 30000 | engineering default, unverified | every DB cursor |
+
+**`TaramaAyari` (K1, the scan loop)**
+
+| Field | Value | Basis | Used in |
+|---|---|---|---|
+| `periyot_sn` | 30 s | engineering default — set from T5's own measurement, not a spec value | `tarama.py` |
+| `emniyet_payi_sn` | 1 s | engineering default, unverified | `tarama.py._aralik_sonu` |
+| `ilk_imlec_geri_sn` | 3600 s | engineering default, unverified | cold-start cursor |
+| `azami_aralik_sn` | 6 h | engineering default, unverified | catch-up cap |
+
+**`PencereAyari` (evaluation windows)**
+
+| Field | Value | Basis | Used in |
+|---|---|---|---|
+| `tespit_sn` (fast detection window) | 6 h | decision record's worked example (section 5) | all four layers |
+| `taban_sn` (fast baseline window) | 14 days | engineering default — "far longer than the detection window" per the poisoning defence, section 5 | `katman2_taban._sapma` |
+| `taban_bosluk_sn` | 6 h | engineering default, unverified | poisoning defence part 2 |
+| `asgari_taban_ornek` | 20 | engineering default, unverified | layer 2 cold-start gate |
+| `komsu_sn` | 6 h | engineering default, unverified | layer 3 module-vs-module |
+| `temsil_ornek` | 5 | engineering default, unverified | "representative value" median everywhere |
+
+**`Katman0Ayari` (sensor health)**
+
+| Field | Value | Basis | Used in |
+|---|---|---|---|
+| `kalite_orani` | 0.5 | engineering default, unverified | quality-flag test |
+| `asgari_ornek` | 6 | engineering default, unverified | minimum-sample gate |
+| `donuk_ardisik` | 12 | engineering default — "two minutes at the contract's 10 s cadence" | frozen-sensor test |
+| `donuk_tolerans` | 1e-6 | sensor quantisation floor, unverified | frozen-sensor test |
+| `sessizlik_sn` | 900 s | engineering default, unverified | silence finding |
+| `saat_kaymasi_sn` | 120 s | engineering default, unverified | clock-drift finding |
+| `ileri_tarih_tolerans_sn` | 5 s | NTP-scatter allowance, unverified | future-dated test |
+| `besleme_yedek_ardisik` | 2 | engineering default, unverified | backup-power finding |
+| `sinyal_zayif_dbm` | −100 dBm | LoRa/NB-IoT link-budget rule of thumb, unverified as a citation | weak-signal finding |
+| severities (`kalite`/`donuk`/`aralik_disi`/`sessizlik`/`besleme` = `uyari`; `saat_kaymasi`/`sinyal` = `izle`) | — | engineering default — "a sensor fault is a maintenance ticket, not a grid emergency" | layer 0 |
+
+**`Katman1Ayari` (absolute limits) — audited, not changed by D2**
+
+| Field | Value | Basis | Used in |
+|---|---|---|---|
+| `termal_izle`/`uyari`/`kritik` | 70 / 90 / 130 °C | decision record cites TEDAS spec + material limits; 130 °C is the record's own worked-scenario insulation limit — **not independently verified against the TEDAS document by this review** | layer 1 hot-spot |
+| `ortam_izle`/`uyari`/`kritik` | 45 / 55 / 65 °C | engineering default, unverified | layer 1 ambient |
+| `nem_izle`/`uyari`/`kritik` | 75 / 85 / 95 % | engineering default (condensation risk), unverified | layer 1 humidity |
+| `faz_izle`/`uyari`/`kritik` | 10 / 20 / 30 % | NEMA-style imbalance percentage, unverified as a specific citation | layer 1 phase |
+| `faz_asgari_akim` | 20 A | engineering default, unverified | phase-imbalance noise floor |
+| `ark_esik` | 0.5 | pass-through of the TVOC-2's own certified decision, not this system's threshold | arc finding |
+
+**`Katman2Ayari` (fast baseline deviation)**
+
+| Field | Value | Basis | Used in |
+|---|---|---|---|
+| `z_izle`/`z_uyari`/`z_kritik` | 3.5 / 6.0 / 10.0 | robust-z convention (comparable to a standard-deviation count); **D2: capped at `izle`, `uyari`/`kritik` now only shape the score curve** | `_sapma` |
+| `asgari_mad` | 0.3 | ~1 sensor quantisation step, unverified | MAD floor |
+| `egilim_izle`/`uyari`/`kritik` | 0.5 / 1.5 / 4.0 °C/h | engineering default, unverified; **D2: no longer set severity — `izle` is a "worth mentioning" floor, `uyari`/`kritik` only word the sentence** | `_egilim_bilgisi` |
+| `asgari_delta` | 5.0 | engineering default, unverified | trend total-rise gate |
+| `asgari_egilim_ornek` | 8 | engineering default, unverified | trend sample-count gate |
+
+**`Katman2YavasAyari` (slow path, new in D1)**
+
+| Field | Value | Basis | Used in |
+|---|---|---|---|
+| `pencere_sn` | 21 days | D1 asked for "at least 14 days"; 21 chosen for early-reference runway, engineering default | slow window |
+| `kova_sn` | 24 h | engineering default — thermal lag itself is hours long, an hourly bucket mostly re-measures it | SQL bucket width |
+| `asgari_akim` | 5 A | mirrors `Katman3Ayari.akim_asgari` | normalized-heating noise floor |
+| `yuk_ustel` (n) | 2 | I²R, physics-derived | normalization exponent |
+| `asgari_kova` | 10 | engineering default, unverified | slow-path cold-start gate |
+| `temsil_kova` | 3 | mirrors `PencereAyari.temsil_ornek` | robust current/reference level |
+| `asiri_isinma_izle`/`uyari`/`kritik` | 11 / 21 / 40 °C | **FIST 4-13**, same bands as `Katman3Ayari.aciklanamayan_*` | slow-path severity |
+| `yenileme_sn` | 3600 s | engineering default — see T5 below for the measurement that set it | `PencereGetirici`'s slow-path cache |
+
+Note on `yuk_ustel`: ABB publishes a vendor thermal model using **n = 1.6**
+for some busbar/connector geometries — a vendor example, not a standard, and
+not adopted here. 2 (the I²R physics model, also used by layer 3) is the
+default.
+
+**`Katman3Ayari` (relationships)**
+
+| Field | Value | Basis | Used in |
+|---|---|---|---|
+| `sicaklik_artis_esigi` | 10 °C | aligned to FIST 4-13's own "not reported" floor below | worth-checking gate |
+| `aciklanamayan_izle`/`uyari`/`kritik` | 11 / 21 / 40 °C | **FIST 4-13** ("excess heating over ambient") — corrected in D2 from the previous unsourced 8/15/30 | `_akim_sicaklik` |
+| `akim_asgari` | 5 A | engineering default, unverified | I² ratio noise floor |
+| `faz_sapma_izle`/`uyari`/`kritik` | 0.08 / 0.15 / 0.25 (fraction) | **engineering default, unverified — deliberately NOT converted to FIST's Kelvin bands**: this is a current-imbalance fraction, not a temperature difference, and forcing a Kelvin citation onto it would misrepresent the source | `_faz_faz` |
+| `notr_orani` | 0.20 | engineering default, unverified | neutral-current corroboration |
+| `piksel_ayrisma_izle`/`uyari`/`kritik` | 6 / 8 / 15 °C | **FIST 4-13 shape** (1–3 not reported / 4–15 uyari / >15 kritik), `izle`/`uyari` raised above FIST's literal 4 K specifically for noise-floor robustness — verified against this project's own noisy-healthy fixture during validation; `kritik` at FIST's literal 15 K. Corrected from the previous unsourced 8/15/25 | `_komsu_piksel` |
+| `piksel_kararlilik_orani` | 0.6 | engineering default, unverified | hot-pixel stability gate |
+| `modul_ayrisma_izle`/`uyari`/`kritik` | 6 / 8 / 15 °C | same as `piksel_ayrisma_*` above, same reasoning | `_modul_modul` |
+| `asgari_komsu` | 2 | engineering default, unverified | peer-count gate |
+| `komsu_kapsami` | "saha" | operational choice, not a threshold | peer scope |
+| `ortak_hareket_delta` | 3.0 °C | engineering default, unverified | common-movement suppression |
+| `ortak_hareket_orani` | 0.6 | engineering default, unverified | common-movement suppression |
+
+**`OlayAyari` (episode lifecycle)**
+
+| Field | Value | Basis | Used in |
+|---|---|---|---|
+| `histerezis_sn` | 30 min | decision record, section 6.5 ("about 30 minutes") | closing hysteresis |
+| `bekleme_sn` (new in D2) | 15 min | engineering default — comfortably above the 30 s scan period, comfortably below the hours-to-weeks fault timescales this system targets | opening delay-on |
+| `bekleme_muaf` | `{ark}` | section 3.5 — the TVOC-2 is SIL-2 and has already decided | delay-on exemption |
+
+**`ApiAyari`** — no detection thresholds; page sizes and pool bounds are
+operational, not physical, and not included above.
 
 ---
 

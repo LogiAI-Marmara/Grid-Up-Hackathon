@@ -85,8 +85,11 @@ def test_fikstur_seti_gecerli_etiket_uretir(tmp_path):
     yol = E.yaz(etiket_uret(AN), tmp_path / "e.json")
     geri = E.oku(yol)
 
-    assert len(geri.senaryolar) == 11
-    assert len(geri.temiz_moduller) == 14
+    # D5 (post-review) added one new labelled slow-path scenario
+    # (senaryo_08_gevsek_klemens_yavas, 11 -> 12) and two new hard negatives
+    # (14 -> 16: ambient rising over days, and a sustained slow load increase).
+    assert len(geri.senaryolar) == 12
+    assert len(geri.temiz_moduller) == 16
     assert {s.senaryo for s in geri.senaryolar} <= set(E.SENARYO_ADLARI)
     # Every scenario's accepted-tip set is non-empty, or it could never be detected.
     for s in geri.senaryolar:

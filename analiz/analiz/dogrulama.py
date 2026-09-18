@@ -135,6 +135,20 @@ def kos(
     More than one turn by default, because a single turn cannot show the episode
     model working: the second turn is what proves a repeated finding updates the
     open episode rather than opening a second one.
+
+    `bekleme_sn` (D2's delay-on) is forced to 0 for this run specifically, and
+    that needs justifying since every other test-only override lives in
+    `dogrulama_ayari` rather than here. Delay-on requires the SAME finding to
+    keep recurring across MEASUREMENT time, not detector time; `kos` runs a
+    couple of turns a few seconds of wall-clock apart against a fixture
+    written once and already ending at `simdi`, so successive turns see
+    (near-)identical windows and an (near-)identical `bulgu.zaman` — the
+    condition never gets the chance to "persist" at all, and every episode
+    this function is supposed to demonstrate would silently stop opening.
+    `oynat` (turn-by-turn replay, 15-minute steps by default) is what
+    actually exercises delay-on with real elapsed measurement time, and its
+    own default `Ayar` is left untouched — see `kortest_vt` / the labelled-set
+    metrics, where this matters and is deliberately still on.
     """
     simdi = simdi or datetime.now(timezone.utc)
     sema_kur(baglanti)
@@ -142,7 +156,7 @@ def kos(
     fikstur = Fikstur(baglanti)
     satir, _ = kur(fikstur, simdi, gecmis_gun=gecmis_gun)
 
-    tarayici = Tarayici(baglanti, ayar)
+    tarayici = Tarayici(baglanti, ayar.ile(olay={"bekleme_sn": 0.0}))
     for i in range(tur_sayisi):
         # Advance the clock a little each turn so successive turns are distinct
         # passes rather than the same instant evaluated repeatedly.

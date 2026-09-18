@@ -230,12 +230,19 @@ def test_katman1_dusuk_yukte_faz_dengesizligi_bildirmez(baglanti, fikstur, ayar,
 
 
 def test_katman2_egilim_mutlak_sinir_asilmadan_uyarir(baglanti, fikstur, ayar, an):
-    """The early-warning claim: a warning while every absolute limit is still fine.
+    """D2 (post-review): a warning while every absolute limit is still fine, but
+    now from the PRESENT magnitude (capped at izle), with the slope as
+    information only — not, as before this decision, a finding the slope
+    itself was allowed to create or promote.
 
     Section 2.3's day-10 row. The value ends at 62 C — below layer 1's `izle`
     limit of 70, so nothing absolute has been crossed and nothing is visibly
-    wrong. The finding comes from the *slope*, and that is the entire difference
-    between this project and a threshold alarm.
+    wrong. Old assertion changed (see analiz/README.md's change log and the
+    final report): this used to assert a SEPARATE trend-only Bulgu existed and
+    that its severity came from the slope; D2 removed that Bulgu entirely, so
+    this now asserts the single surviving layer-2 finding is capped at `izle`
+    (never higher, however large the underlying z gets) and that its
+    `gerekce` still carries the trend as a sentence, not as the reason it fired.
     """
     modul_id = "TR041-P01-M1"
     _gecmis(fikstur, modul_id, an, taban=45.0)
@@ -254,13 +261,13 @@ def test_katman2_egilim_mutlak_sinir_asilmadan_uyarir(baglanti, fikstur, ayar, a
     sonuc = degerlendir(pencere, ayar)
 
     assert Tip.SICAK_NOKTA in sonuc.tipler
-    egilim_bulgulari = [
-        b for b in sonuc.ham_bulgular if b.katman == 2 and "saatte" in b.gerekce
-    ]
-    assert egilim_bulgulari, "the trend half of layer 2 must fire"
-    bulgu = egilim_bulgulari[0]
-    assert bulgu.seviye is not Seviye.NORMAL
-    assert bulgu.kanit["olculen"] > 0, "slope must be positive and reported"
+    katman2_bulgulari = [b for b in sonuc.ham_bulgular if b.katman == 2]
+    assert katman2_bulgulari, "layer 2 must still fire on this module's own history"
+    assert all(b.seviye is Seviye.IZLE for b in katman2_bulgulari), (
+        "deviation from a module's OWN normal may never exceed izle (D2)"
+    )
+    egilim_metinli = [b for b in katman2_bulgulari if "saatte" in b.gerekce]
+    assert egilim_metinli, "the rise is steep enough that trend text must still be present"
     # Nothing absolute was crossed: layer 1 stayed silent.
     assert not [b for b in sonuc.ham_bulgular if b.katman == 1]
 
@@ -474,3 +481,51 @@ def test_robust_z_sifir_mad_ile_patlamaz():
     """A channel that never moved has MAD 0; the floor keeps it finite."""
     assert robust_z(50.0, 45.0, 0.0, 0.3) == pytest.approx(0.6745 * 5.0 / 0.3)
     assert robust_z(45.0, 45.0, 0.0, 0.3) == 0.0
+
+
+def test_kanal_sagligi_aralik_disi_az_ornekle():
+    """D3 fix: the physical-range check must catch an impossible value even
+    with fewer samples than `asgari_ornek` — it used to run AFTER that
+    early-return and so waved a two-sample channel through as merely
+    "unjudged". Pure in-memory `Seri`/`Nokta`, per the reviewer's own note:
+    the shared DB CHECK constraint already rejects an out-of-range value at
+    the PostgreSQL layer, so this can only be exercised as a unit test.
+    """
+    from datetime import datetime, timezone
+
+    from analiz.ayar import Ayar
+    from analiz.dedektor.katman0_sensor import calistir
+    from analiz.pencere import Nokta, Pencere, Seri
+    from analiz.sozlesme import OLCUM_ARALIK
+
+    ayar = Ayar()
+    assert ayar.katman0.asgari_ornek > 2, "the test needs fewer samples than the minimum"
+
+    alt, ust = OLCUM_ARALIK[OlcumTipi.TERMAL_MAKS]
+    zaman0 = datetime(2026, 1, 1, tzinfo=timezone.utc)
+    imkansiz = ust + 1000.0  # far outside the physical range, on purpose
+
+    noktalar = (
+        Nokta(zaman0, 40.0, Kalite.IYI, zaman0),
+        Nokta(zaman0 + timedelta(seconds=30), imkansiz, Kalite.IYI, zaman0 + timedelta(seconds=30)),
+    )
+    seri = Seri(OlcumTipi.TERMAL_MAKS, noktalar)
+    assert len(seri.noktalar) < ayar.katman0.asgari_ornek
+
+    pencere = Pencere(
+        modul_id="TEST",
+        saha_kodu="TEST",
+        pano_kodu="TEST",
+        simdi=noktalar[-1].zaman,
+        tespit_bas=zaman0,
+        tespit_bit=noktalar[-1].zaman,
+        seriler={OlcumTipi.TERMAL_MAKS: seri},
+    )
+
+    bulgular, durum = calistir(pencere, ayar)
+    tipler_ve_kanallar = [(b.tip, b.kanal) for b in bulgular]
+    assert (Tip.SENSOR_ARIZASI, OlcumTipi.TERMAL_MAKS) in tipler_ve_kanallar, (
+        "an out-of-range value must be caught even with too few samples for the "
+        "other, statistical tests"
+    )
+    assert OlcumTipi.TERMAL_MAKS in durum.bozuk
