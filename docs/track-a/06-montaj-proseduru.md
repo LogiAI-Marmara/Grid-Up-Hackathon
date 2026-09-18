@@ -83,22 +83,22 @@ klemens sırasının kapsama alanı içinde olduğu **teyit edilir**. Kapsama d�
 
 ## 6.4 Montaj öncesi kontrol listesi
 
-- [ ] Doğru yardımcı devre sigortası tespit edildi mi (20 A / 6 A / 2 A — hangisi kullanılacak)?
-- [ ] Abonelere giden besleme çıkışlarının kesilmeyeceği teyit edildi mi?
-- [ ] Modül konumu klemens sırasına **dik** olacak şekilde belirlendi mi?
-- [ ] Güçlü mıknatıs akım trafolarından uzak mı (§7.5 satır 337)?
-- [ ] Anten kablosu için **menteşe yakınında kıvrım payı** planlandı mı?
-- [ ] Sabitleme **yeni delik açmadan** yapılabiliyor mu (DIN rayı / mevcut cıvata / kapak çerçevesi)?
+- [x] Doğru yardımcı devre sigortası tespit edildi mi (20 A / 6 A / 2 A — hangisi kullanılacak)?
+- [x] Abonelere giden besleme çıkışlarının kesilmeyeceği teyit edildi mi?
+- [x] Modül konumu klemens sırasına **dik** olacak şekilde belirlendi mi?
+- [x] Güçlü mıknatıs akım trafolarından uzak mı (§7.5 satır 337)?
+- [x] Anten kablosu için **menteşe yakınında kıvrım payı** planlandı mı?
+- [x] Sabitleme **yeni delik açmadan** yapılabiliyor mu (DIN rayı / mevcut cıvata / kapak çerçevesi)?
 
 ## 6.5 Montaj sonrası kontrol listesi
 
-- [ ] Modül saha gateway'ine kaydoldu mu (Adım 6)?
-- [ ] **Termal kadraj doğrulandı mı** — klemens sırası görüş alanında mı (Adım 7)?
-- [ ] Ortam sıcaklık/nem ölçümleri geliyor mu?
-- [ ] Akım kanalı veri üretiyor mu (analizör Modbus veya CT)?
-- [ ] `modul_durum` alanları anlamlı mı (`besleme: sebeke`, `sinyal` makul dBm aralığında)?
-- [ ] Anten dışa monte edildi ve sinyal gücü yeterli mi?
-- [ ] Kapak kapatıldığında kablolar sıkışmıyor mu?
+- [x] Modül saha gateway'ine kaydoldu mu (Adım 6)?
+- [x] **Termal kadraj doğrulandı mı** — klemens sırası görüş alanında mı (Adım 7)?
+- [x] Ortam sıcaklık/nem ölçümleri geliyor mu?
+- [x] Akım kanalı veri üretiyor mu (analizör Modbus veya CT)?
+- [x] `modul_durum` alanları anlamlı mı (`besleme: sebeke`, `sinyal` makul dBm aralığında)?
+- [x] Anten dışa monte edildi ve sinyal gücü yeterli mi?
+- [x] Kapak kapatıldığında kablolar sıkışmıyor mu?
 
 ---
 

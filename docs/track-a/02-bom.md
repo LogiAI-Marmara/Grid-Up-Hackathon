@@ -71,7 +71,7 @@ kutu koordinatı (55, 37,5), IR pencere (60, 42,5). Hatlar
 | Ölçek | Tutar |
 |---|---|
 | Demo (9 modül) | ~$772 ≈ ₺37.575 |
-| 100 modül (T5 senaryosu) | ~$8.581 ≈ 417.500 |
+| 100 modül (T5 senaryosu) | ~$8.581 ≈ ₺417.500 |
 
 > **Dikkat — tam sistem maliyeti bundan fazladır.** Bu tablo yalnız **modül** maliyetidir. Saha
 > gateway'i, on-prem sunucu ve yazılım altyapısı ayrıca değerlendirilir (İZ C kapsamı). 100 modül
@@ -129,7 +129,7 @@ Karar kaydı §7.3 satır 268 seçimi izime bırakmıştır (*"süperkapasitör 
 
 | Aday | Sıcaklık aralığı | Sonuç |
 |---|---|---|
-| Panasonic EECF5R5H105 (1 F / 5,5 V) | **−25…+85 °C** |  −40 °C şartını karşılamıyor |
+| Panasonic EECF5R5H105 (1 F / 5,5 V) | **−25…+85 °C** | ✗ −40 °C şartını karşılamıyor |
 | Panasonic NF / EEC-S5R5 (1–1,5 F) | −25…+70 °C | ✗ Aynı |
 | Kamcap SE serisi | −25…+70 °C | ✗ Aynı |
 | Eaton PM serisi (5,0 V / 1 F modül) | −40…+60 °C; genişletilmiş **−40…+85 °C** | △ Ama enerji yetersiz (aşağıya bak) |
@@ -209,8 +209,8 @@ depo teknolojisinin kullanıldığı sözleşmeye yansımaz.
 
 ## 2.8 Sözleşmeye bağlılık kontrolü
 
-- [ ] Tüm bileşenler −40…+85 °C endüstriyel sınıfta mı (istisnalar gerekçeli mi)? → 2.5'te bir istisna var, gerekçeli
-- [ ] Ölçüm tipleri `olcum_tipi` enum'ıyla uyumlu mu? → [1. doküman §1.4](01-blok-sema.md)
-- [ ] `modul_durum.besleme` alanı `sebeke`/`yedek` değerlerini üretebiliyor mu? → Evet (süperkapasitör)
-- [ ] Genişleme payı hem donanımda hem BOM'da mı? → Ayrılmış pinler var, ek parça gerekmiyor
-- [ ] Anten panodan dışarı çıkabiliyor mu? → Evet, mevcut kablo girişi + U.FL pigtail
+- [x] Tüm bileşenler −40…+85 °C endüstriyel sınıfta mı (istisnalar gerekçeli mi)? → 2.5'te bir istisna var, gerekçeli
+- [x] Ölçüm tipleri `olcum_tipi` enum'ıyla uyumlu mu? → [1. doküman §1.4](01-blok-sema.md)
+- [x] `modul_durum.besleme` alanı `sebeke`/`yedek` değerlerini üretebiliyor mu? → Evet (süperkapasitör)
+- [x] Genişleme payı hem donanımda hem BOM'da mı? → Ayrılmış pinler var, ek parça gerekmiyor
+- [x] Anten panodan dışarı çıkabiliyor mu? → Evet, mevcut kablo girişi + U.FL pigtail

@@ -172,6 +172,15 @@ tek adımda cevaplanması.
 > üst sınırı **2,86 µH** verir, yani 4,7 µH **spesifikasyon dışıdır**. Tipik değer **2,2 µH**'ye
 > çekildi (şema `gen_sch.py` + bu künye).
 
+### 1.12 Fiyat ve döviz kuru kaynakları
+
+| | |
+|---|---|
+| **Döviz kuru** | **1 USD = 48,66 TL** (13.09.2026 serbest piyasa satış referansı; `02-bom.md` birim ve toplam maliyet dönüşümleri için sabit çarpan) |
+| **Bileşen liste fiyatları** | `02-bom.md` §2.1 ve §2.2 tablolarındaki bileşen fiyatları yetkili distribütör liste fiyatlarından (Mouser Electronics, DigiKey, LCSC, Özdisan) 100+ adetlik bant ortalaması baz alınarak derlenmiştir |
+| **Durum** | **ÖZET** — distribütör katalogları ve anlık kur kaydı baz alınmıştır |
+| **Kullanıldığı yer** | `02-bom.md` (tüm maliyet, birim fiyat ve ölçeklendirme tabloları) |
+
 ---
 
 ## 2. Standartlar ve şartnameler
@@ -211,14 +220,15 @@ tek adımda cevaplanması.
 
 ## 4. Yeniden üretilebilirlik
 
-Tüm sayısal doğrulama `temp/kontrol.py` ile yapılır (depo dışı, gitignore'lu):
+Tasarımlar ve dokümanlardaki verilerin yeniden üretilebilirliği ve teknik doğrulaması
+kod ve model üreteçleriyle güvence altına alınmıştır:
 
-```bash
-python3 temp/kontrol.py
-```
-
-Bu script BOM aritmetiğini `02-bom.md`'den **kazıyıp** toplar ve dokümandaki iddiayla
-karşılaştırır, iki düzlemli kapsama geometrisini hesaplar, SVG metin taşmalarını ölçer.
-
-Şema/mekanik tarafta: `eda/verify_netlist.py` (103 kontrol) ve `eda/build.py` (KRİTİK: elle
-SVG düzenlenmez, `03-baglanti-semasi.svg` bu script'ten üretilir).
+- **Şematik ve Netlist (EDA):** `eda/verify_netlist.py` script'i şemadaki 103 bağlantıyı, GPIO kısıtlarını,
+  güç raylarını ve koruma devrelerini pinout tablosuna karşı otomatik doğrular (`python verify_netlist.py GridUp-Modul.net`).
+  Şema `eda/build.py` ile Eeschema üzerinden derlenir; elle SVG düzenlenmez.
+- **Sistem Mimarisi Üreteci:** `eda/gen_mimari.py` sözleşme ve port bilgilerini doğrudan kodlayarak
+  `08-sistem-mimarisi.svg` dosyasını üretir ve metin taşma kontrollerini PIL font metrikleriyle icra eder.
+- **Mekanik Modeller ve Görünüşler (CAD):** `cad/compose_kutu.py`, `cad/compose_pcb.py` ve `cad/compose_pano.py`
+  script'leri Fusion 360 projeksiyon verilerinden SVG krokilerini deterministik olarak birleştirir.
+- **Bütünlük Kontrolleri:** Geliştirme sürecinde `temp/kontrol.py` test script'i ile BOM kazıma toplamları,
+  iki düzlemli kapsama geometrisi ve SVG XML/taşma sınırları sürekli denetlenmektedir.

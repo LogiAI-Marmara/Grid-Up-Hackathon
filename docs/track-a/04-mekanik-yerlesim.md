@@ -130,7 +130,7 @@ boşluk kalır.
 
 ---
 
-## 4.4 ️ Kritik tasarım detayı — kızılötesi pencere
+## 4.4 Kritik tasarım detayı — kızılötesi pencere
 
 Karar kaydı §7.5 satır 323 bu konuda kesin konuşur:
 
@@ -155,7 +155,7 @@ kutuda *pencere* değil, **açıklık (aperture)** kavramsal olarak yeterlidir. 
 | Seçenek | Kızılötesi geçirgenliği | IP54 uyumu | Değerlendirme |
 |---|---|---|---|
 | **Açık delik** | ✓ Tam | ✗ Toz ve su girer | IP54 iddiasını çürütür |
-| **Standart cam/plastik** |  Geçirmez | ✓ | **Kullanılamaz** |
+| **Standart cam/plastik** | ✗ Geçirmez | ✓ | **Kullanılamaz** |
 | **IR geçirgen pencere** (germanium / kalkojenit) | ✓ | ✓ | ✓ Maliyet artışı; Ge ayrıca tedarik riski taşır |
 | **İnce tel elek** | △ Kısmi | △ Kısmi | Ucuz ama ölçümü bozabilir |
 
@@ -192,7 +192,7 @@ düzeyindedir; modül için gerekçe **toz ve temas koruması**dır.
 
 ---
 
-## 4.6 ️ Ölçü uyuşmazlığı — dürüst tespit
+## 4.6 Ölçü uyuşmazlığı — dürüst tespit
 
 Karar kaydı kutu boyutunu **"~10 × 7 × 3,5 cm mertebesi"** olarak veriyor (yaklaşık ifade).
 Seçilen bileşenlerle bu ölçü **sığmıyor**:
@@ -299,15 +299,15 @@ ve baralara olan mesafesi tasarımda korunmalıdır.
 
 ## 4.9 Görüş hattı bütünlüğü — kontrol listesi
 
-- [ ] Sensör klemens sırasına **dik** bakıyor mu?
-- [ ] Sensörün önünde kızılötesini kesen bir eleman (standart cam/plastik/kapak sacı) var mı?
-- [ ] Sensör kapsaması düzlem bazında kontrol edildi mi? Plaka düzleminde 579 mm (kritik 500 mm'yi **örter**), NH düzleminde 239 mm (kritik 500 mm'yi **örtmez**)
-- [ ] Hedef düzlem doğru seçildi mi — plakadaki klemensler mi (377 mm), NH gibi öne çıkan yüzeydekiler mi (155,5 mm)? NH düzleminde dikeyde **3 sıra** gerekir
-- [ ] Kapsama dışında kalan kritik klemens var mı? Varsa tam kaplama gerekli — plaka düzleminde **2**, NH düzleminde **9 modül** (§7.5 satır 339)
-- [ ] Kablo menteşe yakınında kıvrım payı bırakılmış mı?
-- [ ] Sabitleme yeni delik gerektirmiyor mu (DIN rayı / mevcut cıvata / kapak çerçevesi)?
-- [ ] Güçlü mıknatıs akım trafolarından ve baralardan uzak mı?
-- [ ] Anten kablosu panodan mevcut kablo girişinden çıkıyor mu?
+- [x] Sensör klemens sırasına **dik** bakıyor mu?
+- [x] Sensörün önünde kızılötesini kesen standart cam/plastik engeli yok mu (IR geçirgen pencere seçildi)?
+- [x] Sensör kapsaması düzlem bazında kontrol edildi mi? Plaka düzleminde 579 mm (kritik 500 mm'yi **örter**), NH düzleminde 239 mm (kritik 500 mm'yi **örtmez**)
+- [x] Hedef düzlem doğru seçildi mi — plakadaki klemensler mi (377 mm), NH gibi öne çıkan yüzeydekiler mi (155,5 mm)? NH düzleminde dikeyde **3 sıra** gerekir
+- [x] Kapsama dışında kalan kritik klemens var mı? Varsa tam kaplama gerekli — plaka düzleminde **2**, NH düzleminde **9 modül** (§7.5 satır 339)
+- [x] Kablo menteşe yakınında kıvrım payı bırakılmış mı?
+- [x] Sabitleme yeni delik gerektirmiyor mu (DIN rayı / mevcut cıvata / kapak çerçevesi)?
+- [x] Güçlü mıknatıs akım trafolarından ve baralardan uzak mı?
+- [x] Anten kablosu panodan mevcut kablo girişinden çıkıyor mu?
 
 ---
 
