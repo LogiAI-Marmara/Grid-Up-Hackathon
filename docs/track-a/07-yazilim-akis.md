@@ -11,6 +11,16 @@ firmware akışından türetilmiştir. Kod tarafı PR #1 ile teslim edilmiş, en
 > gider**, paket ve termal çevrimi **30 sn**'ye hizalandı, modül içi eşik kapısı kaldırıldı.
 > Gerekçe ve etkisi §7.3'te. Karar kaydı §7.2 / §7.4 henüz bu karara göre güncellenmedi (lider).
 
+> **Kapsam notu — mikrodenetleyici kodu (T3):** Brief T3 *"mikrodenetleyici kodları"* der. Bu
+> projede ESP32 firmware'i **yazılmamıştır**; fiziksel donanım üretilmediği için (§1.4) modül
+> mantığı `/modul-sim` içinde Python olarak gerçeklenmiş ve gerçek toplama servisine karşı
+> çalıştırılmıştır (karar kaydı §12: *"modül mantığı"* = `modul-sim`). Bu doküman o kodun
+> akışıdır. Sahaya taşıma yolu: ESP32-S3 üzerinde Arduino/ESP-IDF; pinler [3. doküman §3.1](03-pinout.md);
+> MLX90640 ve SHT31 için üretici I²C sürücüleri, akım için ADC1 okuma (CT senaryosu) veya
+> Modbus RTU master (analizör senaryosu), zaman SNTP ile UTC, paket sözleşme ② JSON olarak
+> `POST /paket`. `modul.py`'deki dokuz adım (§7.8) firmware'in `loop()` iskeletidir; bu dokümandaki
+> sabitler (`OrneklemeAyar`, `EsikAyar`) firmware'de merkezden güncellenebilir yapılandırma olur.
+
 ---
 
 ## 7.1 Ana akış
