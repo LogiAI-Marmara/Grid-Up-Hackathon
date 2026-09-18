@@ -172,6 +172,15 @@ tek adımda cevaplanması.
 > üst sınırı **2,86 µH** verir, yani 4,7 µH **spesifikasyon dışıdır**. Tipik değer **2,2 µH**'ye
 > çekildi (şema `gen_sch.py` + bu künye).
 
+### 1.12 Fiyat ve döviz kuru kaynakları
+
+| | |
+|---|---|
+| **Döviz kuru** | **1 USD = 48,66 TL**, 13.09.2026 serbest piyasa satış kuru; `02-bom.md` ₺ sütunları bu sabit çarpanla |
+| **Bileşen liste fiyatları** | `02-bom.md` §2.1 kalem 1–4 ve 7: distribütör **1 adet** liste fiyatı, 14.09.2026 (Mouser: MLX90640; DigiKey: ESP32-S3-WROOM-1U-N8, SHT31, TPS61099; Link Electronics: RAC05-05SK/277). Kalem 5, 6 ve §2.2 destek kalemleri **tahmin** (~ işaretli); CT fiyatı OEM liste, düşük güvenilirlik (§3 madde 5) |
+| **Durum** | **ÖZET** — distribütör ürün sayfası, fatura/sepet kaydı yok; kur için kaynak sayfa kaydedilmedi. Fiyatlar 1 adet prototip bandı, adet indirimi uygulanmadı |
+| **Kullanıldığı yer** | `02-bom.md` (tüm maliyet, birim fiyat ve ölçeklendirme tabloları) |
+
 ---
 
 ## 2. Standartlar ve şartnameler
@@ -211,14 +220,17 @@ tek adımda cevaplanması.
 
 ## 4. Yeniden üretilebilirlik
 
-Tüm sayısal doğrulama `temp/kontrol.py` ile yapılır (depo dışı, gitignore'lu):
+Tasarımlar ve dokümanlardaki verilerin yeniden üretilebilirliği ve teknik doğrulaması
+kod ve model üreteçleriyle güvence altına alınmıştır:
 
-```bash
-python3 temp/kontrol.py
-```
-
-Bu script BOM aritmetiğini `02-bom.md`'den **kazıyıp** toplar ve dokümandaki iddiayla
-karşılaştırır, iki düzlemli kapsama geometrisini hesaplar, SVG metin taşmalarını ölçer.
-
-Şema/mekanik tarafta: `eda/verify_netlist.py` (103 kontrol) ve `eda/build.py` (KRİTİK: elle
-SVG düzenlenmez, `03-baglanti-semasi.svg` bu script'ten üretilir).
+- **Şematik ve Netlist (EDA):** `eda/verify_netlist.py` script'i şemadaki 103 bağlantıyı, GPIO kısıtlarını,
+  güç raylarını ve koruma devrelerini pinout tablosuna karşı otomatik doğrular (`python verify_netlist.py GridUp-Modul.net`).
+  Şema `eda/build.py` ile `kicad-cli` üzerinden (ERC → netlist → SVG) üretilir; elle SVG düzenlenmez.
+- **Sistem Mimarisi Üreteci:** `eda/gen_mimari.py` sözleşme ve port bilgilerini doğrudan kodlayarak
+  `08-sistem-mimarisi.svg` dosyasını üretir ve metin taşma kontrollerini PIL font metrikleriyle icra eder.
+- **Mekanik Modeller ve Görünüşler (CAD):** `cad/compose_kutu.py`, `cad/compose_pcb.py` ve `cad/compose_pano.py`
+  script'leri Fusion 360 projeksiyon verilerinden SVG krokilerini deterministik olarak birleştirir.
+- **BOM aritmetiği ve kapsama geometrisi:** repoda script yok (`temp/` gitignore'lu, eski `kontrol.py`
+  saklanmadı). Toplamlar elle doğrulanabilir: §2.1 = 28,62 + 5,66 + 4,50 + 10,25 + 2 × 2,40 + 3,48 + 5,00 + 1,50
+  = 63,81 $; §2.2 = 22,00 $; modül 85,81 $ (CT'li +4 × 2,40 = 95,41 $). Kapsama: 2 · d · tan(55°) × 2 · d · tan(37,5°),
+  d = 377 → 1077 × 579 mm, d = 155,5 → 444 × 239 mm (04 §4.3).

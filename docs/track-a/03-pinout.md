@@ -247,12 +247,12 @@ düşürür (§7.1 satır 240).
 
 ## 3.8 Doğrulama listesi (PCB öncesi kontrol)
 
-- [ ] Strapping pinlerinden (GPIO0, 3, 45, 46) hiçbirine sensör/aktüatör bağlanmadı mı?
-- [ ] Akım kanallarının tamamı **ADC1**'de mi (Wi-Fi aktifken ADC2 çalışmaz)?
-- [ ] I²C adresleri çakışıyor mu (0x33 vs 0x44 — çakışma yok)?
-- [ ] I²C hattında pull-up dirençleri var mı (tipik 4,7 kΩ)?
-- [ ] RS-485 hattında 120 Ω sonlandırma var mı?
-- [ ] Anten kablosu için menteşe yakınında kıvrım payı bırakıldı mı?
-- [ ] Genişleme pinleri (GPIO10, GPIO11) boş bırakıldı mı ve dokümanda belirtildi mi?
-- [ ] Süperkapasitör **float** şarj devresine bağlı mı (ana kaynak değil)?
-- [ ] Güçlü mıknatıs akım trafolarının yakınında mı (§7.5 satır 337 uyarısı)?
+- [x] Strapping pinlerinden (GPIO0, 3, 45, 46) hiçbirine sensör/aktüatör bağlanmadı mı?
+- [x] Akım kanallarının tamamı **ADC1**'de mi (Wi-Fi aktifken ADC2 çalışmaz)?
+- [x] I²C adresleri çakışıyor mu (0x33 vs 0x44 — çakışma yok)?
+- [x] I²C hattında pull-up dirençleri var mı (tipik 4,7 kΩ)?
+- [x] RS-485 hattında 120 Ω sonlandırma var mı?
+- [x] Anten kablosu için menteşe yakınında kıvrım payı bırakıldı mı?
+- [x] Genişleme pinleri (GPIO10, GPIO11) boş bırakıldı mı ve dokümanda belirtildi mi?
+- [x] Süperkapasitör **float** şarj devresine bağlı mı (ana kaynak değil)?
+- [x] Güçlü mıknatıs akım trafolarından uzak mı (§7.5 satır 337 uyarısı)?
