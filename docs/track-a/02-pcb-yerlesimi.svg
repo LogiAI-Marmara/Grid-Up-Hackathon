@@ -1,0 +1,330 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1500 720" width="100%" style="max-width:1100px;background:#fff;font-family:Arial,Helvetica,sans-serif">
+  <!--
+    PCB / kart yerleşimi / (T2 "kart yapısı"). Ölçek 1 mm = 8 birim, kart 110 × 70 × 1,6 mm, köşe R2.
+    Kaynak: Fusion 360 modeli GridUp-PCB.f3d (thozoz hub / Default Project). Geometri modelden API ile projeksiyon:
+    düz çizgi = ön yüz (Z+ yönünden bakış), kesikli = arka yüz parçaları kart üzerinden görünür (aynı bakış, kart gizlenmiş).
+    Koordinat: SVG (x, y aşağı) = model (X, 70 − Y). Kart kutu içinde (5, 5) mm ofsetli → PCB koordinatı = kutu koordinatı − 5 mm.
+    Ön yüz (Z 1,6 →): MLX90640 TO-39 Ø9,3 × 6 (datasheet Ø9,30 ±0,15 × 5,70 ±0,30 + bacak, maks. zarf) merkez (55, 37,5) [kutu IR pencere (60, 42,5)] / SHT31 2,5 × 2,5 (7, 31) [kutu vent (12, 36)] /
+      LED Ø3 (25, 65) [kutu (30, 70)] / pull-up + 100 nF (37,5, 42–46,5) / EN RC (29, 50–52,5) + reset 3 × 3 (32–35, 49,75–52,75).
+    Arka yüz (Z 0 ←): ESP32-S3-WROOM-1U 18 × 19,2 × 3,2 (10–28, 40,8–60) / RAC05-05SK/277 31,7 × 26,7 × 21,8 (64–95,7, 42–68,7) /
+      F1 (88–94,1, 22,25–25) / MOV 7 × 4 × 8 (96,5–103,5, 21,5–25,5) / 230 V klemens 3p 5,08 (84–99,25, 0,5–8,5) /
+      LDO AP7361C SOT-223 (70–76,5, 34–41) / D1 (76,75–81, 39–41,65) / D2 (76,75–81, 35–37,65) / R_şarj (60,5–62,5, 44,5–45,5) / bölücü (77,5–79,5, 28–30,5) /
+      boost U7 (43,5–46, 36–38) + L 3×3 (43,5–46,5, 31,5–34,5) / dengeleme R (48–50, 26–29,5) /
+      2× süperkap Eaton HV1030 Ø10,5 × 31,5 yatık, eksen Y, merkezler (61, 17,75) (72, 17,75), Y 2–33,5 / MAX3485 SOIC-8 (41,25–46,25, 14–20) / 120 Ω (47,5–48,5, 15–17) /
+      RS-485 klemens 3p (1–9, 11–26,25) / R_burden ×4 (25–36, 14–15) + bias (37–39, 13–15) / CT klemens 8p 3,5 (25–53, 0,5–7,5) / genişleme 2×5 (11–24, 6,25–11,25).
+    Kart: M3 Ø3,2 (7, 7) (103, 7) (7, 63) (103, 63) → kutu dikmeleri Ø6 kutu (12, 12) vb.; köşelerde Ø8 boşluk (kapak vida direği Ø7); izolasyon yarığı 1 mm (81,5–82,5, Y 0–40); 230 V bölgesi X ≥ 82.
+    Üretim çizimi değildir (§1.4).
+  -->
+  <defs>
+    <marker id="dim" markerWidth="10" markerHeight="10" refX="5" refY="3" orient="auto-start-reverse">
+      <path d="M0,0 L6,3 L0,6 z" fill="#455a64"/>
+    </marker>
+    <marker id="arr" markerWidth="10" markerHeight="10" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L6,3 L0,6 z" fill="#c62828"/>
+    </marker>
+  </defs>
+  <text x="750" y="34" font-size="24" fill="#263238" text-anchor="middle" font-weight="700">Kart yerleşimi / PCB 110 × 70 mm, ön yüzden bakış (1 mm = 8 birim)</text>
+  <defs><pattern id="pcb" width="16" height="16" patternUnits="userSpaceOnUse"><rect width="16" height="16" fill="#e8f5e9"/><circle cx="8" cy="8" r="1" fill="#a5d6a7"/></pattern><pattern id="hv" width="10" height="10" patternTransform="rotate(45)" patternUnits="userSpaceOnUse"><line x1="0" y1="0" x2="0" y2="10" stroke="#ef6c00" stroke-width="1.5" opacity="0.5"/></pattern></defs>
+  <rect x="80" y="80" width="880" height="560" rx="16" fill="url(#pcb)"/>
+  <rect x="736" y="80" width="224" height="560" rx="16" fill="url(#hv)"/>
+  <line x1="736" y1="80" x2="736" y2="640" stroke="#ef6c00" stroke-width="3" stroke-dasharray="10 5"/>
+  <text x="848" y="320" font-size="11" fill="#c62828" text-anchor="middle" font-weight="700">230 V BİRİNCİL BÖLGE</text>
+  <text x="848" y="336" font-size="10" fill="#607d8b" text-anchor="middle">izolasyon sınırı ≥ 6 mm creepage</text>
+  <text x="848" y="350" font-size="10" fill="#607d8b" text-anchor="middle">alt yarıda frezelenmiş yarık (slot)</text>
+  <text x="848" y="364" font-size="10" fill="#607d8b" text-anchor="middle">RAC05 bariyeri sınırın üstünde</text>
+  <circle cx="520" cy="340" r="60" fill="none" stroke="#c62828" stroke-width="1.5"/>
+  <circle cx="136" cy="584" r="22" fill="none" stroke="#78909c" stroke-width="1"/>
+  <circle cx="904" cy="584" r="22" fill="none" stroke="#78909c" stroke-width="1"/>
+  <circle cx="136" cy="136" r="22" fill="none" stroke="#78909c" stroke-width="1"/>
+  <circle cx="904" cy="136" r="22" fill="none" stroke="#78909c" stroke-width="1"/>
+  <rect x="162.2" y="141.6" width="181.5" height="10.5" rx="2" fill="#e8f5e9"/>
+  <text x="163.2" y="149.6" font-size="10" fill="#607d8b">M3 × 4 (7, 7) / kutu dikmeleri Ø6</text>
+  <g fill="none" stroke-width="1.8" stroke-dasharray="6 3" stroke-linejoin="round">
+<polyline points="160,313.6 304,313.6" stroke="#546e7a"/>
+<polyline points="304,313.6 304,160" stroke="#546e7a"/>
+<polyline points="304,160 160,160" stroke="#546e7a"/>
+<polyline points="160,160 160,313.6" stroke="#546e7a"/>
+<polyline points="592,304 845.6,304" stroke="#ad1457"/>
+<polyline points="845.6,304 845.6,90.4" stroke="#ad1457"/>
+<polyline points="845.6,90.4 592,90.4" stroke="#ad1457"/>
+<polyline points="592,90.4 592,304" stroke="#ad1457"/>
+<polyline points="784,462 832.8,462" stroke="#ef6c00"/>
+<polyline points="832.8,462 832.8,440" stroke="#ef6c00"/>
+<polyline points="832.8,440 784,440" stroke="#ef6c00"/>
+<polyline points="784,440 784,462" stroke="#ef6c00"/>
+<polyline points="852,468 908,468" stroke="#ef6c00"/>
+<polyline points="908,468 908,436" stroke="#ef6c00"/>
+<polyline points="908,436 852,436" stroke="#ef6c00"/>
+<polyline points="852,436 852,468" stroke="#ef6c00"/>
+<polyline points="752,636 874,636" stroke="#ef6c00"/>
+<polyline points="874,636 874,572" stroke="#ef6c00"/>
+<polyline points="874,572 752,572" stroke="#ef6c00"/>
+<polyline points="752,572 752,636" stroke="#ef6c00"/>
+<polyline points="640,368 692,368" stroke="#ad1457"/>
+<polyline points="692,368 692,312" stroke="#ad1457"/>
+<polyline points="692,312 640,312" stroke="#ad1457"/>
+<polyline points="640,312 640,368" stroke="#ad1457"/>
+<polyline points="694,328 728,328" stroke="#ad1457"/>
+<polyline points="728,328 728,306.8" stroke="#ad1457"/>
+<polyline points="728,306.8 694,306.8" stroke="#ad1457"/>
+<polyline points="694,306.8 694,328" stroke="#ad1457"/>
+<polyline points="694,360 728,360" stroke="#ad1457"/>
+<polyline points="728,360 728,338.8" stroke="#ad1457"/>
+<polyline points="728,338.8 694,338.8" stroke="#ad1457"/>
+<polyline points="694,338.8 694,360" stroke="#ad1457"/>
+<polyline points="564,284 580,284" stroke="#ad1457"/>
+<polyline points="580,284 580,276" stroke="#ad1457"/>
+<polyline points="580,276 564,276" stroke="#ad1457"/>
+<polyline points="564,276 564,284" stroke="#ad1457"/>
+<polyline points="700,404 716,404" stroke="#ad1457"/>
+<polyline points="716,404 716,396" stroke="#ad1457"/>
+<polyline points="716,396 700,396" stroke="#ad1457"/>
+<polyline points="700,396 700,404" stroke="#ad1457"/>
+<polyline points="700,416 716,416" stroke="#ad1457"/>
+<polyline points="716,416 716,408" stroke="#ad1457"/>
+<polyline points="716,408 700,408" stroke="#ad1457"/>
+<polyline points="700,408 700,416" stroke="#ad1457"/>
+<polyline points="428,352 448,352" stroke="#ad1457"/>
+<polyline points="448,352 448,336" stroke="#ad1457"/>
+<polyline points="448,336 428,336" stroke="#ad1457"/>
+<polyline points="428,336 428,352" stroke="#ad1457"/>
+<polyline points="428,388 452,388" stroke="#ad1457"/>
+<polyline points="452,388 452,364" stroke="#ad1457"/>
+<polyline points="452,364 428,364" stroke="#ad1457"/>
+<polyline points="428,364 428,388" stroke="#ad1457"/>
+<polyline points="464,432 480,432" stroke="#f9a825"/>
+<polyline points="480,432 480,424" stroke="#f9a825"/>
+<polyline points="480,424 464,424" stroke="#f9a825"/>
+<polyline points="464,424 464,432" stroke="#f9a825"/>
+<polyline points="464,412 480,412" stroke="#f9a825"/>
+<polyline points="480,412 480,404" stroke="#f9a825"/>
+<polyline points="480,404 464,404" stroke="#f9a825"/>
+<polyline points="464,404 464,412" stroke="#f9a825"/>
+<polyline points="526,624 526,372" stroke="#f9a825"/>
+<polyline points="610,624 610,372" stroke="#f9a825"/>
+<polyline points="526,624 610,624" stroke="#f9a825"/>
+<polyline points="526,372 610,372" stroke="#f9a825"/>
+<polyline points="614,624 614,372" stroke="#f9a825"/>
+<polyline points="698,624 698,372" stroke="#f9a825"/>
+<polyline points="614,624 698,624" stroke="#f9a825"/>
+<polyline points="614,372 698,372" stroke="#f9a825"/>
+<polyline points="410,528 450,528" stroke="#2e7d32"/>
+<polyline points="450,528 450,480" stroke="#2e7d32"/>
+<polyline points="450,480 410,480" stroke="#2e7d32"/>
+<polyline points="410,480 410,528" stroke="#2e7d32"/>
+<polyline points="460,520 468,520" stroke="#2e7d32"/>
+<polyline points="468,520 468,504" stroke="#2e7d32"/>
+<polyline points="468,504 460,504" stroke="#2e7d32"/>
+<polyline points="460,504 460,520" stroke="#2e7d32"/>
+<polyline points="88,552 152,552" stroke="#2e7d32"/>
+<polyline points="152,552 152,430" stroke="#2e7d32"/>
+<polyline points="152,430 88,430" stroke="#2e7d32"/>
+<polyline points="88,430 88,552" stroke="#2e7d32"/>
+<polyline points="280,528 296,528" stroke="#6a1b9a"/>
+<polyline points="296,528 296,520" stroke="#6a1b9a"/>
+<polyline points="296,520 280,520" stroke="#6a1b9a"/>
+<polyline points="280,520 280,528" stroke="#6a1b9a"/>
+<polyline points="304,528 320,528" stroke="#6a1b9a"/>
+<polyline points="320,528 320,520" stroke="#6a1b9a"/>
+<polyline points="320,520 304,520" stroke="#6a1b9a"/>
+<polyline points="304,520 304,528" stroke="#6a1b9a"/>
+<polyline points="328,528 344,528" stroke="#6a1b9a"/>
+<polyline points="344,528 344,520" stroke="#6a1b9a"/>
+<polyline points="344,520 328,520" stroke="#6a1b9a"/>
+<polyline points="328,520 328,528" stroke="#6a1b9a"/>
+<polyline points="352,528 368,528" stroke="#6a1b9a"/>
+<polyline points="368,528 368,520" stroke="#6a1b9a"/>
+<polyline points="368,520 352,520" stroke="#6a1b9a"/>
+<polyline points="352,520 352,528" stroke="#6a1b9a"/>
+<polyline points="376,536 392,536" stroke="#6a1b9a"/>
+<polyline points="392,536 392,520" stroke="#6a1b9a"/>
+<polyline points="392,520 376,520" stroke="#6a1b9a"/>
+<polyline points="376,520 376,536" stroke="#6a1b9a"/>
+<polyline points="280,636 504,636" stroke="#6a1b9a"/>
+<polyline points="504,636 504,580" stroke="#6a1b9a"/>
+<polyline points="504,580 280,580" stroke="#6a1b9a"/>
+<polyline points="280,580 280,636" stroke="#6a1b9a"/>
+<polyline points="168,590 272,590" stroke="#1565c0"/>
+<polyline points="272,590 272,550" stroke="#1565c0"/>
+<polyline points="272,550 168,550" stroke="#1565c0"/>
+<polyline points="168,550 168,590" stroke="#1565c0"/>
+</g>
+  <circle cx="520" cy="340" r="36" fill="#37474f"/>
+  <circle cx="520" cy="340" r="14" fill="#90a4ae"/>
+  <rect x="126" y="382" width="20" height="20" fill="#1565c0"/>
+  <circle cx="280" cy="120" r="8" fill="#43a047"/>
+  <g transform="translate(80,80)">
+<polyline points="32,0 31.38,6.24 29.57,12.25 26.61,17.78 22.62,22.62 17.78,26.61 12.25,29.57 6.24,31.38 0,32" fill="none" stroke="#263238" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="0,32 6.24,31.38 12.25,29.57 17.78,26.61 22.62,22.62 26.61,17.78 29.57,12.25 31.38,6.24 32,0" fill="none" stroke="#263238" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="32,560 31.38,553.76 29.57,547.75 26.61,542.22 22.62,537.38 17.78,533.39 12.25,530.43 6.24,528.62 0,528" fill="none" stroke="#263238" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="0,528 6.24,528.62 12.25,530.43 17.78,533.39 22.62,537.38 26.61,542.22 29.57,547.75 31.38,553.76 32,560" fill="none" stroke="#263238" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="660,240 660,560" fill="none" stroke="#263238" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="652,240 660,240" fill="none" stroke="#263238" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="652,560 652,240" fill="none" stroke="#263238" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="43.2,56 43.82,52.05 45.65,48.48 48.48,45.65 52.05,43.82 56,43.2 59.95,43.82 63.52,45.65 66.35,48.48 68.18,52.05 68.8,56 68.18,59.95 66.35,63.52 63.52,66.35 59.95,68.18 56,68.8 52.05,68.18 48.48,66.35 45.65,63.52 43.82,59.95 43.2,56" fill="none" stroke="#263238" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="43.2,56 43.82,59.95 45.65,63.52 48.48,66.35 52.05,68.18 56,68.8 59.95,68.18 63.52,66.35 66.35,63.52 68.18,59.95 68.8,56 68.18,52.05 66.35,48.48 63.52,45.65 59.95,43.82 56,43.2 52.05,43.82 48.48,45.65 45.65,48.48 43.82,52.05 43.2,56" fill="none" stroke="#263238" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="811.2,504 811.82,500.05 813.65,496.48 816.48,493.65 820.05,491.82 824,491.2 827.95,491.82 831.52,493.65 834.35,496.48 836.18,500.05 836.8,504 836.18,507.95 834.35,511.52 831.52,514.35 827.95,516.18 824,516.8 820.05,516.18 816.48,514.35 813.65,511.52 811.82,507.95 811.2,504" fill="none" stroke="#263238" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="811.2,504 811.82,507.95 813.65,511.52 816.48,514.35 820.05,516.18 824,516.8 827.95,516.18 831.52,514.35 834.35,511.52 836.18,507.95 836.8,504 836.18,500.05 834.35,496.48 831.52,493.65 827.95,491.82 824,491.2 820.05,491.82 816.48,493.65 813.65,496.48 811.82,500.05 811.2,504" fill="none" stroke="#263238" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="811.2,56 811.82,52.05 813.65,48.48 816.48,45.65 820.05,43.82 824,43.2 827.95,43.82 831.52,45.65 834.35,48.48 836.18,52.05 836.8,56 836.18,59.95 834.35,63.52 831.52,66.35 827.95,68.18 824,68.8 820.05,68.18 816.48,66.35 813.65,63.52 811.82,59.95 811.2,56" fill="none" stroke="#263238" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="811.2,56 811.82,59.95 813.65,63.52 816.48,66.35 820.05,68.18 824,68.8 827.95,68.18 831.52,66.35 834.35,63.52 836.18,59.95 836.8,56 836.18,52.05 834.35,48.48 831.52,45.65 827.95,43.82 824,43.2 820.05,43.82 816.48,45.65 813.65,48.48 811.82,52.05 811.2,56" fill="none" stroke="#263238" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="43.2,504 43.82,500.05 45.65,496.48 48.48,493.65 52.05,491.82 56,491.2 59.95,491.82 63.52,493.65 66.35,496.48 68.18,500.05 68.8,504 68.18,507.95 66.35,511.52 63.52,514.35 59.95,516.18 56,516.8 52.05,516.18 48.48,514.35 45.65,511.52 43.82,507.95 43.2,504" fill="none" stroke="#263238" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="43.2,504 43.82,507.95 45.65,511.52 48.48,514.35 52.05,516.18 56,516.8 59.95,516.18 63.52,514.35 66.35,511.52 68.18,507.95 68.8,504 68.18,500.05 66.35,496.48 63.52,493.65 59.95,491.82 56,491.2 52.05,491.82 48.48,493.65 45.65,496.48 43.82,500.05 43.2,504" fill="none" stroke="#263238" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="848,560 848.62,553.76 850.43,547.75 853.39,542.22 857.38,537.38 862.22,533.39 867.75,530.43 873.76,528.62 880,528" fill="none" stroke="#263238" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="880,528 873.76,528.62 867.75,530.43 862.22,533.39 857.38,537.38 853.39,542.22 850.43,547.75 848.62,553.76 848,560" fill="none" stroke="#263238" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="880,32 873.76,31.38 867.75,29.57 862.22,26.61 857.38,22.62 853.39,17.78 850.43,12.25 848.62,6.24 848,0" fill="none" stroke="#263238" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="848,0 848.62,6.24 850.43,12.25 853.39,17.78 857.38,22.62 862.22,26.61 867.75,29.57 873.76,31.38 880,32" fill="none" stroke="#263238" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="660,560 848,560" fill="none" stroke="#263238" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="32,560 652,560" fill="none" stroke="#263238" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="848,0 32,0" fill="none" stroke="#263238" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="0,32 0,528" fill="none" stroke="#263238" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="880,528 880,32" fill="none" stroke="#263238" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="402.8,260 403.43,266.83 405.31,273.44 408.37,279.58 412.51,285.06 417.58,289.69 423.42,293.3 429.82,295.78 436.57,297.04 443.43,297.04 450.18,295.78 456.58,293.3 462.42,289.69 467.49,285.06 471.63,279.58 474.69,273.44 476.57,266.83 477.2,260 476.57,253.17 474.69,246.56 471.63,240.42 467.49,234.94 462.42,230.31 456.58,226.7 450.18,224.22 443.43,222.96 436.57,222.96 429.82,224.22 423.42,226.7 417.58,230.31 412.51,234.94 408.37,240.42 405.31,246.56 403.43,253.17 402.8,260" fill="none" stroke="#263238" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="66,302 46,302" fill="none" stroke="#263238" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="66,322 66,302" fill="none" stroke="#263238" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="46,322 66,322" fill="none" stroke="#263238" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="46,302 46,322" fill="none" stroke="#263238" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="188,40 188.58,43.71 190.29,47.06 192.94,49.71 196.29,51.42 200,52 203.71,51.42 207.06,49.71 209.71,47.06 211.42,43.71 212,40 211.42,36.29 209.71,32.94 207.06,30.29 203.71,28.58 200,28 196.29,28.58 192.94,30.29 190.29,32.94 188.58,36.29 188,40" fill="none" stroke="#263238" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="316,188 300,188" fill="none" stroke="#263238" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="316,196 316,188" fill="none" stroke="#263238" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="300,196 316,196" fill="none" stroke="#263238" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="300,188 300,196" fill="none" stroke="#263238" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="316,202 300,202" fill="none" stroke="#263238" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="316,210 316,202" fill="none" stroke="#263238" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="300,210 316,210" fill="none" stroke="#263238" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="300,202 300,210" fill="none" stroke="#263238" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="310,216 300,216" fill="none" stroke="#263238" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="310,224 310,216" fill="none" stroke="#263238" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="300,224 310,224" fill="none" stroke="#263238" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="300,216 300,224" fill="none" stroke="#263238" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="248,140 232,140" fill="none" stroke="#263238" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="248,148 248,140" fill="none" stroke="#263238" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="232,148 248,148" fill="none" stroke="#263238" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="232,140 232,148" fill="none" stroke="#263238" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="248,152 232,152" fill="none" stroke="#263238" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="248,160 248,152" fill="none" stroke="#263238" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="232,160 248,160" fill="none" stroke="#263238" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="232,152 232,160" fill="none" stroke="#263238" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="280,138 256,138" fill="none" stroke="#263238" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="280,162 280,138" fill="none" stroke="#263238" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="256,162 280,162" fill="none" stroke="#263238" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="256,138 256,162" fill="none" stroke="#263238" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+</g>
+  <rect x="422.4" y="223.2" width="145.2" height="11.6" rx="2" fill="#e8f5e9"/>
+  <text x="496" y="232" font-size="11" fill="#37474f" text-anchor="middle" font-weight="700">MLX90640ESF-BAA-000-TU</text>
+  <rect x="374" y="238" width="242" height="10.5" rx="2" fill="#e8f5e9"/>
+  <text x="496" y="246" font-size="10" fill="#607d8b" text-anchor="middle">TO-39 Ø9,3 / I²C 0x33 / merkez (55, 37,5) mm</text>
+  <rect x="382.2" y="252" width="225.5" height="10.5" rx="2" fill="#e8f5e9"/>
+  <text x="496" y="260" font-size="10" fill="#c62828" text-anchor="middle">Ø15 kapak penceresi izdüşümü / ön yüz boş</text>
+  <line x1="508" y1="267.2" x2="520" y2="279.2" stroke="#c62828" stroke-width="1"/>
+  <rect x="327" y="307.2" width="132" height="10.5" rx="2" fill="#e8f5e9"/>
+  <text x="328" y="315.2" font-size="10" fill="#607d8b">2× 4,7k pull-up + 100 nF</text>
+  <rect x="185" y="371.2" width="72.6" height="11.6" rx="2" fill="#e8f5e9"/>
+  <text x="186" y="380" font-size="11" fill="#37474f" font-weight="700">SHT31-DIS-B</text>
+  <rect x="185" y="386" width="121" height="10.5" rx="2" fill="#e8f5e9"/>
+  <text x="186" y="394" font-size="10" fill="#607d8b">I²C 0x44 / vent hizası</text>
+  <rect x="185" y="400" width="126.5" height="10.5" rx="2" fill="#e8f5e9"/>
+  <text x="186" y="408" font-size="10" fill="#607d8b">ısı kaynaklarından uzak</text>
+  <path d="M92 348 h72 v72" fill="none" stroke="#1565c0" stroke-width="2"/>
+  <rect x="91" y="334" width="143" height="10.5" rx="2" fill="#e8f5e9"/>
+  <text x="92" y="342" font-size="10" fill="#1565c0">ısı yarığı (kart yalıtımı)</text>
+  <rect x="291" y="106" width="49.5" height="10.5" rx="2" fill="#e8f5e9"/>
+  <text x="292" y="114" font-size="10" fill="#607d8b">durum LED</text>
+  <rect x="311" y="196.8" width="115.5" height="10.5" rx="2" fill="#e8f5e9"/>
+  <text x="312" y="204.8" font-size="10" fill="#607d8b">EN: 10k + 1µF + reset</text>
+  <rect x="165" y="222" width="132" height="11.6" rx="2" fill="#e8f5e9"/>
+  <text x="232" y="230.8" font-size="11" fill="#37474f" text-anchor="middle" font-weight="700">ESP32-S3-WROOM-1U-N8</text>
+  <rect x="176" y="236.8" width="110" height="10.5" rx="2" fill="#e8f5e9"/>
+  <text x="232" y="244.8" font-size="10" fill="#607d8b" text-anchor="middle">18 × 19,2 / arka yüz</text>
+  <rect x="167.8" y="250.8" width="126.5" height="10.5" rx="2" fill="#e8f5e9"/>
+  <text x="232" y="258.8" font-size="10" fill="#607d8b" text-anchor="middle">U.FL kenarda → kutu SMA</text>
+  <rect x="593" y="165.2" width="132" height="11.6" rx="2" fill="#e8f5e9"/>
+  <text x="660" y="174" font-size="11" fill="#ad1457" text-anchor="middle" font-weight="700">RECOM RAC05-05SK/277</text>
+  <rect x="579.2" y="180" width="159.5" height="10.5" rx="2" fill="#e8f5e9"/>
+  <text x="660" y="188" font-size="10" fill="#607d8b" text-anchor="middle">31,7 × 26,7 × 21,8 / arka yüz</text>
+  <rect x="560" y="194" width="198" height="10.5" rx="2" fill="#e8f5e9"/>
+  <text x="660" y="202" font-size="10" fill="#607d8b" text-anchor="middle">sol 5 V ikincil / sağ 230 V birincil</text>
+  <rect x="599" y="104" width="82.5" height="10.5" rx="2" fill="#e8f5e9"/>
+  <text x="600" y="112" font-size="10" fill="#607d8b">çıkış +5V / GND</text>
+  <rect x="778.5" y="104" width="60.5" height="10.5" rx="2" fill="#e8f5e9"/>
+  <text x="840" y="112" font-size="10" fill="#607d8b" text-anchor="end">giriş L / N</text>
+  <rect x="785" y="473.2" width="44" height="10.5" rx="2" fill="#e8f5e9"/>
+  <text x="808" y="481.2" font-size="10" fill="#607d8b" text-anchor="middle">F1 (SMD)</text>
+  <rect x="862.5" y="488" width="33" height="10.5" rx="2" fill="#e8f5e9"/>
+  <text x="880" y="496" font-size="10" fill="#607d8b" text-anchor="middle">MOV Ø7</text>
+  <rect x="772.5" y="553.2" width="78.7" height="11.6" rx="2" fill="#e8f5e9"/>
+  <text x="812.8" y="562" font-size="11" fill="#37474f" text-anchor="middle">230 V klemens</text>
+  <rect x="748.5" y="539" width="126.5" height="10.5" rx="2" fill="#e8f5e9"/>
+  <text x="812.8" y="547" font-size="10" fill="#607d8b" text-anchor="middle">3 kutup L/N/PE, 5,08 mm</text>
+  <text x="666" y="338" font-size="9" fill="#ad1457" text-anchor="middle" font-weight="700">LDO</text>
+  <text x="666" y="349" font-size="9" fill="#ad1457" text-anchor="middle" font-weight="700">3,3 V</text>
+  <text x="711.2" y="320.6" font-size="8" fill="#ad1457" text-anchor="middle" font-weight="700">D1</text>
+  <text x="711.2" y="352.6" font-size="8" fill="#ad1457" text-anchor="middle" font-weight="700">D2</text>
+  <line x1="572" y1="284.8" x2="588.8" y2="315.2" stroke="#607d8b" stroke-width="1"/>
+  <rect x="591.8" y="312" width="32.4" height="9.5" rx="2" fill="#e8f5e9"/>
+  <text x="592.8" y="319.2" font-size="9" fill="#607d8b" font-weight="700">R_şarj</text>
+  <rect x="591.8" y="324" width="19.8" height="9.5" rx="2" fill="#e8f5e9"/>
+  <text x="592.8" y="331.2" font-size="9" fill="#607d8b">22 Ω</text>
+  <rect x="616" y="402" width="77" height="10.5" rx="2" fill="#e8f5e9"/>
+  <text x="694" y="410" font-size="10" fill="#ad1457" text-anchor="end">bölücü → GPIO1</text>
+  <rect x="538.4" y="485.2" width="145.2" height="11.6" rx="2" fill="#e8f5e9"/>
+  <text x="612" y="494" font-size="11" fill="#f57f17" text-anchor="middle" font-weight="700">2× süperkapasitör seri</text>
+  <rect x="495.5" y="500" width="231" height="10.5" rx="2" fill="#e8f5e9"/>
+  <text x="612" y="508" font-size="10" fill="#607d8b" text-anchor="middle">Eaton HV1030 Ø10,5 × 31,5 yatık / arka yüz</text>
+  <rect x="503.8" y="514" width="214.5" height="10.5" rx="2" fill="#e8f5e9"/>
+  <text x="612" y="522" font-size="10" fill="#607d8b" text-anchor="middle">10 F 2,7 V ×2 → 5 F 4,6 V / 02-bom §2.5</text>
+  <line x1="428" y1="376" x2="417.6" y2="384.8" stroke="#607d8b" stroke-width="1"/>
+  <rect x="340.6" y="380.8" width="72" height="10.5" rx="2" fill="#e8f5e9"/>
+  <text x="413.6" y="388.8" font-size="10" fill="#607d8b" text-anchor="end" font-weight="700">boost U7 + L</text>
+  <rect x="324.6" y="393.8" width="88" height="10.5" rx="2" fill="#e8f5e9"/>
+  <text x="413.6" y="401.8" font-size="10" fill="#607d8b" text-anchor="end">çıkış 4,6 V → D2</text>
+  <rect x="438" y="413.5" width="66" height="10.5" rx="2" fill="#e8f5e9"/>
+  <text x="472" y="421.5" font-size="10" fill="#f57f17" text-anchor="middle">dengeleme 2×</text>
+  <rect x="409.8" y="459.2" width="38.5" height="10.5" rx="2" fill="#e8f5e9"/>
+  <text x="430" y="467.2" font-size="10" fill="#607d8b" text-anchor="middle">MAX3485</text>
+  <rect x="471" y="508" width="27.5" height="10.5" rx="2" fill="#e8f5e9"/>
+  <text x="472" y="516" font-size="10" fill="#607d8b">120 Ω</text>
+  <rect x="100.8" y="412.4" width="36.3" height="11.6" rx="2" fill="#e8f5e9"/>
+  <text x="120" y="421.2" font-size="11" fill="#2e7d32" text-anchor="middle">RS-485</text>
+  <rect x="99.8" y="537.2" width="38.5" height="10.5" rx="2" fill="#e8f5e9"/>
+  <text x="120" y="545.2" font-size="10" fill="#2e7d32" text-anchor="middle">A/B/GND</text>
+  <rect x="263.5" y="504" width="143" height="10.5" rx="2" fill="#e8f5e9"/>
+  <text x="336" y="512" font-size="10" fill="#6a1b9a" text-anchor="middle">4× R_burden + bias (3V3/2)</text>
+  <rect x="273" y="565.2" width="236" height="11.6" rx="2" fill="#e8f5e9"/>
+  <text x="392" y="574" font-size="11" fill="#37474f" text-anchor="middle">CT klemens 8 kutup, 3,5 mm / L1 L2 L3 N</text>
+  <rect x="158.5" y="597.2" width="121" height="11.6" rx="2" fill="#e8f5e9"/>
+  <text x="220" y="606" font-size="11" fill="#1565c0" text-anchor="middle">genişleme 2×5 / §7.1</text>
+  <rect x="172" y="612.8" width="94.1" height="9.5" rx="2" fill="#e8f5e9"/>
+  <text x="220" y="620" font-size="9" fill="#607d8b" text-anchor="middle">I²C/UART/3V3/5V/GND</text>
+  <line x1="80" y1="670" x2="960" y2="670" stroke="#455a64" stroke-width="1.5" marker-start="url(#dim)" marker-end="url(#dim)"/>
+  <text x="520" y="688" font-size="12" fill="#455a64" text-anchor="middle">110 mm</text>
+  <line x1="50" y1="80" x2="50" y2="640" stroke="#455a64" stroke-width="1.5" marker-start="url(#dim)" marker-end="url(#dim)"/>
+  <text x="42" y="360" font-size="12" fill="#455a64" text-anchor="middle" transform="rotate(-90 42 360)">70 mm</text>
+  <rect x="1000" y="80" width="460" height="560" fill="#fff" stroke="#90a4ae" stroke-width="2"/>
+  <text x="1016" y="108" font-size="13" fill="#263238" font-weight="700">Yerleşim kuralları</text>
+  <text x="1016" y="136" font-size="12" fill="#37474f"><tspan font-weight="700">Bakış:</tspan> ön yüz = kutu penceresine bakan taraf.</text>
+  <text x="1016" y="152" font-size="12" fill="#37474f">Düz = ön yüz parçası, kesikli = arka yüz (kart üzerinden);</text>
+  <text x="1016" y="168" font-size="12" fill="#37474f">ince düz halka = boş bırakılacak alan (IR ekseni, M3 çevresi).</text>
+  <text x="1016" y="190" font-size="12" fill="#37474f"><tspan font-weight="700">Ön yüz</tspan> (pencere ile PCB arası 6 mm): yalnız alçak</text>
+  <text x="1016" y="206" font-size="12" fill="#37474f">parçalar / MLX90640 (TO-39, 6 mm), SHT31, LED,</text>
+  <text x="1016" y="222" font-size="12" fill="#37474f">pasifler. IR pencere ekseninde Ø15 boş alan.</text>
+  <text x="1016" y="244" font-size="12" fill="#37474f"><tspan font-weight="700">Arka yüz</tspan> (39 mm derinlik): ESP32 modülü, RAC05 (21,8 mm),</text>
+  <text x="1016" y="260" font-size="12" fill="#37474f">2× süperkap yatık (Ø10,5 × 31,5) + boost, klemensler,</text>
+  <text x="1016" y="276" font-size="12" fill="#37474f">MAX3485. Kablolar kutunun alt yüzünden, klemens sırasıyla girer.</text>
+  <text x="1016" y="298" font-size="12" fill="#37474f"><tspan font-weight="700">Güvenlik:</tspan> 230 V birincil bölge sağ şeritte (x ≥ 82),</text>
+  <text x="1016" y="314" font-size="12" fill="#37474f">≥ 6 mm creepage + alt yarıda 1 mm yarık (Y 0–40);</text>
+  <text x="1016" y="330" font-size="12" fill="#37474f">RAC05'in izolasyon bariyeri sınırı köprüler.</text>
+  <text x="1016" y="346" font-size="12" fill="#37474f">Sigorta + MOV birincil tarafta.</text>
+  <text x="1016" y="368" font-size="12" fill="#37474f"><tspan font-weight="700">Isı:</tspan> SHT31 kartın sol kenarında, RAC05 ve LDO'dan en</text>
+  <text x="1016" y="384" font-size="12" fill="#37474f">uzak noktada; çevresinde ısı yarığı. MLX90640 kendi</text>
+  <text x="1016" y="400" font-size="12" fill="#37474f">sıcaklığını ölçer (Ta), ısıdan uzak.</text>
+  <text x="1016" y="422" font-size="12" fill="#37474f"><tspan font-weight="700">RF:</tspan> ESP32 kart kenarında, U.FL pigtail kısa; dahili</text>
+  <text x="1016" y="438" font-size="12" fill="#37474f">anten kullanılmadığı için keepout yok.</text>
+  <text x="1016" y="460" font-size="12" fill="#37474f"><tspan font-weight="700">Katman:</tspan> 2 katman, alt katman GND dolgu; birincil</text>
+  <text x="1016" y="476" font-size="12" fill="#37474f">bölgede dolgu yok (yalıtım).</text>
+  <text x="1016" y="498" font-size="12" fill="#37474f"><tspan font-weight="700">Montaj:</tspan> 4× M3 delik (7, 7) vb. → kutu dikmeleri Ø6, kutu (12, 12);</text>
+  <text x="1016" y="514" font-size="12" fill="#37474f">kart kutuda (5, 5) ofsetli, ön yüzü kapaktan 5 mm geride.</text>
+  <text x="1016" y="536" font-size="12" fill="#37474f"><tspan font-weight="700">Konum uyumu:</tspan> MLX (55, 37,5) / SHT31 (7, 31) / LED (25, 65)</text>
+  <text x="1016" y="552" font-size="12" fill="#37474f">[model, Y yukarı] = kutu koordinatı − 5 mm.</text>
+  <text x="1016" y="606" font-size="10" fill="#607d8b">Kaynak: Fusion 360 GridUp-PCB.f3d / üretim çizimi değildir (§1.4).</text>
+  <text x="1016" y="622" font-size="10" fill="#607d8b">Pasif değerler 03-baglanti-semasi ile aynı.</text>
+</svg>

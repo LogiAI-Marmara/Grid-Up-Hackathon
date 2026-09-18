@@ -1,0 +1,478 @@
+"""Decision K3 — the anomaly episode: open, update, close. Plus the journal.
+
+Why an episode instead of a row per detection (section 6.2): a loose-terminal
+fault lasts three days, which at a 10 s scan period is 25,920 turns. Writing a
+row per turn would mean 25,920 anomaly rows for one loose screw, and the damage
+would not stay inside track B — the dashboard's list becomes unusable, the alarm
+service has to invent de-duplication for a problem created upstream of it, and
+`durum` stops meaning anything because there is no single row for an operator to
+acknowledge. Lead time could not be computed at all.
+
+So: the same `modul_id` + the same `tip`, not yet closed, is the *same* episode.
+A turn that finds the condition again updates it. A partial unique index makes
+that a database guarantee rather than an intention.
+
+The journal is the second half, and it is not a display convenience. ISA-18.2
+models an alarm as a state machine, and SCADA products (Ignition, Geo SCADA)
+split it into a status table and a permanent journal for the same reason we do:
+"when did this alarm come in, who saw it, when did it clear" is a regulatory
+question in electricity distribution, and it cannot be answered from a table that
+only holds current state.
+
+HYSTERESIS (section 6.5): an episode closes when the condition has been absent
+for about 30 minutes, not the moment a single turn fails to see it. Without it a
+value sitting on a threshold opens and closes an episode all afternoon —
+chattering, in ISA-18.2's vocabulary — and every open is an alarm.
+
+DELAY-ON (decision D2, post-review): the mirror image of hysteresis, on the
+opening side. A condition must persist for `OlayAyari.bekleme_sn` before a NEW
+episode is allowed to open at all — a single turn's single qualifying window is
+not enough on its own, for the same reason a single flickering reading should
+not close one. The arc is exempt (`OlayAyari.bekleme_muaf`): the TVOC-2 is
+SIL-2 and has already decided by the time its row exists, so re-litigating that
+decision with an extra delay would add pure latency. See `OlayDeposu.uygula`.
+"""
+
+from __future__ import annotations
+
+import logging
+from dataclasses import dataclass
+from datetime import datetime, timedelta
+
+import psycopg
+from psycopg import errors
+from psycopg.types.json import Json
+
+from .ayar import Ayar
+from .dedektor.taban import Bulgu
+from .sozlesme import SEVIYE_SIRA, Durum, Seviye, Tip
+
+__all__ = ["OlayDeposu", "OlaySonucu"]
+
+_gunluk = logging.getLogger(__name__)
+
+
+@dataclass(frozen=True, slots=True)
+class OlaySonucu:
+    """What one turn did to the episode table. Returned for logging and tests."""
+
+    acilan: tuple[str, ...] = ()
+    guncellenen: tuple[str, ...] = ()
+    kapanan: tuple[str, ...] = ()
+    seviye_degisen: tuple[str, ...] = ()
+
+    @property
+    def toplam(self) -> int:
+        return len(self.acilan) + len(self.guncellenen) + len(self.kapanan)
+
+
+class OlayDeposu:
+    """Reads and writes `gridup.anomali` and `gridup.anomali_gecis`.
+
+    The only place either table is written. Every state or severity change goes
+    through a method here, and every one of those methods writes its journal row
+    in the same transaction as the change it records — an audit trail that can be
+    missing a row is not an audit trail.
+    """
+
+    def __init__(self, baglanti: psycopg.Connection, ayar: Ayar) -> None:
+        self._baglanti = baglanti
+        self._ayar = ayar
+        # Delay-on state (decision D2): (first-seen turn time, first-seen
+        # measurement time) of a qualifying condition that has not yet
+        # persisted long enough to open an episode, keyed by (modul_id, tip).
+        # Two clocks for two purposes — see `_acilmaya_hazir`. Deliberately
+        # process memory,
+        # not a database table — see `OlayAyari.bekleme_sn`'s docstring for
+        # why that is judged an acceptable limitation. `Tarayici` (production)
+        # and `dogrulama.kos`/`oynat` (the labelled-set harness and the replay
+        # used for lead-time measurement) each construct exactly one
+        # `OlayDeposu` and call `.tur()`/`.uygula()` on it repeatedly, so this
+        # persists correctly across the turns of one run either way — only an
+        # actual process restart resets it, same as a cold-start baseline.
+        self._bekleyen: dict[tuple[str, Tip], tuple[datetime, datetime]] = {}
+
+    # -- the turn's main entry point ---------------------------------------
+
+    def uygula(
+        self, modul_id: str, bulgular: "tuple[Bulgu, ...] | list[Bulgu]", simdi: datetime
+    ) -> OlaySonucu:
+        """Fold one module's findings into the episode table.
+
+        `simdi` is the TURN's instant, not the window's: it records that the
+        detector confirmed these conditions now, which is what the hysteresis
+        sweep measures against. A module replaying a backlog is judged over an
+        old window but is being confirmed in the present, and closing its episode
+        because the measurements are old would be wrong.
+
+        Deliberately does *not* close episodes whose finding is absent this turn.
+        That is `kapat_sureli`'s job, and it is separate because absence has to
+        persist for the hysteresis window before it means anything — a single turn
+        without a finding is not the condition going away, it is one turn.
+
+        DELAY-ON (decision D2): a finding whose type is not exempt
+        (`OlayAyari.bekleme_muaf`) and has no episode open yet does not open
+        one on its first appearance. Its measurement time is recorded as the
+        pending condition's onset, and only once a later turn's SAME finding
+        type is still present `bekleme_sn` after that onset does the episode
+        actually open — at that point immediately, with no further delay. An
+        already-open episode is unaffected: it updates on every qualifying
+        turn exactly as before, because the delay only ever gates the OPENING
+        moment. A finding type that stops recurring is dropped from the
+        pending set at the end of this call, so a one-off blip does not sit
+        around waiting to combine with an unrelated later reading.
+        """
+        acilan: list[str] = []
+        guncellenen: list[str] = []
+        seviye_degisen: list[str] = []
+        bu_tur_tipler: set[Tip] = set()
+
+        for bulgu in bulgular:
+            bu_tur_tipler.add(bulgu.tip)
+            mevcut = self._acik_olay(modul_id, bulgu.tip)
+            if mevcut is None:
+                hazir, onset = self._acilmaya_hazir(modul_id, bulgu, simdi)
+                if not hazir:
+                    # Still pending: seen, but not for long enough yet. No
+                    # episode, no row — a Bulgu that never becomes an episode
+                    # leaves no trace, same as one that never fired at all.
+                    continue
+                # ilk_gorulme is backdated to the true onset, not the
+                # confirming sighting: contract 3's ilk_gorulme is "the
+                # measurement that triggered the anomaly", and the condition
+                # really did start when it was first (pending-ly) seen — lead
+                # time (section 2.5) would otherwise be understated by
+                # roughly bekleme_sn for every single finding.
+                self._bekleyen.pop((modul_id, bulgu.tip), None)
+                acilan.append(self._ac(modul_id, bulgu, simdi, ilk_gorulme=onset))
+            else:
+                degisti = self._guncelle(mevcut, bulgu, simdi)
+                guncellenen.append(mevcut["id"])
+                if degisti:
+                    seviye_degisen.append(mevcut["id"])
+
+        # A pending type that did not recur this turn stopped persisting.
+        # Drop it rather than let it wait indefinitely to combine with a much
+        # later, unrelated occurrence of the same type.
+        for anahtar in [
+            a for a in self._bekleyen if a[0] == modul_id and a[1] not in bu_tur_tipler
+        ]:
+            del self._bekleyen[anahtar]
+
+        return OlaySonucu(
+            acilan=tuple(acilan),
+            guncellenen=tuple(guncellenen),
+            seviye_degisen=tuple(seviye_degisen),
+        )
+
+    def _acilmaya_hazir(
+        self, modul_id: str, bulgu: Bulgu, simdi: datetime
+    ) -> tuple[bool, datetime]:
+        """Has this not-yet-open condition persisted long enough to open?
+
+        Returns (ready, onset) — `onset` is the true first-sighting
+        MEASUREMENT time, always, for backdating `ilk_gorulme` once it opens.
+
+        Exempt types (the arc) always answer ready immediately — section 3.5,
+        unchanged by D2.
+
+        THE PERSISTENCE CLOCK ITSELF runs on `simdi` (DETECTOR/turn time), not
+        `bulgu.zaman` (measurement time) — deliberately, and this is a design
+        correction made while implementing D2, not the original plan. Some
+        findings' `zaman` is a STATE ONSET that does not advance while the
+        state persists — `modul_saglik`'s silence finding is stamped with
+        `son_olcum_zaman`, the last time anything was heard, which is
+        identical on every turn for as long as the module stays silent. A
+        persistence clock measured against a value that never advances can
+        never reach `bekleme_sn` and the finding would wait forever. `simdi`
+        always advances turn to turn (production and `dogrulama.oynat` alike),
+        so it is the correct clock for "how long have we kept observing this"
+        — which is exactly the same reasoning `son_dogrulama` already uses for
+        hysteresis, elsewhere in this class, rather than `son_gorulme`.
+        """
+        o = self._ayar.olay
+        if bulgu.tip in o.bekleme_muaf:
+            return True, bulgu.zaman
+        anahtar = (modul_id, bulgu.tip)
+        # setdefault, not a plain membership check that always answers False
+        # on the first sighting: `bekleme_sn = 0` (used throughout the test
+        # suite to opt individual tests out of this feature) must be able to
+        # open on the very first call, and 0 seconds having elapsed since a
+        # sighting of itself already satisfies ">= 0".
+        ilk_simdi, ilk_zaman = self._bekleyen.setdefault(anahtar, (simdi, bulgu.zaman))
+        hazir = (simdi - ilk_simdi).total_seconds() >= o.bekleme_sn
+        return hazir, ilk_zaman
+
+    def kapat_sureli(self, simdi: datetime) -> tuple[str, ...]:
+        """Close every episode the detector has not confirmed for the hysteresis window.
+
+        Measured on `son_dogrulama` — when the detector last *found* the condition
+        — not on `son_gorulme`, which is when the grid last misbehaved. For a
+        latched condition the two are far apart: an arc that tripped forty minutes
+        ago is still found on every turn, and closing it because the trip itself is
+        older than the hysteresis would open and close an episode every turn for as
+        long as the event stayed in the evaluation window.
+
+        Runs once per turn over the whole table rather than per module: an episode
+        on a module that has gone completely silent still has to close, and that
+        module produces no rows, so a per-module sweep would never reach it.
+        """
+        sinir = simdi - timedelta(seconds=self._ayar.olay.histerezis_sn)
+        with self._baglanti.cursor() as imlec:
+            imlec.execute(
+                "SELECT id, durum FROM gridup.anomali "
+                "WHERE durum <> 'kapandi' AND son_dogrulama < %s "
+                "ORDER BY sira",
+                (sinir,),
+            )
+            adaylar = imlec.fetchall()
+
+        kapanan: list[str] = []
+        for aday in adaylar:
+            self.kapat(aday["id"], simdi, onceki_durum=Durum(aday["durum"]))
+            kapanan.append(aday["id"])
+        return tuple(kapanan)
+
+    # -- individual transitions --------------------------------------------
+
+    def _ac(
+        self, modul_id: str, bulgu: Bulgu, simdi: datetime, ilk_gorulme: datetime | None = None
+    ) -> str:
+        """Open a new episode and journal both of its opening transitions.
+
+        `ilk_gorulme` defaults to `bulgu.zaman` (unchanged from before D2) but
+        the delay-on caller in `uygula` passes the pending condition's actual
+        onset instead, so a finding that had to wait out `bekleme_sn` before
+        opening still gets an accurate first-sighting time rather than one
+        shifted forward by the wait — see `uygula`'s own comment on why that
+        distinction matters for lead time.
+        """
+        ilk_gorulme = bulgu.zaman if ilk_gorulme is None else ilk_gorulme
+        try:
+            with self._baglanti.transaction():
+                anomali_id = self._yeni_kimlik()
+                with self._baglanti.cursor() as imlec:
+                    imlec.execute(
+                        """
+                        INSERT INTO gridup.anomali
+                            (sira, id, modul_id, tip, seviye, maks_seviye, skor,
+                             ilk_gorulme, son_gorulme, son_dogrulama, durum,
+                             gerekce, kanit, katman)
+                        VALUES
+                            (currval('gridup.anomali_sira'), %s, %s, %s, %s, %s, %s,
+                             %s, %s, %s, 'acik', %s, %s, %s)
+                        """,
+                        (
+                            anomali_id,
+                            modul_id,
+                            bulgu.tip.value,
+                            bulgu.seviye.value,
+                            bulgu.seviye.value,
+                            bulgu.skor,
+                            ilk_gorulme,
+                            bulgu.zaman,
+                            simdi,
+                            bulgu.gerekce,
+                            Json(bulgu.kanit) if bulgu.kanit else None,
+                            bulgu.katman,
+                        ),
+                    )
+                # An opening is two transitions, and both belong in the journal:
+                # the episode came into existence, and its severity left normal.
+                self._gecis(anomali_id, "durum", None, Durum.ACIK.value, ilk_gorulme)
+                self._gecis(
+                    anomali_id, "seviye", Seviye.NORMAL.value, bulgu.seviye.value, ilk_gorulme
+                )
+        except errors.UniqueViolation:
+            # Another turn opened the same episode between our check and our
+            # insert. The partial unique index is what caught it; the right
+            # answer is to treat this turn as an update, which is what would have
+            # happened had the two turns been ordered the other way.
+            _gunluk.info(
+                "episode for %s/%s already open, updating instead", modul_id, bulgu.tip.value
+            )
+            mevcut = self._acik_olay(modul_id, bulgu.tip)
+            if mevcut is None:  # pragma: no cover - only if it closed in between
+                raise
+            self._guncelle(mevcut, bulgu, simdi)
+            return mevcut["id"]
+
+        _gunluk.info(
+            "opened %s %s/%s seviye=%s skor=%.2f",
+            anomali_id,
+            modul_id,
+            bulgu.tip.value,
+            bulgu.seviye.value,
+            bulgu.skor,
+        )
+        return anomali_id
+
+    def _guncelle(self, mevcut: dict, bulgu: Bulgu, simdi: datetime) -> bool:
+        """Update an open episode in place. Returns True if the severity moved.
+
+        `son_gorulme` only ever moves forward. A re-scan of history (section 3.4)
+        replays old measurements through the same code, and letting it drag
+        `son_gorulme` backwards would close the episode on the next hysteresis
+        sweep — re-running the detector would destroy the finding it re-derived.
+        """
+        onceki_seviye = Seviye(mevcut["seviye"])
+        onceki_maks = Seviye(mevcut["maks_seviye"])
+        seviye_degisti = bulgu.seviye is not onceki_seviye
+
+        yeni_maks = (
+            bulgu.seviye
+            if SEVIYE_SIRA[bulgu.seviye] > SEVIYE_SIRA[onceki_maks]
+            else onceki_maks
+        )
+
+        with self._baglanti.transaction():
+            with self._baglanti.cursor() as imlec:
+                imlec.execute(
+                    """
+                    UPDATE gridup.anomali
+                       SET seviye      = %s,
+                           maks_seviye = %s,
+                           skor        = %s,
+                           gerekce     = %s,
+                           kanit       = %s,
+                           katman      = %s,
+                           son_gorulme = greatest(son_gorulme, %s),
+                           ilk_gorulme = least(ilk_gorulme, %s),
+                           son_dogrulama = greatest(son_dogrulama, %s),
+                           guncelleme  = now()
+                     WHERE id = %s
+                    """,
+                    (
+                        bulgu.seviye.value,
+                        yeni_maks.value,
+                        bulgu.skor,
+                        bulgu.gerekce,
+                        Json(bulgu.kanit) if bulgu.kanit else None,
+                        bulgu.katman,
+                        bulgu.zaman,
+                        bulgu.zaman,
+                        simdi,
+                        mevcut["id"],
+                    ),
+                )
+            if seviye_degisti:
+                # Section 6.5: a severity change is something the alarm service
+                # must hear about. A score moving 0.81 -> 0.83 inside the same
+                # severity is not, and writing a journal row for it would bury
+                # the transitions that matter.
+                self._gecis(
+                    mevcut["id"],
+                    "seviye",
+                    onceki_seviye.value,
+                    bulgu.seviye.value,
+                    bulgu.zaman,
+                )
+        return seviye_degisti
+
+    def kapat(
+        self, anomali_id: str, simdi: datetime, onceki_durum: Durum | None = None
+    ) -> None:
+        """Close an episode: the condition has been gone for the hysteresis window."""
+        if onceki_durum is None:
+            with self._baglanti.cursor() as imlec:
+                imlec.execute("SELECT durum FROM gridup.anomali WHERE id = %s", (anomali_id,))
+                satir = imlec.fetchone()
+            if satir is None or satir["durum"] == Durum.KAPANDI.value:
+                return
+            onceki_durum = Durum(satir["durum"])
+
+        with self._baglanti.transaction():
+            with self._baglanti.cursor() as imlec:
+                imlec.execute(
+                    "UPDATE gridup.anomali "
+                    "SET durum = 'kapandi', kapanma_zaman = %s, guncelleme = now() "
+                    "WHERE id = %s AND durum <> 'kapandi'",
+                    (simdi, anomali_id),
+                )
+                if imlec.rowcount == 0:
+                    return
+            self._gecis(anomali_id, "durum", onceki_durum.value, Durum.KAPANDI.value, simdi)
+        _gunluk.info("closed %s", anomali_id)
+
+    def onayla(self, anomali_id: str, aktor: str, simdi: datetime) -> bool:
+        """Operator acknowledgement.
+
+        Not called by the scan loop — it is the write half of contract 5's
+        `onayla` endpoint, which is out of scope for this delivery. It lives here
+        because an acknowledgement is a state transition like any other and has to
+        produce a journal row carrying *who* and *when*; that is half of what the
+        audit trail exists for, and a read API that wrote this transition itself
+        would be the second place episode state is mutated.
+        """
+        with self._baglanti.cursor() as imlec:
+            imlec.execute("SELECT durum FROM gridup.anomali WHERE id = %s", (anomali_id,))
+            satir = imlec.fetchone()
+        if satir is None or satir["durum"] != Durum.ACIK.value:
+            return False
+
+        with self._baglanti.transaction():
+            with self._baglanti.cursor() as imlec:
+                imlec.execute(
+                    "UPDATE gridup.anomali SET durum = 'onaylandi', guncelleme = now() "
+                    "WHERE id = %s AND durum = 'acik'",
+                    (anomali_id,),
+                )
+                if imlec.rowcount == 0:  # pragma: no cover - lost race
+                    return False
+            self._gecis(
+                anomali_id, "durum", Durum.ACIK.value, Durum.ONAYLANDI.value, simdi, aktor=aktor
+            )
+        return True
+
+    # -- helpers -----------------------------------------------------------
+
+    def _gecis(
+        self,
+        anomali_id: str,
+        alan: str,
+        onceki: str | None,
+        yeni: str,
+        zaman: datetime,
+        aktor: str | None = None,
+        aciklama: str | None = None,
+    ) -> None:
+        """Write one journal row. Every state and severity change calls this."""
+        with self._baglanti.cursor() as imlec:
+            imlec.execute(
+                "INSERT INTO gridup.anomali_gecis "
+                "(anomali_id, zaman, alan, onceki, yeni, aktor, aciklama) "
+                "VALUES (%s, %s, %s, %s, %s, %s, %s)",
+                (
+                    anomali_id,
+                    zaman,
+                    alan,
+                    onceki,
+                    yeni,
+                    aktor or self._ayar.olay.sistem_aktoru,
+                    aciklama,
+                ),
+            )
+
+    def _acik_olay(self, modul_id: str, tip: Tip) -> dict | None:
+        with self._baglanti.cursor() as imlec:
+            imlec.execute(
+                "SELECT id, seviye, maks_seviye, durum, ilk_gorulme, son_gorulme "
+                "FROM gridup.anomali "
+                "WHERE modul_id = %s AND tip = %s AND durum <> 'kapandi'",
+                (modul_id, tip.value),
+            )
+            return imlec.fetchone()
+
+    def _yeni_kimlik(self) -> str:
+        """Next episode id, e.g. `an_00412`.
+
+        Drawn from the same sequence as `sira`, so the id's ordering and the
+        monotonic column the alarm service reads can never disagree. The insert
+        uses `currval` of this same sequence for `sira` — hence one `nextval`
+        here and none there.
+        """
+        o = self._ayar.olay
+        with self._baglanti.cursor() as imlec:
+            imlec.execute("SELECT nextval('gridup.anomali_sira') AS n")
+            n = int(imlec.fetchone()["n"])  # type: ignore[index]
+        return f"{o.kimlik_oneki}{n:0{o.kimlik_basamak}d}"

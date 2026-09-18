@@ -1,10 +1,13 @@
-# Git ignore rules for İZ C
+# Git ignore rules for Grid Up Hackathon
 
 # Environment files and credentials (Madde 15)
 .env
 *.env
 .env.*
 !.env.example
+
+# Scratch / working files (not deliverables)
+temp/
 
 # State persistence files
 alarm_state.json
@@ -23,6 +26,17 @@ __pycache__/
 .pytest_cache/
 .pyc
 
-# OS specific
+# Claude Code workspace files
+.claude/
+CLAUDE.md
+
+# OS
 Thumbs.db
 .DS_Store
+
+# KiCad yerel ayar dosyasi (kullanici/oturum)
+*.kicad_prl
+
+# KiCad GUI artıkları
+docs/track-a/eda/.history/
+*.lck

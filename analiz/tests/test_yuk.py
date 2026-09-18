@@ -1,0 +1,276 @@
+"""T5 — the load test's own correctness.
+
+A load test that measures the wrong thing is worse than none: it produces
+numbers, and numbers get quoted. These check the arithmetic and the two mistakes
+that made the first version of this harness report nonsense — counting an empty
+turn as the cost of running the fleet, and losing rows from the count.
+
+The measurement run itself is not exercised here. Building a hundred modules'
+history takes minutes and belongs in `python -m analiz.yuk`, not in a suite that
+has to stay fast enough to run on every change.
+"""
+
+from __future__ import annotations
+
+import io
+
+import pytest
+
+from analiz.yuk import (
+    Donanim,
+    SorguKaydi,
+    TurOlcumu,
+    YukSonucu,
+    _etiketle,
+    _modul_idleri,
+    donanim,
+    paralellik_notu,
+    sinir_tahmini,
+    yazdir,
+)
+
+DONANIM = Donanim(
+    cekirdek_mantiksal=4,
+    cekirdek_fiziksel=4,
+    model="Test CPU @ 2.10GHz",
+    ram_gb=16.5,
+    cgroup_cpu="sınırsız",
+)
+
+
+def _sonuc(modul, sureler, periyot=30.0, satir=600, pg_cpu=None, sistem_cpu=None):
+    toplam = sum(sureler)
+    cpu = toplam * 0.7
+    pg = toplam * 0.3 if pg_cpu is None else pg_cpu
+    return YukSonucu(
+        modul_sayisi=modul,
+        turlar=tuple(TurOlcumu(sure_sn=s, satir=satir, modul=modul) for s in sureler),
+        periyot_sn=periyot,
+        cpu_sn=cpu,
+        bellek_mb=150.0,
+        bellek_artis_mb=5.0,
+        veri_satiri=modul * 30_000,
+        kurulum_sn=1.0,
+        pg_cpu_sn=pg,
+        sistem_cpu_sn=(cpu + pg) if sistem_cpu is None else sistem_cpu,
+        olcum_suresi_sn=toplam,
+        donanim=DONANIM,
+        sorgular={"taban çizgisi (medyan+MAD)": {"cagri": 10, "toplam_ms": 100.0, "ort_ms": 10.0, "azami_ms": 20.0}},
+    )
+
+
+def test_modul_idleri_sahalara_yayilir():
+    """Modules spread over sites, because layer 3 compares a module with its site-mates.
+
+    Piling a hundred modules into one site would make that comparison either
+    trivially small or pathologically large, and the load test would be measuring
+    a topology nobody deploys.
+    """
+    idler = _modul_idleri(100)
+    assert len(idler) == 100
+    assert len(set(idler)) == 100
+    sahalar = {i.split("-")[0] for i in idler}
+    assert len(sahalar) > 5, "modules must span several sites"
+    assert all(len(i.split("-")) == 3 for i in idler)
+
+
+def test_doluluk_tarama_periyoduna_gore_olculur():
+    """Duty is p95 turn duration over the scan period; at 1.0 the detector falls behind."""
+    hizli = _sonuc(10, [1.0] * 10, periyot=10.0)
+    assert hizli.doluluk == pytest.approx(0.1)
+    assert hizli.yetisiyor
+
+    yavas = _sonuc(100, [12.0] * 10, periyot=10.0)
+    assert yavas.doluluk == pytest.approx(1.2)
+    assert not yavas.yetisiyor
+
+    # The same turns against a longer period: identical work, comfortable duty.
+    # This is the whole reason the period is configuration.
+    rahat = _sonuc(100, [12.0] * 10, periyot=30.0)
+    assert rahat.doluluk == pytest.approx(0.4)
+    assert rahat.yetisiyor
+
+
+def test_doluluk_ortalamayi_degil_p95i_kullanir():
+    """A detector that overruns one turn in ten is falling behind one turn in ten.
+
+    The lag from those turns accumulates instead of averaging out, so a mean that
+    fits inside the period is not evidence of keeping up.
+    """
+    # Nine fast turns and one slow one: mean is comfortable, p95 is not.
+    sonuc = _sonuc(50, [2.0] * 9 + [40.0])
+    assert sonuc.ort_sure < 10.0
+    assert sonuc.p95_sure == 40.0
+    assert not sonuc.yetisiyor, "the p95 overrun must decide the verdict"
+
+
+def test_sinir_olculdugunde_tahmin_diye_sunulmaz():
+    """When a measured point crosses the period, say measured — not estimated."""
+    sonuclar = [
+        _sonuc(10, [1.0] * 5, periyot=10.0),
+        _sonuc(50, [5.0] * 5, periyot=10.0),
+        _sonuc(100, [14.0] * 5, periyot=10.0),
+    ]
+    metin = sinir_tahmini(sonuclar)
+    assert "ÖLÇÜLDÜ" in metin
+    assert "100 modülde" in metin
+    # Even a measured crossing quotes capacity per core, not only a duration.
+    assert "modül/çekirdek" in metin
+
+
+def test_sinira_ulasilmadiginda_tahmin_oldugu_soylenir():
+    """An extrapolation is labelled as one rather than quoted as a measurement."""
+    sonuclar = [_sonuc(10, [0.5] * 5), _sonuc(50, [2.0] * 5), _sonuc(100, [4.0] * 5)]
+    metin = sinir_tahmini(sonuclar)
+    assert "ULAŞILMADI" in metin
+    assert "tahmin" in metin
+
+
+def test_sorgu_etiketleri_gercek_ifadeleri_ayirir():
+    """Query timings are grouped by what the statement does, not by its text."""
+    assert "taban" in _etiketle(
+        "SELECT percentile_cont(0.5) WITHIN GROUP (ORDER BY deger) FROM gridup.olcum"
+    )
+    assert _etiketle("INSERT INTO gridup.anomali_gecis (anomali_id) VALUES (1)") == (
+        "olay: journal yazımı"
+    )
+    assert _etiketle("SELECT 1") == "diğer"
+
+
+def test_sorgu_kaydi_yalnizca_acikken_toplar():
+    """Timing is off during setup and the warm-up turn.
+
+    Building the fleet issues far more statements than a turn does, and folding
+    those into the per-turn figures would report the fixture generator's cost as
+    the detector's.
+    """
+    kayit = SorguKaydi()
+    kayit.ekle("a", 1.0)
+    assert not kayit.sureler
+
+    kayit.acik = True
+    kayit.ekle("a", 0.5)
+    kayit.ekle("a", 1.5)
+    ozet = kayit.ozet()
+    assert ozet["a"]["cagri"] == 2
+    assert ozet["a"]["ort_ms"] == pytest.approx(1000.0)
+    assert ozet["a"]["azami_ms"] == pytest.approx(1500.0)
+
+
+def test_bos_tur_flotu_calistirmanin_maliyeti_degildir():
+    """A turn that processed nothing is not evidence the fleet is cheap.
+
+    The harness generates data past the measurement window so every measured turn
+    has arrivals; the first version did not, the warm-up drained the table, and
+    every measured turn afterwards timed the empty case at ~1 ms and reported it
+    as the cost of running a hundred modules.
+    """
+    bos = _sonuc(100, [0.001] * 10, satir=0)
+    assert bos.ort_satir == 0
+    # The figure is honest on its own terms, so the guard is that the report
+    # shows the row count alongside the duration and cannot hide a zero.
+    akis = io.StringIO()
+    yazdir([bos], akis)
+    cikti = akis.getvalue()
+    assert "satır/tur" in cikti
+    assert " 0 " in cikti
+
+
+def test_rapor_bolum_8in_istedigi_her_seyi_yazdirir():
+    """Section 8 fixes the list: duration, rows, CPU, memory, query times, limit."""
+    akis = io.StringIO()
+    yazdir([_sonuc(10, [1.0] * 5), _sonuc(100, [9.0] * 5)], akis)
+    cikti = akis.getvalue()
+
+    # Section 8 asks for duration, rows, CPU, memory, query times and the limit.
+    # CPU appears as core-seconds per turn (detector process + PostgreSQL), which
+    # is the portable form of the same quantity.
+    for baslik in (
+        "modül",
+        "veri satırı",
+        "tur ort",
+        "satır/tur",
+        "çekirdek-sn",
+        "bellek",
+        "doluluk",
+    ):
+        assert baslik in cikti, f"missing column: {baslik}"
+    assert "VERİTABANI SORGU SÜRELERİ" in cikti
+    assert "ÖLÇEK SINIRI" in cikti
+
+
+# --------------------------------------------------------------------------
+# Hardware and per-core accounting
+# --------------------------------------------------------------------------
+
+
+def test_donanim_gercek_makineyi_okur():
+    """A turn duration without the machine it ran on is a number, not a result."""
+    d = donanim()
+    assert d.cekirdek_mantiksal >= 1
+    assert d.ram_gb > 0
+    assert d.model
+    metin = str(d)
+    assert "çekirdek" in metin and "RAM" in metin
+
+
+def test_cekirdek_saniyesi_postgresi_de_sayar():
+    """The detector's own process CPU is only half the bill.
+
+    The queries run in separate PostgreSQL backends and their cost does not
+    appear in `Process.cpu_times()`. Counting only the Python side would
+    understate the work per turn by the SQL share and flatter the capacity
+    figure — which is the number that would be quoted.
+    """
+    sonuc = _sonuc(100, [10.0] * 10, pg_cpu=30.0)
+    # 10 turns: 70 s of Python CPU plus 30 s of PostgreSQL = 10 core-s/turn.
+    assert sonuc.cekirdek_sn_tur == pytest.approx(10.0)
+    assert sonuc.modul_basina_cekirdek_sn == pytest.approx(0.1)
+
+
+def test_kapasite_cekirdek_basina_ve_periyoda_bagli():
+    """Capacity is modules per core at a period, not an absolute duration.
+
+    A turn duration is only true of the machine it was measured on; core-seconds
+    per module carries to other hardware by one ratio. Tripling the period
+    triples the capacity, because the same work has three times as long to land.
+    """
+    otuz = _sonuc(100, [10.0] * 10, periyot=30.0, pg_cpu=30.0)
+    assert otuz.cekirdek_basina_kapasite == pytest.approx(300.0)
+
+    on = _sonuc(100, [10.0] * 10, periyot=10.0, pg_cpu=30.0)
+    assert on.cekirdek_basina_kapasite == pytest.approx(100.0)
+
+
+def test_paralellik_tek_cekirdek_isini_teshis_eder():
+    """Serial work is measured, not inferred from process CPU ≈ wall time.
+
+    Process CPU close to wall time is suggestive but does not establish it: the
+    detector's process CPU excludes the PostgreSQL backends it waits on, so a
+    turn that is half Python and half SQL on two different cores still shows a
+    process ratio near one. The verdict reads system-wide CPU instead.
+    """
+    # 10 core-seconds of work spread over 10 s of wall time: nothing overlapped.
+    seri = _sonuc(100, [10.0] * 10, pg_cpu=30.0, sistem_cpu=100.0)
+    assert seri.paralellik == pytest.approx(1.0)
+    assert seri.mesgul_cekirdek == pytest.approx(1.0)
+    assert "TEK ÇEKİRDEK" in paralellik_notu([seri])
+
+    # 30 core-seconds inside 10 s of wall time: three cores busy.
+    paralel = _sonuc(100, [10.0] * 10, pg_cpu=230.0, sistem_cpu=300.0)
+    assert paralel.paralellik == pytest.approx(3.0)
+    assert "TEK ÇEKİRDEK" not in paralellik_notu([paralel])
+
+
+def test_rapor_donanimi_ve_cekirdek_kapasitesini_yazdirir():
+    """The report must carry the machine and the per-core figure, not just seconds."""
+    akis = io.StringIO()
+    yazdir([_sonuc(10, [1.0] * 5), _sonuc(100, [9.0] * 5)], akis)
+    cikti = akis.getvalue()
+
+    assert "donanım:" in cikti
+    assert "çekirdek" in cikti
+    assert "çekirdek-sn" in cikti
+    assert "mod/çekirdek" in cikti
+    assert "ÇEKİRDEK KULLANIMI" in cikti
+    assert "Çekirdek başına kapasite" in cikti
