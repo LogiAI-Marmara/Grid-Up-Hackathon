@@ -28,7 +28,8 @@ flowchart TB
 
         subgraph GUC["Besleme"]
             PSU["AC/DC modül<br/>RECOM RAC05-05SK/277<br/>230 V → 5 V · −40…+90 °C*"]
-            SC["Yedek depo<br/>Süperkapasitör<br/>(float şarjlı)"]
+            SC["Yedek depo<br/>2× süperkapasitör seri<br/>(float şarjlı)"]
+            BST["Boost çevirici<br/>TPS61099 → 4,6 V<br/>(yalnız kesintide)"]
             LDO["3.3 V regülatör<br/>(LDO — MCU ve sensörler)"]
         end
 
@@ -49,7 +50,8 @@ flowchart TB
 
     PSU -->|"5 V"| LDO
     PSU -->|"float şarj"| SC
-    SC -->|"kesintide"| LDO
+    SC -.->|"kesintide"| BST
+    BST -.->|"D2 → 5 V rayı"| LDO
     LDO -->|"3.3 V"| MCU
 
     MCU -->|"U.FL kablosu"| ANT
@@ -63,7 +65,7 @@ flowchart TB
     class T,TH,EXT sensor
     class AN,CT,ARC olcum
     class MCU,RX mcu
-    class PSU,SC,LDO,ANT guc
+    class PSU,SC,BST,LDO,ANT guc
     class GWA disi
 ```
 
@@ -252,7 +254,7 @@ tanımlı, ölçüm kaydı uzun formatta tutuluyor ve dedektör arayüzü sabit.
 | **RS-485** | Enerji analizörü, TVOC-2 | Modbus okuma hattı |
 | **UART** | RS-485 alıcı-verici | Modbus istekleri |
 | **Analog** | Split-core CT ×4 (analizör yoksa) | Akım kanalı alternatifi |
-| **Besleme** | AC/DC modül 5 V → LDO 3,3 V → MCU ve sensörler; süperkapasitör → kesintide LDO girişini besler | Güç hattı |
+| **Besleme** | AC/DC modül 5 V → LDO 3,3 V → MCU ve sensörler; kesintide süperkapasitör → boost (TPS61099, 4,6 V) → D2 → 5 V rayı → LDO ([3. doküman §3.4](03-pinout.md)) | Güç hattı |
 | **RF** | U.FL → panel SMA anten → gateway | Kablosuz hat |
 
 Ayrıntılı pin seviyesi bağlantılar [3. dokümanda](03-pinout.md) verilmiştir.
