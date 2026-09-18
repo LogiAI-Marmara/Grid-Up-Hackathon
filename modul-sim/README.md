@@ -78,9 +78,22 @@ python -m modul_sim --dogrula --senaryo asiri_yuk
 - `--cikti`: `ndjson` (satır satır) veya `json` (tek dizi)
 - `--dogrula`: Her paketi çıkışta `modul_paketi.schema.json` şemasına karşı doğrular
 - `--senaryo-bas DK` / `--senaryo-sure DK`: senaryonun başlama anı ve rampa süresi (varsayılan: koşunun %35'inde başlar, %55'i boyunca tırmanır)
+- `--senaryo-modul ID[,ID...]`: senaryoyu yalnız bu modüllere uygula, kalanlar temiz kalır
+- `--senaryo-oran 0-1`: senaryoyu filonun bu kesrine uygula (tohumdan deterministik seçim), kalanlar temiz
+- `--etiket PATH`: koşu bitince kör test **etiket dosyasını** yaz (İZ B formatı, `analiz/README.md` "Etiket dosyası formatı": `senaryolar[].baslangic / kritik_esik`, `temiz_moduller`, `kapsam`)
 - `--sessiz`: stderr'e koşu özeti basma
 
-> Kör test için etiket dosyası (İZ B `analiz/README` formatı) henüz üretilmiyor; senaryo tüm modüllere uygulanır (#9).
+### Kör test seti üretme
+
+```bash
+# 20 modül, 12 saat; modüllerin %30'unda gevşek klemens, kalan 14 modül temiz
+python -m modul_sim --senaryo gevsek_klemens --modul 20 --sure 720 --senaryo-oran 0.3 --etiket etiket.json > kor.ndjson
+```
+
+Veri (`kor.ndjson`) veritabanına gider; `etiket.json` dedektör çıktısı dondurulana kadar üreticide kalır
+(`analiz/README.md` "Kör test protokolü"). `kritik_esik` rampanın sonu, ark için ilk trip anı; etiketteki
+senaryo adları İZ B sözlüğüyle (`faz_dengesizligi`, `nem_yukselmesi`, `ark_olayi`, `sensor_arizasi`) yazılır,
+CLI adları değişmez.
 
 ---
 
