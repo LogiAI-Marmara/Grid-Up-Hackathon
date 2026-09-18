@@ -15,7 +15,7 @@ PostgreSQL veritabanına ya da dosya sistemine yazan yüksek performanslı FastA
   - Modülün kendi zaman damgasına dokunmaz; sunucu saatiyle `alindi_zaman` damgalar (saat kayması tespiti için bu fark zorunludur).
   - Başarılı yeni kayıtta `201 Created` ve yazılan satır sayısını döner.
   - Aynı zaman damgalı tekrar paketlerde `200 OK` ve `{"yinelenen": true}` döner (idempotent).
-- **`GET /saglik`**: Servisin durumunu, kullanılan kayıt backend'ini ve şema sürümünü döner (`200 OK`).
+- **`GET /saglik`**: servis sürümü, depo durumu (`depo.durum` = `hazir` ise Docker healthcheck geçer) ve yazılan satır sayaçları (`200 OK`).
 
 ---
 
@@ -28,7 +28,7 @@ Servis `TOPLAMA_KAYIT` ortam değişkeniyle iki farklı backend ile çalışabil
    - `DATABASE_URL` ile belirtilen veritabanına bağlanır.
 2. **Dosya (`TOPLAMA_KAYIT=dosya`) — Test / Geliştirme Modu:**
    - Veritabanı kurulumu gerektirmeden çalışır.
-   - Belirtilen dizine (`TOPLAMA_DOSYA_DIZIN`) JSONL formatında yazar (`olcum.jsonl`, `termal_ozet.jsonl`, `termal_kare.jsonl`, `modul_durum.jsonl`).
+   - Belirtilen dizine (`TOPLAMA_DOSYA_DIZIN`) JSONL formatında yazar (`modul.jsonl`, `olcum.jsonl`, `termal_ozet.jsonl`, `termal_kare.jsonl`, `modul_durum.jsonl`).
 
 ---
 
@@ -45,7 +45,7 @@ psql -d gridup -f toplama/migrations/004_termal_kare_ikili.sql
 psql -d gridup -f toplama/migrations/005_modul_durum.sql
 ```
 
-*(Not: İZ B analiz katmanı bu tabloların üzerine kendi tarama imleci ve anomali tablolarını ekler: `analiz/100_*.sql`)*
+*(Not: İZ B analiz katmanı bu tabloların üzerine kendi tarama imleci ve anomali tablolarını ekler: `analiz/analiz/migrations/100_analiz.sql`; `python -m analiz sema` önce buradaki 001–005'i, sonra kendininkini uygular.)*
 
 ---
 
@@ -54,7 +54,7 @@ psql -d gridup -f toplama/migrations/005_modul_durum.sql
 | Değişken | Varsayılan | Açıklama |
 |---|---|---|
 | `TOPLAMA_KAYIT` | `postgres` | Kayıt tipi: `postgres` veya `dosya` |
-| `DATABASE_URL` | `postgresql:///gridup` | PostgreSQL bağlantı DSN'i |
+| `DATABASE_URL` | — (zorunlu, `postgres` modunda) | PostgreSQL bağlantı DSN'i; boşsa servis açılışta hata verir |
 | `TOPLAMA_DOSYA_DIZIN` | `/veri` | Dosya modu için JSONL çıktı klasörü |
 | `TOPLAMA_HOST` | `0.0.0.0` | Servisin dinleyeceği adres |
 | `TOPLAMA_PORT` | `8000` | Servisin dinleyeceği port |

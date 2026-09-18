@@ -15,9 +15,9 @@ istatistikleri ise `stderr`'e basılır:
 
 - `modul_id`: `{saha}-{pano}-{modul}` hiyerarşik kimliği (örn. `TR041-P01-M1`)
 - `zaman`: ISO 8601 UTC zaman damgası
-- `olcumler`: `ortam_sicaklik`, `nem`, `akim_l1`, `akim_l2`, `akim_l3`, `akim_notr`, `ark_olay`
+- `olcumler`: `akim_l1`, `akim_l2`, `akim_l3`, `akim_notr`, `termal_maks`, `termal_ort` (her paket); `ortam_sicaklik`, `nem` (60 sn'de bir); `ark_olay` (olay olunca)
 - `termal_ozet`: `maks`, `maks_konum`, `bolge_ort` (4 bölge)
-- `termal_kare`: 32×24 = 768 elemanlı sıcaklık matrisi (0,1 °C çözünürlük)
+- `termal_kare`: 32×24 = 768 elemanlı sıcaklık matrisi, her pakette (pakette 0,01 °C; toplama DB'de int16 0,1 °C)
 - `modul_durum`: `besleme` (`sebeke`/`yedek`), `sinyal` (dBm), `yazilim_surumu`
 
 ---
@@ -30,11 +30,11 @@ Karar kaydı §7.6 ile tanımlı tüm arıza senaryoları simüle edilebilir:
 |---|---|---|
 | `gevsek_klemens` | Akım sabitken tek noktada (klemens) aşırı ısınma | `sicak_nokta`, `akim_sicaklik_sapmasi` |
 | `asiri_yuk` | Tüm faz akımları anma değerini aşar, genel pano sıcaklığı artar | `asiri_yuk`, `ortam_sicaklik_yuksek` |
-| `faz_dengesizligi` | Fazlar arası akım farkı ve nötr akımı yükselir | `faz_dengesizligi` |
-| `nem_yukselmesi` | Bağıl nem yükselir, çiğ noktasına yaklaşarak yoğuşma riski doğurur | `nem_yuksek` |
-| `ark_olayi` | Optik ark algılama kaydı (TVOC-2 Modbus trip sinyali) | `ark` |
-| `sensor_arizasi` | Sensör donması veya gürültülü okuma (`kalite: supheli/yok`) | `sensor_arizasi` |
-| `modul_sagligi` | Şebeke besleme kaybı (`yedek`), RF sinyal düşüşü, saat kayması | `modul_saglik` |
+| `faz_dengesizlik` | Fazlar arası akım farkı ve nötr akımı yükselir | `faz_dengesizligi` |
+| `nem_yuksek` | Bağıl nem yükselir, çiğ noktasına yaklaşarak yoğuşma riski doğurur | `nem_yuksek` |
+| `ark_olay` | Optik ark algılama kaydı (TVOC-2 Modbus trip sinyali) | `ark` |
+| `sensor_ariza` | Sensör donması veya gürültülü okuma (`kalite: supheli/yok`) | `sensor_arizasi` |
+| `modul_saglik` | Şebeke besleme kaybı (`yedek`), RF sinyal düşüşü, saat kayması | `modul_saglik` |
 
 Senaryo listesini terminalden görüntülemek için:
 ```bash
@@ -77,6 +77,10 @@ python -m modul_sim --dogrula --senaryo asiri_yuk
 - `--baslangic ISO`: Simülasyon başlangıç zamanı (varsayılan: koşunun şu an bitmesini sağlayacak an)
 - `--cikti`: `ndjson` (satır satır) veya `json` (tek dizi)
 - `--dogrula`: Her paketi çıkışta `modul_paketi.schema.json` şemasına karşı doğrular
+- `--senaryo-bas DK` / `--senaryo-sure DK`: senaryonun başlama anı ve rampa süresi (varsayılan: koşunun %35'inde başlar, %55'i boyunca tırmanır)
+- `--sessiz`: stderr'e koşu özeti basma
+
+> Kör test için etiket dosyası (İZ B `analiz/README` formatı) henüz üretilmiyor; senaryo tüm modüllere uygulanır (#9).
 
 ---
 

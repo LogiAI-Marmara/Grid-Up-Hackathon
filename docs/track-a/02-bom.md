@@ -19,7 +19,7 @@
 | # | Bileşen | Parça kodu | Adet | Birim $ | Birim ₺ | İşlevi | Sıcaklık sınıfı | Kaynak |
 |---|---|---|---|---|---|---|---|---|
 | 1 | **Termal dizi** | `MLX90640ESF-BAA-000-TU` | 1 | 28,62 | 1.393 | 32×24 nokta sıcaklık; nokta bazında erken tespit | −40…+85 °C | Mouser |
-| 2 | **Mikrodenetleyici + radyo** | `ESP32-S3-WROOM-1U-N8` | 1 | 5,66 | 275 | Okuma, özet, eşik mantığı, Wi-Fi/BLE, harici anten | −40…+85 °C | DigiKey |
+| 2 | **Mikrodenetleyici + radyo** | `ESP32-S3-WROOM-1U-N8` | 1 | 5,66 | 275 | Okuma, termal özet, paketleme, Modbus master, Wi-Fi/BLE, harici anten | −40…+85 °C | DigiKey |
 | 3 | **Sıcaklık + nem** | `SHT31-DIS-B2.5KS` | 1 | 4,50 | 219 | Referans çizgisi + yoğuşma riski | −40…+125 °C | DigiKey |
 | 4 | **AC/DC güç modülü** | `RECOM RAC05-05SK/277` | 1 | 10,25 | 499 | 230 V → 5 V, izoleli | −40…+90 °C *(5 V tam yükte +75 °C; +90 °C derating ile — yükümüz %15–40, sınır içi)* | Link Electronics |
 | 5a | **Yedek depo — süperkapasitör** | `Eaton HV1030-2R7106-R` (10 F / 2,7 V) **×2 seri** | 2 | ~2,40 | ~117 | 5 F / 5,4 V (4,6 V derate) yedek depo; kesintide birkaç dk | −40…+65 °C; **−40…+85 °C** (2,3 V/hücre derate) | DigiKey / Mouser |
