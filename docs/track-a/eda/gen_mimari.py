@@ -126,7 +126,7 @@ def uret():
     P_M = [('Oku → özetle → eşik → paketle (sözleşme ②)', 's'),
            ('Akım 1–5 s (10 s ort.) / termal özet 10–30 s / ortam 30–60 s', 's'),
            ('Normalde termal özet; anomali anında tam kare (768)', 's'),
-           ('Hüküm VERMEZ: seviye/tip yok, eşik merkezden güncellenir', 's'),
+           ('Hüküm vermez (seviye/tip yok); basit eşik, merkezden güncellenir', 's'),
            ('modul_durum: besleme sebeke/yedek, sinyal dBm, sürüm', 'r'),
            ('Ayrıntı: 01 blok şema / 03 bağlantı / 07 yazılım akışı', 'r')]
     P_G = [('230 V iç ihtiyaç → RAC05 5 V → LDO 3,3 V (03 §3.4)', 's'),
@@ -155,8 +155,8 @@ def uret():
     bGW = box(gx, 150, gw, 'boxIc', 'Gateway', [
         ('Trafo binası içi, 230 V', 's'),
         ('Modüllerden Wi-Fi ile toplar', 's'),
-        ('Mevcut altyapı (GSM/fiber)', 's'),
-        ('ile merkeze HTTP iletir', 's'),
+        ('Mevcut altyapı üzerinden', 's'),
+        ('merkeze HTTP ile iletir', 's'),
         ('Boyut kısıtı yok (§7.4)', 'r'),
         ('Kendi gateway; mevcut', 'r'),
         ('modem/RTU alternatif', 'r')])
@@ -173,7 +173,7 @@ def uret():
     # simülatör → toplama (kesikli, gateway'i atlar)
     sy = bSim[1] + bSim[3] / 2
     line(px + pw + 2, sy, 730, sy, '#1565c0', 1.5, '6 4'); line(730, sy, 730, 180, '#1565c0', 1.5, '6 4'); arrow(730, 180, 758, 180, '#1565c0', 1.5, '6 4', 'arrB')
-    text(735, sy - 6, 'POST /paket', 'lbl', 'end')
+    text(gx + gw / 2, sy - 6, 'POST /paket', 'lbl', 'middle')   # gateway sütununun ortasında, dikey kesikli çizgiye girmesin
 
     # ---------- SUNUCU ----------
     sx, sw_ = 758, 795
@@ -235,7 +235,7 @@ def uret():
            ('② Modül paketi', 'A → A (toplama)', 'olcumler[], termal_ozet, termal_kare, modul_durum', 'modul_paketi.schema.json'),
            ('③ Anomali çıktısı', 'B → C', 'id, skor, seviye, tip, gerekce, kanit, durum', 'anomali.schema.json'),
            ('④ Modbus haritası', 'C → SCADA', 'modül başına 20 register, çarpanlı tam sayı', 'sozlesme_4_modbus.json (PR #2)'),
-           ('⑤ Okuma API\'si', 'B → C', 'REST+JSON, 10 uç (/sahalar … /saglik)', 'sozlesme_5_api.json (PR #2)')]
+           ('⑤ Okuma API\'si', 'B → C', 'REST+JSON, 10 uç + /gecisler (İZ B ekledi)', 'sozlesme_5_api.json (PR #2)')]
     bw = 300
     for i, (t, yon, ic, dosya) in enumerate(soz):
         x = 30 + i * (bw + 10)
@@ -245,7 +245,7 @@ def uret():
     # ortak sözlük
     text(30, yb + 108, 'Ortak sözlük (§10, enums.py): olcum_tipi 9 değer / seviye normal-izle-uyari-kritik / tip 8 değer / kalite iyi-supheli-yok / durum acik-onaylandi-kapandi / modul_id {saha}-{pano}-{modul} / zaman UTC ISO 8601', 'r', 'start', 1540)
     # alt notlar
-    text(30, yb + 132, 'Veri politikası (§7.4): normalde özet (maks, konum, bölge ort.) / anomali anında tam kare kanıt olarak / modül hüküm vermez (§7.4 satır 304) / ark tespiti yok, TVOC-2 kaydı okunur (§7.1 satır 230)', 'r', 'start', 1540)
+    text(30, yb + 132, 'Veri politikası (§7.4): normalde özet (maks, konum, bölge ort.) / anomali anında tam kare kanıt olarak / modülde basit eşik, hüküm merkezde (§7.4 satır 304) / ark tespiti yok, TVOC-2 kaydı okunur (§7.1 satır 230)', 'r', 'start', 1540)
     text(30, yb + 150, 'Sahipler: saha + modul-sim + toplama İZ A / anomali motoru + okuma API İZ B / arayüz + Modbus + alarm + deploy İZ C / on-prem: tüm servisler docker-compose ile tek sunucuda, public cloud yok (T6)', 'r', 'start', 1540)
     text(30, yb + 168, 'Kaynak: gridup-proje-karar-kaydi.md §8–§11, sozlesmeler/README.md, analiz/README.md, PR #2 docs/operasyon-yuzu-dokumantasyonu.md. Üretim: eda/gen_mimari.py', 'r', 'start', 1540)
 

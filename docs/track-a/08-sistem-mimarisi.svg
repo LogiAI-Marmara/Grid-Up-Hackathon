@@ -48,7 +48,7 @@
   <text x="240.0" y="289.25" text-anchor="middle" class="s">Oku → özetle → eşik → paketle (sözleşme ②)</text>
   <text x="240.0" y="306.25" text-anchor="middle" class="s">Akım 1–5 s (10 s ort.) / termal özet 10–30 s / ortam 30–60 s</text>
   <text x="240.0" y="323.25" text-anchor="middle" class="s">Normalde termal özet; anomali anında tam kare (768)</text>
-  <text x="240.0" y="340.25" text-anchor="middle" class="s">Hüküm VERMEZ: seviye/tip yok, eşik merkezden güncellenir</text>
+  <text x="240.0" y="340.25" text-anchor="middle" class="s">Hüküm vermez (seviye/tip yok); basit eşik, merkezden güncellenir</text>
   <text x="240.0" y="355.25" text-anchor="middle" class="r">modul_durum: besleme sebeke/yedek, sinyal dBm, sürüm</text>
   <text x="240.0" y="370.25" text-anchor="middle" class="r">Ayrıntı: 01 blok şema / 03 bağlantı / 07 yazılım akışı</text>
   <rect x="50" y="397.5" width="380" height="81" rx="8" class="boxGuc"/>
@@ -70,8 +70,8 @@
   <text x="595.0" y="170" text-anchor="middle" class="t">Gateway</text>
   <text x="595.0" y="189" text-anchor="middle" class="s">Trafo binası içi, 230 V</text>
   <text x="595.0" y="206" text-anchor="middle" class="s">Modüllerden Wi-Fi ile toplar</text>
-  <text x="595.0" y="223" text-anchor="middle" class="s">Mevcut altyapı (GSM/fiber)</text>
-  <text x="595.0" y="240" text-anchor="middle" class="s">ile merkeze HTTP iletir</text>
+  <text x="595.0" y="223" text-anchor="middle" class="s">Mevcut altyapı üzerinden</text>
+  <text x="595.0" y="240" text-anchor="middle" class="s">merkeze HTTP ile iletir</text>
   <text x="595.0" y="255" text-anchor="middle" class="r">Boyut kısıtı yok (§7.4)</text>
   <text x="595.0" y="270" text-anchor="middle" class="r">Kendi gateway; mevcut</text>
   <text x="595.0" y="285" text-anchor="middle" class="r">modem/RTU alternatif</text>
@@ -84,7 +84,7 @@
   <line x1="432" y1="594.0" x2="730" y2="594.0" stroke="#1565c0" stroke-width="1.5" stroke-dasharray="6 4"/>
   <line x1="730" y1="594.0" x2="730" y2="180" stroke="#1565c0" stroke-width="1.5" stroke-dasharray="6 4"/>
   <line x1="730" y1="180" x2="758" y2="180" stroke="#1565c0" stroke-width="1.5" stroke-dasharray="6 4" marker-end="url(#arrB)"/>
-  <text x="735" y="588.0" text-anchor="end" class="lbl">POST /paket</text>
+  <text x="595.0" y="588.0" text-anchor="middle" class="lbl">POST /paket</text>
   <rect x="758" y="118" width="795" height="64" rx="8" class="boxIc"/>
   <text x="1155.5" y="138" text-anchor="middle" class="t">Toplama servisi / FastAPI (İZ A, /toplama)</text>
   <text x="1155.5" y="157" text-anchor="middle" class="s">POST /paket: sözleşme ② şemasıyla doğrula (hata → 400 + gerekçe) → alindi_zaman damgala → PostgreSQL</text>
@@ -171,10 +171,10 @@
   <rect x="1270" y="674" width="300" height="74" rx="6" class="boxSoz"/>
   <text x="1280" y="694" text-anchor="start" class="t">⑤ Okuma API'si</text>
   <text x="1560" y="694" text-anchor="end" class="r">B → C</text>
-  <text x="1280" y="714" text-anchor="start" class="s">REST+JSON, 10 uç (/sahalar … /saglik)</text>
+  <text x="1280" y="714" text-anchor="start" class="s">REST+JSON, 10 uç + /gecisler (İZ B ekledi)</text>
   <text x="1280" y="732" text-anchor="start" class="r">sozlesme_5_api.json (PR #2)</text>
   <text x="30" y="772" text-anchor="start" class="r">Ortak sözlük (§10, enums.py): olcum_tipi 9 değer / seviye normal-izle-uyari-kritik / tip 8 değer / kalite iyi-supheli-yok / durum acik-onaylandi-kapandi / modul_id {saha}-{pano}-{modul} / zaman UTC ISO 8601</text>
-  <text x="30" y="796" text-anchor="start" class="r">Veri politikası (§7.4): normalde özet (maks, konum, bölge ort.) / anomali anında tam kare kanıt olarak / modül hüküm vermez (§7.4 satır 304) / ark tespiti yok, TVOC-2 kaydı okunur (§7.1 satır 230)</text>
+  <text x="30" y="796" text-anchor="start" class="r">Veri politikası (§7.4): normalde özet (maks, konum, bölge ort.) / anomali anında tam kare kanıt olarak / modülde basit eşik, hüküm merkezde (§7.4 satır 304) / ark tespiti yok, TVOC-2 kaydı okunur (§7.1 satır 230)</text>
   <text x="30" y="814" text-anchor="start" class="r">Sahipler: saha + modul-sim + toplama İZ A / anomali motoru + okuma API İZ B / arayüz + Modbus + alarm + deploy İZ C / on-prem: tüm servisler docker-compose ile tek sunucuda, public cloud yok (T6)</text>
   <text x="30" y="832" text-anchor="start" class="r">Kaynak: gridup-proje-karar-kaydi.md §8–§11, sozlesmeler/README.md, analiz/README.md, PR #2 docs/operasyon-yuzu-dokumantasyonu.md. Üretim: eda/gen_mimari.py</text>
 </svg>
