@@ -59,7 +59,7 @@ services:
     image: deploy-analiz:latest
     environment:
       - GRIDUP_ANALIZ_VERITABANI_DSN=postgresql://postgres:gridup@veritabani:5432/${GRIDUP_DB_NAME:-gridup}
-      - GRIDUP_ANALIZ_OLAY_HISTEREZIS_SN=31536000
+      - GRIDUP_ANALIZ_OLAY_HISTEREZIS_SN=1800
       - TZ=Europe/Istanbul
     ports:
       - "127.0.0.1:${GRIDUP_API_PORT:-8080}:8080"
@@ -84,7 +84,7 @@ services:
     command: ["sh", "-c", "sleep 5 && python -m analiz tara --periyot 30"]
     environment:
       - GRIDUP_ANALIZ_VERITABANI_DSN=postgresql://postgres:gridup@veritabani:5432/${GRIDUP_DB_NAME:-gridup}
-      - GRIDUP_ANALIZ_OLAY_HISTEREZIS_SN=31536000
+      - GRIDUP_ANALIZ_OLAY_HISTEREZIS_SN=1800
       - TZ=Europe/Istanbul
     depends_on:
       analiz_api:
