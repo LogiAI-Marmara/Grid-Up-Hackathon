@@ -21,17 +21,6 @@ import unittest
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-
-def setUpModule():
-    """Servis logları testlerin çıktısını boğmasın.
-
-    `assertLogs` çağrıldığı logger'ın seviyesini kendisi geçici olarak
-    düşürdüğü için, hata yollarını doğrulayan testler bundan etkilenmez.
-    ALARM_TEST_LOG=1 ile normal seviyeye dönülür.
-    """
-    if not os.getenv("ALARM_TEST_LOG"):
-        logging.getLogger("alarm").setLevel(logging.CRITICAL)
-
 from alarm_service import (  # noqa: E402
     BASARISIZ,
     BASTIRILDI,
@@ -58,6 +47,18 @@ from kanallar import (  # noqa: E402
     kanal_kurali_coz,
     yuvali_yaz,
 )
+
+
+def setUpModule():
+    """Servis logları testlerin çıktısını boğmasın.
+
+    `assertLogs` çağrıldığı logger'ın seviyesini kendisi geçici olarak
+    düşürdüğü için, hata yollarını doğrulayan testler bundan etkilenmez.
+    ALARM_TEST_LOG=1 ile normal seviyeye dönülür.
+    """
+    if not os.getenv("ALARM_TEST_LOG"):
+        logging.getLogger("alarm").setLevel(logging.CRITICAL)
+
 
 # ---------------------------------------------------------------------------
 # Sahte nesneler
@@ -809,6 +810,91 @@ class TestAkis(AlarmTestTabani):
 
         self.assertEqual(yon.state["son_gecis_id"], 700)
         self.assertEqual([b.gecis_id for b in sms.cagrilar], [700])
+
+    def test_bekleyen_yeniden_denemesi_bastirilmaz(self):
+        """Başarısız teslimden sonraki yeniden deneme bastırılmamalı.
+
+        Teslim başarısızsa cooldown kaydı oluşmaz, dolayısıyla kuyruktaki
+        kayıt kendi yeniden denemesinde BASTIRILDI alamaz. Eğer alsaydı
+        hiç gitmemiş bir alarm sessizce kuyruktan düşerdi.
+        """
+        sms = SahteKanal("sms", sonuclar=[HATA, TESLIM])
+        api = SahteAPI(sayfalar=[[gecis(101, "an_A", "izle", "kritik")], []])
+        yon = self.yonetici(api=api, sms=sms)
+
+        yon.poll_transitions()
+        self.assertEqual(list(yon.state["bekleyen"]), ["101"])
+        self.assertEqual(yon.state["son_bildirim"], {})
+
+        yon.poll_transitions()
+        self.assertEqual(len(sms.cagrilar), 2)       # gerçekten yeniden denendi
+        self.assertEqual(yon.state["bekleyen"], {})
+
+    def test_bekleyen_yalniz_esdeger_alarm_gittiyse_bastirilip_dusurulur(self):
+        """BASTIRILDI ile kuyruktan düşme, ancak eşdeğer alarm gittiyse olur."""
+        sms = SahteKanal("sms", sonuclar=[HATA, TESLIM])
+        api = SahteAPI(
+            sayfalar=[
+                [gecis(101, "an_A", "izle", "kritik")],
+                [gecis(105, "an_A", "izle", "kritik")],
+            ]
+        )
+        yon = self.yonetici(
+            api=api, sms=sms, yeniden_deneme_taban=9999, yeniden_deneme_tavan=9999
+        )
+        yon.poll_transitions()                        # #101 başarısız -> kuyruk
+        yon.poll_transitions()                        # #105 başarılı -> cooldown
+
+        self.assertEqual(list(yon.state["son_bildirim"]), ["anomali:an_A|seviye:kritik"])
+        for kayit in yon.state["bekleyen"].values():
+            kayit["sonraki_deneme"] = 0
+        yon.bekleyenleri_dene(simdi=10**9)
+
+        # #101 düştü, ama aynı olay+seviye için operatöre #105 ile haber gitmişti.
+        self.assertEqual(yon.state["bekleyen"], {})
+        self.assertEqual(
+            [(b.anomali_id, b.seviye) for b in sms.cagrilar],
+            [("an_A", "kritik"), ("an_A", "kritik")],
+        )
+
+    def test_basarili_yeniden_deneme_yeni_gecis_olmadan_da_kaydedilir(self):
+        """Kuyruk boşalması diske inmeli; yoksa yeniden başlatma tekrar bildirir."""
+        sms = SahteKanal("sms", sonuclar=[HATA])
+        api = SahteAPI(sayfalar=[[gecis(101, "an_A", "izle", "kritik")]])
+        yon = self.yonetici(api=api, sms=sms)
+        yon.poll_transitions()
+        with open(self.durum_yolu, encoding="utf-8") as f:
+            self.assertEqual(list(json.load(f)["bekleyen"]), ["101"])
+
+        # Yeni geçiş YOK: sayfa boş. Bekleyen başarıyla teslim edilir.
+        sms.sonuclar = [TESLIM]
+        yon.oturum = SahteAPI(sayfalar=[[]])
+        yon.poll_transitions()
+
+        with open(self.durum_yolu, encoding="utf-8") as f:
+            diskte = json.load(f)
+        self.assertEqual(diskte["bekleyen"], {})
+        self.assertEqual(list(diskte["son_bildirim"]), ["anomali:an_A|seviye:kritik"])
+
+    def test_api_cokerken_basarili_yeniden_deneme_kaydedilir(self):
+        sms = SahteKanal("sms", sonuclar=[HATA])
+        yon = self.yonetici(
+            api=SahteAPI(sayfalar=[[gecis(101, "an_A", "izle", "kritik")]]), sms=sms
+        )
+        yon.poll_transitions()
+
+        class PatlayanAPI:
+            def get(self, *a, **kw):
+                raise RuntimeError("API çöktü")
+
+        sms.sonuclar = [TESLIM]
+        yon.oturum = PatlayanAPI()
+        yon.poll_transitions()
+
+        with open(self.durum_yolu, encoding="utf-8") as f:
+            diskte = json.load(f)
+        self.assertEqual(diskte["bekleyen"], {})
+        self.assertEqual(list(diskte["son_bildirim"]), ["anomali:an_A|seviye:kritik"])
 
     def test_yeniden_denenen_kayit_kuyruktan_dusurulmez(self):
         """Yeniden deneme, denediği alarmı düşürmemeli.

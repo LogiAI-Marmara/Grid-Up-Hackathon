@@ -137,7 +137,22 @@ kod değil **ayar** değişikliğidir (`SMS_GATEWAY_MESAJ_ALANI=mesaj`).
    (DHCP rezervasyonu) önerilir, yoksa yeniden bağlanmada URL kayar.
 4. Telefon şarjda ve uygulama arka planda çalışır durumda kalmalı.
 
-### 4.5 ⚠️ Doğrulanmamış olan
+### 4.5 Telegram kanalı ve token'ın kalan riski
+
+Telegram varsayılan kuralda yok ve **bulut** olarak işaretli (§4.2'deki
+gerekçe). Açılırsa bilinmesi gereken bir sınır var:
+
+Telegram Bot API token'ı **URL yolunda** taşır (`/bot<TOKEN>/sendMessage`).
+Servis kendi ürettiği hata metinlerinden ve yanıt gövdelerinden token'ı
+siler (`***TOKEN***`), ama URL'i isteğin kendisi taşıdığı için **HTTP
+kütüphanesinin kendi ayrıntılı (DEBUG) logu açılırsa token yine loga
+düşer** — bu, servisin dışında kalan bir yol.
+
+Sonuç: `urllib3`/`requests` DEBUG loglaması üretimde açılmamalı, ya da
+Telegram kapalı tutulmalı. SMS kanalında bu sorun yok; orada kimlik
+bilgisi `Authorization` başlığında veya gövdede taşınır, URL'de değil.
+
+### 4.6 ⚠️ Doğrulanmamış olan
 
 **Gerçek bir telefondan gerçek bir alıcıya SMS gönderilmedi.** Testlerdeki
 "teslim", cihazın API'sini taklit eden sahte bir gateway'in 202 dönmesidir.
