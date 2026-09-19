@@ -1,2 +1,8 @@
+# Derleme bağlamını küçültür. Web köküne ne gireceğini Dockerfile'daki açık
+# COPY listesi belirler; nginx.conf burada DIŞLANMAZ, çünkü Dockerfile onu
+# /etc/nginx/conf.d/ altına kopyalamak zorundadır.
 tests/
+dogrulama/
 *.md
+Dockerfile
+.dockerignore

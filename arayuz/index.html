@@ -28,14 +28,14 @@
             <div class="header-controls">
                 <div class="control-item">
                     <span class="status-indicator online" id="api-status-led"></span>
-                    <span class="status-label" id="api-status-text">API ÇEVRİMİÇİ</span>
+                    <span class="status-label" id="api-status-text" title="Yalnızca API'ye erişilebildiğini gösterir; modüllerin canlı veya verisinin güncel olduğu anlamına gelmez.">API ÇEVRİMİÇİ</span>
                 </div>
 
                 <div class="control-divider"></div>
 
                 <div class="control-item">
                     <label for="operator-id-input" class="control-label">Operatör:</label>
-                    <input type="text" id="operator-id-input" class="input-box" placeholder="Operatör ID" value="operator_1" title="Onay için zorunlu operatör kimliği">
+                    <input type="text" id="operator-id-input" class="input-box" placeholder="Operatör kimliği girin" value="" title="Onay için zorunlu operatör kimliği. Gerçek kimlik doğrulaması yoktur; girilen ad denetim kaydına aktör olarak yazılır.">
                 </div>
 
                 <div class="control-item">
@@ -102,7 +102,8 @@
                     <div class="module-meta">
                         <span class="meta-item" title="Cihazın ağda son görüldüğü zaman. Her kanal bağımsız zaman damgasına sahiptir.">🕒 Cihaz Son Görülme: <strong id="val-time">--:--:--</strong> <span class="badge-tz">TSİ</span></span>
                         <span class="meta-item">⚡ Besleme: <strong id="val-feed" class="badge-feed">BİLİNMİYOR</strong></span>
-                        <span class="meta-item">📶 RSSI: <strong id="val-rssi">-- dBm</strong></span>
+                        <span class="meta-item">📶 RSSI: <strong id="val-rssi">Bilinmiyor</strong></span>
+                        <span class="meta-item" id="val-durum-zaman" title="Besleme ve RSSI değerlerinin modül tarafından bildirildiği zaman (durum_zaman). Bu zaman bilinmiyorsa değerlerin güncel olduğu iddia edilmez.">🛈 Durum bildirimi: <strong>Bilinmiyor</strong></span>
                     </div>
                 </div>
 
@@ -186,6 +187,8 @@
                     <div class="thermal-viewport-wrapper">
                         <div class="canvas-box">
                             <canvas id="thermalCanvas" width="480" height="360"></canvas>
+                            <!-- UI-04: Ölçülmemiş (özetten türetilmiş) görselde kaldırılamaz uyarı şeridi -->
+                            <div id="thermal-synthetic-overlay" class="thermal-synthetic-overlay" style="display: none;">Özetten üretilmiş tahmini görsel — ölçülmüş piksel değildir</div>
                             <!-- Canlı Sıcak Nokta Hedef Göstergesi -->
                             <div id="hotspot-reticle" class="hotspot-reticle" style="display: none;">
                                 <span class="reticle-ring"></span>
@@ -208,7 +211,7 @@
                                 <span class="legend-val mid">35°C</span>
                                 <span class="legend-val">≤20°C</span>
                             </div>
-                            <div class="legend-caption">Termal Isı Ölçeği (Sensör Dağılımı)</div>
+                            <div class="legend-caption">Termal Isı Ölçeği (renk skalası) — alarm eşiği değildir. Resmî olay seviyesi yalnız API'nin <code>seviye</code> alanından gelir.</div>
                         </div>
                     </div>
 
@@ -303,10 +306,10 @@
 
                 <div class="telegram-broadcast-status">
                     <div class="tg-info">
-                        <span class="tg-icon">✈️</span>
+                        <span class="tg-icon">📟</span>
                         <div>
-                            <strong>Telegram Bot Entegrasyonu</strong>
-                            <p>Kritik ve Uyarı seviyeleri saha mühendislerine anında iletilir.</p>
+                            <strong>Acil Bildirim: Android SMS Gateway (yerel ağ)</strong>
+                            <p>Kritik seviye alarm servisince SMS olarak kuyruğa alınır; teslim durumu bu arayüzde görünmez.</p>
                         </div>
                     </div>
                 </div>

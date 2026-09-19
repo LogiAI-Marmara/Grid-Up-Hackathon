@@ -78,3 +78,8 @@ firmware/.pio/
 # Markdown dokümanları
 *.md
 !deploy/README.md
+# Arayüzün kendi çalıştırma/işletme notları izlenir (İZ C).
+# NOT: Yukarıdaki `*.md` kuralı repodaki TÜM markdown dokümanlarını sessizce
+# izlem dışı bırakıyor; bu istisna yalnız arayuz/ dizinini kurtarır. Kuralın
+# genel onarımı bu görevin kapsamı dışında, kompozisyon/repo sahibine ait.
+!arayuz/**/*.md
