@@ -1,0 +1,8 @@
+{
+  "name": "grid-up-arayuz",
+  "version": "1.0.0",
+  "description": "Grid Up - İZ C Monitoring Arayüzü",
+  "scripts": {
+    "test": "node --test arayuz/tests/test_arayuz_sozlesme.mjs"
+  }
+}

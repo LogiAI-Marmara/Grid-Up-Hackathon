@@ -1,0 +1,8 @@
+Metadata-Version: 2.4
+Name: modul-sim
+Version: 1.0.0
+Summary: Grid-Up track A: synthetic module simulator (fault scenarios, thermal array, firmware threshold logic).
+License: MIT
+Requires-Python: >=3.11
+Provides-Extra: dogrula
+Requires-Dist: jsonschema>=4.21; extra == "dogrula"

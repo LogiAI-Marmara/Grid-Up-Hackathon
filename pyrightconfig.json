@@ -1,0 +1,9 @@
+{
+  "extraPaths": [
+    "modul-sim",
+    "analiz",
+    "toplama",
+    "."
+  ],
+  "reportMissingImports": "none"
+}

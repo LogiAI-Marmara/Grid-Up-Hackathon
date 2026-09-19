@@ -1,0 +1,20 @@
+{
+  "title": "Sözleşme 4 - Modbus TCP Register Haritası (İZ C -> Dış SCADA)",
+  "description": "Modbus TCP Port 5020 Holding Register Tanımları. Başlangıç Adresi = 100 + (N - 1) * 20",
+  "port": 5020,
+  "base_address_formula": "100 + (N - 1) * 20",
+  "registers_per_module": 20,
+  "offsets": [
+    { "offset": 0, "name": "Ortam Sıcaklığı", "type": "UInt16", "multiplier": 0.1, "unit": "°C", "desc": "Değer / 10" },
+    { "offset": 1, "name": "Bağıl Nem", "type": "UInt16", "multiplier": 0.1, "unit": "%", "desc": "Değer / 10" },
+    { "offset": 2, "name": "L1 Faz Akımı", "type": "UInt16", "multiplier": 0.1, "unit": "A", "desc": "Değer / 10" },
+    { "offset": 3, "name": "L2 Faz Akımı", "type": "UInt16", "multiplier": 0.1, "unit": "A", "desc": "Değer / 10" },
+    { "offset": 4, "name": "L3 Faz Akımı", "type": "UInt16", "multiplier": 0.1, "unit": "A", "desc": "Değer / 10" },
+    { "offset": 5, "name": "Nötr Akımı", "type": "UInt16", "multiplier": 0.1, "unit": "A", "desc": "Değer / 10" },
+    { "offset": 6, "name": "Termal Maks. Sıcaklık", "type": "UInt16", "multiplier": 0.1, "unit": "°C", "desc": "Değer / 10" },
+    { "offset": 7, "name": "Anomali Seviyesi", "type": "UInt16", "multiplier": 1, "unit": "Enum", "desc": "0: normal, 1: izle, 2: uyari, 3: kritik" },
+    { "offset": 8, "name": "Modül Besleme Durumu", "type": "UInt16", "multiplier": 1, "unit": "Enum", "desc": "0: sebeke, 1: yedek" },
+    { "offset": 9, "name": "Sinyal Gücü (RSSI)", "type": "Int16", "multiplier": 1, "unit": "dBm", "desc": "16-bit işaretli tamsayı" },
+    { "offset": 10, "name": "Ark Olay Sayısı", "type": "UInt16", "multiplier": 1, "unit": "Sayaç", "desc": "TVOC-2 Trip Sayısı" }
+  ]
+}

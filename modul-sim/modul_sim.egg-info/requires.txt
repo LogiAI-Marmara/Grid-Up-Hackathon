@@ -1,0 +1,3 @@
+
+[dogrula]
+jsonschema>=4.21
