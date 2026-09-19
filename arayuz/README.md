@@ -74,6 +74,15 @@ Chrome'da elle geçildi. Sonuçlar:
 Bu senaryoda "SMS/Telegram gönderildi" iddiası **yoktur**; arayüz yalnız API'yi
 görür.
 
+### Nginx vekili ve DNS
+
+`nginx.conf` `/api/` isteklerini `analiz_api:8080`'e vekiller ve adı çalışma
+anında **Docker'ın gömülü DNS'i `127.0.0.11`** ile çözer; böylece API kapalıyken
+Nginx açılabilir, API sonradan gelince veya yeniden oluşturulup IP'si değişince
+yeniden başlatma gerekmez. Bilinen sınır: imaj Docker/Compose dışında
+(çıplak makine, Kubernetes, Docker uyumlu DNS vermeyen Podman) çalıştırılırsa
+`resolver` satırı o ortamın DNS adresiyle değiştirilmelidir.
+
 ## Arayüz neyi gösterir, neyi göstermez
 
 Bu bölüm operatörün ekranda gördüğü ayrımların sözlüğüdür. Aynı kelimenin iki
