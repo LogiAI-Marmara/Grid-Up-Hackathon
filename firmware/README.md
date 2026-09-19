@@ -52,5 +52,6 @@ Simülatördeki `dusuk_guc` dalının karşılığı.
 
 - Merkezden modüle ayar protokolü (§7.4): `ayar.h` sabitleri yapılandırma adayı, kanal yok
 - OTA, TLS, paket tamponlama (Wi-Fi yokken paket düşer, `modul_durum.sinyal` bunu gösterir)
+- Saat kaynağı yalnız SNTP: NTP ulaşılamazsa hiç paket gitmez (sözleşme `zaman` ister, uydurulmaz). Sahada saha gateway'i NTP sunar; alternatif RTC/GPS yok
 - Analizör register haritası: model belli değil; `ANALIZOR_VAR=false` varsayılan, CT yolu aktif
 - MLX90640 yayma katsayısı: kütüphane varsayılanı 0,95; klemens için 0,60 (01 §1.2) sahada ayarlanır
