@@ -6,18 +6,32 @@
 .env.*
 !.env.example
 
-# Scratch / working files (not deliverables)
+# Node.js & Web
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# Scratch, logs and temporary files
 temp/
+tmp/
+*.tmp
+*.log
 
 # State persistence files
 alarm_state.json
 test_alarm_state.json
 *.state.json
 
-# Python & build artifacts
+# Python virtual environments & build artifacts
 .venv/
 venv/
 env/
+ENV/
+build/
+dist/
+*.egg-info/
 
 # Python bytecode and caches
 __pycache__/
@@ -25,14 +39,30 @@ __pycache__/
 *$py.class
 .pytest_cache/
 .pyc
+.coverage
+htmlcov/
+.mypy_cache/
+.ruff_cache/
 
-# Claude Code workspace files
+# IDE & Editor files
+.idea/
+*.swp
+*.swo
+*~
+.vscode/*
+!.vscode/settings.json
+
+# Claude & AI workspace files
 .claude/
 CLAUDE.md
 
-# OS
+# OS specific files
 Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
 .DS_Store
+._*
 
 # KiCad yerel ayar dosyasi (kullanici/oturum)
 *.kicad_prl
@@ -40,3 +70,7 @@ Thumbs.db
 # KiCad GUI artıkları
 docs/track-a/eda/.history/
 *.lck
+
+# Markdown dokümanları
+*.md
+

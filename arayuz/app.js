@@ -1,66 +1,74 @@
 /**
  * Grid Up - İZ C: Operasyon Yüzü & Monitoring Uygulaması
- * Sözleşme ⑤ gerçek okuma API'si ile tam entegre:
- * Saha Hiyerarşisi, Canlı Sensör Metrikleri, 32x24 Termal Görselleştirme (Canlı + Kanıt Karesi) ve Alarm Yönetimi
+ * Sözleşme ⑤ ve IZ_C_ARAYUZ_GOREV_TANIMI.md kabul kriterlerine tam uyumlu sürüm.
+ * UI-01 - UI-08 gereksinimlerini eksiksiz karşılar.
  */
 
 // API Base URL tespiti:
-// 1. window.GRIDUP_API_URL varsa öncelikli
-// 2. Port 8080'den sunuluyorsa doğrudan relatif ""
-// 3. Port 80 veya Nginx üzerinden sunuluyorsa reverse proxy "/api"
-// 4. Aksi takdirde dinamik ana makine port 8080
-const API_HOST = window.location.hostname || "localhost";
-const API_BASE = (window.GRIDUP_API_URL) 
-    || (window.location.protocol === "file:" ? "http://localhost:8080" : (window.location.port === "8080" ? "" : (window.location.port === "80" || !window.location.port ? "/api" : `http://${API_HOST}:8080`)));
+const API_HOST = (typeof window !== 'undefined' && window.location && window.location.hostname) || "localhost";
+const API_BASE = (typeof window !== 'undefined' && window.GRIDUP_API_URL)
+    || (typeof window !== 'undefined' && window.location && window.location.protocol === "file:"
+        ? "http://localhost:8080"
+        : (typeof window !== 'undefined' && window.location && window.location.port === "8080"
+            ? ""
+            : (typeof window !== 'undefined' && window.location && (window.location.port === "80" || !window.location.port)
+                ? "/api"
+                : `http://${API_HOST}:8080`)));
 
-// Güvenli ve Çift Yollu API Çağrısı (Reverse Proxy + Doğrudan Fallback)
+// Güvenli API Çağrısı (UI-02: 4xx/5xx durumunda sessizce 8080'e fallback yapmaz, POST'u tekrarlamaz)
 async function apiFetch(path, options = {}) {
     const cleanPath = path.startsWith('/') ? path : `/${path}`;
     const primaryUrl = `${API_BASE}${cleanPath}`;
-    try {
-        const res = await fetch(primaryUrl, options);
-        if (res.ok) return res;
-        if (!primaryUrl.includes(':8080')) {
-            const fallbackUrl = `http://${API_HOST}:8080${cleanPath}`;
-            const fallbackRes = await fetch(fallbackUrl, options);
-            if (fallbackRes.ok) return fallbackRes;
-        }
-        return res;
-    } catch (err) {
-        if (!primaryUrl.includes(':8080')) {
-            try {
-                const fallbackUrl = `http://${API_HOST}:8080${cleanPath}`;
-                const fallbackRes = await fetch(fallbackUrl, options);
-                if (fallbackRes.ok) return fallbackRes;
-            } catch (fallbackErr) {}
-        }
-        throw err;
-    }
+    return await fetch(primaryUrl, options);
+}
+
+// Güvenli HTML Kaçış Yardımcısı (UI-08 XSS Koruması)
+function escapeHtml(str) {
+    if (str === null || str === undefined) return '';
+    return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
 }
 
 // Uygulama Durumu (State)
 const state = {
-    aktifModulId: 'TR041-P01-M1',
-    aktifModulIsmi: 'Giriş Fideri Modülü',
+    aktifModulId: null,
+    aktifModulIsmi: '',
     termalMatris: null,
     termalOzet: null,
     kanitKareModu: false,
     seciliAnomaliId: null,
+    kanitAnomali: null,
     smoothMode: true,
     gridMode: false,
     audioEnabled: true,
     pollIntervalMs: 3000,
     pollTimer: null,
     isOnline: true,
-    sonAlarmlar: [],
-    modulSeviyeleri: {},
-    // Durum kaynakları ayrı tutulur. Bir kaynak "normal" döndü diye açık
-    // alarm veya API'nin bildirdiği daha yüksek seviye asla maskelenmemelidir.
+    // Modül çalışma durumları (/moduller'den: aktif, sessiz, pasif)
+    modulDurumlari: {},
+    // Modül alarm seviyeleri (/sahalar ve açık anomalilerden: normal, izle, uyari, kritik)
     apiModulSeviyeleri: {},
     alarmModulSeviyeleri: {},
-    canliModulSeviyeleri: {},
-    auditLog: []
+    cozulmemisAnomaliler: [],
+    // Operasyon günlüğü (en büyük son 30 geçiş kaydı)
+    gecisler: [],
+    sonGecisId: null,
+    gunlukHata: false,
+    // Zaman serisi grafiği
+    seriKanal: 'ortam_sicaklik',
+    seriAralik: '',
+    seriNoktalar: [],
+    seriHataMesaji: null
 };
+
+// Asenkron Yarış Durumu (Race Condition) Sayaçları (UI-02, UI-06)
+let detailRequestToken = 0;
+let thermalRequestToken = 0;
+let seriesRequestToken = 0;
 
 // Türkiye Saati (Europe/Istanbul - UTC+3) Formatlayıcı
 function formatZamanTr(isoStr) {
@@ -85,50 +93,68 @@ function formatZamanTr(isoStr) {
 const SEVIYE_PUANI = { normal: 0, izle: 1, uyari: 2, kritik: 3 };
 
 function seviyeNormalize(seviye) {
-    const deger = String(seviye || 'normal').trim().toLocaleLowerCase('tr-TR');
-    return Object.prototype.hasOwnProperty.call(SEVIYE_PUANI, deger) ? deger : 'normal';
+    if (!seviye) return null;
+    const deger = String(seviye).trim().toLocaleLowerCase('tr-TR');
+    return Object.prototype.hasOwnProperty.call(SEVIYE_PUANI, deger) ? deger : null;
 }
 
 function enYuksekSeviye(...seviyeler) {
-    return seviyeler
-        .map(seviyeNormalize)
-        .reduce((enYuksek, seviye) => SEVIYE_PUANI[seviye] > SEVIYE_PUANI[enYuksek] ? seviye : enYuksek, 'normal');
+    const gecerliler = seviyeler.map(seviyeNormalize).filter(Boolean);
+    if (gecerliler.length === 0) return 'normal';
+    return gecerliler.reduce((enY, s) => SEVIYE_PUANI[s] > SEVIYE_PUANI[enY] ? s : enY, 'normal');
 }
 
 function modulSeviyesiniGetir(modulId) {
-    return enYuksekSeviye(
-        state.apiModulSeviyeleri[modulId],
-        state.alarmModulSeviyeleri[modulId],
-        state.canliModulSeviyeleri[modulId]
-    );
+    const apiSev = state.apiModulSeviyeleri[modulId];
+    const alarmSev = state.alarmModulSeviyeleri[modulId];
+
+    // Eğer seviye değeri tanınmıyorsa "bilinmiyor" döner
+    if (apiSev === null && alarmSev === null) {
+        return 'bilinmiyor';
+    }
+    return enYuksekSeviye(apiSev, alarmSev);
 }
 
 function modulRozetiniGuncelle(modulId) {
     const seviye = modulSeviyesiniGetir(modulId);
-    state.modulSeviyeleri[modulId] = seviye;
-
     const treeBadge = document.getElementById(`tree-badge-${modulId}`);
     if (treeBadge) {
-        treeBadge.className = `status-badge badge-${seviye}`;
-        treeBadge.innerText = seviye.toUpperCase();
+        if (seviye === 'bilinmiyor') {
+            treeBadge.className = 'status-badge';
+            treeBadge.style.background = 'rgba(100, 116, 139, 0.25)';
+            treeBadge.style.color = 'var(--text-muted)';
+            treeBadge.innerText = 'SEVİYE BİLİNMİYOR';
+        } else {
+            treeBadge.removeAttribute('style');
+            treeBadge.className = `status-badge badge-${seviye}`;
+            treeBadge.innerText = seviye.toUpperCase();
+        }
     }
     if (modulId === state.aktifModulId && !state.kanitKareModu) {
         const topBadge = document.getElementById('active-module-status-badge');
         if (topBadge) {
-            topBadge.className = `status-badge badge-${seviye}`;
-            topBadge.innerText = seviye.toUpperCase();
+            if (seviye === 'bilinmiyor') {
+                topBadge.className = 'status-badge';
+                topBadge.style.background = 'rgba(100, 116, 139, 0.25)';
+                topBadge.style.color = 'var(--text-muted)';
+                topBadge.innerText = 'SEVİYE BİLİNMİYOR';
+            } else {
+                topBadge.removeAttribute('style');
+                topBadge.className = `status-badge badge-${seviye}`;
+                topBadge.innerText = seviye.toUpperCase();
+            }
         }
     }
     return seviye;
 }
 
-// Web Audio API Sentezleyici (Harici dosyasız SCADA Uyarı Sesi)
+// Web Audio API Sentezleyici
 class SoundFx {
     constructor() {
         this.ctx = null;
     }
     init() {
-        if (!this.ctx) {
+        if (!this.ctx && typeof window !== 'undefined') {
             const AudioContext = window.AudioContext || window.webkitAudioContext;
             if (AudioContext) this.ctx = new AudioContext();
         }
@@ -143,7 +169,7 @@ class SoundFx {
             const osc = this.ctx.createOscillator();
             const gain = this.ctx.createGain();
             osc.type = 'triangle';
-            osc.frequency.setValueAtTime(880, this.ctx.currentTime); // A5
+            osc.frequency.setValueAtTime(880, this.ctx.currentTime);
             osc.frequency.exponentialRampToValueAtTime(440, this.ctx.currentTime + 0.18);
 
             gain.gain.setValueAtTime(0.2, this.ctx.currentTime);
@@ -161,266 +187,557 @@ class SoundFx {
 const sfx = new SoundFx();
 
 // --------------------------------------------------------------------------
-// 1. SAHA HİYERARŞİSİ YÖNETİMİ (GET /sahalar) - Madde 18
+// UI-01 & UI-08: SAHA HİYERARŞİSİ VE MODÜL DURUMU
 // --------------------------------------------------------------------------
+async function tumModulDurumlariniCek() {
+    const durumHaritasi = {};
+    let ofset = 0;
+    const limit = 50;
+    let devam = true;
+
+    while (devam) {
+        try {
+            const res = await apiFetch(`/moduller?limit=${limit}&ofset=${ofset}`);
+            if (!res.ok) break;
+            const data = await res.json();
+            const veriler = data.veriler || [];
+            veriler.forEach(m => {
+                if (m.modul_id) {
+                    durumHaritasi[m.modul_id] = {
+                        durum: m.durum || 'bilinmiyor',
+                        son_gorulme: m.son_gorulme,
+                        seviye: m.seviye
+                    };
+                }
+            });
+            ofset += veriler.length;
+            if (veriler.length === 0 || ofset >= (data.toplam || 0)) {
+                devam = false;
+            }
+        } catch (err) {
+            console.warn("Modül durumu sayfalama hatası:", err);
+            break;
+        }
+    }
+    return durumHaritasi;
+}
+
 async function hiyerarsiyiYukle() {
     const container = document.getElementById('hierarchy-container');
     const countTag = document.getElementById('hierarchy-count');
+    if (!container) return;
 
     try {
+        // Önce modüllerin yetkili aktif/sessiz/pasif durumlarını sayfalı olarak al
+        const modulDurumlari = await tumModulDurumlariniCek();
+        state.modulDurumlari = modulDurumlari;
+
         const res = await apiFetch('/sahalar');
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = await res.json();
         setOnlineStatus(true);
 
-        // Detay endpoint'i hiyerarşi endpoint'inden daha güncel olabilir.
-        // Sunucunun bildirdiği risk seviyesi termal kartın "normal" sonucu ile
-        // düşürülmez; kaynaklar aşağıda en yüksek seviye olarak birleştirilir.
         const sahalar = data.sahalar || [];
-        let toplamModul = 0;
-        let html = '';
-        const tumModuller = [];
+        container.innerHTML = '';
 
         if (sahalar.length === 0) {
-            container.innerHTML = `
-                <div class="empty-state" style="padding: 1.5rem; text-align: center; color: var(--text-muted);">
-                    <p>Kayıtlı saha veya pano bulunamadı.</p>
-                </div>
-            `;
-            if (countTag) countTag.innerText = "0 Modül";
+            const emptyEl = document.createElement('div');
+            emptyEl.className = 'empty-state';
+            emptyEl.style.padding = '1.5rem';
+            emptyEl.style.textAlign = 'center';
+            emptyEl.style.color = 'var(--text-muted)';
+            emptyEl.textContent = 'Kayıtlı saha bulunamadı.';
+            container.appendChild(emptyEl);
+            if (countTag) countTag.textContent = '0 Modül';
             return;
         }
 
+        let toplamModulSayisi = 0;
+        const tumModuller = [];
+
         sahalar.forEach(saha => {
-            // Sadece aktif modülleri olan panoları filtrele
-            const panolar = (saha.panolar || []).map(pano => {
-                const aktifModuller = (pano.moduller || []).filter(m => m.aktif !== false);
-                return { ...pano, aktifModuller };
-            }).filter(p => p.aktifModuller.length > 0);
+            const sahaDiv = document.createElement('div');
+            sahaDiv.className = 'tree-saha';
 
-            // Eğer sahada hiç aktif modüllü pano yoksa sahayı listeye ekleme
-            if (panolar.length === 0) return;
+            const sahaHeader = document.createElement('div');
+            sahaHeader.className = 'tree-saha-header';
+            const sahaIcon = document.createElement('span');
+            sahaIcon.textContent = '📍';
+            const sahaBaslikText = document.createElement('span');
+            sahaBaslikText.textContent = saha.ad ? `${saha.saha_kodu} (${saha.ad})` : (saha.saha_kodu || 'Bilinmeyen Saha');
+            sahaHeader.appendChild(sahaIcon);
+            sahaHeader.appendChild(sahaBaslikText);
+            sahaDiv.appendChild(sahaHeader);
 
-            const sahaBaslik = saha.ad ? `${saha.saha_kodu} (${saha.ad})` : (saha.saha_kodu || 'Bilinmeyen Saha');
-            html += `
-                <div class="tree-saha">
-                    <div class="tree-saha-header">
-                        <span>📍</span>
-                        <span>${sahaBaslik}</span>
-                    </div>
-            `;
+            const panolar = saha.panolar || [];
+            if (panolar.length === 0) {
+                const bosPano = document.createElement('div');
+                bosPano.className = 'tree-pano-empty';
+                bosPano.textContent = 'Bu sahada kayıtlı pano yok.';
+                sahaDiv.appendChild(bosPano);
+            }
 
             panolar.forEach(pano => {
+                const panoDiv = document.createElement('div');
+                panoDiv.className = 'tree-pano';
+
+                const panoHeader = document.createElement('div');
+                panoHeader.className = 'tree-pano-header';
+                const panoIcon = document.createElement('span');
+                panoIcon.textContent = '⚙️';
+                const panoBaslikText = document.createElement('span');
                 const panoBaslik = pano.ad ? `${pano.pano_kodu} (${pano.ad})` : (pano.pano_kodu || 'Bilinmeyen Pano');
-                const ilkModul = pano.aktifModuller[0].modul_id;
-                const panoClickAttr = `onclick="modulSec('${ilkModul}', '${panoBaslik} - ${ilkModul}')" style="cursor: pointer;" title="Panoyu seç"`;
-                html += `
-                    <div class="tree-pano">
-                        <div class="tree-pano-header" ${panoClickAttr}>
-                            <span>⚙️</span>
-                            <span>${panoBaslik}</span>
-                        </div>
-                        <ul class="tree-modul-list">
-                `;
+                panoBaslikText.textContent = panoBaslik;
+                panoHeader.appendChild(panoIcon);
+                panoHeader.appendChild(panoBaslikText);
 
-                pano.aktifModuller.forEach(modul => {
-                    toplamModul++;
-                    tumModuller.push(modul.modul_id);
-                    const isActive = modul.modul_id === state.aktifModulId;
-                    // Saha API'sinin seviyesi de bir alarm kaynağıdır; yalnızca
-                    // açık-anomali listesine bakmak gerçek riski gizleyebilir.
-                    state.apiModulSeviyeleri[modul.modul_id] = seviyeNormalize(modul.seviye);
-                    const seviye = modulSeviyesiniGetir(modul.modul_id);
-                    state.modulSeviyeleri[modul.modul_id] = seviye;
-                    const durumClass = `badge-${seviye}`;
-                    const seviyeText = seviye.toUpperCase();
+                const moduller = pano.moduller || [];
+                if (moduller.length > 0) {
+                    panoHeader.style.cursor = 'pointer';
+                    panoHeader.title = 'İlk modülü seç';
+                    panoHeader.addEventListener('click', () => {
+                        const ilk = moduller[0];
+                        modulSec(ilk.modul_id, `${panoBaslik} - ${ilk.modul_id}`);
+                    });
+                }
+                panoDiv.appendChild(panoHeader);
 
-                    html += `
-                        <li class="tree-modul-item ${isActive ? 'active' : ''}" 
-                            onclick="modulSec('${modul.modul_id}', '${modul.modul_id}')"
-                            id="modul-item-${modul.modul_id}">
-                            <div class="modul-info-left">
-                                <span class="modul-id-text">${modul.modul_id}</span>
-                                <span class="modul-sub-text">Aktif</span>
-                            </div>
-                            <span class="status-badge ${durumClass}" id="tree-badge-${modul.modul_id}">${seviyeText}</span>
-                        </li>
-                    `;
-                });
+                if (moduller.length === 0) {
+                    const bosModul = document.createElement('div');
+                    bosModul.className = 'tree-pano-empty';
+                    bosModul.textContent = 'Bu panoda modül bulunmuyor (Boş Pano).';
+                    panoDiv.appendChild(bosModul);
+                } else {
+                    const ul = document.createElement('ul');
+                    ul.className = 'tree-modul-list';
 
-                html += `</ul></div>`;
+                    moduller.forEach(modul => {
+                        toplamModulSayisi++;
+                        tumModuller.push(modul.modul_id);
+                        const mId = modul.modul_id;
+
+                        // Modülün yetkili cihaz durumu
+                        const yetkiliDurum = modulDurumlari[mId] ? modulDurumlari[mId].durum : null;
+                        let cihazDurumuText = 'Durum bilinmiyor';
+                        let cihazDurumuClass = '';
+
+                        if (modul.aktif === false || yetkiliDurum === 'pasif') {
+                            cihazDurumuText = 'Pasif';
+                            cihazDurumuClass = 'pasif';
+                        } else if (yetkiliDurum === 'sessiz') {
+                            cihazDurumuText = 'Sessiz';
+                            cihazDurumuClass = 'sessiz';
+                        } else if (yetkiliDurum === 'aktif') {
+                            cihazDurumuText = 'Aktif';
+                        }
+
+                        // Alarm seviyesi
+                        const apiSeviye = seviyeNormalize(modul.seviye);
+                        state.apiModulSeviyeleri[mId] = apiSeviye;
+
+                        const li = document.createElement('li');
+                        li.className = `tree-modul-item ${mId === state.aktifModulId ? 'active' : ''}`;
+                        li.id = `modul-item-${mId}`;
+                        li.addEventListener('click', () => {
+                            modulSec(mId, mId);
+                        });
+
+                        const infoLeft = document.createElement('div');
+                        infoLeft.className = 'modul-info-left';
+
+                        const idSpan = document.createElement('span');
+                        idSpan.className = 'modul-id-text';
+                        idSpan.textContent = mId;
+
+                        const subSpan = document.createElement('span');
+                        subSpan.className = `modul-sub-text ${cihazDurumuClass}`;
+                        subSpan.textContent = cihazDurumuText;
+
+                        infoLeft.appendChild(idSpan);
+                        infoLeft.appendChild(subSpan);
+
+                        const badgeSpan = document.createElement('span');
+                        badgeSpan.id = `tree-badge-${mId}`;
+                        const currentSev = modulSeviyesiniGetir(mId);
+                        if (currentSev === 'bilinmiyor') {
+                            badgeSpan.className = 'status-badge';
+                            badgeSpan.style.background = 'rgba(100, 116, 139, 0.25)';
+                            badgeSpan.style.color = 'var(--text-muted)';
+                            badgeSpan.textContent = 'SEVİYE BİLİNMİYOR';
+                        } else {
+                            badgeSpan.className = `status-badge badge-${currentSev}`;
+                            badgeSpan.textContent = currentSev.toUpperCase();
+                        }
+
+                        li.appendChild(infoLeft);
+                        li.appendChild(badgeSpan);
+                        ul.appendChild(li);
+                    });
+                    panoDiv.appendChild(ul);
+                }
+                sahaDiv.appendChild(panoDiv);
             });
-
-            html += `</div>`;
+            container.appendChild(sahaDiv);
         });
 
-        container.innerHTML = html;
-        if (countTag) countTag.innerText = `${toplamModul} Modül`;
+        if (countTag) countTag.textContent = `${toplamModulSayisi} Modül`;
 
-        // Eğer seçili modül listede yoksa ilk modülü seç (inceleme modunu bozmadan)
-        if (tumModuller.length > 0 && !tumModuller.includes(state.aktifModulId)) {
+        // Seçili modül listede yoksa ilk geçerli modülü otomatik seç
+        if (tumModuller.length > 0 && (!state.aktifModulId || !tumModuller.includes(state.aktifModulId))) {
             _modulSecProgramatik(tumModuller[0], tumModuller[0]);
         }
     } catch (err) {
-        console.warn("Hiyerarşi çekilemedi:", err);
-        setOnlineStatus(false);
+        console.warn("Hiyerarşi yükleme hatası:", err);
+        // UI-02: Tek bir servisin hatası genel online durumunu ezmemeli, ağaç içine hata basılır
+        if (container.children.length === 0) {
+            container.innerHTML = `
+                <div class="empty-state" style="padding: 1.5rem; text-align: center; color: #fca5a5;">
+                    <p>⚠️ Hiyerarşi verisi alınamadı.</p>
+                </div>
+            `;
+        }
     }
 }
 
-// Kullanıcı sol panelden tıkladığında çağrılır — inceleme modunu sıfırlar
+// --------------------------------------------------------------------------
+// UI-02 & UI-03: MODÜL SEÇİMİ, ASENKRON İZOLASYON VE CANLI ÖLÇÜMLER
+// --------------------------------------------------------------------------
 function modulSec(modulId, modulIsmi) {
     state.aktifModulId = modulId;
     state.aktifModulIsmi = modulIsmi || modulId;
-    state.kanitKareModu = false;    // Kullanıcı bilinçli olarak farklı modüle geçiyor
+    state.kanitKareModu = false;
     state.seciliAnomaliId = null;
+    state.kanitAnomali = null;
 
     const btnLive = document.getElementById('btn-live-thermal');
     if (btnLive) btnLive.style.display = 'none';
 
-    document.querySelectorAll('.tree-modul-item').forEach(el => el.classList.remove('active'));
+    document.querySelectorAll('.tree-modul-item').forEach(el => {
+        if (el && el.classList) el.classList.remove('active');
+    });
     const seciliEl = document.getElementById(`modul-item-${modulId}`);
-    if (seciliEl) seciliEl.classList.add('active');
+    if (seciliEl && seciliEl.classList) seciliEl.classList.add('active');
 
     modulDetayYukle(modulId);
+    zamanSerisiYukle();
 }
 
-// Programatik (polling/init) modül seçimi — kanitKareModu ve seciliAnomaliId'yi KORUR
 function _modulSecProgramatik(modulId, modulIsmi) {
-    if (state.kanitKareModu || state.seciliAnomaliId) return; // inceleme modundaysa değişme!
+    if (state.kanitKareModu || state.seciliAnomaliId) return;
     state.aktifModulId = modulId;
     state.aktifModulIsmi = modulIsmi || modulId;
 
-    document.querySelectorAll('.tree-modul-item').forEach(el => el.classList.remove('active'));
+    document.querySelectorAll('.tree-modul-item').forEach(el => {
+        if (el && el.classList) el.classList.remove('active');
+    });
     const seciliEl = document.getElementById(`modul-item-${modulId}`);
-    if (seciliEl) seciliEl.classList.add('active');
+    if (seciliEl && seciliEl.classList) seciliEl.classList.add('active');
 
     modulDetayYukle(modulId);
+    zamanSerisiYukle();
 }
 
-// --------------------------------------------------------------------------
-// 2. MODÜL VE TERMAL VERİLERİN YÜKLENMESİ (GET /moduller/{id}) - Madde 18
-// --------------------------------------------------------------------------
+// UI-02: Modül seçildiğinde alanları anında temizleyen yardımcı fonksiyon
+function resetModulEkranGorunumu(modulId, modulIsmi) {
+    const badgeEl = document.getElementById('active-module-badge');
+    const nameEl = document.getElementById('active-module-name');
+    const statusBadge = document.getElementById('active-module-status-badge');
+    const deviceBadge = document.getElementById('active-module-device-badge');
+    const errorBanner = document.getElementById('module-error-banner');
+
+    if (badgeEl) badgeEl.textContent = modulId;
+    if (nameEl) nameEl.textContent = modulIsmi || modulId;
+    if (statusBadge) {
+        statusBadge.className = 'status-badge badge-normal';
+        statusBadge.textContent = 'YÜKLENİYOR...';
+        statusBadge.removeAttribute('style');
+    }
+    if (deviceBadge) {
+        deviceBadge.className = 'status-badge badge-device';
+        deviceBadge.textContent = 'CİHAZ: --';
+    }
+    if (errorBanner) {
+        errorBanner.style.display = 'none';
+        errorBanner.textContent = '';
+    }
+
+    const valTime = document.getElementById('val-time');
+    const valFeed = document.getElementById('val-feed');
+    const valRssi = document.getElementById('val-rssi');
+
+    if (valTime) valTime.textContent = '--:--:--';
+    if (valFeed) {
+        valFeed.textContent = 'BİLİNMİYOR';
+        valFeed.className = 'badge-feed';
+    }
+    if (valRssi) valRssi.textContent = 'Bilinmiyor';
+
+    // 6'lı kartları "--" durumuna al
+    const kartDegerleri = ['val-temp', 'val-hum', 'val-tmax', 'val-l1', 'val-l2', 'val-l3', 'val-notr', 'val-arc'];
+    kartDegerleri.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.textContent = '--';
+    });
+
+    const diffEl = document.getElementById('current-diff');
+    if (diffEl) {
+        diffEl.textContent = 'Faz Dengesizliği: Hesaplanamadı';
+        diffEl.style.color = 'var(--text-muted)';
+    }
+
+    // Varsa önceki kalite uyarılarını temizle
+    document.querySelectorAll('.card-quality-warning, .card-quality-bad').forEach(e => e.remove());
+
+    // Termal reticle gizle
+    const reticle = document.getElementById('hotspot-reticle');
+    if (reticle) reticle.style.display = 'none';
+
+    const bannerDesc = document.getElementById('banner-desc');
+    const bannerTitle = document.getElementById('banner-title');
+    const bannerIcon = document.getElementById('banner-icon');
+    if (bannerTitle) bannerTitle.textContent = 'Termal Durum:';
+    if (bannerDesc) bannerDesc.textContent = 'Termal veri bekleniyor...';
+    if (bannerIcon) bannerIcon.textContent = 'ℹ️';
+
+    const sourceBadge = document.getElementById('thermal-source-badge');
+    if (sourceBadge) {
+        sourceBadge.className = 'thermal-resolution';
+        sourceBadge.textContent = 'Veri Bekleniyor';
+    }
+}
+
 async function modulDetayYukle(modulId) {
-    document.getElementById('active-module-badge').innerText = modulId;
-    document.getElementById('active-module-name').innerText = state.aktifModulIsmi;
+    if (!modulId) return;
+
+    // UI-02: Asenkron yarış durumu koruması için istek jetonu
+    const currentToken = ++detailRequestToken;
+
+    // Önceki modülün verilerini bir an bile göstermemek için anında sıfırla
+    resetModulEkranGorunumu(modulId, state.aktifModulIsmi);
 
     try {
-        const res = await apiFetch(`/moduller/${modulId}`);
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const res = await apiFetch(`/moduller/${encodeURIComponent(modulId)}`);
+
+        // Geç gelen yanıt kontrolü
+        if (currentToken !== detailRequestToken) return;
+
+        if (!res.ok) {
+            throw new Error(`HTTP ${res.status}`);
+        }
+
         const data = await res.json();
-        setOnlineStatus(true);
+        if (currentToken !== detailRequestToken) return;
 
-        // 1. Zaman ve Modül Durumu
-        if (data.seviye !== undefined || data.durum_seviyesi !== undefined) {
-            state.apiModulSeviyeleri[modulId] = seviyeNormalize(data.seviye ?? data.durum_seviyesi);
+        // 1. Cihaz Durumu ve Zaman
+        const modulDurumKaydi = state.modulDurumlari[modulId] || {};
+        let cihazDurumu = modulDurumKaydi.durum;
+        if (!cihazDurumu) {
+            if (data.aktif === false) cihazDurumu = 'pasif';
+            else cihazDurumu = 'bilinmiyor';
         }
 
-        // Açık anomalilerden gelen seviyeyi değerlendir (Madde 18 / Sözleşme ⑤)
-        const acikAnomaliler = data.acik_anomaliler || [];
-        if (acikAnomaliler.length > 0) {
-            const enKotuAnomali = acikAnomaliler
-                .map(a => seviyeNormalize(a.seviye))
-                .reduce((enY, s) => SEVIYE_PUANI[s] > SEVIYE_PUANI[enY] ? s : enY, 'normal');
-            state.alarmModulSeviyeleri[modulId] = enYuksekSeviye(state.alarmModulSeviyeleri[modulId], enKotuAnomali);
-            state.apiModulSeviyeleri[modulId] = enYuksekSeviye(state.apiModulSeviyeleri[modulId], enKotuAnomali);
+        const deviceBadge = document.getElementById('active-module-device-badge');
+        if (deviceBadge) {
+            deviceBadge.className = `status-badge badge-device-${cihazDurumu}`;
+            deviceBadge.textContent = `CİHAZ: ${cihazDurumu.toUpperCase()}`;
         }
 
-        const zamanStr = formatZamanTr(data.son_gorulme);
-        document.getElementById('val-time').innerText = zamanStr;
-        document.getElementById('val-rssi').innerText = data.sinyal !== null && data.sinyal !== undefined ? `${data.sinyal} dBm` : '-- dBm';
+        // Son görülme zamanı (TSİ)
+        const valTime = document.getElementById('val-time');
+        if (valTime) {
+            valTime.textContent = formatZamanTr(data.son_gorulme);
+        }
 
+        // Besleme: data.besleme null/undefined ise "BİLİNMİYOR" göster
         const feedEl = document.getElementById('val-feed');
         if (feedEl) {
-            const besleme = (data.besleme || 'sebeke').toLowerCase();
-            feedEl.innerText = besleme.toUpperCase();
-            feedEl.className = besleme === 'yedek' ? 'badge-feed badge-warning' : 'badge-feed';
-        }
-
-        // 2. Uzun format son_olcumler dizisini haritaya çevir (Madde 18)
-        const sonOlcumler = data.son_olcumler || [];
-        const olcumler = {};
-        sonOlcumler.forEach(o => {
-            if (o.olcum_tipi) olcumler[o.olcum_tipi] = o.deger;
-        });
-
-        document.getElementById('val-temp').innerText = olcumler.ortam_sicaklik !== undefined ? Number(olcumler.ortam_sicaklik).toFixed(1) : '--';
-        document.getElementById('val-hum').innerText = olcumler.nem !== undefined ? Number(olcumler.nem).toFixed(1) : '--';
-        document.getElementById('val-l1').innerText = olcumler.akim_l1 !== undefined ? Number(olcumler.akim_l1).toFixed(1) : '--';
-        document.getElementById('val-l2').innerText = olcumler.akim_l2 !== undefined ? Number(olcumler.akim_l2).toFixed(1) : '--';
-        document.getElementById('val-l3').innerText = olcumler.akim_l3 !== undefined ? Number(olcumler.akim_l3).toFixed(1) : '--';
-        document.getElementById('val-notr').innerText = olcumler.akim_notr !== undefined ? Number(olcumler.akim_notr).toFixed(1) : '0.0';
-        document.getElementById('val-arc').innerText = olcumler.ark_olay !== undefined ? olcumler.ark_olay : '0';
-
-        // Faz Dengesizliği Hesabı
-        if (olcumler.akim_l1 !== undefined && olcumler.akim_l2 !== undefined && olcumler.akim_l3 !== undefined) {
-            const akimlar = [Number(olcumler.akim_l1), Number(olcumler.akim_l2), Number(olcumler.akim_l3)];
-            const ort = akimlar.reduce((a, b) => a + b, 0) / 3;
-            const maksFark = Math.max(...akimlar.map(a => Math.abs(a - ort)));
-            const dengesizlik = ort > 0 ? ((maksFark / ort) * 100).toFixed(1) : 0;
-            const diffEl = document.getElementById('current-diff');
-            if (diffEl) {
-                diffEl.innerText = `Faz Dengesizliği: %${dengesizlik}`;
-                diffEl.style.color = dengesizlik > 15 ? 'var(--color-warning)' : 'var(--text-muted)';
+            if (data.besleme) {
+                const beslemeStr = String(data.besleme).toLowerCase();
+                feedEl.textContent = beslemeStr.toUpperCase();
+                feedEl.className = beslemeStr === 'yedek' ? 'badge-feed badge-warning' : 'badge-feed';
+            } else {
+                feedEl.textContent = 'BİLİNMİYOR';
+                feedEl.className = 'badge-feed';
             }
         }
 
-        // 3. Termal Verilerin Yüklenmesi (Eğer Kanıt Karesi modunda değilsek canlı termal veriyi çek)
-        if (!state.kanitKareModu) {
-            await canliTermalYukle(modulId, olcumler, data);
+        // Sinyal (RSSI): null ise "Bilinmiyor"
+        const rssiEl = document.getElementById('val-rssi');
+        if (rssiEl) {
+            if (data.sinyal !== null && data.sinyal !== undefined && !isNaN(Number(data.sinyal))) {
+                rssiEl.textContent = `${data.sinyal} dBm`;
+            } else {
+                rssiEl.textContent = 'Bilinmiyor';
+            }
         }
+
+        // 2. Canlı Ölçümler (UI-03 Kuralları)
+        const sonOlcumler = Array.isArray(data.son_olcumler) ? data.son_olcumler : [];
+        const olcumMap = {};
+        sonOlcumler.forEach(o => {
+            if (o && o.olcum_tipi) {
+                olcumMap[o.olcum_tipi] = o;
+            }
+        });
+
+        // Metrik kartlarını güvenli doldur
+        olcumKartiniGuncelle('val-temp', 'card-temp', 'temp-status', olcumMap.ortam_sicaklik, 'Sensör: SHT31', 1);
+        olcumKartiniGuncelle('val-hum', 'card-hum', 'hum-status', olcumMap.nem, 'Optimum: %40-60', 1);
+        olcumKartiniGuncelle('val-l1', 'card-current', null, olcumMap.akim_l1, '', 1);
+        olcumKartiniGuncelle('val-l2', 'card-current', null, olcumMap.akim_l2, '', 1);
+        olcumKartiniGuncelle('val-l3', 'card-current', null, olcumMap.akim_l3, '', 1);
+        olcumKartiniGuncelle('val-notr', 'card-notr', 'notr-status', olcumMap.akim_notr, 'Dönüş Hattı Akımı', 1);
+        olcumKartiniGuncelle('val-arc', 'card-arc', 'arc-status', olcumMap.ark_olay, 'TVOC-2 Optik Koruma', 0);
+
+        // Faz Dengesizliği: Yalnızca L1, L2, L3'ün üçü de varsa, sayısal ve kalite=iyi ise hesaplanır
+        const diffEl = document.getElementById('current-diff');
+        const oL1 = olcumMap.akim_l1;
+        const oL2 = olcumMap.akim_l2;
+        const oL3 = olcumMap.akim_l3;
+
+        if (oL1 && oL2 && oL3 &&
+            oL1.kalite === 'iyi' && oL2.kalite === 'iyi' && oL3.kalite === 'iyi' &&
+            oL1.deger !== null && oL2.deger !== null && oL3.deger !== null &&
+            !isNaN(Number(oL1.deger)) && !isNaN(Number(oL2.deger)) && !isNaN(Number(oL3.deger))) {
+
+            const a1 = Number(oL1.deger);
+            const a2 = Number(oL2.deger);
+            const a3 = Number(oL3.deger);
+            const ort = (a1 + a2 + a3) / 3;
+            const maksFark = Math.max(Math.abs(a1 - ort), Math.abs(a2 - ort), Math.abs(a3 - ort));
+            const dengesizlik = ort > 0 ? ((maksFark / ort) * 100).toFixed(1) : '0.0';
+
+            if (diffEl) {
+                diffEl.textContent = `Faz Dengesizliği: %${dengesizlik}`;
+                diffEl.style.color = Number(dengesizlik) > 15 ? 'var(--color-warning)' : 'var(--text-muted)';
+            }
+        } else {
+            if (diffEl) {
+                diffEl.textContent = 'Faz Dengesizliği: Hesaplanamadı';
+                diffEl.style.color = 'var(--text-muted)';
+            }
+        }
+
+        // 3. Alarm Seviyesi Senkronizasyonu (UI-03 kuralı: API normal ve açık anomali yoksa normale döner)
+        const acikAnomaliler = Array.isArray(data.acik_anomaliler) ? data.acik_anomaliler : [];
+        if (acikAnomaliler.length > 0) {
+            const enKotu = acikAnomaliler
+                .map(a => seviyeNormalize(a.seviye))
+                .filter(Boolean)
+                .reduce((enY, s) => SEVIYE_PUANI[s] > SEVIYE_PUANI[enY] ? s : enY, 'normal');
+            state.alarmModulSeviyeleri[modulId] = enKotu;
+        } else {
+            // Açık anomali yoksa alarm seviyesi kalıntısı temizlenir
+            delete state.alarmModulSeviyeleri[modulId];
+        }
+
+        if (data.seviye !== undefined) {
+            state.apiModulSeviyeleri[modulId] = seviyeNormalize(data.seviye);
+        }
+
         modulRozetiniGuncelle(modulId);
+
+        // 4. Termal Veri Yükleme
+        if (!state.kanitKareModu) {
+            await canliTermalYukle(modulId, olcumMap);
+        }
     } catch (err) {
-        console.warn(`Modül (${modulId}) detayları çekilemedi:`, err);
-        setOnlineStatus(false);
+        if (currentToken !== detailRequestToken) return;
+        console.warn(`Modül detayı yüklenemedi (${modulId}):`, err);
+
+        const errorBanner = document.getElementById('module-error-banner');
+        if (errorBanner) {
+            errorBanner.style.display = 'flex';
+            errorBanner.textContent = `⚠️ Modül (${modulId}) detay verisi alınamadı: ${err.message || 'Hata'}`;
+        }
+        const topBadge = document.getElementById('active-module-status-badge');
+        if (topBadge) {
+            topBadge.className = 'status-badge';
+            topBadge.style.background = 'rgba(239, 68, 68, 0.25)';
+            topBadge.style.color = 'var(--color-critical)';
+            topBadge.textContent = 'HATA';
+        }
+    }
+}
+
+// UI-03: Ölçüm kartı güncelleme yardımcısı
+function olcumKartiniGuncelle(valId, cardId, statusSubId, olcum, defaultSub, ondalik) {
+    const valEl = document.getElementById(valId);
+    const cardEl = cardId ? document.getElementById(cardId) : null;
+    const subEl = statusSubId ? document.getElementById(statusSubId) : null;
+
+    // Önceki kalite uyarılarını temizle
+    if (cardEl) {
+        const eskiUyari = cardEl.querySelector('.card-quality-warning, .card-quality-bad');
+        if (eskiUyari) eskiUyari.remove();
+    }
+
+    if (!olcum || olcum.deger === null || olcum.deger === undefined || olcum.kalite === 'yok') {
+        if (valEl) valEl.textContent = '--';
+        if (subEl) subEl.textContent = defaultSub || 'Veri yok';
+        return;
+    }
+
+    const valNum = Number(olcum.deger);
+    if (isNaN(valNum)) {
+        if (valEl) valEl.textContent = '--';
+        return;
+    }
+
+    if (valEl) {
+        valEl.textContent = ondalik > 0 ? valNum.toFixed(ondalik) : String(Math.round(valNum));
+    }
+
+    if (subEl && olcum.zaman) {
+        subEl.textContent = `${defaultSub ? defaultSub + ' | ' : ''}${formatZamanTr(olcum.zaman)} TSİ`;
+    }
+
+    if (olcum.kalite === 'supheli' && cardEl) {
+        const warnSpan = document.createElement('span');
+        warnSpan.className = 'card-quality-warning';
+        warnSpan.textContent = '⚠️ Şüpheli ölçüm';
+        cardEl.appendChild(warnSpan);
     }
 }
 
 // --------------------------------------------------------------------------
-// 2.1 TERMAL RENK PALETİ VE MATRİS SENTEZİ
+// UI-04: TERMAL MATRİS, GERÇEK KARE DOĞRULAMA VE GÖRSELLEŞTİRME
 // --------------------------------------------------------------------------
-// Sıcaklık -> Renk Haritalama Fonksiyonu (Her piksel/kare için hassas renk karşılığı)
-// Sıcaklık Aralıkları:
-//   <= 20°C : Koyu Lacivert / Mavi (hsl(240, 100%, 45%)) - Normal Soğuk
-//   20°C - 35°C : Mavi -> Camgöbeği/Cyan (hsl(240 -> 180)) - Serin/Normal
-//   35°C - 50°C : Camgöbeği -> Yeşil (hsl(180 -> 120)) - Ilık Çalışma Sıcaklığı
-//   50°C - 65°C : Yeşil -> Sarı (hsl(120 -> 60)) - Dikkat / Yükselen Sıcaklık
-//   65°C - 75°C : Sarı -> Turuncu (hsl(60 -> 30)) - Uyarı / Belirgin Isınma
-//   75°C - 85°C : Turuncu -> Kırmızı (hsl(30 -> 0)) - Aşırı Sıcaklık
-//   >= 85°C : Parlak Kırmızı / Beyaz-Kırmızı Işıma (hsl(0, 100%, 65%)) - Kritik Tehlike
 function sicaklikToRenk(temp) {
     if (temp <= 20) {
         return 'hsl(240, 100%, 45%)';
     } else if (temp < 85) {
-        // 20°C (240°) ile 85°C (0°) arasında doğrusal yumuşak geçiş
         const hue = 240 - ((temp - 20) * (240 / 65));
         return `hsl(${Math.max(0, Math.min(240, hue))}, 100%, 50%)`;
     } else {
-        // 85°C üstünde doymuş/açık parlayan kritik kırmızı
         const lightness = Math.min(75, 50 + (temp - 85) * 1.2);
         return `hsl(0, 100%, ${lightness}%)`;
     }
 }
 
-function bolgelerdenMatrisUret(ozet, olcumler) {
+// Özetten tahmini matris üretme (UI-04: Sahte gürültü / dinamik animasyon eklenmez!)
+function bolgelerdenTahminiMatrisUret(ozet, olcumMap) {
     const matris = new Array(768);
-    const ortam = (olcumler && olcumler.ortam_sicaklik !== undefined) ? Number(olcumler.ortam_sicaklik) : 25.0;
+    const ortam = (olcumMap && olcumMap.ortam_sicaklik && olcumMap.ortam_sicaklik.deger !== null)
+        ? Number(olcumMap.ortam_sicaklik.deger)
+        : 25.0;
+
     const bolgeler = (ozet && Array.isArray(ozet.bolge_ort) && ozet.bolge_ort.length === 4)
         ? ozet.bolge_ort.map(Number)
-        : [ortam + 2, ortam + 3, ortam + 2.5, ortam + 3.5];
+        : [ortam, ortam, ortam, ortam];
 
-    const maks = (ozet && ozet.maks !== undefined) ? Number(ozet.maks) : (Math.max(...bolgeler) + 2);
+    const maks = (ozet && ozet.maks !== undefined && ozet.maks !== null)
+        ? Number(ozet.maks)
+        : Math.max(...bolgeler);
+
     const [hx, hy] = (ozet && Array.isArray(ozet.maks_konum) && ozet.maks_konum.length === 2)
         ? ozet.maks_konum
         : [16, 12];
-
-    // Her yenileme ve karede canlı sensör dalgalanması hissi veren zamana bağlı mikro-faz
-    const timePhase = Date.now() / 800;
 
     for (let y = 0; y < 24; y++) {
         const rowNorm = y / 23;
         for (let x = 0; x < 32; x++) {
             const colNorm = x / 31;
-            // 4 köşe ağırlıklı bilinear enterpolasyon
             const b00 = bolgeler[0];
             const b10 = bolgeler[1];
             const b01 = bolgeler[2];
@@ -430,277 +747,253 @@ function bolgelerdenMatrisUret(ozet, olcumler) {
             const bottom = b01 * (1 - colNorm) + b11 * colNorm;
             let val = top * (1 - rowNorm) + bottom * rowNorm;
 
-            // Sıcak nokta (maks_konum) etrafında Gaussian yayılımı
             const dx = x - hx;
             const dy = y - hy;
             const distSq = (dx * dx) + (dy * dy * 1.5);
             const peakDelta = Math.max(0, maks - val);
-            const spotIntensity = Math.exp(-distSq / 12.0); // 12 piksel varyans
+            const spotIntensity = Math.exp(-distSq / 12.0);
             val += peakDelta * spotIntensity;
 
-            // Her karede yenilenen termal sensör gürültüsü ve mikro dalgalanma (±0.4°C)
-            const dynamicNoise = Math.sin(timePhase + x * 0.7 + y * 0.5) * 0.25 + 
-                                 Math.cos(timePhase * 1.3 + (x ^ y)) * 0.15;
-            matris[y * 32 + x] = Math.max(15, Math.min(120, val + dynamicNoise));
+            // Statik, deterministik değer (sahte sensör gürültüsü YOKTUR)
+            matris[y * 32 + x] = Math.max(10, Math.min(130, val));
         }
     }
     return matris;
 }
 
-async function canliTermalYukle(modulId, olcumler, modulData = null) {
+// 768 Sonlu Sayısal Piksel Doğrulama (UI-04 Kural 1)
+function tamKareyiDogrula(kareData, beklenenModulId, beklenenZaman) {
+    if (!kareData) return false;
+    if (kareData.satir_sayisi !== 24 || kareData.sutun_sayisi !== 32) return false;
+    if (!Array.isArray(kareData.piksel_verisi) || kareData.piksel_verisi.length !== 768) return false;
+
+    // Tüm pikseller sonlu sayı olmalıdır (NaN, null, string reddedilir)
+    for (let i = 0; i < 768; i++) {
+        const val = kareData.piksel_verisi[i];
+        if (typeof val !== 'number' || !Number.isFinite(val)) {
+            return false;
+        }
+    }
+
+    if (beklenenModulId && kareData.modul_id !== beklenenModulId) return false;
+    if (beklenenZaman && kareData.zaman !== beklenenZaman) return false;
+
+    return true;
+}
+
+async function canliTermalYukle(modulId, olcumMap) {
+    const currentToken = ++thermalRequestToken;
+    const sourceBadge = document.getElementById('thermal-source-badge');
+    const valTmax = document.getElementById('val-tmax');
+    const hotspotEl = document.getElementById('hotspot-coord');
+    const bannerTitle = document.getElementById('banner-title');
+    const bannerDesc = document.getElementById('banner-desc');
+    const bannerIcon = document.getElementById('banner-icon');
+
     try {
-        const res = await apiFetch(`/moduller/${modulId}/termal/son`);
+        const res = await apiFetch(`/moduller/${encodeURIComponent(modulId)}/termal/son`);
+        if (currentToken !== thermalRequestToken) return;
+
         if (res.ok) {
             const ozet = await res.json();
+            if (currentToken !== thermalRequestToken) return;
+
             state.termalOzet = ozet;
-
-            document.getElementById('val-tmax').innerText = ozet.maks !== undefined ? Number(ozet.maks).toFixed(1) : '--';
-
-            const hotspotEl = document.getElementById('hotspot-coord');
+            if (valTmax && ozet.maks !== undefined && ozet.maks !== null) {
+                valTmax.textContent = Number(ozet.maks).toFixed(1);
+            }
             if (hotspotEl && ozet.maks_konum) {
-                hotspotEl.innerText = `Konum: X:${ozet.maks_konum[0]}, Y:${ozet.maks_konum[1]}`;
+                hotspotEl.textContent = `Konum: X:${ozet.maks_konum[0]}, Y:${ozet.maks_konum[1]}`;
             }
 
-            // Canlı termal kareyi çek veya bölge ortalamalarından 32x24 matris sentezle
+            let tamKareGosterildi = false;
+
             if (ozet.kare_id) {
                 try {
-                    const kareRes = await apiFetch(`/termal/kare/${ozet.kare_id}`);
-                    if (kareRes.ok) {
+                    const kareRes = await apiFetch(`/termal/kare/${encodeURIComponent(ozet.kare_id)}`);
+                    if (currentToken === thermalRequestToken && kareRes.ok) {
                         const kareData = await kareRes.json();
-                        state.termalMatris = kareData.piksel_verisi;
-                        termalKareCiz();
-                    } else {
-                        state.termalMatris = bolgelerdenMatrisUret(ozet, olcumler);
-                        termalKareCiz();
+                        if (tamKareyiDogrula(kareData, modulId, ozet.zaman)) {
+                            state.termalMatris = kareData.piksel_verisi;
+                            tamKareGosterildi = true;
+                            if (sourceBadge) {
+                                sourceBadge.className = 'thermal-resolution source-tam';
+                                sourceBadge.textContent = 'Ölçülmüş Tam Kare';
+                            }
+                            termalKareCiz();
+                        }
                     }
-                } catch (kareErr) {
-                    state.termalMatris = bolgelerdenMatrisUret(ozet, olcumler);
-                    termalKareCiz();
+                } catch (e) {
+                    console.warn("Tam kare isteği başarısız:", e);
                 }
-            } else {
-                // Normal çalışan modüllerde 768 baytlık ham kare yerine 4 bölge ortalaması ve sıcak nokta koordinatı enterpolasyonu
-                state.termalMatris = bolgelerdenMatrisUret(ozet, olcumler);
+            }
+
+            if (!tamKareGosterildi && currentToken === thermalRequestToken) {
+                // UI-04 Kural 2: Tam kare yoksa açıkça tahmini görsel olduğu belirtilir
+                state.termalMatris = bolgelerdenTahminiMatrisUret(ozet, olcumMap);
+                if (sourceBadge) {
+                    sourceBadge.className = 'thermal-resolution source-ozet';
+                    sourceBadge.textContent = 'Özetten Üretilmiş Tahmini Görsel — Ölçülmüş Piksel Değildir';
+                }
                 termalKareCiz();
             }
 
-            // Termal durum şeridi ve Dinamik Modül Durumu Değerlendirmesi
-            const bannerEl = document.getElementById('thermal-status-banner');
-            const bannerDesc = document.getElementById('banner-desc');
-            const bannerTitle = document.getElementById('banner-title');
-            const bannerIcon = document.getElementById('banner-icon');
-            const modBadge = document.getElementById('active-module-status-badge');
-            const tmaxBox = document.getElementById('val-tmax-box');
-
-            const tMax = Number(ozet.maks);
-            let termalSeviye = 'normal';
-
-            // Endüstriyel Eşikler (Sadece termal sıcaklık eşikleri):
-            // ≥ 80°C : KRİTİK (Kırmızı alarm)
-            // 65°C - 79.9°C : UYARI (Turuncu alarm)
-            // 55°C - 64.9°C : İZLE (Dikkat / Yükselen sıcaklık)
-            // < 55°C : NORMAL (Yeşil, sağlıklı çalışma sıcaklığı)
-            if (tMax >= 80) {
-                termalSeviye = 'kritik';
-            } else if (tMax >= 65) {
-                termalSeviye = 'uyari';
-            } else if (tMax >= 55) {
-                termalSeviye = 'izle';
-            } else {
-                termalSeviye = 'normal';
+            if (bannerTitle) bannerTitle.textContent = 'Termal Özet Analizi:';
+            if (bannerIcon) bannerIcon.textContent = '🔥';
+            if (bannerDesc) {
+                bannerDesc.textContent = `Sıcak nokta: ${ozet.maks !== undefined ? Number(ozet.maks).toFixed(1) + ' °C' : '--'} (Zaman: ${formatZamanTr(ozet.zaman)} TSİ)`;
             }
-
-            // Modülün açık anomali/alarm seviyesini dahil et (asla uyarının üzerine "Normal" yazıp ezmemeli)
-            const anomaliSeviye = enYuksekSeviye(
-                state.alarmModulSeviyeleri[modulId],
-                state.apiModulSeviyeleri[modulId]
-            );
-            const durumSeviye = enYuksekSeviye(termalSeviye, anomaliSeviye);
-            const durumText = durumSeviye.toUpperCase();
-
-            // Aktif anomali gerekçesini tespit et
-            const aktifAnomali = (state.sonAlarmlar || []).find(a => a.modul_id === modulId && seviyeNormalize(a.seviye) === durumSeviye)
-                || (modulData && modulData.acik_anomaliler ? modulData.acik_anomaliler.find(a => seviyeNormalize(a.seviye) === durumSeviye) : null);
-
-            if (durumSeviye === 'kritik') {
-                if (bannerIcon) bannerIcon.innerText = "🔥";
-                if (bannerTitle) bannerTitle.innerText = "KRİTİK TERMAL / SİSTEM ALARMI:";
-                if (bannerEl) {
-                    bannerEl.style.background = 'rgba(239, 68, 68, 0.25)';
-                    bannerEl.style.borderColor = 'var(--color-critical)';
-                }
-                if (bannerDesc) {
-                    const detay = aktifAnomali ? `<b>${aktifAnomali.tip}:</b> ${aktifAnomali.gerekce} | ` : '';
-                    bannerDesc.innerHTML = `<b style="color:var(--color-critical)">ACİL MÜDAHALE GEREKLİ!</b> ${detay}Sıcak nokta: <b>${tMax.toFixed(1)} °C</b> (Eşik: 80°C).`;
-                }
-            } else if (durumSeviye === 'uyari') {
-                if (bannerIcon) bannerIcon.innerText = "⚠️";
-                if (bannerTitle) bannerTitle.innerText = "TERMAL / SİSTEM UYARISI:";
-                if (bannerEl) {
-                    bannerEl.style.background = 'rgba(245, 158, 11, 0.18)';
-                    bannerEl.style.borderColor = 'var(--color-warning)';
-                }
-                if (bannerDesc) {
-                    const detay = aktifAnomali ? `<b>${aktifAnomali.tip}:</b> ${aktifAnomali.gerekce} | ` : '';
-                    bannerDesc.innerHTML = `<b style="color:var(--color-warning)">DİKKAT (UYARI):</b> ${detay}Sıcak nokta: <b>${tMax.toFixed(1)} °C</b>.`;
-                }
-            } else if (durumSeviye === 'izle') {
-                if (bannerIcon) bannerIcon.innerText = "👁️";
-                if (bannerTitle) bannerTitle.innerText = "TERMAL İZLEME:";
-                if (bannerEl) {
-                    bannerEl.style.background = 'rgba(6, 182, 212, 0.15)';
-                    bannerEl.style.borderColor = 'var(--color-izle)';
-                }
-                if (bannerDesc) {
-                    bannerDesc.innerHTML = `<span style="color:var(--color-izle)">Yükselen Çalışma Sıcaklığı / İzleme.</span> Sıcak nokta: <b>${tMax.toFixed(1)} °C</b>. İzleme önerilir.`;
-                }
-            } else {
-                if (bannerIcon) bannerIcon.innerText = "✅";
-                if (bannerTitle) bannerTitle.innerText = "Canlı Termal Analiz:";
-                if (bannerEl) {
-                    bannerEl.style.background = 'rgba(16, 185, 129, 0.12)';
-                    bannerEl.style.borderColor = 'var(--color-normal)';
-                }
-                if (bannerDesc) {
-                    bannerDesc.innerHTML = `<span style="color:var(--color-normal)">Termal Dağılım Normal.</span> Sıcak nokta: <b>${tMax.toFixed(1)} °C</b>. Sağlıklı çalışma aralığında.`;
-                }
+        } else {
+            // Özet de yoksa
+            if (sourceBadge) {
+                sourceBadge.className = 'thermal-resolution source-hata';
+                sourceBadge.textContent = 'Termal Veri Yok';
             }
-
-            // Metrik kartı rengini güncelle
-            if (tmaxBox) {
-                tmaxBox.className = `card-value ${durumSeviye}`;
-            }
-
-            // Aktif modül başlık rozetini ve hiyerarşi ağacındaki rozeti anında güncelle
-            state.canliModulSeviyeleri[modulId] = durumSeviye;
-            modulRozetiniGuncelle(modulId);
-        } else if (olcumler && olcumler.termal_maks !== undefined) {
-            document.getElementById('val-tmax').innerText = Number(olcumler.termal_maks).toFixed(1);
-            state.termalOzet = {
-                maks: Number(olcumler.termal_maks),
-                maks_konum: [16, 12]
-            };
-            state.termalMatris = bolgelerdenMatrisUret(state.termalOzet, olcumler);
+            state.termalMatris = null;
+            state.termalOzet = null;
+            if (valTmax) valTmax.textContent = '--';
+            if (hotspotEl) hotspotEl.textContent = 'Konum: --';
+            if (bannerDesc) bannerDesc.textContent = 'Bu modül için termal ölçüm kaydı bulunmuyor.';
             termalKareCiz();
         }
-    } catch (e) {
-        console.warn("Termal veri çekilemedi:", e);
+    } catch (err) {
+        if (currentToken !== thermalRequestToken) return;
+        console.warn("Termal veri hatası:", err);
     }
 }
 
-// --------------------------------------------------------------------------
-// 3. KANIT KARESİ GÖRÜNTÜLEME (Madde 19)
-// --------------------------------------------------------------------------
+// UI-04: Kanıt Karesi İnceleme
 async function anomaliSec(anomaliId) {
-    const anomali = state.sonAlarmlar.find(a => a.id === anomaliId);
+    const anomali = state.cozulmemisAnomaliler.find(a => a.id === anomaliId);
     if (!anomali) return;
 
     state.seciliAnomaliId = anomaliId;
-    state.kanitKareModu = true; // İnceleme moduna geç, periyodik tarama normale döndürmesin!
+    state.kanitAnomali = anomali;
+    state.kanitKareModu = true;
 
-    // Kartları görsel olarak vurgula
     document.querySelectorAll('.alarm-card').forEach(c => c.classList.remove('selected-alarm'));
     const seciliKart = document.getElementById(`alarm-card-${anomaliId}`);
     if (seciliKart) seciliKart.classList.add('selected-alarm');
 
-    const seviye = seviyeNormalize(anomali.seviye || 'uyari');
-    const isKritik = seviye === 'kritik';
+    const btnLive = document.getElementById('btn-live-thermal');
+    if (btnLive) btnLive.style.display = 'inline-block';
 
-    // Eğer anomali başka bir modüle aitse o modülü seç
-    if (anomali.modul_id && anomali.modul_id !== state.aktifModulId) {
-        state.aktifModulId = anomali.modul_id;
-        state.aktifModulIsmi = anomali.modul_id;
-        document.querySelectorAll('.tree-modul-item').forEach(el => el.classList.remove('active'));
-        const seciliEl = document.getElementById(`modul-item-${anomali.modul_id}`);
-        if (seciliEl) seciliEl.classList.add('active');
-        await modulDetayYukle(anomali.modul_id);
-    }
-
-    // Banner güncelle (kare_id olsun veya olmasın uyarının detayını göster)
-    const bannerEl = document.getElementById('thermal-status-banner');
+    const sourceBadge = document.getElementById('thermal-source-badge');
     const bannerTitle = document.getElementById('banner-title');
     const bannerDesc = document.getElementById('banner-desc');
     const bannerIcon = document.getElementById('banner-icon');
-    const btnLive = document.getElementById('btn-live-thermal');
+    const valTmax = document.getElementById('val-tmax');
+    const hotspotEl = document.getElementById('hotspot-coord');
 
-    if (btnLive) btnLive.style.display = 'inline-block';
-    if (bannerIcon) bannerIcon.innerText = isKritik ? "🔥" : "⚠️";
-    if (bannerTitle) {
-        bannerTitle.innerText = isKritik
-            ? `🚨 KRİTİK ALARM İNCELEME (${anomali.tip || anomali.id}):`
-            : `⚠️ UYARI İNCELEME (${anomali.tip || anomali.id}):`;
-    }
-    if (bannerDesc) {
-        bannerDesc.innerHTML = `<b style="color:${isKritik ? 'var(--color-critical)' : 'var(--color-warning)'}">${anomali.tip || 'Anomali'}</b> | ${anomali.gerekce || 'Gerekçe belirtilmedi.'}`;
-    }
-    if (bannerEl) {
-        bannerEl.style.background = isKritik ? 'rgba(239, 68, 68, 0.25)' : 'rgba(245, 158, 11, 0.2)';
-        bannerEl.style.borderColor = isKritik ? 'var(--color-critical)' : 'var(--color-warning)';
-    }
-
-    // Aktif modül başlık rozetini anomali seviyesine sabitle
-    const topBadge = document.getElementById('active-module-status-badge');
-    if (topBadge) {
-        topBadge.className = `status-badge badge-${seviye}`;
-        topBadge.innerText = seviye.toUpperCase();
-    }
-
-    // Kanıt Karesini çek ve çiz (Madde 19)
     const kareId = anomali.kanit ? anomali.kanit.kare_id : null;
-    const piksel = anomali.kanit ? anomali.kanit.piksel : null;
+    const kanitPiksel = (anomali.kanit && Array.isArray(anomali.kanit.piksel) && anomali.kanit.piksel.length === 2)
+        ? anomali.kanit.piksel
+        : null;
+
+    if (bannerTitle) bannerTitle.textContent = `📸 Kanıt İnceleme (${anomali.tip || anomali.id}):`;
+    if (bannerIcon) bannerIcon.textContent = '🚨';
+    if (bannerDesc) {
+        bannerDesc.textContent = `${anomali.gerekce || 'Gerekçe sağlanmadı.'} (Tespit: ${formatZamanTr(anomali.ilk_gorulme)} TSİ)`;
+    }
 
     if (kareId) {
         try {
-            const res = await apiFetch(`/termal/kare/${kareId}`);
+            const res = await apiFetch(`/termal/kare/${encodeURIComponent(kareId)}`);
             if (res.ok) {
                 const kareData = await res.json();
-                state.termalMatris = kareData.piksel_verisi;
+                if (tamKareyiDogrula(kareData, anomali.modul_id, null)) {
+                    state.termalMatris = kareData.piksel_verisi;
 
-                // Sıcak nokta koordinatı kanıt pikseli
-                const maksKonum = (Array.isArray(piksel) && piksel.length === 2) ? piksel : [16, 12];
-                state.termalOzet = {
-                    maks: (anomali.skor ? (anomali.skor * 100).toFixed(1) : 75.0),
-                    maks_konum: maksKonum
-                };
+                    // UI-04 Kural 3: Sıcaklık anomali skorundan (°C'ye çevrilerek) ALINMAZ!
+                    // Hedef pikseli varsa piksel_verisi[y*32+x], yoksa gerçek piksel maksimumu
+                    let hedefSicaklik = null;
+                    let maksKonum = kanitPiksel;
 
-                if (bannerTitle) {
-                    bannerTitle.innerText = `📸 Kanıt Karesi (${kareId}) - ${isKritik ? 'KRİTİK' : 'UYARI'}:`;
+                    if (kanitPiksel) {
+                        const [px, py] = kanitPiksel;
+                        if (px >= 0 && px < 32 && py >= 0 && py < 24) {
+                            hedefSicaklik = kareData.piksel_verisi[py * 32 + px];
+                        }
+                    }
+
+                    if (hedefSicaklik === null) {
+                        hedefSicaklik = Math.max(...kareData.piksel_verisi);
+                    }
+
+                    state.termalOzet = {
+                        maks: hedefSicaklik,
+                        maks_konum: maksKonum || [16, 12]
+                    };
+
+                    if (sourceBadge) {
+                        sourceBadge.className = 'thermal-resolution source-tam';
+                        sourceBadge.textContent = `Kanıt Karesi (${kareId}) — Ölçülmüş Tam Kare`;
+                    }
+                    if (valTmax) valTmax.textContent = Number(hedefSicaklik).toFixed(1);
+                    if (hotspotEl && maksKonum) hotspotEl.textContent = `Konum: X:${maksKonum[0]}, Y:${maksKonum[1]}`;
+
+                    termalKareCiz();
+                    return;
                 }
-
-                termalKareCiz();
             }
-        } catch (err) {
-            console.error("Kanıt karesi yüklenemedi:", err);
+        } catch (e) {
+            console.warn("Kanıt karesi yüklenemedi:", e);
         }
     }
+
+    // Kare yoksa veya doğrulanamadıysa eski kare kanıt diye sunulmaz!
+    state.termalMatris = null;
+    state.termalOzet = null;
+    if (sourceBadge) {
+        sourceBadge.className = 'thermal-resolution source-hata';
+        sourceBadge.textContent = 'Kanıt Karesi Mevcut Değil';
+    }
+    if (valTmax) valTmax.textContent = '--';
+    if (hotspotEl) hotspotEl.textContent = 'Konum: --';
+    termalKareCiz();
 }
 
 function canliGoruntuyeDon() {
     state.kanitKareModu = false;
     state.seciliAnomaliId = null;
+    state.kanitAnomali = null;
 
     const btnLive = document.getElementById('btn-live-thermal');
     if (btnLive) btnLive.style.display = 'none';
 
     document.querySelectorAll('.alarm-card').forEach(c => c.classList.remove('selected-alarm'));
-    modulDetayYukle(state.aktifModulId);
+
+    // Canlı görünüme dönünce seçili modülün güncel verisini yeniden yükle
+    if (state.aktifModulId) {
+        modulDetayYukle(state.aktifModulId);
+    }
 }
 
-// --------------------------------------------------------------------------
-// 4. 32x24 TERMAL MATRİS ÇİZİMİ VE CANVAS ETKİLEŞİMİ
-// --------------------------------------------------------------------------
 function termalKareCiz() {
     const canvas = document.getElementById('thermalCanvas');
-    if (!canvas || !state.termalMatris || state.termalMatris.length !== 768) return;
-
+    if (!canvas) return;
     const ctx = canvas.getContext('2d');
     const width = canvas.width;
     const height = canvas.height;
+
+    ctx.clearRect(0, 0, width, height);
+
+    if (!state.termalMatris || state.termalMatris.length !== 768) {
+        ctx.fillStyle = '#0c1220';
+        ctx.fillRect(0, 0, width, height);
+        ctx.fillStyle = '#64748b';
+        ctx.font = '14px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('Görüntülenecek termal kare yok', width / 2, height / 2);
+        const reticle = document.getElementById('hotspot-reticle');
+        if (reticle) reticle.style.display = 'none';
+        return;
+    }
+
     const cellW = width / 32;
     const cellH = height / 24;
-
     canvas.className = state.smoothMode ? 'smooth' : '';
 
-    // Piksel Çizimi (Her piksel sıcaklık aralığına göre dinamik renklendirilir)
     for (let y = 0; y < 24; y++) {
         for (let x = 0; x < 32; x++) {
             const temp = state.termalMatris[y * 32 + x];
@@ -715,47 +1008,32 @@ function termalKareCiz() {
         }
     }
 
-    // Sıcak Nokta (Hotspot) Reticle Konumlandırma
+    // Sıcak nokta reticle gösterimi
     const reticle = document.getElementById('hotspot-reticle');
     const reticleTemp = document.getElementById('reticle-temp');
 
     if (state.termalOzet && state.termalOzet.maks_konum && reticle) {
         const [hx, hy] = state.termalOzet.maks_konum;
         const rect = canvas.getBoundingClientRect();
-        const cellW = rect.width / 32;
-        const cellH = rect.height / 24;
+        const rw = rect.width || width;
+        const rh = rect.height || height;
+        const cW = rw / 32;
+        const cH = rh / 24;
 
-        const rawX = (hx + 0.5) * cellW;
-        const rawY = (hy + 0.5) * cellH;
-
-        const posX = Math.max(14, Math.min(rect.width - 14, rawX));
-        const posY = Math.max(14, Math.min(rect.height - 14, rawY));
+        const posX = Math.max(14, Math.min(rw - 14, (hx + 0.5) * cW));
+        const posY = Math.max(14, Math.min(rh - 14, (hy + 0.5) * cH));
 
         reticle.style.display = 'block';
         reticle.style.left = `${posX}px`;
         reticle.style.top = `${posY}px`;
 
         if (reticleTemp) {
-            reticleTemp.innerText = `${Number(state.termalOzet.maks).toFixed(1)} °C`;
-            if (posY < 35) {
-                reticleTemp.classList.add('pos-bottom');
-            } else {
-                reticleTemp.classList.remove('pos-bottom');
-            }
-            if (posX < 40) {
-                reticleTemp.classList.add('pos-right');
-                reticleTemp.classList.remove('pos-left');
-            } else if (posX > rect.width - 40) {
-                reticleTemp.classList.add('pos-left');
-                reticleTemp.classList.remove('pos-right');
-            } else {
-                reticleTemp.classList.remove('pos-left', 'pos-right');
-            }
+            const val = state.termalOzet.maks !== undefined ? Number(state.termalOzet.maks).toFixed(1) : '--';
+            reticleTemp.textContent = `${val} °C`;
         }
     }
 }
 
-// Canvas Mouse Move HUD Tooltip Etkileşimi
 function setupCanvasHover() {
     const canvas = document.getElementById('thermalCanvas');
     const tooltip = document.getElementById('thermal-tooltip');
@@ -765,7 +1043,7 @@ function setupCanvasHover() {
     if (!canvas || !tooltip) return;
 
     canvas.addEventListener('mousemove', (e) => {
-        if (!state.termalMatris) return;
+        if (!state.termalMatris || state.termalMatris.length !== 768) return;
 
         const rect = canvas.getBoundingClientRect();
         const mouseX = e.clientX - rect.left;
@@ -779,27 +1057,16 @@ function setupCanvasHover() {
             const temp = state.termalMatris[index];
 
             tooltip.style.display = 'block';
-            tooltipTemp.innerText = `${temp ? temp.toFixed(1) : '--'} °C`;
-            tooltipCoord.innerText = `X: ${cellX}, Y: ${cellY}`;
-
-            const tipWidth = tooltip.offsetWidth || 90;
-            const tipHeight = tooltip.offsetHeight || 44;
-
-            let posY = mouseY + 14;
-            if (mouseY + tipHeight + 14 > rect.height) {
-                posY = mouseY - tipHeight - 8;
-            }
+            tooltipTemp.textContent = `${typeof temp === 'number' ? temp.toFixed(1) : '--'} °C`;
+            tooltipCoord.textContent = `X: ${cellX}, Y: ${cellY}`;
 
             let posX = mouseX + 14;
-            if (mouseX + tipWidth + 14 > rect.width) {
-                posX = mouseX - tipWidth - 8;
-            }
+            let posY = mouseY + 14;
+            if (posX + 100 > rect.width) posX = mouseX - 100;
+            if (posY + 50 > rect.height) posY = mouseY - 50;
 
-            posX = Math.max(4, posX);
-            posY = Math.max(4, posY);
-
-            tooltip.style.left = `${posX}px`;
-            tooltip.style.top = `${posY}px`;
+            tooltip.style.left = `${Math.max(4, posX)}px`;
+            tooltip.style.top = `${Math.max(4, posY)}px`;
         }
     });
 
@@ -809,214 +1076,558 @@ function setupCanvasHover() {
 }
 
 // --------------------------------------------------------------------------
-// 5. AKTİF ALARMLAR VE OPERATÖR ONAY AKIŞI (GET/POST /anomaliler) - Madde 18
+// UI-05: ÇÖZÜLMEMİŞ ALARMLAR LİSTESİ VE OPERATÖR ONAYI
 // --------------------------------------------------------------------------
+async function sayfaliAnomalileriGetir(durumFiltresi) {
+    const sonuclar = [];
+    let sonra = null;
+    let devam = true;
+    const limit = 50;
+
+    while (devam) {
+        try {
+            let url = `/anomaliler?durum=${durumFiltresi}&limit=${limit}`;
+            if (sonra !== null) {
+                url += `&sonra=${sonra}`;
+            }
+            const res = await apiFetch(url);
+            if (!res.ok) break;
+            const data = await res.json();
+            const veriler = data.veriler || [];
+            sonuclar.push(...veriler);
+
+            if (data.sonraki !== null && data.sonraki !== undefined && veriler.length > 0) {
+                sonra = data.sonraki;
+            } else {
+                devam = false;
+            }
+        } catch (err) {
+            console.warn(`Anomali (${durumFiltresi}) getirme hatası:`, err);
+            break;
+        }
+    }
+    return sonuclar;
+}
+
 async function alarmlariYukle() {
     const container = document.getElementById('alarms-container');
     const counterEl = document.getElementById('active-alarm-count');
     if (!container) return;
 
     try {
-        // Yalnızca aktif/açık durumdaki anomalileri sorgula (Sözleşme ⑤ / Madde 18)
-        const res = await apiFetch('/anomaliler?durum=acik&limit=50');
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        const data = await res.json();
-        setOnlineStatus(true);
+        // UI-05 Kural 1 & 2: Hem acik hem onaylandi listelenir; sayfalar sonuna kadar taranır
+        const [aciklar, onaylilar] = await Promise.all([
+            sayfaliAnomalileriGetir('acik'),
+            sayfaliAnomalileriGetir('onaylandi')
+        ]);
 
-        const anomaliler = (data.veriler || []).filter(a => a.durum !== 'kapandi');
+        const cozulmemisler = [...aciklar, ...onaylilar].sort((a, b) => (b.sira || 0) - (a.sira || 0));
 
-        // Yeni açık alarm kontrolü ve ses çalma
-        if (anomaliler.length > 0) {
-            const yeniAlarmVar = anomaliler.some(a => !state.sonAlarmlar.some(sa => sa.id === a.id));
-            if (yeniAlarmVar) {
+        // Yeni açık alarm ses çalma kontrolü
+        if (aciklar.length > 0) {
+            const yeniVar = aciklar.some(a => !state.cozulmemisAnomaliler.some(sa => sa.id === a.id));
+            if (yeniVar) {
                 sfx.playAlert();
             }
         }
-        state.sonAlarmlar = anomaliler;
 
-        // Açık anomalilere sahip modüllerin seviye haritasını oluştur
-        const acikSeviyeler = {};
-        anomaliler.forEach(a => {
-            if (a.modul_id && a.seviye) {
-                const s = seviyeNormalize(a.seviye);
-                const mevcut = acikSeviyeler[a.modul_id] || 'normal';
-                if (s === 'kritik' || (s === 'uyari' && mevcut !== 'kritik') || (s === 'izle' && mevcut === 'normal')) {
-                    acikSeviyeler[a.modul_id] = s;
-                }
-            }
-        });
-        state.alarmModulSeviyeleri = acikSeviyeler;
+        state.cozulmemisAnomaliler = cozulmemisler;
 
-        // Ağaçtaki tüm modül rozetlerini güncelle: Açık anomali varsa seviyesini göster, yoksa canlı/normal
-        document.querySelectorAll('[id^="tree-badge-"]').forEach(badge => {
-            const mId = badge.id.replace('tree-badge-', '');
-            modulRozetiniGuncelle(mId);
-        });
-
-        // Eğer seçili modülde açık anomali veya canlı kritik/uyarı varsa başlık rozetini güncelle
-        if (!state.kanitKareModu) {
-            const topBadge = document.getElementById('active-module-status-badge');
-            if (topBadge) {
-                const aktifSev = modulSeviyesiniGetir(state.aktifModulId);
-                topBadge.className = `status-badge badge-${aktifSev}`;
-                topBadge.innerText = aktifSev.toUpperCase();
-            }
+        if (counterEl) {
+            counterEl.textContent = String(cozulmemisler.length);
         }
 
-        if (counterEl) counterEl.innerText = anomaliler.length;
+        container.innerHTML = '';
 
-        // Madde 18 Kabul: Anomali listesi boş görünüyorsa gerçekten boş olduğu için görünüyor
-        if (anomaliler.length === 0) {
-            container.innerHTML = `
-                <div class="empty-alarms" style="padding: 2rem 1rem; text-align: center;">
-                    <span class="empty-icon" style="font-size: 2.5rem; display: block; margin-bottom: 0.5rem;">🛡️</span>
-                    <strong style="color:var(--color-normal); font-size: 1.1rem;">Sistem Stabil</strong>
-                    <p style="margin-top:6px; color: var(--text-muted); font-size: 0.85rem;">Şu anda açık anomali bulunmamaktadır.</p>
-                </div>
+        if (cozulmemisler.length === 0) {
+            const emptyDiv = document.createElement('div');
+            emptyDiv.className = 'empty-alarms';
+            emptyDiv.innerHTML = `
+                <span class="empty-icon">🛡️</span>
+                <strong style="color:var(--color-normal); font-size: 1.1rem;">Sistem Stabil</strong>
+                <p style="margin-top:6px; color: var(--text-muted); font-size: 0.85rem;">Şu anda açık veya onay bekleyen anomali bulunmamaktadır.</p>
             `;
+            container.appendChild(emptyDiv);
             return;
         }
 
-        let html = '';
-        anomaliler.forEach(anomali => {
-            const seviye = seviyeNormalize(anomali.seviye || 'uyari');
+        cozulmemisler.forEach(anomali => {
+            const seviye = seviyeNormalize(anomali.seviye) || 'uyari';
             const isKritik = seviye === 'kritik';
-            const seviyeText = seviye.toUpperCase();
-            const zaman = anomali.son_gorulme || anomali.ilk_gorulme || 'Canlı';
+            const isOnayli = anomali.durum === 'onaylandi';
             const isSelected = anomali.id === state.seciliAnomaliId;
 
-            html += `
-                <div class="alarm-card ${isKritik ? 'kritik' : ''} ${isSelected ? 'selected-alarm' : ''}" 
-                     id="alarm-card-${anomali.id}"
-                     onclick="anomaliSec('${anomali.id}')"
-                     style="cursor: pointer;">
-                    <div class="alarm-card-header">
-                        <span class="alarm-modul">⚠️ ${anomali.modul_id}</span>
-                        <span class="status-badge badge-${seviye}">${seviyeText}</span>
-                    </div>
-                    <div class="alarm-time">⏱️ Tespit: ${formatZamanTr(zaman)}</div>
-                    <div class="alarm-reason">
-                        <b>${anomali.tip || 'Anomali'}:</b> ${anomali.gerekce || 'Gerekçe belirtilmedi.'}
-                    </div>
-                    ${anomali.kanit && anomali.kanit.kare_id ? `<div style="font-size: 0.75rem; color: var(--accent-cyan); margin-top: 4px;">📸 Kanıt Karesi Mevcut (İncelemek için tıkla)</div>` : ''}
-                    <button class="btn-ack" onclick="event.stopPropagation(); alarmOnayla('${anomali.id}', '${anomali.modul_id}')" style="margin-top: 8px;">
-                        <span>✓</span> Operatör Onayı (Kapat)
-                    </button>
-                </div>
-            `;
-        });
+            const card = document.createElement('div');
+            card.className = `alarm-card ${isKritik ? 'kritik' : ''} ${isSelected ? 'selected-alarm' : ''}`;
+            card.id = `alarm-card-${anomali.id}`;
+            card.style.cursor = 'pointer';
+            card.addEventListener('click', () => {
+                anomaliSec(anomali.id);
+            });
 
-        container.innerHTML = html;
+            const cardHeader = document.createElement('div');
+            cardHeader.className = 'alarm-card-header';
+
+            const modSpan = document.createElement('span');
+            modSpan.className = 'alarm-modul';
+            modSpan.textContent = `⚠️ ${anomali.modul_id}`;
+
+            const badgeSpan = document.createElement('span');
+            badgeSpan.className = `status-badge badge-${seviye}`;
+            badgeSpan.textContent = seviye.toUpperCase();
+
+            cardHeader.appendChild(modSpan);
+            cardHeader.appendChild(badgeSpan);
+            card.appendChild(cardHeader);
+
+            const timeDiv = document.createElement('div');
+            timeDiv.className = 'alarm-time';
+            const zaman = anomali.son_gorulme || anomali.ilk_gorulme;
+            timeDiv.textContent = `⏱️ Tespit: ${formatZamanTr(zaman)} TSİ`;
+            card.appendChild(timeDiv);
+
+            const reasonDiv = document.createElement('div');
+            reasonDiv.className = 'alarm-reason';
+            const tipText = anomali.tip ? `${anomali.tip}: ` : '';
+            const gerekceText = anomali.gerekce || 'Gerekçe sağlanmadı.';
+            reasonDiv.textContent = `${tipText}${gerekceText}`;
+            card.appendChild(reasonDiv);
+
+            if (anomali.kanit && anomali.kanit.kare_id) {
+                const kanitNotice = document.createElement('div');
+                kanitNotice.style.fontSize = '0.75rem';
+                kanitNotice.style.color = 'var(--accent-cyan)';
+                kanitNotice.style.marginTop = '4px';
+                kanitNotice.textContent = '📸 Kanıt Karesi Mevcut (İncelemek için tıkla)';
+                card.appendChild(kanitNotice);
+            }
+
+            const btnAck = document.createElement('button');
+            btnAck.className = `btn-ack ${isOnayli ? 'ack-done' : ''}`;
+            btnAck.style.marginTop = '8px';
+
+            if (isOnayli) {
+                btnAck.textContent = '✓ Onaylandı — Olay Devam Ediyor';
+                btnAck.disabled = true;
+            } else {
+                btnAck.textContent = '✓ Operatör Onayı';
+                btnAck.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    alarmOnayla(anomali.id, anomali.modul_id);
+                });
+            }
+
+            card.appendChild(btnAck);
+            container.appendChild(card);
+        });
     } catch (err) {
-        console.warn("Alarmlar okunamadı:", err);
-        setOnlineStatus(false);
+        console.warn("Alarmlar yüklenemedi:", err);
     }
 }
 
 async function alarmOnayla(alarmId, modulId) {
+    const opInput = document.getElementById('operator-id-input');
+    const aktor = opInput ? opInput.value.trim() : '';
+
+    if (!aktor) {
+        alert("Onay işlemi için geçerli ve boş olmayan bir 'Operatör Kimliği' girilmelidir.");
+        if (opInput && typeof opInput.focus === 'function') opInput.focus();
+        return;
+    }
+
     try {
-        // Sözleşme ⑤: POST /anomaliler/{id}/onayla?aktor=operator_1 (Madde 18)
-        const res = await apiFetch(`/anomaliler/${alarmId}/onayla?aktor=operator_1`, {
+        const res = await apiFetch(`/anomaliler/${encodeURIComponent(alarmId)}/onayla?aktor=${encodeURIComponent(aktor)}`, {
             method: 'POST'
         });
 
         if (res.ok) {
-            const card = document.getElementById(`alarm-card-${alarmId}`);
-            if (card) {
-                card.style.opacity = '0';
-                card.style.transform = 'scale(0.95)';
-                setTimeout(() => card.remove(), 250);
-            }
-
-            addAuditLog(`Operatör Onayı: ${modulId} (${alarmId}) onaylandı ve kapatıldı.`);
-
-            if (state.seciliAnomaliId === alarmId) {
-                canliGoruntuyeDon();
-            }
-
-            setTimeout(async () => {
-                await alarmlariYukle();
-                await hiyerarsiyiYukle();
-                if (state.aktifModulId === modulId) {
-                    modulDetayYukle(modulId);
+            const data = await res.json();
+            // UI-05: Başarılı yanıtta durum=onaylandi olur; kart silinmez, onaylandı durumuna geçer!
+            if (data.durum === 'onaylandi') {
+                const card = document.getElementById(`alarm-card-${alarmId}`);
+                if (card) {
+                    const btn = card.querySelector('.btn-ack');
+                    if (btn) {
+                        btn.className = 'btn-ack ack-done';
+                        btn.textContent = '✓ Onaylandı — Olay Devam Ediyor';
+                        btn.disabled = true;
+                    }
                 }
-                operasyonGunluguYukle();
-            }, 300);
-        } else if (res.status === 409) {
-            alert(`Bilgi: ${alarmId} numaralı anomali zaten daha önce onaylanmış veya kapatılmış.`);
+            }
             await alarmlariYukle();
+            operasyonGunluguYukle();
+        } else if (res.status === 409) {
+            // UI-05 Kural 5: 409 durumunda olay API'den yeniden okunur ve gerçek durum gösterilir
+            try {
+                const checkRes = await apiFetch(`/anomaliler/${encodeURIComponent(alarmId)}`);
+                if (checkRes.ok) {
+                    const freshData = await checkRes.json();
+                    if (freshData.durum === 'kapandi') {
+                        const card = document.getElementById(`alarm-card-${alarmId}`);
+                        if (card) card.remove();
+                    }
+                }
+            } catch (e) {}
+            await alarmlariYukle();
+            alert(`Bilgi: Anomali (${alarmId}) zaten onaylanmış veya kapanmış durumda.`);
         } else {
             const err = await res.json().catch(() => ({}));
             const msg = (err && err.hata && err.hata.mesaj) || `HTTP ${res.status}`;
-            alert(`Alarm onaylama işlemi başarısız: ${msg}`);
+            alert(`Onay işlemi başarısız: ${msg}`);
         }
     } catch (err) {
         console.error("Onaylama hatası:", err);
-        alert("Sunucuya ulaşılamadı.");
+        alert("Sunucuya bağlanılamadı. Onay iletilemedi.");
     }
 }
 
-async function operasyonGunluguYukle() {
+// --------------------------------------------------------------------------
+// UI-06: ZAMAN SERİSİ GRAFİĞİ (ORTAM, TERMAL MAKS, L1, L2, L3)
+// --------------------------------------------------------------------------
+async function zamanSerisiYukle() {
+    const modulId = state.aktifModulId;
+    if (!modulId) return;
+
+    const currentToken = ++seriesRequestToken;
+    const metricSelect = document.getElementById('timeseries-metric');
+    const intervalSelect = document.getElementById('timeseries-interval');
+    const msgEl = document.getElementById('timeseries-message');
+    const infoEl = document.getElementById('timeseries-info');
+
+    const metrik = (metricSelect && metricSelect.value) || state.seriKanal;
+    const aralik = (intervalSelect && intervalSelect.value) || state.seriAralik;
+
+    if (msgEl) {
+        msgEl.style.display = 'flex';
+        msgEl.className = 'timeseries-message';
+        msgEl.textContent = 'Zaman serisi yükleniyor...';
+    }
+
     try {
-        const res = await apiFetch('/gecisler?limit=30');
-        if (res.ok) {
-            const data = await res.json();
-            const gecisler = (data.veriler || []).slice().reverse();
-            const remoteEntries = gecisler.map(g => {
-                const zamanStr = g.zaman ? formatZamanTr(g.zaman) : '';
-                let text = '';
-                if (g.alan === 'durum') {
-                    if (g.yeni === 'onaylandi') {
-                        text = `✅ Operatör Onayı: <b>${g.anomali_id}</b> onaylandı (Operatör: ${g.aktor})`;
-                    } else if (g.yeni === 'kapandi') {
-                        text = `🛡️ Anomali Kapatıldı: <b>${g.anomali_id}</b> (${g.aktor})`;
-                    } else if (g.yeni === 'acik') {
-                        text = `🚨 Anomali Başlatıldı: <b>${g.anomali_id}</b>`;
-                    } else {
-                        text = `Durum: <b>${g.anomali_id}</b> → ${g.yeni} (${g.aktor})`;
-                    }
-                } else if (g.alan === 'seviye') {
-                    text = `📶 Seviye: <b>${g.anomali_id}</b> (${g.onceki || 'normal'} → ${g.yeni})`;
-                } else {
-                    text = `${g.anomali_id}: ${g.alan} → ${g.yeni}`;
-                }
-                return { time: zamanStr, mesaj: text, isRemote: true };
-            });
-
-            const localEntries = state.auditLog.filter(l => !l.isRemote);
-            state.auditLog = [...localEntries, ...remoteEntries];
-            renderAuditLog();
+        let url = `/moduller/${encodeURIComponent(modulId)}/seri?tip=${encodeURIComponent(metrik)}`;
+        if (aralik) {
+            url += `&aralik=${encodeURIComponent(aralik)}`;
         }
-    } catch (e) {
-        console.warn("Operasyon günlüğü çekilemedi:", e);
+
+        const res = await apiFetch(url);
+        if (currentToken !== seriesRequestToken) return;
+
+        if (!res.ok) {
+            const errData = await res.json().catch(() => ({}));
+            if (currentToken !== seriesRequestToken) return;
+
+            if (errData && errData.hata && errData.hata.kod === 'cok_fazla_nokta') {
+                if (msgEl) {
+                    msgEl.style.display = 'flex';
+                    msgEl.className = 'timeseries-message error';
+                    msgEl.textContent = 'Çok fazla nokta: Lütfen daha geniş bir kova aralığı seçin.';
+                }
+            } else {
+                if (msgEl) {
+                    msgEl.style.display = 'flex';
+                    msgEl.className = 'timeseries-message error';
+                    msgEl.textContent = 'Grafik yüklenemedi.';
+                }
+            }
+            state.seriNoktalar = [];
+            zamanSerisiCiz([], metrik, aralik);
+            return;
+        }
+
+        const data = await res.json();
+        if (currentToken !== seriesRequestToken) return;
+
+        const noktalar = Array.isArray(data.noktalar) ? data.noktalar : [];
+        state.seriNoktalar = noktalar;
+
+        if (noktalar.length === 0) {
+            if (msgEl) {
+                msgEl.style.display = 'flex';
+                msgEl.className = 'timeseries-message';
+                msgEl.textContent = 'Bu aralıkta ölçüm yok';
+            }
+            if (infoEl) infoEl.textContent = `${metrik} — Ölçüm bulunamadı`;
+            zamanSerisiCiz([], metrik, aralik);
+            return;
+        }
+
+        if (msgEl) msgEl.style.display = 'none';
+        if (infoEl) {
+            infoEl.textContent = `${metrik} — ${noktalar.length} nokta (${aralik ? 'Kova: ' + aralik : 'Ham'})`;
+        }
+
+        zamanSerisiCiz(noktalar, metrik, aralik);
+    } catch (err) {
+        if (currentToken !== seriesRequestToken) return;
+        console.warn("Zaman serisi hatası:", err);
+        if (msgEl) {
+            msgEl.style.display = 'flex';
+            msgEl.className = 'timeseries-message error';
+            msgEl.textContent = 'Grafik yüklenemedi';
+        }
+        state.seriNoktalar = [];
+        zamanSerisiCiz([], metrik, aralik);
     }
 }
 
-function addAuditLog(mesaj) {
-    const time = new Date().toLocaleTimeString('tr-TR', { timeZone: 'Europe/Istanbul' });
-    state.auditLog.unshift({ time, mesaj, isRemote: false });
-    renderAuditLog();
+function zamanSerisiCiz(noktalar, metrik, aralik) {
+    const canvas = document.getElementById('timeseriesCanvas');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    const w = canvas.width;
+    const h = canvas.height;
+
+    ctx.clearRect(0, 0, w, h);
+
+    // Koyu SCADA arka plan
+    ctx.fillStyle = '#070b14';
+    ctx.fillRect(0, 0, w, h);
+
+    if (!noktalar || noktalar.length === 0) return;
+
+    const isCurrent = metrik.startsWith('akim_');
+    const unit = isCurrent ? 'A' : '°C';
+
+    const paddingLeft = 60;
+    const paddingRight = 30;
+    const paddingTop = 25;
+    const paddingBottom = 30;
+    const plotW = w - paddingLeft - paddingRight;
+    const plotH = h - paddingTop - paddingBottom;
+
+    // Değerleri çıkar
+    const parsedPoints = noktalar.map((pt, idx) => {
+        const val = aralik ? pt.ort : pt.deger;
+        const num = (val !== null && val !== undefined) ? Number(val) : null;
+        const isSupheli = aralik ? ((pt.supheli || 0) > 0) : (pt.kalite !== 'iyi');
+        return {
+            xIdx: idx,
+            val: num,
+            asgari: pt.asgari !== undefined ? Number(pt.asgari) : null,
+            azami: pt.azami !== undefined ? Number(pt.azami) : null,
+            zaman: pt.zaman,
+            supheli: isSupheli
+        };
+    }).filter(p => p.val !== null && !isNaN(p.val));
+
+    if (parsedPoints.length === 0) return;
+
+    let minVal = Math.min(...parsedPoints.map(p => p.asgari !== null ? p.asgari : p.val));
+    let maxVal = Math.max(...parsedPoints.map(p => p.azami !== null ? p.azami : p.val));
+    if (minVal === maxVal) {
+        minVal -= 1;
+        maxVal += 1;
+    }
+    const valRange = maxVal - minVal;
+
+    // Izgara ve Y ekseni etiketleri
+    ctx.strokeStyle = '#17233d';
+    ctx.lineWidth = 1;
+    ctx.fillStyle = '#64748b';
+    ctx.font = '10px monospace';
+    ctx.textAlign = 'right';
+
+    const yAdim = 4;
+    for (let i = 0; i <= yAdim; i++) {
+        const ratio = i / yAdim;
+        const y = paddingTop + plotH * (1 - ratio);
+        const labelVal = (minVal + valRange * ratio).toFixed(1);
+
+        ctx.beginPath();
+        ctx.moveTo(paddingLeft, y);
+        ctx.lineTo(w - paddingRight, y);
+        ctx.stroke();
+
+        ctx.fillText(`${labelVal} ${unit}`, paddingLeft - 8, y + 3);
+    }
+
+    // X ekseni ve çizgi
+    const xStep = parsedPoints.length > 1 ? plotW / (parsedPoints.length - 1) : plotW / 2;
+
+    // Kovalanmış aralık min-max bandı
+    if (aralik) {
+        ctx.fillStyle = isCurrent ? 'rgba(59, 130, 246, 0.12)' : 'rgba(239, 68, 68, 0.12)';
+        ctx.beginPath();
+        parsedPoints.forEach((p, idx) => {
+            const x = paddingLeft + idx * xStep;
+            const yMax = paddingTop + plotH * (1 - (p.azami - minVal) / valRange);
+            if (idx === 0) ctx.moveTo(x, yMax);
+            else ctx.lineTo(x, yMax);
+        });
+        for (let idx = parsedPoints.length - 1; idx >= 0; idx--) {
+            const p = parsedPoints[idx];
+            const x = paddingLeft + idx * xStep;
+            const yMin = paddingTop + plotH * (1 - (p.asgari - minVal) / valRange);
+            ctx.lineTo(x, yMin);
+        }
+        ctx.closePath();
+        ctx.fill();
+    }
+
+    // Ana Seri Çizgisi
+    ctx.strokeStyle = isCurrent ? '#38bdf8' : '#ef4444';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+
+    parsedPoints.forEach((p, idx) => {
+        const x = paddingLeft + idx * xStep;
+        const y = paddingTop + plotH * (1 - (p.val - minVal) / valRange);
+        if (idx === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+    });
+    ctx.stroke();
+
+    // Noktalar ve Şüpheli Vurguları
+    parsedPoints.forEach((p, idx) => {
+        const x = paddingLeft + idx * xStep;
+        const y = paddingTop + plotH * (1 - (p.val - minVal) / valRange);
+
+        ctx.beginPath();
+        ctx.arc(x, y, p.supheli ? 4 : 2, 0, Math.PI * 2);
+        ctx.fillStyle = p.supheli ? '#f59e0b' : (isCurrent ? '#38bdf8' : '#ef4444');
+        ctx.fill();
+
+        if (p.supheli) {
+            ctx.strokeStyle = '#000';
+            ctx.lineWidth = 1;
+            ctx.stroke();
+        }
+    });
+
+    // Zaman etiketleri (İlk ve Son)
+    ctx.fillStyle = '#94a3b8';
+    ctx.font = '10px monospace';
+    ctx.textAlign = 'left';
+    ctx.fillText(formatZamanTr(parsedPoints[0].zaman) + ' TSİ', paddingLeft, h - 10);
+    ctx.textAlign = 'right';
+    ctx.fillText(formatZamanTr(parsedPoints[parsedPoints.length - 1].zaman) + ' TSİ', w - paddingRight, h - 10);
+}
+
+// --------------------------------------------------------------------------
+// UI-07: OPERASYON GÜNLÜĞÜ VE KÜRESEL GEÇİŞ AKIŞI
+// --------------------------------------------------------------------------
+async function operasyonGunluguYukle() {
+    const auditContainer = document.getElementById('audit-container');
+    if (!auditContainer) return;
+
+    try {
+        // UI-07 Kural 1: İlk yüklemede cursor ile son sayfaya kadar taranıp en büyük son 30 id tutulur
+        let tumGecisler = [];
+        let sonra = state.sonGecisId;
+        let devam = true;
+        const limit = 50;
+
+        // Eğer ilk kez çağrılıyorsa tüm akışı cursor'la sonuna kadar tara
+        if (state.sonGecisId === null) {
+            let cursor = null;
+            while (devam) {
+                let url = `/gecisler?limit=${limit}`;
+                if (cursor !== null) {
+                    url += `&sonra=${cursor}`;
+                }
+                const res = await apiFetch(url);
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                const data = await res.json();
+                const veriler = data.veriler || [];
+                tumGecisler.push(...veriler);
+
+                if (data.sonraki !== null && data.sonraki !== undefined && veriler.length > 0) {
+                    cursor = data.sonraki;
+                } else {
+                    devam = false;
+                }
+            }
+            // En büyük 30 id'yi al
+            state.gecisler = tumGecisler.slice(-30);
+            if (tumGecisler.length > 0) {
+                state.sonGecisId = tumGecisler[tumGecisler.length - 1].id;
+            }
+        } else {
+            // Sonraki yenilemelerde yalnız yeni gelenleri al
+            const res = await apiFetch(`/gecisler?sonra=${state.sonGecisId}&limit=${limit}`);
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+            const data = await res.json();
+            const yeniVeriler = data.veriler || [];
+            if (yeniVeriler.length > 0) {
+                state.gecisler = [...state.gecisler, ...yeniVeriler].slice(-30);
+                state.sonGecisId = yeniVeriler[yeniVeriler.length - 1].id;
+            }
+        }
+
+        state.gunlukHata = false;
+        renderAuditLog();
+    } catch (err) {
+        console.warn("Operasyon günlüğü hatası:", err);
+        state.gunlukHata = true;
+        renderAuditLog();
+    }
 }
 
 function renderAuditLog() {
     const container = document.getElementById('audit-container');
     if (!container) return;
 
-    if (state.auditLog.length === 0) {
-        container.innerHTML = `<div class="empty-audit"><p>Henüz operatör eylemi kaydedilmedi.</p></div>`;
+    container.innerHTML = '';
+
+    if (state.gunlukHata) {
+        const errNotice = document.createElement('div');
+        errNotice.style.padding = '8px 12px';
+        errNotice.style.color = '#fca5a5';
+        errNotice.style.fontSize = '0.75rem';
+        errNotice.style.background = 'rgba(239, 68, 68, 0.15)';
+        errNotice.style.borderRadius = 'var(--radius-sm)';
+        errNotice.style.marginBottom = '8px';
+        errNotice.textContent = '⚠️ Günlük güncellenemedi (Son başarılı liste korunuyor).';
+        container.appendChild(errNotice);
+    }
+
+    if (state.gecisler.length === 0) {
+        const emptyEl = document.createElement('div');
+        emptyEl.className = 'empty-audit';
+        emptyEl.innerHTML = '<p>Henüz operatör eylemi veya geçiş kaydedilmedi.</p>';
+        container.appendChild(emptyEl);
         return;
     }
 
-    container.innerHTML = state.auditLog.map(item => `
-        <div class="audit-entry">
-            <div class="audit-time">${item.time}</div>
-            <div class="audit-text">${item.mesaj}</div>
-        </div>
-    `).join('');
+    // En günceli en üstte göstermek için ters çevir
+    const gosterilecekler = state.gecisler.slice().reverse();
+
+    gosterilecekler.forEach(g => {
+        const entry = document.createElement('div');
+        entry.className = 'audit-entry';
+
+        const timeEl = document.createElement('div');
+        timeEl.className = 'audit-time';
+        timeEl.textContent = `${formatZamanTr(g.zaman)} TSİ (ID: ${g.id})`;
+
+        const textEl = document.createElement('div');
+        textEl.className = 'audit-text';
+
+        // UI-07 Kural 2: alan=durum ve alan=seviye ayrı anlamla gösterilir; onaylandi asla kapandi yazılmaz!
+        if (g.alan === 'durum') {
+            if (g.yeni === 'onaylandi') {
+                textEl.innerHTML = `✅ Operatör Onayı: <b>${escapeHtml(g.anomali_id)}</b> onaylandı (Operatör: ${escapeHtml(g.aktor || 'Bilinmiyor')})`;
+            } else if (g.yeni === 'kapandi') {
+                textEl.innerHTML = `🛡️ Anomali Kapatıldı: <b>${escapeHtml(g.anomali_id)}</b>`;
+            } else if (g.yeni === 'acik') {
+                textEl.innerHTML = `🚨 Yeni Anomali: <b>${escapeHtml(g.anomali_id)}</b> tespit edildi`;
+            } else {
+                textEl.innerHTML = `Durum Geçişi: <b>${escapeHtml(g.anomali_id)}</b> → ${escapeHtml(g.yeni)}`;
+            }
+        } else if (g.alan === 'seviye') {
+            textEl.innerHTML = `📶 Seviye Değişimi: <b>${escapeHtml(g.anomali_id)}</b> (${escapeHtml(g.onceki || 'normal')} → ${escapeHtml(g.yeni)})`;
+        } else {
+            textEl.textContent = `${g.anomali_id}: ${g.alan} → ${g.yeni}`;
+        }
+
+        entry.appendChild(timeEl);
+        entry.appendChild(textEl);
+        container.appendChild(entry);
+    });
 }
 
 // --------------------------------------------------------------------------
-// 6. YARDIMCI KONTROLLER & BAŞLANGIÇ
+// SİSTEM DURUMU, SAAT VE PERİYODİK TARAMA
 // --------------------------------------------------------------------------
 function setOnlineStatus(online) {
     state.isOnline = online;
@@ -1026,10 +1637,10 @@ function setOnlineStatus(online) {
     if (led && label) {
         if (online) {
             led.className = 'status-indicator online';
-            label.innerText = 'API ÇEVRİMİÇİ';
+            label.textContent = 'API ÇEVRİMİÇİ';
         } else {
             led.className = 'status-indicator offline';
-            label.innerText = 'BAĞLANTI KESİLDİ';
+            label.textContent = 'BAĞLANTI KESİLDİ';
         }
     }
 }
@@ -1038,104 +1649,166 @@ function updateClock() {
     const clock = document.getElementById('clock-display');
     if (clock) {
         const now = new Date();
-        clock.innerText = now.toLocaleTimeString('tr-TR', { timeZone: 'Europe/Istanbul' });
+        clock.textContent = now.toLocaleTimeString('tr-TR', { timeZone: 'Europe/Istanbul' }) + ' TSİ';
     }
 }
 
 function startPolling() {
     if (state.pollTimer) clearInterval(state.pollTimer);
     state.pollTimer = setInterval(() => {
-        if (!state.kanitKareModu && !state.seciliAnomaliId) {
+        if (!state.kanitKareModu && !state.seciliAnomaliId && state.aktifModulId) {
             modulDetayYukle(state.aktifModulId);
         }
         alarmlariYukle();
+        operasyonGunluguYukle();
     }, state.pollIntervalMs);
 }
 
-window.addEventListener('DOMContentLoaded', () => {
-    updateClock();
-    setInterval(updateClock, 1000);
+// Tarayıcı Olay Bağlantıları
+if (typeof window !== 'undefined' && typeof document !== 'undefined') {
+    window.addEventListener('DOMContentLoaded', () => {
+        updateClock();
+        setInterval(updateClock, 1000);
 
-    setupCanvasHover();
+        setupCanvasHover();
 
-    const btnRefresh = document.getElementById('btn-manual-refresh');
-    if (btnRefresh) {
-        btnRefresh.addEventListener('click', () => {
-            hiyerarsiyiYukle();
-            modulDetayYukle(state.aktifModulId);
-            alarmlariYukle();
-        });
-    }
+        const btnRefresh = document.getElementById('btn-manual-refresh');
+        if (btnRefresh) {
+            btnRefresh.addEventListener('click', () => {
+                hiyerarsiyiYukle();
+                if (state.aktifModulId) modulDetayYukle(state.aktifModulId);
+                alarmlariYukle();
+                operasyonGunluguYukle();
+                zamanSerisiYukle();
+            });
+        }
 
-    const btnLiveThermal = document.getElementById('btn-live-thermal');
-    if (btnLiveThermal) {
-        btnLiveThermal.addEventListener('click', () => {
-            canliGoruntuyeDon();
-        });
-    }
+        const btnLiveThermal = document.getElementById('btn-live-thermal');
+        if (btnLiveThermal) {
+            btnLiveThermal.addEventListener('click', () => {
+                canliGoruntuyeDon();
+            });
+        }
 
-    const btnAudio = document.getElementById('btn-audio-toggle');
-    if (btnAudio) {
-        btnAudio.addEventListener('click', () => {
-            state.audioEnabled = !state.audioEnabled;
-            document.getElementById('audio-icon').innerText = state.audioEnabled ? '🔔' : '🔕';
-            document.getElementById('audio-text').innerText = state.audioEnabled ? 'Ses Açık' : 'Sessiz';
-            if (state.audioEnabled) sfx.playAlert();
-        });
-    }
+        const btnAudio = document.getElementById('btn-audio-toggle');
+        if (btnAudio) {
+            btnAudio.addEventListener('click', () => {
+                state.audioEnabled = !state.audioEnabled;
+                const icon = document.getElementById('audio-icon');
+                const text = document.getElementById('audio-text');
+                if (icon) icon.textContent = state.audioEnabled ? '🔔' : '🔕';
+                if (text) text.textContent = state.audioEnabled ? 'Ses Açık' : 'Sessiz';
+                if (state.audioEnabled) sfx.playAlert();
+            });
+        }
 
-    const selectPoll = document.getElementById('poll-interval');
-    if (selectPoll) {
-        selectPoll.addEventListener('change', (e) => {
-            state.pollIntervalMs = parseInt(e.target.value, 10);
-            startPolling();
-        });
-    }
+        const selectPoll = document.getElementById('poll-interval');
+        if (selectPoll) {
+            selectPoll.addEventListener('change', (e) => {
+                state.pollIntervalMs = parseInt(e.target.value, 10);
+                startPolling();
+            });
+        }
 
-    const btnSmooth = document.getElementById('btn-toggle-smooth');
-    if (btnSmooth) {
-        btnSmooth.addEventListener('click', () => {
-            state.smoothMode = !state.smoothMode;
-            btnSmooth.innerText = `Pürüzsüzleştirme: ${state.smoothMode ? 'Açık' : 'Kapalı'}`;
-            termalKareCiz();
-        });
-    }
+        const btnSmooth = document.getElementById('btn-toggle-smooth');
+        if (btnSmooth) {
+            btnSmooth.addEventListener('click', () => {
+                state.smoothMode = !state.smoothMode;
+                btnSmooth.textContent = `Pürüzsüzleştirme: ${state.smoothMode ? 'Açık' : 'Kapalı'}`;
+                termalKareCiz();
+            });
+        }
 
-    const btnGrid = document.getElementById('btn-toggle-grid');
-    if (btnGrid) {
-        btnGrid.addEventListener('click', () => {
-            state.gridMode = !state.gridMode;
-            btnGrid.innerText = `Izgara: ${state.gridMode ? 'Açık' : 'Kapalı'}`;
-            termalKareCiz();
-        });
-    }
+        const btnGrid = document.getElementById('btn-toggle-grid');
+        if (btnGrid) {
+            btnGrid.addEventListener('click', () => {
+                state.gridMode = !state.gridMode;
+                btnGrid.textContent = `Izgara: ${state.gridMode ? 'Açık' : 'Kapalı'}`;
+                termalKareCiz();
+            });
+        }
 
-    const tabActive = document.getElementById('tab-btn-active');
-    const tabHistory = document.getElementById('tab-btn-history');
-    const alarmsBox = document.getElementById('alarms-container');
-    const auditBox = document.getElementById('audit-container');
+        // Zaman Serisi Kontrolleri
+        const metricSelect = document.getElementById('timeseries-metric');
+        if (metricSelect) {
+            metricSelect.addEventListener('change', (e) => {
+                state.seriKanal = e.target.value;
+                zamanSerisiYukle();
+            });
+        }
 
-    if (tabActive && tabHistory && alarmsBox && auditBox) {
-        tabActive.addEventListener('click', () => {
-            tabActive.classList.add('active');
-            tabHistory.classList.remove('active');
-            alarmsBox.style.display = 'flex';
-            auditBox.style.display = 'none';
-        });
+        const intervalSelect = document.getElementById('timeseries-interval');
+        if (intervalSelect) {
+            intervalSelect.addEventListener('change', (e) => {
+                state.seriAralik = e.target.value;
+                zamanSerisiYukle();
+            });
+        }
 
-        tabHistory.addEventListener('click', () => {
-            tabHistory.classList.add('active');
-            tabActive.classList.remove('active');
-            alarmsBox.style.display = 'none';
-            auditBox.style.display = 'flex';
-            operasyonGunluguYukle();
-        });
-    }
+        const btnRefreshSeries = document.getElementById('btn-refresh-series');
+        if (btnRefreshSeries) {
+            btnRefreshSeries.addEventListener('click', () => {
+                zamanSerisiYukle();
+            });
+        }
 
-    // İlk yüklemeler
-    hiyerarsiyiYukle();
-    modulDetayYukle(state.aktifModulId);
-    alarmlariYukle();
-    operasyonGunluguYukle();
-    startPolling();
-});
+        // Sekmeler
+        const tabActive = document.getElementById('tab-btn-active');
+        const tabHistory = document.getElementById('tab-btn-history');
+        const alarmsBox = document.getElementById('alarms-container');
+        const auditBox = document.getElementById('audit-container');
+
+        if (tabActive && tabHistory && alarmsBox && auditBox) {
+            tabActive.addEventListener('click', () => {
+                tabActive.classList.add('active');
+                tabHistory.classList.remove('active');
+                alarmsBox.style.display = 'flex';
+                auditBox.style.display = 'none';
+            });
+
+            tabHistory.addEventListener('click', () => {
+                tabHistory.classList.add('active');
+                tabActive.classList.remove('active');
+                alarmsBox.style.display = 'none';
+                auditBox.style.display = 'flex';
+                operasyonGunluguYukle();
+            });
+        }
+
+        // İlk yüklemeler
+        hiyerarsiyiYukle();
+        alarmlariYukle();
+        operasyonGunluguYukle();
+        startPolling();
+    });
+}
+
+// Test ve dış ortam erişimi için globalThis ve module.exports desteği
+if (typeof globalThis !== 'undefined') {
+    globalThis.GridUpApp = {
+        state,
+        escapeHtml,
+        formatZamanTr,
+        seviyeNormalize,
+        enYuksekSeviye,
+        modulSeviyesiniGetir,
+        tamKareyiDogrula,
+        bolgelerdenTahminiMatrisUret,
+        sicaklikToRenk,
+        resetModulEkranGorunumu,
+        modulSec,
+        modulDetayYukle,
+        canliTermalYukle,
+        anomaliSec,
+        alarmOnayla,
+        zamanSerisiYukle,
+        zamanSerisiCiz,
+        hiyerarsiyiYukle,
+        alarmlariYukle,
+        operasyonGunluguYukle
+    };
+}
+
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = (typeof globalThis !== 'undefined' && globalThis.GridUpApp) ? globalThis.GridUpApp : {};
+}

@@ -34,6 +34,11 @@
                 <div class="control-divider"></div>
 
                 <div class="control-item">
+                    <label for="operator-id-input" class="control-label">Operatör:</label>
+                    <input type="text" id="operator-id-input" class="input-box" placeholder="Operatör ID" value="operator_1" title="Onay için zorunlu operatör kimliği">
+                </div>
+
+                <div class="control-item">
                     <label for="poll-interval" class="control-label">Yenileme:</label>
                     <select id="poll-interval" class="select-box">
                         <option value="2000">2 sn</option>
@@ -89,20 +94,23 @@
             <main class="panel main-monitor">
                 <div class="monitor-top-bar">
                     <div class="module-title-wrap">
-                        <span class="module-code-badge" id="active-module-badge">TR041-P01-M1</span>
-                        <h2 id="active-module-name">Giriş Fideri Modülü</h2>
-                        <span class="status-badge badge-normal" id="active-module-status-badge">NORMAL</span>
+                        <span class="module-code-badge" id="active-module-badge">--</span>
+                        <h2 id="active-module-name">Modül Seçiniz</h2>
+                        <span class="status-badge badge-normal" id="active-module-status-badge">DURUM BİLİNMİYOR</span>
+                        <span class="status-badge badge-device" id="active-module-device-badge">CİHAZ: --</span>
                     </div>
                     <div class="module-meta">
-                        <span class="meta-item">🕒 Son Güncelleme: <strong id="val-time">--:--:--</strong></span>
-                        <span class="meta-item">⚡ Besleme: <strong id="val-feed" class="badge-feed">ŞEBEKE</strong></span>
+                        <span class="meta-item">🕒 Son Görülme: <strong id="val-time">--:--:--</strong> <span class="badge-tz">TSİ</span></span>
+                        <span class="meta-item">⚡ Besleme: <strong id="val-feed" class="badge-feed">BİLİNMİYOR</strong></span>
                         <span class="meta-item">📶 RSSI: <strong id="val-rssi">-- dBm</strong></span>
                     </div>
                 </div>
 
+                <div id="module-error-banner" class="module-error-banner" style="display: none;"></div>
+
                 <!-- 6'lı Kritik Metrik Kartları -->
                 <section class="metrics-grid">
-                    <div class="metric-card">
+                    <div class="metric-card" id="card-temp">
                         <div class="card-icon">🌡️</div>
                         <div class="card-info">
                             <span class="card-title">Ortam Sıcaklığı</span>
@@ -111,16 +119,16 @@
                         </div>
                     </div>
 
-                    <div class="metric-card">
+                    <div class="metric-card" id="card-hum">
                         <div class="card-icon">💧</div>
                         <div class="card-info">
                             <span class="card-title">Bağıl Nem</span>
                             <div class="card-value"><strong id="val-hum">--</strong><span class="unit">%</span></div>
-                            <span class="card-sub">Optimum: %40-60</span>
+                            <span class="card-sub" id="hum-status">Optimum: %40-60</span>
                         </div>
                     </div>
 
-                    <div class="metric-card card-highlight">
+                    <div class="metric-card card-highlight" id="card-tmax">
                         <div class="card-icon">🔥</div>
                         <div class="card-info">
                             <span class="card-title">Termal Maks. Sıcaklık</span>
@@ -129,34 +137,34 @@
                         </div>
                     </div>
 
-                    <div class="metric-card">
+                    <div class="metric-card" id="card-current">
                         <div class="card-icon">⚡</div>
                         <div class="card-info">
                             <span class="card-title">3-Faz Akım Yükü</span>
                             <div class="card-value-multi">
                                 <span>L1: <b id="val-l1">--</b> A</span>
-                                <span>L2: <b id="val-l2" class="text-alert">--</b> A</span>
+                                <span>L2: <b id="val-l2">--</b> A</span>
                                 <span>L3: <b id="val-l3">--</b> A</span>
                             </div>
-                            <span class="card-sub" id="current-diff">Faz Dengesizliği: %--</span>
+                            <span class="card-sub" id="current-diff">Faz Dengesizliği: Hesaplanamadı</span>
                         </div>
                     </div>
 
-                    <div class="metric-card">
+                    <div class="metric-card" id="card-notr">
                         <div class="card-icon">⚖️</div>
                         <div class="card-info">
                             <span class="card-title">Nötr Akımı</span>
                             <div class="card-value"><strong id="val-notr">--</strong><span class="unit">A</span></div>
-                            <span class="card-sub">Dönüş Hattı Akımı</span>
+                            <span class="card-sub" id="notr-status">Dönüş Hattı Akımı</span>
                         </div>
                     </div>
 
-                    <div class="metric-card">
+                    <div class="metric-card" id="card-arc">
                         <div class="card-icon">🛡️</div>
                         <div class="card-info">
                             <span class="card-title">Ark Olay Sayacı</span>
-                            <div class="card-value"><strong id="val-arc">0</strong><span class="unit">Trip</span></div>
-                            <span class="card-sub">TVOC-2 Optik Koruma</span>
+                            <div class="card-value"><strong id="val-arc">--</strong><span class="unit">Trip</span></div>
+                            <span class="card-sub" id="arc-status">TVOC-2 Optik Koruma</span>
                         </div>
                     </div>
                 </section>
@@ -166,7 +174,7 @@
                     <div class="thermal-header">
                         <div class="thermal-title">
                             <h3>🔥 32×24 Termal Matris Isı Haritası</h3>
-                            <span class="thermal-resolution">768 Piksel (MLX90640 Sensör)</span>
+                            <span class="thermal-resolution" id="thermal-source-badge">Ölçülmüş Tam Kare</span>
                         </div>
                         <div class="thermal-actions">
                             <button id="btn-live-thermal" class="btn-sm" style="display:none; background: #2563eb; color: #fff; font-weight: 600;">📷 Canlı Görüntüye Dön</button>
@@ -179,9 +187,9 @@
                         <div class="canvas-box">
                             <canvas id="thermalCanvas" width="480" height="360"></canvas>
                             <!-- Canlı Sıcak Nokta Hedef Göstergesi -->
-                            <div id="hotspot-reticle" class="hotspot-reticle">
+                            <div id="hotspot-reticle" class="hotspot-reticle" style="display: none;">
                                 <span class="reticle-ring"></span>
-                                <span class="reticle-label" id="reticle-temp">83.5 °C</span>
+                                <span class="reticle-label" id="reticle-temp">-- °C</span>
                             </div>
                             <!-- Fare Hover HUD Tooltip -->
                             <div id="thermal-tooltip" class="thermal-tooltip">
@@ -190,24 +198,64 @@
                             </div>
                         </div>
 
-                        <!-- Termal Renk Skalası Lejantı -->
-                        <div class="thermal-legend-bar">
-                            <span class="legend-val" title="Kritik Sıcaklık: Kırmızı/Işıma">≥85°C (Kritik)</span>
-                            <span class="legend-val mid" title="Uyarı: Turuncu">70°C</span>
-                            <div class="legend-gradient"></div>
-                            <span class="legend-val mid" title="Ilık/Çalışma: Yeşil">50°C</span>
-                            <span class="legend-val mid" title="Normal: Camgöbeği">35°C</span>
-                            <span class="legend-val" title="Soğuk/Baz: Mavi">≤20°C (Normal)</span>
+                        <!-- Termal Renk Skalası Lejantı (Isı Ölçeği) -->
+                        <div class="thermal-legend-container">
+                            <div class="thermal-legend-bar">
+                                <span class="legend-val">≥85°C</span>
+                                <span class="legend-val mid">70°C</span>
+                                <div class="legend-gradient" title="Termal Isı Ölçeği"></div>
+                                <span class="legend-val mid">50°C</span>
+                                <span class="legend-val mid">35°C</span>
+                                <span class="legend-val">≤20°C</span>
+                            </div>
+                            <div class="legend-caption">Termal Isı Ölçeği (Sensör Dağılımı)</div>
                         </div>
                     </div>
 
                     <!-- Canlı Hotspot ve Tanı Bildirim Şeridi -->
                     <div class="thermal-status-banner" id="thermal-status-banner">
-                        <span class="banner-icon" id="banner-icon">✅</span>
+                        <span class="banner-icon" id="banner-icon">ℹ️</span>
                         <div class="banner-text">
-                            <strong id="banner-title">Termal Anomali Analizi:</strong>
-                            <span id="banner-desc">Sıcak nokta taranıyor...</span>
+                            <strong id="banner-title">Termal Durum:</strong>
+                            <span id="banner-desc">Termal veri bekleniyor...</span>
                         </div>
+                    </div>
+                </section>
+
+                <!-- Zaman Serisi Grafiği Bölümü (UI-06) -->
+                <section class="timeseries-section">
+                    <div class="timeseries-header">
+                        <div class="timeseries-title">
+                            <h3>📈 Zaman Serisi Geçmişi</h3>
+                            <span class="timeseries-sub" id="timeseries-info">Kanal ve kova aralığı seçin</span>
+                        </div>
+                        <div class="timeseries-controls">
+                            <label for="timeseries-metric" class="control-label">Metrik:</label>
+                            <select id="timeseries-metric" class="select-box">
+                                <option value="ortam_sicaklik" selected>Ortam Sıcaklığı (°C)</option>
+                                <option value="termal_maks">Termal Maks. Sıcaklık (°C)</option>
+                                <option value="akim_l1">Akım L1 (A)</option>
+                                <option value="akim_l2">Akım L2 (A)</option>
+                                <option value="akim_l3">Akım L3 (A)</option>
+                                <option value="akim_notr">Nötr Akımı (A)</option>
+                            </select>
+                            <label for="timeseries-interval" class="control-label">Aralık:</label>
+                            <select id="timeseries-interval" class="select-box">
+                                <option value="" selected>Ham Noktalar</option>
+                                <option value="10s">10 saniye</option>
+                                <option value="1m">1 dakika</option>
+                                <option value="5m">5 dakika</option>
+                                <option value="15m">15 dakika</option>
+                                <option value="1h">1 saat</option>
+                                <option value="1d">1 gün</option>
+                            </select>
+                            <button id="btn-refresh-series" class="btn-sm">Yenile</button>
+                        </div>
+                    </div>
+
+                    <div class="timeseries-viewport">
+                        <canvas id="timeseriesCanvas" width="760" height="210"></canvas>
+                        <div id="timeseries-message" class="timeseries-message" style="display: none;"></div>
                     </div>
                 </section>
             </main>
@@ -217,13 +265,13 @@
                 <div class="panel-header">
                     <div class="panel-title">
                         <span class="icon">🚨</span>
-                        <h2>Aktif Alarmlar</h2>
+                        <h2>Çözülmemiş Alarmlar</h2>
                     </div>
                     <span class="alarm-counter" id="active-alarm-count">0</span>
                 </div>
 
                 <div class="panel-tabs">
-                    <button class="tab-btn active" id="tab-btn-active">Açık Alarmlar</button>
+                    <button class="tab-btn active" id="tab-btn-active">Açık & Onaylı</button>
                     <button class="tab-btn" id="tab-btn-history">Operasyon Günlüğü</button>
                 </div>
 
