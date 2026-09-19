@@ -106,6 +106,10 @@ let detailRequestToken = 0;
 // kendisinden yeni bir BAŞARI yoksa yine de boyanır (aşağıda, catch'te).
 let detailLastOkToken = 0;
 let detailInFlight = false;
+let detailInFlightSince = 0;
+// Süren istek bu süreyi aşarsa tarama yeni istek açabilir: hiç yanıt vermeyen
+// bir bağlantı (fetch'in zaman aşımı yoktur) taramayı sonsuza kadar kilitlemesin.
+const DETAY_ISTEK_KILIT_MS = 30000;
 let thermalRequestToken = 0;
 let seriesRequestToken = 0;
 let evidenceRequestToken = 0;
@@ -729,11 +733,12 @@ async function modulDetayYukle(modulId, isPolling = false) {
     // 502/504'ü saniyeler sonra döndürdüğünde 3 sn'lik tarama istekleri
     // birikiyor, her biri bir sonrakince "eski" sayılıp düşüyor ve hata hiç
     // boyanmıyordu: operatör ekranda bayat değerleri sağlıklı sanıyordu.
-    if (isPolling && detailInFlight) return;
+    if (isPolling && detailInFlight && (Date.now() - detailInFlightSince) < DETAY_ISTEK_KILIT_MS) return;
 
     // UI-02: Asenkron yarış durumu koruması için istek jetonu
     const currentToken = ++detailRequestToken;
     detailInFlight = true;
+    detailInFlightSince = Date.now();
 
     // UI-02: "Ekranda hangi modülün verisi boyalı?" sorusunun yanıtı state.aktifModulId
     // OLAMAZ: modulSec() çağrıdan önce aktif modülü değiştirdiği için karşılaştırma

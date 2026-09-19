@@ -682,6 +682,53 @@ test('UI-07: sayfa API kesintisinde açıldıysa ağaç bağlantı gelince kendi
     app.startPolling();
     await new Promise(r => setTimeout(r, 60));
     clearInterval(app.state.pollTimer);
+    app.state.pollTimer = null;
+    // Tetiklenmiş asenkron geri çağrılar bitsin; sonraki testlere sızmasın.
+    await new Promise(r => setTimeout(r, 30));
     assert.equal(app.state.hiyerarsiYuklendi, true, 'Tarama ağacı yeniden yükledi');
     assert.equal(app.state.aktifModulId, 'TR1-P1-M1', 'İlk modül kendiliğinden seçildi');
+});
+
+// --------------------------------------------------------------------------
+test('UI-02: yavaş tarama sürerken modül değişince tarama kilidi takılı kalmaz', async () => {
+    // Bot iddiası (PR #26, 1. tur): eski taramanın finally'si jetonu eskidiği için
+    // detailInFlight'ı temizlemez ve tarama sonsuza kadar kilitlenir. Kilidi en yeni
+    // istek temizler; o istek her zaman biter. Üretilerek çürütüldü, burada kilitli.
+    const doc = setupMockEnvironment();
+    const app = await loadApp();
+    app.canliGoruntuyeDon();
+
+    const bekleyen = [];
+    global.fetch = (url) => new Promise((resolve) => {
+        if (url.includes('/termal/son')) return resolve(yanit({}, { ok: false, status: 404 }));
+        if (url.includes('/seri')) return resolve(yanit({ noktalar: [] }));
+        bekleyen.push((id) => resolve(yanit(modulDetayi(id))));
+    });
+
+    // Önceki testlerden askıda kalmış istek olabilir; kullanıcı yolu (tarama değil)
+    // ile temiz bir başlangıç: M1 seçilir ve yanıtı gelir.
+    app.modulSec('M1', 'M1');
+    await new Promise(r => setTimeout(r, 0));
+    bekleyen.shift()('M1');
+    await new Promise(r => setTimeout(r, 5));
+    assert.equal(bekleyen.length, 0);
+
+    const yavasTarama = app.modulDetayYukle('M1', true);   // tarama isteği askıda
+    app.modulSec('M2', 'M2');                               // kullanıcı tıklar (tarama değil)
+    await new Promise(r => setTimeout(r, 0));
+    assert.equal(bekleyen.length, 2, 'Kullanıcı tıklaması tarama kilidine takılmaz');
+
+    bekleyen[1]('M2');                                      // yeni modül yanıtı önce
+    await new Promise(r => setTimeout(r, 5));
+    bekleyen[0]('M1');                                      // eski tarama sonra
+    await yavasTarama;
+    await new Promise(r => setTimeout(r, 5));
+
+    const onceki = bekleyen.length;
+    app.modulDetayYukle('M2', true);
+    await new Promise(r => setTimeout(r, 0));
+    assert.equal(bekleyen.length, onceki + 1, 'Sonraki tarama yeni istek açabiliyor: kilit takılı değil');
+    assert.equal(doc.getElementById('active-module-name').textContent, 'M2');
+    assert.equal(doc.getElementById('module-error-banner').style.display || 'none', 'none',
+        'Eski taramanın geç yanıtı M2 ekranına hata basmaz');
 });
