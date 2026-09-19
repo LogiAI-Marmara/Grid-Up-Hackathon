@@ -9,7 +9,7 @@
 
 Elektrik dağıtım şebekesindeki orta gerilim (OG) hücreleri ve alçak gerilim (AG) panolarında meydana gelen yangın, ekipman hasarı ve enerji kesintilerinin büyük bölümü (gevşek klemens, aşırı yük, faz dengesizliği, yoğuşma, yalıtım kaybı); **kritik arıza gerçekleşmeden önce ısınma, nem artışı ve akım dengesizlikleriyle sinyal verir.**
 
-**Grid-Up**, pano içine yerleştirilen endüstriyel sınıf sensör modülü tasarımıyla başlayıp, saha gateway'i üzerinden şirket içi (**on-premise**) sunucuya ulaşan, çok katmanlı istatistiksel anomali tespit motoruyla arızayı kök nedeninde yakalayan ve operatörlere **SCADA (Modbus TCP)**, **Web İzleme Arayüzü** ile **GSM/SMS & Telegram** üzerinden anlık bildirim ileten uçtan uca, çalışan bir erken uyarı sistemidir.
+**Grid-Up**, pano içine yerleştirilen endüstriyel sınıf sensör modülü tasarımıyla başlayıp, saha gateway'i üzerinden şirket içi (**on-premise**) sunucuya ulaşan, çok katmanlı istatistiksel anomali tespit motoruyla arızayı kök nedeninde yakalayan ve operatörlere **SCADA (Modbus TCP)**, **Web İzleme Arayüzü** ile yerel ağdaki **Android SMS Gateway** üzerinden SMS bildirimi ileten uçtan uca, çalışan bir erken uyarı sistemidir.
 
 > **Önemli Kısıtlar & Mimari İlkeler:**
 > 1. **%100 On-Premise:** Şartname gereği **Public Cloud (AWS, Azure, GCP vb.) kesinlikle kullanılmamıştır.** Tüm veri saklama, analiz, arayüz ve alarm servisleri yerel ağda tek bir `docker-compose` komutuyla izole çalışır.
@@ -54,7 +54,7 @@ Sistem, fiziksel pano içi donanımdan merkezi operasyon yüzüne kadar birbirin
         │         │                                         │
         │         └──► ⑥ Alarm Servisi                      │
         │                 ├─► Android SMS Gateway (LAN)     │
-        │                 └─► Telegram Bot (Acil Bildirim)  │
+        │                 └─► Telegram (isteğe bağlı; kapalı) │
         ═════════════════════════════════════════════════════
 ```
 
@@ -74,7 +74,7 @@ Yarışma şartnamesindeki tüm teslimat kalemleri projemizde eksiksiz karşıla
 | **T4** | **Monitoring (İzleme) Platformu** | [`arayuz/`](arayuz/) (Nginx üzerinde Web Dashboard, Isı Haritası, Canlı Metrikler) · [`modbus/`](modbus/) (SCADA Modbus TCP Sunucusu) |
 | **T5** | **Ölçeklenebilirlik & Kaynak Kullanımı** | [`analiz/`](analiz/) (100 modül eşzamanlı ingest ve anomali tarama testi, kaynak tüketim raporu) · [`modul-sim`](modul-sim/) (`--modul 100`) |
 | **T6** | **On-Premise / Özel Altyapı** | [`deploy/docker-compose.yml`](deploy/docker-compose.yml) (Public Cloud bağımsızlığı, tek komutla yerel orkestrasyon) |
-| **T7** | **Alarm ve Acil Bildirim Mekanizması** | [`alarm/`](alarm/) (SMS Gateway LAN adaptörü, Telegram Bot, 300s anti-flapping bastırma, dayanıklı durum motoru) |
+| **T7** | **Alarm ve Acil Bildirim Mekanizması** | [`alarm/`](alarm/) (Android SMS Gateway yerel sunucu kipi, olay bazlı tekrar önleme, bekleyen kuyruğu ve kalıcı durum; Telegram bulut hizmeti olduğu için varsayılan kuralda yok — bkz. `alarm/README.md`) |
 
 ---
 
@@ -102,7 +102,7 @@ Takım çalışması ve sözleşme sınırları 3 bağımsız iş izine bölünm
 │
 ├── arayuz/                    # İZ C: Web tabanlı SCADA/Monitoring arayüzü (HTML5/Vanilla JS/Nginx :80)
 ├── modbus/                    # İZ C: SCADA entegrasyonu için Modbus TCP sunucusu (:5020)
-├── alarm/                     # İZ C: Dayanıklı alarm dağıtım servisi (SMS Gateway & Telegram)
+├── alarm/                     # İZ C: Dayanıklı alarm dağıtım servisi (Android SMS Gateway, LAN)
 └── deploy/                    # İZ C: On-Premise Docker Compose dağıtım yapılandırması
 ```
 
@@ -118,7 +118,8 @@ Tüm sistemi şirket içi (on-premise) ortamda ayağa kaldırmak için:
 
 ### 2. Tek Komutla Başlatma
 ```bash
-# Repo kök dizininde ortam dosyasını oluşturun
+# (İsteğe bağlı) SMS gateway adresi/kimlik bilgileri için ortam dosyası;
+# yoksa da yığın kalkar, kritik alarmlar teslim edilene kadar kuyrukta bekler
 cp deploy/.env.example deploy/.env
 
 # Tüm servisleri arka planda ayağa kaldırın
@@ -181,7 +182,8 @@ pytest analiz/tests/
 # İZ C alarm servisi, Modbus sunucusu ve web arayüz sözleşme testleri
 cd alarm && python3 -m unittest test && cd ..
 python3 modbus/test_modbus_service.py
-node arayuz/tests/test_arayuz_sozlesme.mjs
+npm test --prefix arayuz                    # sözleşme + kabul testleri, node:test
+sh arayuz/dogrulama/docker_dogrula.sh       # imaj + Nginx vekil yolu (Docker gerekir)
 
 # Donanım EDA şematik bağlantı (netlist) doğrulaması ve mimari üreteci
 python3 docs/track-a/eda/verify_netlist.py docs/track-a/eda/GridUp-Modul.net
