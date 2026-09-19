@@ -34,9 +34,11 @@ echo "==> Ağ ve sahte API"
 docker network create "$AG" >/dev/null
 
 # Sahte API: /sahalar ucuna sabit bir yanıt döndürür.
+# `-w /srv` kullanılmaz: Git Bash (MSYS) `/srv`'yi Windows yoluna çevirip
+# docker'a bozuk gönderir. Dizin değişimi konteyner içindeki sh'a bırakılır.
 docker run -d --name "$API" --network "$AG" --network-alias "$API" \
-    -w /srv python:3.12-alpine sh -c \
-    'mkdir -p /srv && printf "%s" "{\"sahalar\":[]}" > /srv/sahalar && python -m http.server 8080' >/dev/null
+    python:3.12-alpine sh -c \
+    'mkdir -p /srv && cd /srv && printf "%s" "{\"sahalar\":[]}" > sahalar && python -m http.server 8080' >/dev/null
 
 echo "==> Arayüz konteyneri"
 docker run -d --name "$UI" --network "$AG" -p "$KONAK_PORT":80 "$IMAJ" >/dev/null

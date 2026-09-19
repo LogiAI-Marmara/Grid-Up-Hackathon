@@ -1,8 +1,8 @@
-# Arayüz imajına yalnız tarayıcıya sunulacak dosyalar girer.
+# Derleme bağlamını küçültür. Web köküne ne gireceğini Dockerfile'daki açık
+# COPY listesi belirler; nginx.conf burada DIŞLANMAZ, çünkü Dockerfile onu
+# /etc/nginx/conf.d/ altına kopyalamak zorundadır.
 tests/
+dogrulama/
 *.md
 Dockerfile
 .dockerignore
-# nginx.conf imaja COPY ile ayrıca alınır; web köküne kopyalanıp
-# yayımlanmamalıdır (iç upstream adını açığa çıkarır).
-nginx.conf
