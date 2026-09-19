@@ -133,7 +133,7 @@ docker compose -f deploy/docker-compose.yml up -d
 | **Toplama (Ingest) API** | `http://localhost:8000` | Gateway/Modül veri alım uç noktası (`POST /paket`, `GET /saglik`) |
 | **Okuma API'si (Analiz)** | `http://localhost:8080` | İz B REST API (`/sahalar`, `/moduller`, `/anomaliler`, Swagger `/docs`) |
 | **Modbus TCP Sunucusu** | `localhost:5020` | SCADA/RTU PLC entegrasyonu için Sözleşme ④ register haritası |
-| **PostgreSQL Veritabanı** | `localhost:5432` | Zaman serisi ve anomali veritabanı (`gridup` şeması) |
+| **PostgreSQL Veritabanı** | `veritabani:5432` *(Docker ağı içi)* | Merkezi zaman serisi ve anomali deposu (güvenlik için dış host portu kapalıdır) |
 
 ### 4. Duman Testini Koşturma
 Servislerin birbirleriyle uçtan uca haberleştiğini doğrulamak için:
@@ -170,7 +170,7 @@ Projeye dahil tüm bileşenler kapsamlı otomatik testlerle donatılmıştır:
 
 ```bash
 # Şema ve sözleşme tutarlılık denetimi
-python sozlesmeler/dogrula.py
+python3 sozlesmeler/dogrula.py
 
 # İZ A modül simülatörü ve toplama servisi testleri
 pytest modul-sim/tests/ toplama/tests/
@@ -178,12 +178,14 @@ pytest modul-sim/tests/ toplama/tests/
 # İZ B anomali motoru ve kör test doğrulayıcı testleri
 pytest analiz/tests/
 
-# İZ C alarm servisi ve Modbus sunucusu testleri
-cd alarm && python -m unittest test && cd ..
-python modbus/test_modbus_service.py
+# İZ C alarm servisi, Modbus sunucusu ve web arayüz sözleşme testleri
+cd alarm && python3 -m unittest test && cd ..
+python3 modbus/test_modbus_service.py
+node arayuz/tests/test_arayuz_sozlesme.mjs
 
-# Donanım dokümantasyonu, BOM aritmetiği ve SVG metin taşma kontrolleri
-python temp/kontrol.py
+# Donanım EDA şematik bağlantı (netlist) doğrulaması ve mimari üreteci
+python3 docs/track-a/eda/verify_netlist.py docs/track-a/eda/GridUp-Modul.net
+python3 docs/track-a/eda/gen_mimari.py
 ```
 
 ---
@@ -195,4 +197,4 @@ python temp/kontrol.py
 - **Onur Demir (onurdemir123456):** İZ C — Operasyon Yüzü, Web İzleme Arayüzü, Modbus TCP Sunucusu, Alarm Servisi, On-Prem Kompozisyon.
 
 ---
-*Proje lisansı: [MIT License](LICENSE)*
+*Proje lisansı: [Apache License 2.0](LICENSE)*
