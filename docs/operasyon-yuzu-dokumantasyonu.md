@@ -9,14 +9,14 @@
 
 ## 1. Giriş ve Amaç
 
-Bu doküman, ADM Elektrik ve GDZ Elektrik tarafından düzenlenen **Grid Up Hackathon** kapsamında geliştirilen **Pano/Hücre İçi Anomali Erken Uyarı Sistemi**'nin **İZ C (Operasyon Yüzü)** kulvarına ait güncel mimariyi, bileşen detaylarını, Modbus TCP register haritasını, Telegram acil bildirim servis kurallarını, modern web arayüzünü ve on-premise kurulum adımlarını tanımlar.
+Bu doküman, ADM Elektrik ve GDZ Elektrik tarafından düzenlenen **Grid Up Hackathon** kapsamında geliştirilen **Pano/Hücre İçi Anomali Erken Uyarı Sistemi**'nin **İZ C (Operasyon Yüzü)** kulvarına ait güncel mimariyi, bileşen detaylarını, Modbus TCP register haritasını, acil bildirim servisinin kanal kurallarını, modern web arayüzünü ve on-premise kurulum adımlarını tanımlar.
 
-İZ C kulvarı; sahadan toplanan (İZ A) ve yapay zeka/makine öğrenmesi algoritmalarıyla analiz edilen (İZ B) anomali verilerini operatörlerin 7/24 anlık takip edebileceği yüksek standartlı bir SCADA/Monitoring Operasyon Merkezine dönüştürür. Dış SCADA altyapılarına endüstriyel Modbus TCP üzerinden veri aktarırken, sahada görev yapan mühendislere anti-flapping korumalı acil Telegram alarmları iletir.
+İZ C kulvarı; sahadan toplanan (İZ A) ve yapay zeka/makine öğrenmesi algoritmalarıyla analiz edilen (İZ B) anomali verilerini operatörlerin 7/24 anlık takip edebileceği yüksek standartlı bir SCADA/Monitoring Operasyon Merkezine dönüştürür. Dış SCADA altyapılarına endüstriyel Modbus TCP üzerinden veri aktarırken, sahada görev yapan mühendislere, teslimi izlenen ve tekrarı önlenen acil alarmlar iletir.
 
 ### Karşılanan Hackathon Teslimat Kalemleri
 * **T4 (Monitoring / İzleme):** Merkezi toplama ve izleme web uygulaması, saha hiyerarşisi (`Saha → Pano → Modül`), 32×24 (768 piksel) termal ısı haritası görselleştirmesi, canlı sıcak nokta (hotspot) reticle takibi ve SCADA entegrasyonu (Modbus TCP haritalama).
 * **T6 (On-Premise / Yerel Altyapı):** Public Cloud (AWS, Azure, GCP vb.) kullanılmaksızın şirket içi/yerel sunucu altyapısında çalışma garantisi (`docker-compose.yml` mikroservis kompozisyonu).
-* **T7 (Alarm ve Acil Bildirim Mekanizması):** Kritik ve Uyarı durumlarında operasyon ekiplerine gerekçe odaklı anlık Telegram bildirimi iletimi (`Telegram Bot API` entegrasyonu), HTML güvenlik zırhı ve 300 saniyelik anti-flapping (tekrar önleme) yönetimi.
+* **T7 (Alarm ve Acil Bildirim Mekanizması):** Kritik ve Uyarı seviyelerinde seviye→kanal kuralına göre dış bildirim; kritik için on-prem SMS gateway **zorunlu** kanaldır. Teslim edilemeyen alarm yeniden denenir, olay bazlı tekrar önleme (varsayılan 300 sn) mükerrer bildirimi engeller. **Kanal seçimi (yerel GSM modemi / SMS gateway) ekip kararı olarak açıktır; gerçek SIM üzerinden teslim doğrulanmamıştır.**
 
 ---
 
@@ -38,10 +38,13 @@ Proje dizini, yarışmanın tek repo standartlarına uygun olarak modüler mikro
 │   ├── modbus_server.py            ← Port 5020 PyModbus Asenkron Sunucu & API Senkronizasyonu
 │   ├── test_client.py              ← SCADA İstemci Okuma Doğrulama Testi
 │   └── Dockerfile                  ← Modbus Konteyneri
-├── alarm/                     ← İZ C: Anomali Dinleyici & Telegram Alarm Servisi
-│   ├── alarm_service.py            ← Telegram Bot API Entegrasyonu & Anti-Flapping Yöneticisi
-│   ├── test.py                     ← Dahili Threaded Entegrasyon & Cooldown Testi
-│   ├── test_alarm_with_mock.py     ← Mock API Dinleyici Test Betiği
+├── alarm/                     ← İZ C: Anomali Geçiş Dinleyici & Alarm Servisi
+│   ├── alarm_service.py            ← Geçiş değerlendirme, teslim takibi, tekrar önleme
+│   ├── kanallar.py                 ← Kanallar (konsol / on-prem SMS / Telegram) & seviye kuralı
+│   ├── durum.py                    ← Atomik kalıcı durum, bozuk dosya politikası
+│   ├── test.py                     ← 41 birim/davranış testi (A-01..A-05)
+│   ├── entegrasyon_testi.py        ← Gerçek süreç yeniden başlatma testi
+│   ├── README.md                   ← Alarm servisi işletme dokümanı
 │   └── Dockerfile                  ← Alarm Konteyneri
 ├── deploy/                    ← İZ C: On-Premise Dağıtım
 │   └── docker-compose.yml          ← Tek Komutla 4 Mikroservisli Dağıtım Kompozisyonu
@@ -109,15 +112,85 @@ Modbus servisi, çalışma anında `API_URL` üzerinden canlı modül verilerini
 
 ---
 
-## 5. Alarm ve Telegram Acil Bildirim Servisi (`/alarm`)
+## 5. Alarm ve Acil Bildirim Servisi (`/alarm`)
 
-Kritik arıza ve yangın başlangıcı durumlarının operatörün gözünden kaçmaması için **Telegram Bot API** entegrasyonlu alarm servisi (`alarm_service.py`) geliştirilmiştir.
+Kritik arızanın operatörün gözünden kaçmaması için `GET /gecisler` akışını
+dinleyen, çok kanallı bir alarm servisi geliştirilmiştir. Ayrıntılı işletme
+dokümanı: **`alarm/README.md`**.
 
-### Temel Özellikler
-1. **Gerekçe Odaklı HTML Bildirim:** Mesajda yalnızca alarm seviyesi değil; anomali skoru, tespit zamanı ve İZ B yapay zeka modelinin ürettiği `gerekce` metni zengin HTML biçimlendirmesiyle iletilir.
-2. **HTML Güvenlik Zırhı (`html.escape`):** Gerekçe ve modül metinlerindeki özel karakterler (`<`, `>`, `&`) Telegram API ayrıştırıcısını bozmayacak şekilde filtrelenir.
-3. **Anti-Flapping (Tekrar Önleme):** Aynı modülden gelen ardışık alarmlar için belirlenen bekleme süresi (`COOLDOWN_SECONDS = 300` sn / 5 dk) boyunca mükerrer bildirim gönderimi engellenir. Operatör spama maruz kalmaz.
-4. **Ortam Değişkeni Desteği:** `API_URL`, `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID` ve `COOLDOWN_SECONDS` değerleri Docker ve ortam değişkenlerinden dinamik olarak yapılandırılabilir.
+### 5.1 Dört ayrı olay, dört ayrı söz
+
+Servis şunları bilerek birbirinden ayırır ve raporlarda da ayrı tutulmalıdır:
+
+| Söz | Ne demek | Kim görebilir |
+|---|---|---|
+| **loglandı** | Konsol kanalı satırı yazdı | Servis |
+| **kanal kabul etti** | SMS gateway / Telegram 2xx döndü | Servis |
+| **SMS gerçekten teslim edildi** | Operatörün telefonunda mesaj var | **Servis göremez** |
+| **operatör onayladı** | `POST /anomaliler/{id}/onayla` çağrıldı | İZ B / arayüz |
+
+### 5.2 Seviye → kanal kuralı
+
+`ALARM_KANAL_KURALI` ile tanımlanır; sondaki `!` o kanalı **zorunlu** yapar.
+Varsayılan: `uyari:konsol,sms | kritik:konsol,sms!`
+
+* `normal`, `izle` → dış bildirim yok.
+* `uyari` → konsol + SMS denenir; SMS hatası olayı bekletmez.
+* `kritik` → SMS **zorunlu**; gateway reddederse olay teslim edilmiş sayılmaz.
+
+`konsol` hiçbir varsayılan kuralda zorunlu değildir: kritik alarmın yalnız
+loga yazılması dış bildirim sayılmaz.
+
+### 5.3 Kanal seçimi ve public cloud kısıtı — **AÇIK BAĞIMLILIK**
+
+Karar kaydı §T6 public cloud'u yasaklar. `sms` kanalı belirli bir ürüne bağlı
+değildir: yapılandırılabilir alan adlarıyla yerel bir HTTP uca POST eder, yani
+yerel GSM modemi, Android SMS Gateway veya kurum içi gateway aynı adaptörle
+sürülür. **Hangisinin kullanılacağı henüz seçilmemiştir.**
+
+Telegram kanalı korunmuştur ama **bulut** olarak işaretlidir, varsayılan
+kuralda yer almaz ve açıkken servis §T6 ile çeliştiğini açılışta yazar.
+WhatsApp Business API de bulut tarafında çalışır ve aynı çelişkiyi taşır.
+
+**Gerçek bir SIM'den gerçek bir telefona uçtan uca SMS teslimi
+DOĞRULANMAMIŞTIR;** testlerdeki "teslim", sahte bir gateway'in isteği kabul
+etmesidir. Maliyet ve fiilî teslim ayrıca doğrulanmalıdır.
+
+### 5.4 Tekrar önleme
+
+Anahtar **olaydır, modül değil**: `anomali_id + hedef seviye`.
+
+* Aynı moduldeki iki ayrı anomali birbirini bastırmaz.
+* `uyari → kritik` yükselmesi önceki `uyari` bildiriminin bekleme süresine
+  takılmaz.
+* Aynı olayın aynı seviyedeki eşdeğer tekrarı `COOLDOWN_SECONDS` (varsayılan
+  300 sn) boyunca bastırılır — "aynı alarm 50 kez gitmesin".
+* **Başarısız teslim tekrar önleme başlatmaz**: kanal hatası kendi yeniden
+  denemesini bastıramaz.
+
+### 5.5 Teslim takibi ve kalıcı durum
+
+Zorunlu kanal başarısızsa olay teslim edilmiş sayılmaz; geçiş tam gövdesiyle
+`bekleyen` kuyruğuna alınır ve imleçle **aynı atomik yazımda** kalıcılaşır.
+İmleç ilerler (tek bir başarısız olay arkasındaki kritik alarmları rehin
+almaz) ama başarısız geçiş atlanmaz: üstel geri çekilmeyle yeniden denenir ve
+servis/konteyner yeniden başlatmasından sağ çıkar.
+
+Durum `/durum/alarm_state.json` altında, `gridup_alarm_durum` volume'unda
+tutulur. Yazma hatası başarı sayılmaz, bozuk durum dosyası sessizce
+sıfırlanmaz (varsayılan: servis açılmaz).
+
+**Kabul edilen sınır:** kanal olumlu yanıt verdikten sonra durum diske inmeden
+süreç ölürse o bildirim yeniden gönderilebilir. Tekrar bildirim ile sessiz
+alarm kaybı arasında tercih yapılmış, tekrar bildirim seçilmiştir.
+
+### 5.6 Ortam değişkenleri
+
+`API_URL`, `POLL_INTERVAL`, `COOLDOWN_SECONDS`, `ALARM_KANAL_KURALI`,
+`ALARM_STATE_FILE`, `ALARM_BOZUK_DURUM`, `SMS_GATEWAY_URL`, `SMS_ALICILAR`,
+`SMS_GATEWAY_TOKEN`, `SMS_GATEWAY_ALICI_ALANI`, `SMS_GATEWAY_MESAJ_ALANI`,
+`TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID`. Tam liste `alarm/README.md` §2'de.
+Repoda gömülü anahtar yoktur (Madde 15).
 
 ---
 
@@ -165,7 +238,7 @@ docker compose up -d --build
 | **Monitoring Arayüzü** | `gridup_arayuz` | `80:80` | Nginx üzerinde çalışan modern operasyon arayüzü |
 | **SCADA Modbus Sunucusu** | `gridup_modbus` | `5020:5020` | Dış SCADA/RTU sistemlerine Holding Register yayını |
 | **Mock API & Dashboard** | `gridup_mock_api` | `8000:8000` | Canlı veri simülasyonu, REST API ve arayüz sunumu |
-| **Telegram Alarm Servisi** | `gridup_alarm` | Dahili Ağ | Arka plan anomali dinleyicisi & Telegram bot entegrasyonu |
+| **Alarm Servisi** | `gridup_alarm` | Dahili Ağ | Geçiş akışı dinleyicisi, seviye→kanal kuralı, on-prem SMS bildirimi (`gridup_alarm_durum` volume'u ile kalıcı durum) |
 
 ---
 
@@ -187,14 +260,19 @@ Sistem bileşenleri uçtan uca test edilmiş ve doğrulanmıştır:
    python modbus/test_client.py
    # 100. register'dan 11 parametre başarıyla okunmuş ve fiziki birimlere dönüştürülmüştür.
    ```
-3. **Telegram Alarm & Anti-Flapping Testi:**
+3. **Alarm Servisi Testleri:**
    ```bash
-   python alarm/test.py
-   # 1. turda alarm başarıyla iletilmiş, sonraki 4 turda anti-flapping (300 sn) devrede kalarak spamsız çalışma doğrulanmıştır.
+   cd alarm && python3 -m unittest test        # 41 test — A-01..A-05 olumlu/olumsuz yolları
+   cd alarm && python3 entegrasyon_testi.py    # servisi gerçek süreç olarak öldürüp yeniden başlatır
    ```
+   Her ikisi de geçmektedir. Hiçbiri gerçek veritabanına, gerçek `/gecisler`
+   ucuna ya da gerçek bir alıcıya bağlanmaz: HTTP uçları ve SMS gateway
+   sahtedir. Bu testler "kanal kabul etti"yi gösterir, **gerçek SMS teslimini
+   göstermez**. Konteyner yeniden oluşturma testi (`docker compose down && up`)
+   **henüz çalıştırılmamıştır**.
 
 ---
 
 ## 9. Sonuç
 
-Grid Up Hackathon İZ C (Operasyon Yüzü); endüstriyel SCADA uyumluluğunu, modern web tabanlı izleme panelini, termal matris görselleştirmesini, anti-flapping korumalı acil bildirim mekanizmasını ve tam yerel (on-premise) dağıtılabilirliği tek bir profesyonel mimari çatısı altında başarıyla sunmaktadır.
+Grid Up Hackathon İZ C (Operasyon Yüzü); endüstriyel SCADA uyumluluğunu, modern web tabanlı izleme panelini, termal matris görselleştirmesini, teslim takibi yapan ve olay bazlı tekrar önleme uygulayan acil bildirim mekanizmasını ve tam yerel (on-premise) dağıtılabilirliği tek bir mimari çatı altında sunmaktadır. Acil bildirim kanalının nihai seçimi ve gerçek SMS teslimi doğrulaması **açık maddedir**.
