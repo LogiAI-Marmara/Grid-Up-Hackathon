@@ -1,4 +1,4 @@
-# kodlar/deploy/sim_streamer.py
+# deploy/sim_streamer.py
 """
 Grid Up - Canlı Gerçek Zamanlı Simülasyon Akışçısı (Live Real-Time Streamer)
 Sözleşme ① paketlerini gerçek zamanlı olarak (sistem UTC saati ile) üretip
@@ -23,7 +23,10 @@ logging.basicConfig(
     format="%(asctime)s - [%(levelname)s] - %(message)s"
 )
 
-TOPLAMA_URL = os.getenv("TOPLAMA_URL", "http://toplama:8000/paket")
+TOPLAMA_URL = os.getenv(
+    "TOPLAMA_URL",
+    "http://toplama:8000/paket" if os.path.exists("/.dockerenv") else "http://127.0.0.1:8000/paket"
+)
 MODUL_SAYISI = int(os.getenv("SIM_MODUL_SAYISI", "10"))
 ARALIK_SN = float(os.getenv("SIM_ARALIK_SN", "3.0"))
 SENARYO_AD = os.getenv("SIM_SENARYO", "").strip() or None
@@ -32,19 +35,20 @@ TOHUM = int(os.getenv("SIM_TOHUM", "20260914"))
 # Gerekli PYTHONPATH yapılandırması
 repo_kok = os.environ.get(
     "REPO_KOK",
-    os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "repo", "Grid-Up-Hackathon"))
+    os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 )
 if os.path.exists(os.path.join(repo_kok, "modul-sim")):
     sys.path.insert(0, os.path.join(repo_kok, "modul-sim"))
 if os.path.exists(repo_kok):
     sys.path.insert(0, repo_kok)
 
+# pyright: reportMissingImports=false
 try:
-    from modul_sim.ayar import topoloji
-    from modul_sim.fizik import Hava
-    from modul_sim.modul import Modul
-    from modul_sim.runner import PaylasilanHava
-    from modul_sim.senaryo import senaryo_olustur
+    from modul_sim.ayar import topoloji  # type: ignore
+    from modul_sim.fizik import Hava  # type: ignore
+    from modul_sim.modul import Modul  # type: ignore
+    from modul_sim.runner import PaylasilanHava  # type: ignore
+    from modul_sim.senaryo import senaryo_olustur  # type: ignore
 except ImportError as e:
     logging.error(f"modul_sim kütüphanesi içe aktarılamadı: {e}. sys.path={sys.path}")
     raise

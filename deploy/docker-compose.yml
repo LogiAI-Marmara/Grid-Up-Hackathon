@@ -33,7 +33,7 @@ services:
   # --------------------------------------------------------------------------
   toplama:
     build:
-      context: ../../repo/Grid-Up-Hackathon
+      context: ..
       dockerfile: toplama/Dockerfile
     container_name: gridup_toplama
     environment:
@@ -58,8 +58,8 @@ services:
   # --------------------------------------------------------------------------
   analiz_api:
     build:
-      context: ../..
-      dockerfile: kodlar/deploy/Dockerfile.analiz
+      context: ..
+      dockerfile: deploy/Dockerfile.analiz
     image: deploy-analiz:latest
     container_name: gridup_analiz_api
     environment:
@@ -171,8 +171,8 @@ services:
   # --------------------------------------------------------------------------
   simulator:
     build:
-      context: ../..
-      dockerfile: kodlar/deploy/Dockerfile.sim
+      context: ..
+      dockerfile: deploy/Dockerfile.sim
     container_name: gridup_simulator
     environment:
       - TOPLAMA_URL=http://toplama:8000/paket

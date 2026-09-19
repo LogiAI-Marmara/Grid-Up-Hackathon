@@ -1,4 +1,4 @@
-# kodlar/veri_okuma/cli.py
+# veri_okuma/cli.py
 """
 Grid Up - Komut Satırı Veri Okuma Aracı (CLI)
 Terminalden ölçüm verilerini, termal özetleri ve zaman serilerini

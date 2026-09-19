@@ -1,4 +1,4 @@
-# kodlar/veri_okuma/ornek_kullanim.py
+# veri_okuma/ornek_kullanim.py
 """
 Grid Up - Veri Okuma Paketi Örnek Kullanım Kılavuzu
 

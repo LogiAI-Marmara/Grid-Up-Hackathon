@@ -1,4 +1,4 @@
-# kodlar/veri_okuma/db_okuyucu.py
+# veri_okuma/db_okuyucu.py
 """
 Grid Up - PostgreSQL Veritabanı Doğrudan Veri Okuyucu
 PostgreSQL (gridup veritabanı) üzerinden doğrudan SQL sorguları ile

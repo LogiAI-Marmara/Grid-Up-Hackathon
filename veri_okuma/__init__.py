@@ -1,4 +1,4 @@
-# kodlar/veri_okuma/__init__.py
+# veri_okuma/__init__.py
 """
 Grid Up - Veri Okuma Paketi
 Hem REST API (FastAPI Port 8080) hem de doğrudan PostgreSQL (Port 5432)

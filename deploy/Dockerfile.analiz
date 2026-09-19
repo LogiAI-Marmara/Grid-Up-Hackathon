@@ -12,7 +12,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
     && rm -rf /var/lib/apt/lists/*
 
-COPY repo/Grid-Up-Hackathon /app/repo
+COPY . /app/repo
 WORKDIR /app/repo
 
 # Entegrasyon Madde 2.2 ve 7 gereği ortak sözlüğe asiri_yuk eklenmesi

@@ -1,4 +1,4 @@
-# kodlar/veri_okuma/api_okuyucu.py
+# veri_okuma/api_okuyucu.py
 """
 Grid Up - REST API Veri Okuyucu
 Analiz/Okuma API'si (Varsayılan: http://localhost:8080) üzerinden

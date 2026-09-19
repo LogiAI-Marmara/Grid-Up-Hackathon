@@ -156,9 +156,9 @@ def main(argv: list[str] | None = None) -> int:
 
     dosya_dizini = os.path.dirname(os.path.abspath(__file__))
     olasi_yollar = [
+        dosya_dizini,
         os.path.join(dosya_dizini, "repo", "Grid-Up-Hackathon"),
         os.path.abspath(os.path.join(dosya_dizini, "..", "repo", "Grid-Up-Hackathon")),
-        dosya_dizini,
     ]
     repo_kok = next((p for p in olasi_yollar if os.path.exists(os.path.join(p, "analiz"))), dosya_dizini)
 

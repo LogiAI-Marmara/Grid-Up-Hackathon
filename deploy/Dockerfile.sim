@@ -10,11 +10,11 @@ WORKDIR /app
 RUN pip install requests
 
 # Modül simülatörü kaynak kodu (modul-sim alt dizini) + sözleşmeler
-COPY repo/Grid-Up-Hackathon/modul-sim/ /app/modul-sim/
-COPY repo/Grid-Up-Hackathon/sozlesmeler/ /app/sozlesmeler/
+COPY modul-sim/ /app/modul-sim/
+COPY sozlesmeler/ /app/sozlesmeler/
 
 # Streamer script
-COPY kodlar/deploy/sim_streamer.py /app/sim_streamer.py
+COPY deploy/sim_streamer.py /app/sim_streamer.py
 
 # PYTHONPATH: sim_streamer.py'nin beklediği yol yapısı:
 #   repo_kok/modul-sim  ve  repo_kok

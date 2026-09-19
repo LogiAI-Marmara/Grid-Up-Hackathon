@@ -1,7 +1,7 @@
-# kodlar/veri_oku.py
+# veri_oku.py
 """
 Grid Up - Pratik Ölçüm Verisi Okuma Başlatıcısı
-Doğrudan `python kodlar/veri_oku.py` olarak çalıştırılabilir.
+Doğrudan `python veri_oku.py` olarak çalıştırılabilir.
 """
 
 import sys

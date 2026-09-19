@@ -1,0 +1,25 @@
+{
+  "python.analysis.extraPaths": [
+    "${workspaceFolder}/modul-sim",
+    "${workspaceFolder}/analiz",
+    "${workspaceFolder}/toplama",
+    "${workspaceFolder}",
+    "c:/Users/user/Desktop/universite/1. yıl/GripUpHackathon/repo/Grid-Up-Hackathon/modul-sim",
+    "c:/Users/user/Desktop/universite/1. yıl/GripUpHackathon/repo/Grid-Up-Hackathon/analiz",
+    "c:/Users/user/Desktop/universite/1. yıl/GripUpHackathon/repo/Grid-Up-Hackathon/toplama",
+    "c:/Users/user/Desktop/universite/1. yıl/GripUpHackathon/repo/Grid-Up-Hackathon"
+  ],
+  "python.autoComplete.extraPaths": [
+    "${workspaceFolder}/modul-sim",
+    "${workspaceFolder}/analiz",
+    "${workspaceFolder}/toplama",
+    "${workspaceFolder}",
+    "c:/Users/user/Desktop/universite/1. yıl/GripUpHackathon/repo/Grid-Up-Hackathon/modul-sim",
+    "c:/Users/user/Desktop/universite/1. yıl/GripUpHackathon/repo/Grid-Up-Hackathon/analiz",
+    "c:/Users/user/Desktop/universite/1. yıl/GripUpHackathon/repo/Grid-Up-Hackathon/toplama",
+    "c:/Users/user/Desktop/universite/1. yıl/GripUpHackathon/repo/Grid-Up-Hackathon"
+  ],
+  "python.analysis.diagnosticSeverityOverrides": {
+    "reportMissingImports": "none"
+  }
+}
