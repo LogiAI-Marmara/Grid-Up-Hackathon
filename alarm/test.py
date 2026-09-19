@@ -647,6 +647,57 @@ class TestA04Kalicilik(AlarmTestTabani):
         self.assertIsNone(yon.state["son_gecis_id"])
         self.assertFalse(os.path.exists(self.durum_yolu))
 
+    def test_beklenmeyen_kayit_hatasi_servisi_oldurmez(self):
+        """`kaydet` beklenmeyen bir şey atarsa servis ayakta kalmalı.
+
+        `save_state` yalnız `DurumYazmaHatasi` yakalıyordu; başka bir tip
+        (örn. json.dump'tan TypeError) poll_transitions'ı geçip
+        run_service'in döngüsünü kırıyordu.
+        """
+        sms = SahteKanal("sms")
+        api = SahteAPI(sayfalar=[[gecis(101, "an_A", "izle", "kritik")]])
+        yon = self.yonetici(api=api, sms=sms)
+
+        def beklenmeyen(durum):
+            raise TypeError("Object of type X is not JSON serializable")
+
+        yon.depo.kaydet = beklenmeyen
+        with self.assertLogs("alarm", level="ERROR"):
+            yon.poll_transitions()          # istisna dışarı kaçmamalı
+
+        # Kayıt başarısız sayıldı: bellek son kalıcı duruma geri alındı.
+        self.assertIsNone(yon.state["son_gecis_id"])
+
+    def test_serilestirilemeyen_durum_durum_yazma_hatasi_olur(self):
+        """json.dump'tan gelen TypeError tek bir hata tipine çevrilmeli."""
+        depo = DurumDeposu(self.durum_yolu)
+        durum = bos_durum()
+        durum["bekleyen"]["1"] = {"gecis": {"id": 1, "nesne": object()}}
+        with self.assertRaises(DurumYazmaHatasi):
+            depo.kaydet(durum)
+        # Yarım kalan geçici dosya bırakılmamalı.
+        self.assertFalse(os.path.exists(self.durum_yolu + ".tmp"))
+
+    def test_yazma_hatasi_basarili_yeniden_denemeyi_kaybetmez(self):
+        """Geri alma kayıp değil TEKRAR üretmeli (belgelenen tercih)."""
+        sms = SahteKanal("sms", sonuclar=[HATA, TESLIM])
+        api = SahteAPI(sayfalar=[[gecis(101, "an_A", "izle", "kritik")], [], []])
+        yon = self.yonetici(api=api, sms=sms)
+        yon.poll_transitions()
+        self.assertIn("101", yon.state["bekleyen"])
+
+        def patlat(durum):
+            raise DurumYazmaHatasi("disk dolu")
+
+        yon.depo.kaydet = patlat
+        with self.assertLogs("alarm", level="ERROR"):
+            yon.poll_transitions()      # yeniden deneme başarılı, yazma hatalı
+
+        # Alarm kaybolmadı: kuyrukta duruyor, tekrar gönderilecek.
+        self.assertIn("101", yon.state["bekleyen"])
+        with open(self.durum_yolu, encoding="utf-8") as f:
+            self.assertIn("101", json.load(f)["bekleyen"])
+
     def test_bozuk_durum_sessizce_sifirlanmaz(self):
         with open(self.durum_yolu, "w", encoding="utf-8") as f:
             f.write("{bu gecerli json degil")

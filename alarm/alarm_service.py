@@ -427,6 +427,18 @@ class AlarmManager:
             )
             self.state = copy.deepcopy(self._kalici)
             return False
+        except Exception:
+            # Son savunma hattı. Buradan kaçan herhangi bir istisna
+            # poll_transitions'ı geçip run_service'in döngüsünü kırar, yani
+            # ALARM SERVİSİNİ ÖLDÜRÜR. Beklenmeyen bir hata kaydı da
+            # başarısız sayılır: geri al, yüksek sesle logla, ayakta kal.
+            _GUNLUK.exception(
+                "🚨 Durum kaydedilirken beklenmeyen hata. Bellek son kalıcı duruma "
+                "geri alınıyor (son_gecis_id=%s); servis ayakta kalıyor.",
+                self._kalici.get("son_gecis_id"),
+            )
+            self.state = copy.deepcopy(self._kalici)
+            return False
         self._kalici = copy.deepcopy(self.state)
         return True
 

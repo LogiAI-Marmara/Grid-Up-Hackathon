@@ -172,10 +172,15 @@ class DurumDeposu:
                     os.close(dfd)
             except OSError:
                 pass  # her dosya sisteminde dizin fsync'i desteklenmiyor
-        except OSError as hata:
+        except (OSError, TypeError, ValueError) as hata:
+            # OSError disk/izin; TypeError ve ValueError json.dump'tan gelir
+            # (seri hale getirilemeyen bir değer duruma sızmışsa). Üçü de
+            # aynı şey demek: durum diske inmedi. Çağıranın tek bir hata
+            # tipi görmesi gerekiyor, yoksa beklenmeyen tip save_state'i
+            # geçip servisi öldürüyor.
             try:
                 if os.path.exists(gecici):
                     os.remove(gecici)
             except OSError:
                 pass
-            raise DurumYazmaHatasi(f"{self.yol}: {hata}") from hata
+            raise DurumYazmaHatasi(f"{self.yol}: {type(hata).__name__}: {hata}") from hata
