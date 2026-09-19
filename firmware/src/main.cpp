@@ -48,6 +48,7 @@ static bool kabinHazir = false;
 static uint32_t cevrimSayaci = 0;          // Modul._sayac
 static uint32_t arkSayaci = 0;             // Modul._ark_sayaci: TVOC-2 kümülatif trip
 static uint32_t sonTvocTrip = 0;
+static bool arkBekleyen = false;           // trip görüldü ama paket gönderilemedi: satır sonraki pakete
 static bool yedekte = false;               // şebeke kaybı görüldü mü
 static uint32_t yedekBaslangicMs = 0;      // kaybın görüldüğü an (yedekte iken anlamlı)
 static char yazBuf[20 * 1024];             // paket JSON'u (768 değer ≈ 5–6 KB)
@@ -297,12 +298,14 @@ void loop() {
 
     // ---- adım 5: ark sayacı (olay bazlı, periyot yok) ----
     const uint32_t arkTetik = arkTetikOku();
-    if (arkTetik) arkSayaci = min<uint32_t>(arkSayaci + arkTetik, 1000);
+    if (arkTetik) { arkSayaci = min<uint32_t>(arkSayaci + arkTetik, 1000); arkBekleyen = true; }
 
     // ---- adım 6: modülün saati ----
     char zaman[24];
     if (!zamanYaz(zaman, sizeof zaman)) {
-        Serial.println("zaman: SNTP yok, paket atlandi");   // sözleşme `zaman` ister; uydurulmaz
+        // sözleşme `zaman` ister; uydurulmaz. Wi-Fi yoksa SNTP de gelmez: bağlantıyı dene.
+        Serial.println("zaman: SNTP yok, paket atlandi");
+        if (WiFi.status() != WL_CONNECTED) WiFi.reconnect();
         return;
     }
 
@@ -331,7 +334,7 @@ void loop() {
             olcumSatiri(y, ilk, "nem", kabinOk ? kirp(kabinNem, 0.0f, 100.0f) : 0.0f, "%", zaman, kabinOk ? "iyi" : "yok");
         }
     }
-    if (arkTetik) olcumSatiri(y, ilk, "ark_olay", (float)arkSayaci, "olay", zaman, "iyi");
+    if (arkBekleyen) olcumSatiri(y, ilk, "ark_olay", (float)arkSayaci, "olay", zaman, "iyi");
     y.yaz("],");
 
     if (termalVar) {
@@ -359,6 +362,7 @@ void loop() {
         http.begin(TOPLAMA_URL);
         http.addHeader("Content-Type", "application/json");
         const int kod = http.POST((uint8_t*)yazBuf, strlen(yazBuf));
+        if (kod == 200 || kod == 201) arkBekleyen = false;   // ark satırı yerine ulaştı
         Serial.printf("POST /paket -> %d (%u bayt, kare %s, %s)\n", kod, (unsigned)strlen(yazBuf),
                       termalVar ? "var" : "yok", dusukGuc ? "dusuk guc" : (sebeke ? "sebeke" : "yedek"));
         http.end();
