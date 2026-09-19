@@ -12,7 +12,7 @@ hata koduyla çıkar. Arayüz `http://localhost/`, okuma API'si
 `http://127.0.0.1:8080`, toplama servisi `http://127.0.0.1:8000` ve Modbus TCP
 `localhost:5020` üzerindedir. PostgreSQL yalnız Docker ağı içinden
 `veritabani:5432` adresiyle erişilir. Telegram değişkenleri isteğe bağlıdır;
-`deploy/.env` dosyası gerekmez. Alarm imleci kalıcı `gridup_alarm_state`
+`deploy/.env` dosyası gerekmez. Alarm imleci kalıcı `gridup_alarm_durum`
 volume'unda tutulur.
 
 Entegrasyon duman testini depo kökünden çalıştırın:

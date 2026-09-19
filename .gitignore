@@ -72,6 +72,9 @@ $RECYCLE.BIN/
 docs/track-a/eda/.history/
 *.lck
 
+# PlatformIO
+firmware/.pio/
+
 # Markdown dokümanları
 *.md
 !deploy/README.md

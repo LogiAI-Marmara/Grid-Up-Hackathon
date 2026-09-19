@@ -149,21 +149,46 @@ services:
     build:
       context: ../alarm
       dockerfile: Dockerfile
+    container_name: gridup_alarm
+    # env_file yok: aşağıdaki `environment` bloğu gereken her değişkeni
+    # ${DEGISKEN:-} ile zaten alıyor ve Compose `deploy/.env` dosyasını
+    # değişken yerine koyma için kendiliğinden okuyor. `env_file: .env`
+    # ise dosya yoksa HATA verir; temiz bir klonda `docker compose config`
+    # bile çalışmıyordu.
     environment:
       - API_URL=http://analiz_api:8080
       - COOLDOWN_SECONDS=300
       - POLL_INTERVAL=5
+      # Seviye -> kanal kuralı. Sondaki '!' o kanalı ZORUNLU yapar: başarısız
+      # olursa olay teslim edilmiş sayılmaz ve yeniden denenir.
+      - ALARM_KANAL_KURALI=${ALARM_KANAL_KURALI:-uyari:konsol,sms|kritik:konsol,sms!}
+      # Acil bildirim kanalı: Android SMS Gateway, YEREL SUNUCU kipi.
+      # Aynı uygulamanın bulut kipi mesajı sms-gate.app üzerinden geçirir ve
+      # karar kaydı §T6'nın public cloud yasağıyla çelişir — yerel kip şart.
+      # Örn. SMS_GATEWAY_URL=http://192.168.1.50:8080/message
+      # Boş bırakılırsa kritik alarmlar TESLİM EDİLEMEZ ve bekleyen kuyruğunda
+      # birikir; servis bunu açılışta uyarı olarak yazar.
+      - SMS_GATEWAY_URL=${SMS_GATEWAY_URL:-}
+      - SMS_ALICILAR=${SMS_ALICILAR:-}
+      - SMS_GATEWAY_KULLANICI=${SMS_GATEWAY_KULLANICI:-}
+      - SMS_GATEWAY_PAROLA=${SMS_GATEWAY_PAROLA:-}
+      - SMS_GATEWAY_TOKEN=${SMS_GATEWAY_TOKEN:-}
+      # Yük alan adları noktalı yol kabul eder; varsayılanlar cihazın
+      # belgelenmiş gövdesidir: {"textMessage":{"text":...},"phoneNumbers":[...]}
+      - SMS_GATEWAY_ALICI_ALANI=${SMS_GATEWAY_ALICI_ALANI:-phoneNumbers}
+      - SMS_GATEWAY_MESAJ_ALANI=${SMS_GATEWAY_MESAJ_ALANI:-textMessage.text}
+      # Telegram kurum dışı bir bulut hizmetidir (karar kaydı §T6 ile çelişir).
+      # Varsayılan kuralda yer almaz; yalnız bilinçli olarak açılır.
       - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN:-}
       - TELEGRAM_CHAT_ID=${TELEGRAM_CHAT_ID:-}
-      - ALARM_STATE_FILE=/state/alarm_state.json
+      - ALARM_STATE_FILE=/durum/alarm_state.json
       - TZ=Europe/Istanbul
     volumes:
-      - gridup_alarm_state:/state
-    healthcheck:
-      test: ["CMD", "python", "-c", "import os,urllib.request; urllib.request.urlopen('http://analiz_api:8080/saglik', timeout=3).close(); assert os.path.isdir('/state')"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+      # A-04: imleç, bekleyen bildirimler ve tekrar önleme kayıtları konteyner
+      # yeniden oluşturulduğunda korunmalı. Bu volume olmadan `docker compose
+      # down && up` eski geçişleri yeniden bildirir ya da teslim geçmişini
+      # kaybeder.
+      - gridup_alarm_durum:/durum
     depends_on:
       analiz_api:
         condition: service_healthy
@@ -193,7 +218,7 @@ services:
 volumes:
   gridup_db_data:
     driver: local
-  gridup_alarm_state:
+  gridup_alarm_durum:
     driver: local
 
 networks:
