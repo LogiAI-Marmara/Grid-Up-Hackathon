@@ -274,6 +274,18 @@ class TelegramKanali(Kanal):
         self.zaman_asimi = zaman_asimi
         self.oturum = oturum or requests
 
+    def _gizle(self, metin: str) -> str:
+        """Token'ı dışarı çıkan her metinden siler.
+
+        Telegram API token'ı URL *yolunda* taşır. requests'in bağlantı hatası
+        mesajı istenen URL'i içerdiği için, ham hata metnini kanal sonucuna
+        koymak token'ı doğrudan loglara yazıyordu — log dosyasını gören
+        herkes botu ele geçirebilirdi.
+        """
+        if self.token and metin:
+            metin = metin.replace(self.token, "***TOKEN***")
+        return metin
+
     def yapilandirildi_mi(self) -> bool:
         return bool(self.token and self.chat_id)
 
@@ -328,12 +340,14 @@ class TelegramKanali(Kanal):
                 timeout=self.zaman_asimi,
             )
         except Exception as hata:
-            return KanalSonucu(self.ad, HATA, f"{type(hata).__name__}: {hata}")
+            return KanalSonucu(
+                self.ad, HATA, self._gizle(f"{type(hata).__name__}: {hata}")
+            )
 
         kod = getattr(yanit, "status_code", 0)
         if 200 <= kod < 300:
             return KanalSonucu(self.ad, TESLIM, f"HTTP {kod}")
-        govde = str(getattr(yanit, "text", ""))[:200]
+        govde = self._gizle(str(getattr(yanit, "text", ""))[:200])
         return KanalSonucu(self.ad, HATA, f"HTTP {kod}: {govde}")
 
 

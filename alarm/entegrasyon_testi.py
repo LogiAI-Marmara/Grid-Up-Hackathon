@@ -157,6 +157,16 @@ def servisi_calistir(durum_yolu, port, saniye):
     return cikti
 
 
+def teslimler():
+    """Teslim listesinin kilit altında alınmış kopyası.
+
+    Sunucu iş parçacığı `SMS_TESLIMLERI`'ne yazarken ana iş parçacığı
+    okuduğu için kopya kilit altında alınır; okuma ile yazma araya girmesin.
+    """
+    with _kilit:
+        return list(SMS_TESLIMLERI)
+
+
 def bekle(kosul, zaman_asimi=10.0):
     bitis = time.time() + zaman_asimi
     while time.time() < bitis:
@@ -193,7 +203,8 @@ def main() -> int:
 
         kontrol("durum dosyası yazıldı", os.path.exists(durum_yolu))
         durum = json.load(open(durum_yolu, encoding="utf-8"))
-        kontrol("hiçbir SMS teslim edilmedi", len(SMS_TESLIMLERI) == 0, SMS_TESLIMLERI)
+        t = teslimler()
+        kontrol("hiçbir SMS teslim edilmedi", len(t) == 0, t)
         kontrol("geçiş bekleyen kuyruğunda", "101" in durum.get("bekleyen", {}), durum)
         kontrol("teslim/cooldown iddia edilmedi", durum.get("son_bildirim") == {}, durum)
 
@@ -203,13 +214,14 @@ def main() -> int:
             SMS_KABUL_ET = True
         servisi_calistir(durum_yolu, port, 6)
 
+        t = teslimler()
         kontrol(
             "bekleyen alarm yeniden başlatmadan sonra teslim edildi",
-            len(SMS_TESLIMLERI) == 1,
-            SMS_TESLIMLERI,
+            len(t) == 1,
+            t,
         )
-        if SMS_TESLIMLERI:
-            govde = SMS_TESLIMLERI[0]
+        if t:
+            govde = t[0]
             metin = govde["textMessage"]["text"]
             kontrol("gövde Android SMS Gateway biçiminde",
                     sorted(govde) == ["phoneNumbers", "textMessage"], govde)
@@ -224,10 +236,11 @@ def main() -> int:
         # --- Aşama 3: üçüncü başlatma tekrar bildirim üretmemeli. -----------
         print("\n[3] Servis bir kez daha yeniden başlatıldı (tekrar olmamalı)")
         servisi_calistir(durum_yolu, port, 4)
+        t = teslimler()
         kontrol(
             "yeniden başlatma aynı geçişi tekrar bildirmedi",
-            len(SMS_TESLIMLERI) == 1,
-            SMS_TESLIMLERI,
+            len(t) == 1,
+            t,
         )
 
         # --- Aşama 4: aynı modülde ikinci, ayrı anomali bastırılmamalı. -----
@@ -245,9 +258,8 @@ def main() -> int:
                 }
             )
         servisi_calistir(durum_yolu, port, 4)
-        kontrol(
-            "ayrı anomali ayrı bildirildi", len(SMS_TESLIMLERI) == 2, SMS_TESLIMLERI
-        )
+        t = teslimler()
+        kontrol("ayrı anomali ayrı bildirildi", len(t) == 2, t)
     finally:
         sunucu.shutdown()
 

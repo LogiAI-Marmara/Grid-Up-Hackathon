@@ -553,6 +553,50 @@ class TestYuvaliYol(unittest.TestCase):
             yuvali_yaz(k, "a.b", 2)
 
 
+class TestTelegramTokenSizintisi(unittest.TestCase):
+    """Token hiçbir kanal sonucuna sızmamalı — sonuçlar loglanıyor."""
+
+    TOKEN = "123456789:AAG-COK-GIZLI-BOT-TOKENI"
+
+    def bildirim(self):
+        return Bildirim(
+            gecis_id=1, anomali_id="an_A", seviye="kritik", onceki_seviye="uyari",
+            zaman="2026-09-19T12:00:00Z", modul_id="M1", detay_alindi=True,
+        )
+
+    def test_baglanti_hatasi_tokeni_sizdirmaz(self):
+        from kanallar import TelegramKanali
+
+        kendisi = self
+
+        class Oturum:
+            def post(self, url, **kw):
+                # requests'in gerçek hata metni istenen URL'i içerir; Telegram
+                # token'ı URL yolunda taşıdığı için ham metin token'ı taşır.
+                raise OSError(
+                    f"HTTPSConnectionPool(host='api.telegram.org', port=443): "
+                    f"Max retries exceeded with url: /bot{kendisi.TOKEN}/sendMessage"
+                )
+
+        sonuc = TelegramKanali(self.TOKEN, "-100", oturum=Oturum()).gonder(self.bildirim())
+        self.assertEqual(sonuc.durum, HATA)
+        self.assertNotIn(self.TOKEN, sonuc.detay)
+        self.assertIn("***TOKEN***", sonuc.detay)
+
+    def test_hata_govdesi_tokeni_sizdirmaz(self):
+        from kanallar import TelegramKanali
+
+        kendisi = self
+
+        class Oturum:
+            def post(self, url, **kw):
+                return SahteYanit(401, text=f"Unauthorized for bot{kendisi.TOKEN}")
+
+        sonuc = TelegramKanali(self.TOKEN, "-100", oturum=Oturum()).gonder(self.bildirim())
+        self.assertEqual(sonuc.durum, HATA)
+        self.assertNotIn(self.TOKEN, sonuc.detay)
+
+
 class TestA04Kalicilik(AlarmTestTabani):
     def test_yeniden_baslatma_ayni_gecisi_tekrar_bildirmez(self):
         sms1 = SahteKanal("sms")
@@ -765,6 +809,43 @@ class TestAkis(AlarmTestTabani):
 
         self.assertEqual(yon.state["son_gecis_id"], 700)
         self.assertEqual([b.gecis_id for b in sms.cagrilar], [700])
+
+    def test_yeniden_denenen_kayit_kuyruktan_dusurulmez(self):
+        """Yeniden deneme, denediği alarmı düşürmemeli.
+
+        Sınır küçültülmüş bir durum dosyasıyla açılınca kuyruk sınırın
+        üstünde kalıyordu. Kuyruk artan sırada gezildiği için en küçük
+        anahtar tam da o an yeniden denenen kayıttı; budama onu düşürüyor,
+        yani hiç teslim edilmemiş bir kritik alarm kayboluyordu.
+        """
+        sms = SahteKanal("sms", sonuclar=[HATA] * 10)
+        yon = self.yonetici(sms=sms, bekleyen_siniri=2)
+        for i in (1, 2, 3):
+            yon.state["bekleyen"][str(i)] = {
+                "gecis": gecis(i, f"an_{i}", "izle", "kritik"),
+                "deneme": 1,
+                "sonraki_deneme": 0,
+            }
+
+        yon.bekleyenleri_dene(simdi=1000)
+
+        # Üçü de teslim edilemedi; hiçbiri kuyruktan düşmemeli.
+        self.assertEqual(sorted(yon.state["bekleyen"], key=int), ["1", "2", "3"])
+        self.assertEqual(yon.state.get("dusen_bildirim", 0), 0)
+
+    def test_yeni_kayit_eklenirken_sinir_hala_uygulanir(self):
+        """Budama kalkmadı: kuyruk büyürken sınır çalışmaya devam ediyor."""
+        sms = SahteKanal("sms", sonuclar=[HATA] * 10)
+        yon = self.yonetici(sms=sms, bekleyen_siniri=2)
+        for i in (1, 2, 3):
+            yon.evaluate_transition(gecis(i, f"an_{i}", "izle", "kritik"))
+            yon._bekleyene_al(gecis(i, f"an_{i}", "izle", "kritik"), 1000)
+
+        self.assertEqual(len(yon.state["bekleyen"]), 2)
+        self.assertEqual(yon.state["dusen_bildirim"], 1)
+        # Düşen en eski olmalı, az önce eklenen değil.
+        self.assertNotIn("1", yon.state["bekleyen"])
+        self.assertIn("3", yon.state["bekleyen"])
 
     def test_yeniden_deneme_zamani_gelmeden_denenmez(self):
         sms = SahteKanal("sms", sonuclar=[HATA])

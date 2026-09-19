@@ -332,6 +332,7 @@ class AlarmManager:
     def _bekleyene_al(self, gecis: dict, simdi: float):
         bekleyen = self.state.setdefault("bekleyen", {})
         anahtar = str(gecis.get("id"))
+        yeni_kayit = anahtar not in bekleyen
         kayit = bekleyen.get(anahtar) or {"gecis": gecis, "deneme": 0}
         kayit["gecis"] = gecis
         kayit["deneme"] = int(kayit.get("deneme", 0)) + 1
@@ -342,9 +343,19 @@ class AlarmManager:
         kayit["sonraki_deneme"] = simdi + gecikme
         bekleyen[anahtar] = kayit
 
-        if len(bekleyen) > self.bekleyen_siniri:
-            # En eski geçişi düşürmek zorundayız; sessizce değil.
-            dusen = min(bekleyen, key=lambda k: int(k))
+        # Sınır yalnız kuyruk BÜYÜRKEN uygulanır. Bir yeniden denemenin
+        # kaydı kuyruğu büyütmez; orada budama yapmak, az önce teslim
+        # edilemediği için yeniden sıraya koyduğumuz alarmı aynı çağrıda
+        # düşürüyordu (kuyruk artan sırada gezildiği için en küçük anahtar
+        # tam da o anki kayıttı). Düşürülen hiç teslim edilmemiş bir kritik
+        # alarm olabileceği için bu, tüm tasarımın önlemeye çalıştığı şeydi.
+        if not yeni_kayit:
+            return
+        while len(bekleyen) > self.bekleyen_siniri:
+            adaylar = [k for k in bekleyen if k != anahtar]
+            if not adaylar:
+                break
+            dusen = min(adaylar, key=lambda k: int(k))
             bekleyen.pop(dusen, None)
             self.state["dusen_bildirim"] = int(self.state.get("dusen_bildirim", 0)) + 1
             _GUNLUK.error(
