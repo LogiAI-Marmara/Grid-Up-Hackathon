@@ -16,7 +16,7 @@ Bu doküman, ADM Elektrik ve GDZ Elektrik tarafından düzenlenen **Grid Up Hack
 ### Karşılanan Hackathon Teslimat Kalemleri
 * **T4 (Monitoring / İzleme):** Merkezi toplama ve izleme web uygulaması, saha hiyerarşisi (`Saha → Pano → Modül`), 32×24 (768 piksel) termal ısı haritası görselleştirmesi, canlı sıcak nokta (hotspot) reticle takibi ve SCADA entegrasyonu (Modbus TCP haritalama).
 * **T6 (On-Premise / Yerel Altyapı):** Public Cloud (AWS, Azure, GCP vb.) kullanılmaksızın şirket içi/yerel sunucu altyapısında çalışma garantisi (`docker-compose.yml` mikroservis kompozisyonu).
-* **T7 (Alarm ve Acil Bildirim Mekanizması):** Kritik ve Uyarı seviyelerinde seviye→kanal kuralına göre dış bildirim; kritik için on-prem SMS gateway **zorunlu** kanaldır. Teslim edilemeyen alarm yeniden denenir, olay bazlı tekrar önleme (varsayılan 300 sn) mükerrer bildirimi engeller. **Kanal seçimi (yerel GSM modemi / SMS gateway) ekip kararı olarak açıktır; gerçek SIM üzerinden teslim doğrulanmamıştır.**
+* **T7 (Alarm ve Acil Bildirim Mekanizması):** Kritik ve Uyarı seviyelerinde seviye→kanal kuralına göre dış bildirim; kritik için on-prem SMS **zorunlu** kanaldır. Seçilen kanal Android SMS Gateway'in yerel sunucu kipidir (telefonun SIM'i, LAN üzerinden, buluta çıkmadan). Teslim edilemeyen alarm yeniden denenir, olay bazlı tekrar önleme (varsayılan 300 sn) mükerrer bildirimi engeller. **Gerçek telefondan gerçek alıcıya teslim henüz doğrulanmamıştır.**
 
 ---
 
@@ -141,20 +141,37 @@ Varsayılan: `uyari:konsol,sms | kritik:konsol,sms!`
 `konsol` hiçbir varsayılan kuralda zorunlu değildir: kritik alarmın yalnız
 loga yazılması dış bildirim sayılmaz.
 
-### 5.3 Kanal seçimi ve public cloud kısıtı — **AÇIK BAĞIMLILIK**
+### 5.3 Acil bildirim kanalı — Android SMS Gateway (yerel sunucu)
 
-Karar kaydı §T6 public cloud'u yasaklar. `sms` kanalı belirli bir ürüne bağlı
-değildir: yapılandırılabilir alan adlarıyla yerel bir HTTP uca POST eder, yani
-yerel GSM modemi, Android SMS Gateway veya kurum içi gateway aynı adaptörle
-sürülür. **Hangisinin kullanılacağı henüz seçilmemiştir.**
+**Kanal seçildi:** "SMS Gateway for Android" uygulamasının **yerel sunucu**
+kipi. Telefonun kendi SIM'i üzerinden SMS atar, LAN'da HTTP sunucusu açar;
+alarm servisi ona POST eder. Mesaj kurumun ağından çıkmaz — arada üçüncü bir
+sunucu yoktur, yani karar kaydı §T6'nın public cloud yasağına uyar.
 
-Telegram kanalı korunmuştur ama **bulut** olarak işaretlidir, varsayılan
-kuralda yer almaz ve açıkken servis §T6 ile çeliştiğini açılışta yazar.
-WhatsApp Business API de bulut tarafında çalışır ve aynı çelişkiyi taşır.
+> ⚠️ Aynı uygulamanın **bulut kipi** mesajı `sms-gate.app` sunucuları
+> üzerinden geçirir ve §T6 ile çelişir. Yalnız "Local server" açılmalıdır.
 
-**Gerçek bir SIM'den gerçek bir telefona uçtan uca SMS teslimi
-DOĞRULANMAMIŞTIR;** testlerdeki "teslim", sahte bir gateway'in isteği kabul
-etmesidir. Maliyet ve fiilî teslim ayrıca doğrulanmalıdır.
+Cihazın API'si (kodun varsayılanları buna göre):
+
+```
+POST http://<telefon-ip>:8080/message      (Basic auth)
+{"textMessage": {"text": "..."}, "phoneNumbers": ["+905551112233"]}
+```
+
+Cihaz **202 Accepted** döner. Alan adları noktalı yol kabul ettiği için kurum
+içi düz bir gateway'e geçiş kod değil ayar değişikliğidir. Kurulum adımları ve
+ortam değişkenleri `alarm/README.md` §4'te; şablon `deploy/.env.example`'da.
+
+WhatsApp Business API de bulut tarafında çalışır ve aynı çelişkiyi taşır;
+değerlendirilmedi.
+
+#### ⚠️ Doğrulanmamış olan
+
+**Gerçek bir telefondan gerçek bir alıcıya SMS gönderilmedi.** Testlerdeki
+"teslim", cihazın API'sini taklit eden sahte bir gateway'in 202 dönmesidir.
+Uçtan uca doğrulanacaklar: fiilî teslim, SIM'in birim ücreti (telefon
+üzerinden gönderim otomatik olarak ücretsiz değildir), telefonun arka plan
+kısıtlarında gönderimi sürdürmesi ve uzun mesajın bölünmesi.
 
 ### 5.4 Tekrar önleme
 
@@ -275,4 +292,4 @@ Sistem bileşenleri uçtan uca test edilmiş ve doğrulanmıştır:
 
 ## 9. Sonuç
 
-Grid Up Hackathon İZ C (Operasyon Yüzü); endüstriyel SCADA uyumluluğunu, modern web tabanlı izleme panelini, termal matris görselleştirmesini, teslim takibi yapan ve olay bazlı tekrar önleme uygulayan acil bildirim mekanizmasını ve tam yerel (on-premise) dağıtılabilirliği tek bir mimari çatı altında sunmaktadır. Acil bildirim kanalının nihai seçimi ve gerçek SMS teslimi doğrulaması **açık maddedir**.
+Grid Up Hackathon İZ C (Operasyon Yüzü); endüstriyel SCADA uyumluluğunu, modern web tabanlı izleme panelini, termal matris görselleştirmesini, teslim takibi yapan ve olay bazlı tekrar önleme uygulayan acil bildirim mekanizmasını ve tam yerel (on-premise) dağıtılabilirliği tek bir mimari çatı altında sunmaktadır. Acil bildirim kanalı Android SMS Gateway'in yerel sunucu kipi olarak seçilmiştir; gerçek telefondan gerçek alıcıya teslim doğrulaması **açık maddedir**.

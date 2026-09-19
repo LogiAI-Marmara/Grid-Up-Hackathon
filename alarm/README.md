@@ -34,6 +34,7 @@ demek değildir.
 cd alarm
 API_URL=http://localhost:8080 \
 SMS_GATEWAY_URL=http://192.168.1.50:8080/message \
+SMS_GATEWAY_KULLANICI=admin SMS_GATEWAY_PAROLA=<cihazdaki-parola> \
 SMS_ALICILAR=+905551112233 \
 python3 alarm_service.py
 ```
@@ -54,10 +55,11 @@ beklemeden söyler.
 | `ALARM_BOZUK_DURUM` | `dur` | Bozuk durum dosyasında: `dur` \| `sifirla` |
 | `ALARM_YENIDEN_DENEME_TABAN` / `_TAVAN` | `30` / `900` | Yeniden deneme geri çekilmesi (sn) |
 | `ALARM_BEKLEYEN_SINIRI` | `500` | Bekleyen bildirim kuyruğu üst sınırı |
-| `SMS_GATEWAY_URL` | — | On-prem SMS gateway HTTP ucu |
+| `SMS_GATEWAY_URL` | — | Telefonun yerel sunucu ucu, örn. `http://192.168.1.50:8080/message` |
 | `SMS_ALICILAR` | — | Virgülle ayrılmış numaralar |
-| `SMS_GATEWAY_TOKEN` / `_KULLANICI` / `_PAROLA` | — | Gateway kimlik doğrulaması |
-| `SMS_GATEWAY_ALICI_ALANI` / `_MESAJ_ALANI` | `alicilar` / `mesaj` | JSON yük alan adları |
+| `SMS_GATEWAY_KULLANICI` / `_PAROLA` | — | Cihazın Basic auth bilgileri |
+| `SMS_GATEWAY_TOKEN` | — | Basic auth yerine JWT kullanılıyorsa |
+| `SMS_GATEWAY_ALICI_ALANI` / `_MESAJ_ALANI` | `phoneNumbers` / `textMessage.text` | JSON yük alan yolları (nokta = iç içe) |
 | `TELEGRAM_BOT_TOKEN` / `TELEGRAM_CHAT_ID` | — | Telegram (bulut — bkz. §4) |
 
 Repoda gömülü anahtar yoktur (Madde 15); hepsi ortamdan okunur.
@@ -90,36 +92,65 @@ uyarı olarak yazar.
 
 ---
 
-## 4. Kanal seçimi ve public cloud kısıtı — **AÇIK BAĞIMLILIK**
+## 4. Acil bildirim kanalı — Android SMS Gateway (yerel sunucu)
 
-> **Bu madde tamamlanmamıştır.** Kanal kararı ekipten beklenmektedir.
+**Kanal seçildi:** "SMS Gateway for Android" uygulamasının **yerel sunucu**
+kipi. Telefonun kendi SIM'i üzerinden SMS atar ve LAN'da bir HTTP sunucusu
+açar; alarm servisi ona POST eder.
 
-Karar kaydı §T6 public cloud'u yasaklıyor; §12'deki alarm notu şunu söylüyor:
-*"WhatsApp Business API bir bulut hizmetidir ve public cloud yasağıyla
-çelişir. Tutarlı çözüm yerel GSM/SMS modemi veya on-prem SMS gateway'dir."*
+### 4.1 Neden bu
 
-Kodun aldığı tavır:
+Karar kaydı §T6 public cloud'u yasaklıyor, §12'deki alarm notu da WhatsApp
+Business API'nin bulut hizmeti olduğunu ve tutarlı çözümün yerel GSM/SMS yolu
+olduğunu söylüyor. Yerel sunucu kipinde mesaj kurumun ağından çıkmaz: alarm
+sunucusu → telefon → GSM şebekesi. Arada üçüncü bir sunucu yok.
 
-- **`sms` kanalı** belirli bir ürüne bağlı değildir. Yapılandırılabilir bir
-  yerel HTTP ucuna JSON POST eder; alan adları (`SMS_GATEWAY_ALICI_ALANI`,
-  `SMS_GATEWAY_MESAJ_ALANI`) ayarlanabilir olduğu için Android SMS Gateway
-  (`phoneNumbers`/`message`), yerel bir GSM modem servisi ya da kurum içi bir
-  gateway aynı adaptörle sürülür. **Hangisinin kullanılacağı seçilmemiştir.**
-- **`telegram` kanalı** çalışır durumda ama `bulut = True` işaretli,
-  varsayılan kuralda yok ve açıldığında servis §T6 ile çeliştiğini açıkça
-  yazar. Demo dışında kullanılması ekip kararı gerektirir.
-- **WhatsApp API** değerlendirilirse: Business API bulut tarafında çalışır ve
-  §T6 ile çelişir. Bu çelişki gizlenmeden karara bağlanmalıdır.
+### 4.2 ⚠️ Yerel kip şart, bulut kipi değil
 
-### Doğrulanmamış olan
+Aynı uygulamanın bir de **bulut kipi** var ve mesajı `sms-gate.app`
+sunucuları üzerinden geçirir. **Bu kip §T6 ile çelişir ve kullanılmamalıdır.**
+Uygulamada yalnız "Local server" açılmalı.
 
-Telefon/SIM üzerinden gönderim **otomatik olarak ücretsiz sayılmamıştır** ve
-**gerçek alıcıya teslim doğrulanmamıştır**. Testlerdeki "teslim" sahte bir
-gateway'in isteği kabul etmesidir. Gerçek bir SIM'den gerçek bir telefona
-uçtan uca SMS gönderimi **yapılmamıştır**; maliyet ve fiilî teslim ayrıca
-doğrulanmalıdır.
+### 4.3 Cihazın API'si
 
----
+Kodun varsayılanları bu gövdeye göre ayarlıdır:
+
+```
+POST http://<telefon-ip>:8080/message      (Basic auth)
+Content-Type: application/json
+
+{"textMessage": {"text": "..."}, "phoneNumbers": ["+905551112233"]}
+```
+
+Cihaz **202 Accepted** döner. Düz bir `message` alanı eski/deprecated biçimdir
+ve üretilmez — `test_android_sms_gateway_yuku_dokumanla_birebir` gövdenin
+şeklini sınar.
+
+Alan adları noktalı yol kabul ettiği için kurum içi düz bir gateway'e geçiş
+kod değil **ayar** değişikliğidir (`SMS_GATEWAY_MESAJ_ALANI=mesaj`).
+
+### 4.4 Kurulum
+
+1. Telefona uygulamayı kur, **Local server**'ı aç.
+2. Uygulamanın gösterdiği IP, kullanıcı adı ve parolayı `deploy/.env`'e yaz.
+3. Telefon alarm sunucusuyla aynı ağda olmalı; IP'nin sabitlenmesi
+   (DHCP rezervasyonu) önerilir, yoksa yeniden bağlanmada URL kayar.
+4. Telefon şarjda ve uygulama arka planda çalışır durumda kalmalı.
+
+### 4.5 ⚠️ Doğrulanmamış olan
+
+**Gerçek bir telefondan gerçek bir alıcıya SMS gönderilmedi.** Testlerdeki
+"teslim", cihazın API'sini taklit eden sahte bir gateway'in 202 dönmesidir.
+Uçtan uca doğrulanması gerekenler:
+
+- telefonun gerçekten SMS atması ve alıcıya ulaşması,
+- SIM'in mesaj kotası / birim ücreti (telefon üzerinden gönderim otomatik
+  olarak ücretsiz değildir),
+- telefon uyku/arka plan kısıtlarında gönderimin sürmesi,
+- uzun mesajın bölünmesi (alarm metni tek SMS sınırını aşabilir).
+
+Bunlar yapılana kadar "SMS gerçekten teslim edildi" denemez; kodun
+söyleyebildiği en fazlası "cihaz isteği kabul etti"dir.
 
 ## 5. Tekrar önleme
 

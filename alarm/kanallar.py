@@ -83,6 +83,26 @@ class Bildirim:
         return " | ".join(parcalar)
 
 
+def yuvali_yaz(kok: dict, yol: str, deger) -> None:
+    """`"textMessage.text"` gibi noktalı bir yolu iç içe sözlüğe yazar.
+
+    Android SMS Gateway'in yükü düz değil: `{"textMessage": {"text": ...}}`.
+    Alan adlarını noktayla yazdırmak, adaptörü hâlâ ürüne bağlamadan iç içe
+    gövde üretebilmesini sağlar — kurum içi düz bir gateway için
+    `mesaj` yazmak da aynı yoldan çalışır.
+    """
+    parcalar = [p.strip() for p in yol.split(".")]
+    if not yol.strip() or any(not p for p in parcalar):
+        raise ValueError(f"geçersiz alan yolu: {yol!r}")
+    dugum = kok
+    for parca in parcalar[:-1]:
+        alt = dugum.setdefault(parca, {})
+        if not isinstance(alt, dict):
+            raise ValueError(f"alan yolu çakışıyor: {yol!r}")
+        dugum = alt
+    dugum[parcalar[-1]] = deger
+
+
 @dataclass
 class KanalSonucu:
     kanal: str
@@ -143,9 +163,18 @@ class KonsolKanali(Kanal):
 class SmsGatewayKanali(Kanal):
     """On-prem HTTP SMS gateway adaptörü.
 
-    Yük biçimi alan adlarıyla ayarlanabilir, çünkü seçilecek gateway henüz
-    kesinleşmedi: Android SMS Gateway `phoneNumbers`/`message`, kurum içi bir
-    gateway başka bir şey bekleyebilir. Ürün seçimi buraya gömülmüyor.
+    Seçilen kanal **Android SMS Gateway'in yerel sunucu kipidir** ve
+    varsayılanlar onun API'sine göredir:
+
+        POST http://<telefon-ip>:8080/message      (Basic auth)
+        {"textMessage": {"text": "..."}, "phoneNumbers": ["+90..."]}
+
+    Alan adları yine de ayarlanabilir ve noktalı yol kabul eder, böylece
+    kurum içi düz bir gateway'e geçilirse kod değil ayar değişir.
+
+    ÖNEMLİ (karar kaydı §T6): uygulamanın **yerel sunucu** kipi kullanılmalıdır.
+    Aynı uygulamanın bulut kipi mesajı sms-gate.app sunucuları üzerinden
+    geçirir ve public cloud yasağıyla çelişir.
 
     Gönderimin "kabul edildi" olması SMS'in gerçekten abonesine ulaştığı
     anlamına gelmez; gateway'in kabulü ile operatörün telefonundaki teslim iki
@@ -161,8 +190,8 @@ class SmsGatewayKanali(Kanal):
         token: str = "",
         kullanici: str = "",
         parola: str = "",
-        alici_alani: str = "alicilar",
-        mesaj_alani: str = "mesaj",
+        alici_alani: str = "phoneNumbers",
+        mesaj_alani: str = "textMessage.text",
         zaman_asimi: float = 10.0,
         oturum=None,
     ):
@@ -195,10 +224,13 @@ class SmsGatewayKanali(Kanal):
                 "eksik ayar: " + ", ".join(self.eksikler()),
             )
 
-        yuk = {
-            self.alici_alani: self.alicilar,
-            self.mesaj_alani: bildirim.kisa_metin(),
-        }
+        yuk: dict = {}
+        try:
+            yuvali_yaz(yuk, self.alici_alani, self.alicilar)
+            yuvali_yaz(yuk, self.mesaj_alani, bildirim.kisa_metin())
+        except ValueError as hata:
+            # Yanlış yapılandırma; gönderim denenmez ve teslim sayılmaz.
+            return KanalSonucu(self.ad, YAPILANDIRILMAMIS, str(hata))
         basliklar = {}
         kimlik = None
         if self.token:
@@ -369,8 +401,8 @@ def ortamdan_kanallar(ortam=None) -> dict:
             token=ortam.get("SMS_GATEWAY_TOKEN", ""),
             kullanici=ortam.get("SMS_GATEWAY_KULLANICI", ""),
             parola=ortam.get("SMS_GATEWAY_PAROLA", ""),
-            alici_alani=ortam.get("SMS_GATEWAY_ALICI_ALANI", "alicilar"),
-            mesaj_alani=ortam.get("SMS_GATEWAY_MESAJ_ALANI", "mesaj"),
+            alici_alani=ortam.get("SMS_GATEWAY_ALICI_ALANI", "phoneNumbers"),
+            mesaj_alani=ortam.get("SMS_GATEWAY_MESAJ_ALANI", "textMessage.text"),
         ),
         TelegramKanali.ad: TelegramKanali(
             token=ortam.get("TELEGRAM_BOT_TOKEN", ""),

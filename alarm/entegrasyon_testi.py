@@ -9,7 +9,10 @@ gerçek HTTP istemcisinin gerçek bir uca konuşup konuşmadığını ve
 yeniden başlatmanın bekleyen alarmı sürdürüp sürdürmediğini yalnız bu
 gösterir.
 
-Sahte olan ne: `/gecisler` ve `/anomaliler/{id}` uçları ile SMS gateway.
+Sahte olan ne: `/gecisler` ve `/anomaliler/{id}` uçları ile SMS gateway. Sahte
+gateway, Android SMS Gateway'in yerel sunucu kipini taklit eder: `POST /message`,
+Basic auth ve `{"textMessage":{"text":...},"phoneNumbers":[...]}` gövde
+doğrulaması — yani yanlış biçimde bir yük gönderirsek test kırmızıya döner.
 Gerçek olan ne: alarm servisi süreci, HTTP taşıma, durum dosyası, yeniden
 başlatma. Hiçbir aşamada gerçek bir telefona SMS gitmez — bu betiğin
 "teslim edildi" dediği şey, sahte gateway'in isteği kabul etmesidir.
@@ -88,16 +91,28 @@ class Uc(BaseHTTPRequestHandler):
         return self._json(404, {"hata": "yok"})
 
     def do_POST(self):
-        if self.path == "/sms":
+        # Android SMS Gateway'in yerel sunucu kipini taklit eder:
+        # POST /message, Basic auth, {"textMessage":{"text":...},"phoneNumbers":[...]}
+        if self.path == "/message":
+            if not self.headers.get("Authorization", "").startswith("Basic "):
+                return self._json(401, {"hata": "basic auth gerekli"})
+
             uzunluk = int(self.headers.get("Content-Length", 0))
             govde = json.loads(self.rfile.read(uzunluk) or b"{}")
+
+            # Cihaz gövdeyi doğrular: eksik/yanlış şekil 400 döner.
+            metin = (govde.get("textMessage") or {}).get("text")
+            numaralar = govde.get("phoneNumbers")
+            if not metin or not isinstance(numaralar, list) or not numaralar:
+                return self._json(400, {"hata": f"gecersiz govde: {govde}"})
+
             with _kilit:
                 kabul = SMS_KABUL_ET
                 if kabul:
                     SMS_TESLIMLERI.append(govde)
             if not kabul:
                 return self._json(500, {"hata": "gateway kapalı"})
-            return self._json(202, {"durum": "kuyruğa alındı"})
+            return self._json(202, {"id": "sahte-1", "state": "Pending"})
         return self._json(404, {"hata": "yok"})
 
     def log_message(self, *a):
@@ -116,8 +131,10 @@ def servisi_calistir(durum_yolu, port, saniye):
             "ALARM_YENIDEN_DENEME_TABAN": "1",
             "ALARM_YENIDEN_DENEME_TAVAN": "2",
             "ALARM_KANAL_KURALI": "uyari:konsol,sms|kritik:konsol,sms!",
-            "SMS_GATEWAY_URL": f"http://127.0.0.1:{port}/sms",
+            "SMS_GATEWAY_URL": f"http://127.0.0.1:{port}/message",
             "SMS_ALICILAR": "+905551112233",
+            "SMS_GATEWAY_KULLANICI": "sms",
+            "SMS_GATEWAY_PAROLA": "gizli",
             "TELEGRAM_BOT_TOKEN": "",
             "TELEGRAM_CHAT_ID": "",
             "PYTHONUNBUFFERED": "1",
@@ -192,7 +209,12 @@ def main() -> int:
             SMS_TESLIMLERI,
         )
         if SMS_TESLIMLERI:
-            metin = json.dumps(SMS_TESLIMLERI[0], ensure_ascii=False)
+            govde = SMS_TESLIMLERI[0]
+            metin = govde["textMessage"]["text"]
+            kontrol("gövde Android SMS Gateway biçiminde",
+                    sorted(govde) == ["phoneNumbers", "textMessage"], govde)
+            kontrol("alıcı numara taşındı",
+                    govde["phoneNumbers"] == ["+905551112233"], govde)
             kontrol("mesaj modül kimliğini taşıyor", "TR041-P01-M1" in metin, metin)
             kontrol("mesaj seviyeyi taşıyor", "KRITIK" in metin, metin)
         durum = json.load(open(durum_yolu, encoding="utf-8"))

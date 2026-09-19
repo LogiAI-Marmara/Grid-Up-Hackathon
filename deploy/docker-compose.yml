@@ -159,14 +159,21 @@ services:
       # Seviye -> kanal kuralı. Sondaki '!' o kanalı ZORUNLU yapar: başarısız
       # olursa olay teslim edilmiş sayılmaz ve yeniden denenir.
       - ALARM_KANAL_KURALI=${ALARM_KANAL_KURALI:-uyari:konsol,sms|kritik:konsol,sms!}
-      # On-prem SMS gateway (yerel GSM modemi / Android SMS Gateway / kurum içi
-      # gateway). Boş bırakılırsa kritik alarmlar TESLİM EDİLEMEZ ve bekleyen
-      # kuyruğunda birikir; servis bunu açılışta uyarı olarak yazar.
+      # Acil bildirim kanalı: Android SMS Gateway, YEREL SUNUCU kipi.
+      # Aynı uygulamanın bulut kipi mesajı sms-gate.app üzerinden geçirir ve
+      # karar kaydı §T6'nın public cloud yasağıyla çelişir — yerel kip şart.
+      # Örn. SMS_GATEWAY_URL=http://192.168.1.50:8080/message
+      # Boş bırakılırsa kritik alarmlar TESLİM EDİLEMEZ ve bekleyen kuyruğunda
+      # birikir; servis bunu açılışta uyarı olarak yazar.
       - SMS_GATEWAY_URL=${SMS_GATEWAY_URL:-}
       - SMS_ALICILAR=${SMS_ALICILAR:-}
+      - SMS_GATEWAY_KULLANICI=${SMS_GATEWAY_KULLANICI:-}
+      - SMS_GATEWAY_PAROLA=${SMS_GATEWAY_PAROLA:-}
       - SMS_GATEWAY_TOKEN=${SMS_GATEWAY_TOKEN:-}
-      - SMS_GATEWAY_ALICI_ALANI=${SMS_GATEWAY_ALICI_ALANI:-alicilar}
-      - SMS_GATEWAY_MESAJ_ALANI=${SMS_GATEWAY_MESAJ_ALANI:-mesaj}
+      # Yük alan adları noktalı yol kabul eder; varsayılanlar cihazın
+      # belgelenmiş gövdesidir: {"textMessage":{"text":...},"phoneNumbers":[...]}
+      - SMS_GATEWAY_ALICI_ALANI=${SMS_GATEWAY_ALICI_ALANI:-phoneNumbers}
+      - SMS_GATEWAY_MESAJ_ALANI=${SMS_GATEWAY_MESAJ_ALANI:-textMessage.text}
       # Telegram kurum dışı bir bulut hizmetidir (karar kaydı §T6 ile çelişir).
       # Varsayılan kuralda yer almaz; yalnız bilinçli olarak açılır.
       - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN:-}

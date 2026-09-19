@@ -56,6 +56,7 @@ from kanallar import (  # noqa: E402
     KonsolKanali,
     SmsGatewayKanali,
     kanal_kurali_coz,
+    yuvali_yaz,
 )
 
 # ---------------------------------------------------------------------------
@@ -412,26 +413,81 @@ class TestA03SmsGateway(unittest.TestCase):
             detay_alindi=True,
         )
 
-    def test_olumlu_yanit(self):
+    def test_android_sms_gateway_yuku_dokumanla_birebir(self):
+        """Varsayılan yük, Android SMS Gateway'in belgelenmiş gövdesiyle aynı.
+
+        Resmî örnek:
+            POST http://<ip>:8080/message  (Basic auth)
+            {"textMessage": {"text": "..."}, "phoneNumbers": ["+7999..."]}
+
+        Düz bir `message` alanı üretmek eski/deprecated biçimdir ve cihaz
+        tarafından reddedilir; bu yüzden gövdenin şekli test ediliyor.
+        """
         cagrilar = []
 
         class Oturum:
             def post(self, url, **kw):
                 cagrilar.append((url, kw))
-                return SahteYanit(202, text="queued")
+                return SahteYanit(202, text='{"state":"Pending"}')
 
         kanal = SmsGatewayKanali(
             url="http://192.168.1.50:8080/message",
-            alicilar=["+905551112233"],
-            alici_alani="phoneNumbers",
-            mesaj_alani="message",
+            alicilar=["+905551112233", "+905559998877"],
+            kullanici="admin",
+            parola="gizli",
             oturum=Oturum(),
         )
         sonuc = kanal.gonder(self.bildirim())
         self.assertEqual(sonuc.durum, TESLIM)
-        # Alan adları yapılandırıldığı gibi kullanıldı: ürün seçimi koda gömülü değil.
-        self.assertIn("phoneNumbers", cagrilar[0][1]["json"])
-        self.assertIn("TR041-P01-M1", cagrilar[0][1]["json"]["message"])
+
+        url, kw = cagrilar[0]
+        yuk = kw["json"]
+        self.assertEqual(sorted(yuk), ["phoneNumbers", "textMessage"])
+        self.assertEqual(yuk["phoneNumbers"], ["+905551112233", "+905559998877"])
+        self.assertEqual(list(yuk["textMessage"]), ["text"])
+        self.assertIn("TR041-P01-M1", yuk["textMessage"]["text"])
+        self.assertNotIn("message", yuk)          # deprecated düz alan üretilmiyor
+        self.assertEqual(kw["auth"], ("admin", "gizli"))   # Basic auth
+
+    def test_202_kabul_ediliyor(self):
+        """Cihaz 202 Accepted döner; 200 beklemek teslimi hataya çevirirdi."""
+
+        class Oturum:
+            def post(self, url, **kw):
+                return SahteYanit(202, text='{"state":"Pending"}')
+
+        kanal = SmsGatewayKanali(url="http://x/message", alicilar=["+9055"], oturum=Oturum())
+        self.assertEqual(kanal.gonder(self.bildirim()).durum, TESLIM)
+
+    def test_duz_alan_adlari_hala_calisiyor(self):
+        """Kurum içi düz bir gateway'e geçiş kod değil ayar değişikliği olmalı."""
+        cagrilar = []
+
+        class Oturum:
+            def post(self, url, **kw):
+                cagrilar.append(kw)
+                return SahteYanit(200)
+
+        kanal = SmsGatewayKanali(
+            url="http://x/m",
+            alicilar=["+9055"],
+            alici_alani="alicilar",
+            mesaj_alani="mesaj",
+            oturum=Oturum(),
+        )
+        self.assertEqual(kanal.gonder(self.bildirim()).durum, TESLIM)
+        self.assertEqual(sorted(cagrilar[0]["json"]), ["alicilar", "mesaj"])
+
+    def test_bozuk_alan_yolu_gonderim_denemez(self):
+        class Oturum:
+            def post(self, url, **kw):
+                raise AssertionError("bozuk yapılandırmada gönderim denenmemeli")
+
+        kanal = SmsGatewayKanali(
+            url="http://x/m", alicilar=["+9055"], mesaj_alani="textMessage..text",
+            oturum=Oturum(),
+        )
+        self.assertEqual(kanal.gonder(self.bildirim()).durum, YAPILANDIRILMAMIS)
 
     def test_reddedilme(self):
         class Oturum:
@@ -466,6 +522,35 @@ class TestA03SmsGateway(unittest.TestCase):
 # ---------------------------------------------------------------------------
 # A-04: Durum yeniden başlatmada korunur, hatalar görünür
 # ---------------------------------------------------------------------------
+
+
+class TestYuvaliYol(unittest.TestCase):
+    def test_ic_ice_yol(self):
+        k = {}
+        yuvali_yaz(k, "textMessage.text", "merhaba")
+        self.assertEqual(k, {"textMessage": {"text": "merhaba"}})
+
+    def test_duz_yol(self):
+        k = {}
+        yuvali_yaz(k, "mesaj", "merhaba")
+        self.assertEqual(k, {"mesaj": "merhaba"})
+
+    def test_ayni_koke_iki_yol(self):
+        k = {}
+        yuvali_yaz(k, "a.b", 1)
+        yuvali_yaz(k, "a.c", 2)
+        self.assertEqual(k, {"a": {"b": 1, "c": 2}})
+
+    def test_gecersiz_yollar(self):
+        for kotu in ("", "   ", "a..b", ".a", "a."):
+            with self.assertRaises(ValueError):
+                yuvali_yaz({}, kotu, 1)
+
+    def test_cakisan_yol(self):
+        k = {}
+        yuvali_yaz(k, "a", 1)
+        with self.assertRaises(ValueError):
+            yuvali_yaz(k, "a.b", 2)
 
 
 class TestA04Kalicilik(AlarmTestTabani):
