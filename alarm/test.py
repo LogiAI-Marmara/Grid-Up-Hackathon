@@ -793,6 +793,63 @@ class TestAkis(AlarmTestTabani):
         self.assertEqual(yon.state["dusen_bildirim"], 1)
         self.assertNotIn("1", yon.state["bekleyen"])
 
+    def test_kod_hatasi_imleci_kilitlemez(self):
+        """Bir geçişin KOD hatası arkasındaki alarmları rehin almamalı.
+
+        Teslim hatası değil, `evaluate_transition` içinde beklenmeyen bir
+        istisna. Eskiden bu döngüyü kırıyor, imleç o geçişte kalıcı olarak
+        takılıyor ve arkasındaki kritik alarmlar hiç gönderilmiyordu.
+        """
+        sms = SahteKanal("sms")
+        api = SahteAPI(
+            sayfalar=[
+                [
+                    gecis(101, "an_A", "izle", "kritik"),
+                    gecis(102, "an_BOZUK", "izle", "kritik"),
+                    gecis(103, "an_C", "izle", "kritik"),
+                ]
+            ]
+        )
+        yon = self.yonetici(api=api, sms=sms)
+
+        orijinal = yon.evaluate_transition
+
+        def patlayan(gc):
+            if gc.get("anomali_id") == "an_BOZUK":
+                raise TypeError("değerlendirmede programlama hatası")
+            return orijinal(gc)
+
+        yon.evaluate_transition = patlayan
+        with self.assertLogs("alarm", level="ERROR"):
+            yon.poll_transitions()
+
+        # #103 gitti, imleç ilerledi, #102 kaybolmadı.
+        self.assertEqual([b.gecis_id for b in sms.cagrilar], [101, 103])
+        self.assertEqual(yon.state["son_gecis_id"], 103)
+        self.assertIn("102", yon.state["bekleyen"])
+
+    def test_kuyrukta_kod_hatasi_servisi_oldurmez(self):
+        """Kuyruk yeniden denemesindeki kod hatası poll_transitions'dan kaçmamalı.
+
+        `bekleyenleri_dene()` çağrısı `try` bloğunun dışındaydı; oradan kaçan
+        bir istisna `run_service`'in döngüsünü kırıp servisi öldürüyordu.
+        """
+        sms = SahteKanal("sms", sonuclar=[HATA])
+        api = SahteAPI(sayfalar=[[gecis(101, "an_A", "izle", "kritik")], [], []])
+        yon = self.yonetici(api=api, sms=sms)
+        yon.poll_transitions()
+        self.assertIn("101", yon.state["bekleyen"])
+
+        def patlayan(gc):
+            raise TypeError("kuyrukta programlama hatası")
+
+        yon.evaluate_transition = patlayan
+        with self.assertLogs("alarm", level="ERROR"):
+            yon.poll_transitions()          # istisna dışarı kaçmamalı
+
+        # Kayıt kuyrukta duruyor, servis yaşıyor.
+        self.assertIn("101", yon.state["bekleyen"])
+
     def test_idsiz_gecis_imleci_bozmaz(self):
         """Bozuk bir satır imleci bilinmez hale getirmemeli."""
         api = SahteAPI(

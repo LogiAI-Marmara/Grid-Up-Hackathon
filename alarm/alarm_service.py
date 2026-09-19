@@ -386,7 +386,17 @@ class AlarmManager:
                 anahtar,
                 kayit.get("deneme"),
             )
-            sonuc = self.evaluate_transition(gecis)
+            try:
+                sonuc = self.evaluate_transition(gecis)
+            except Exception:
+                # Teslim hatası değil, KOD hatası. Yutmuyoruz (tam iz loglanır)
+                # ama kuyruğun geri kalanını da durdurmuyoruz.
+                _GUNLUK.exception(
+                    "Bekleyen geçiş #%s yeniden denenirken beklenmeyen hata; "
+                    "kuyrukta bırakılıp sonrakilere devam ediliyor.",
+                    anahtar,
+                )
+                sonuc = BASARISIZ
             if sonuc == BASARISIZ:
                 self._bekleyene_al(gecis, simdi)
             else:
@@ -426,7 +436,16 @@ class AlarmManager:
 
     def poll_transitions(self):
         """Önce bekleyenleri dener, sonra yeni sayfayı çeker."""
-        degisti = self.bekleyenleri_dene() > 0
+        # Bu çağrı `try` bloğunun dışındaydı: buradan kaçan bir istisna
+        # `poll_transitions`'ı tamamen geçip `run_service`'in döngüsünü
+        # kırıyor, yani ALARM SERVİSİNİ ÖLDÜRÜYORDU.
+        try:
+            degisti = self.bekleyenleri_dene() > 0
+        except Exception:
+            _GUNLUK.exception(
+                "Bekleyen kuyruğu işlenirken beklenmeyen hata; servis ayakta kalıyor."
+            )
+            degisti = True  # kuyruk kısmen değişmiş olabilir, kaydı zorla
 
         params = {"limit": self.sayfa_boyutu}
         son_id = self.state.get("son_gecis_id")
@@ -457,7 +476,19 @@ class AlarmManager:
                         "Geçiş kaydında geçerli 'id' yok, atlanıyor: %r", gecis
                     )
                     continue
-                sonuc = self.evaluate_transition(gecis)
+                try:
+                    sonuc = self.evaluate_transition(gecis)
+                except Exception:
+                    # Teslim hatası değil, KOD hatası. Eskiden bu istisna
+                    # döngüyü kırıyor, imleç bu geçişte kalıcı olarak
+                    # takılıyordu: ARKASINDAKİ KRİTİK ALARMLAR HİÇ GİTMİYORDU.
+                    # Artık teslim edilemeyen geçiş gibi davranılıyor.
+                    _GUNLUK.exception(
+                        "Geçiş #%s değerlendirilirken beklenmeyen hata; bekleyen "
+                        "kuyruğuna alınıp sonraki geçişlere devam ediliyor.",
+                        gecis_id,
+                    )
+                    sonuc = BASARISIZ
                 if sonuc == BASARISIZ:
                     # İmleç ilerler ama geçiş atlanmaz: tam gövdesiyle
                     # bekleyen kuyruğunda, imleçle aynı atomik yazımda.
