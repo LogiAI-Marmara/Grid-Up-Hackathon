@@ -6,7 +6,9 @@
 // o iki adım burada sensör okumasının içinde erir. Akış diyagramı: docs/track-a/07 §7.1.
 //
 // Politika (entegrasyon kararı madde 2, entegrasyon-gorev-dagilimi.md §2.4): her 30 sn'de
-// bir paket; termal özet + 768 değerlik tam kare her pakette, koşulsuz. Modül hüküm vermez;
+// bir paket; termal özet + 768 değerlik tam kare her ölçüm çevriminde, modül içi eşik yok.
+// Tek istisna düşük güç modu (yedekte ≥ 3 dk): ölçüm çevrimi yapılmaz, yalnız modul_durum
+// kalp atışı gider; modul.py adım 7 `if not b.dusuk_guc` ile aynı. Modül hüküm vermez;
 // pakette seviye/tip yoktur (07 §7.4).
 //
 // Durum: PlatformIO'da derlenir. Fiziksel modül üretilmediği için (karar kaydı §1.4) donanım
@@ -32,6 +34,8 @@
 
 static Adafruit_MLX90640 termalDizi;
 static Adafruit_SHT31 kabinSensoru;
+// Tek ModbusMaster örneği: RS-485 tek master, yarım dubleks; analizör ve TVOC-2 aynı hattan
+// sırayla sorgulanır, `begin()` yalnız slave adresini değiştirir. Eşzamanlı sorgu tasarımda yok.
 static ModbusMaster modbus;
 
 static bool termalHazir = false;
@@ -322,8 +326,9 @@ void loop() {
         }
         if (cevrimSayaci % CEVRE_CEVRIM == 0) {   // 60 sn'de bir
             const bool kabinOk = kabinHazir && !isnan(kabinC) && !isnan(kabinNem);
-            olcumSatiri(y, ilk, "ortam_sicaklik", kirp(kabinC, ARALIK_SICAKLIK_MIN, ARALIK_SICAKLIK_MAX), "C", zaman, kabinOk ? "iyi" : "yok");
-            olcumSatiri(y, ilk, "nem", kirp(kabinNem, 0.0f, 100.0f), "%", zaman, kabinOk ? "iyi" : "yok");
+            // okuma yoksa değer null gider (kalite yok); NaN hiçbir yere sokulmaz
+            olcumSatiri(y, ilk, "ortam_sicaklik", kabinOk ? kirp(kabinC, ARALIK_SICAKLIK_MIN, ARALIK_SICAKLIK_MAX) : 0.0f, "C", zaman, kabinOk ? "iyi" : "yok");
+            olcumSatiri(y, ilk, "nem", kabinOk ? kirp(kabinNem, 0.0f, 100.0f) : 0.0f, "%", zaman, kabinOk ? "iyi" : "yok");
         }
     }
     if (arkTetik) olcumSatiri(y, ilk, "ark_olay", (float)arkSayaci, "olay", zaman, "iyi");

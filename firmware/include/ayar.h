@@ -13,7 +13,7 @@
 #define WIFI_SSID "gridup-gateway"
 #endif
 #ifndef WIFI_SIFRE
-#define WIFI_SIFRE "degistir"
+#define WIFI_SIFRE ""                    // build_flags ile verilir; boş = bağlanamaz, sır yok
 #endif
 #ifndef TOPLAMA_URL
 #define TOPLAMA_URL "http://192.168.4.1:8000/paket"   // saha gateway'i → toplama servisi POST /paket
