@@ -9,14 +9,11 @@ services:
   # --------------------------------------------------------------------------
   veritabani:
     image: postgres:16-alpine
-    container_name: gridup_db
     environment:
-      - POSTGRES_DB=gridup
+      - POSTGRES_DB=${GRIDUP_DB_NAME:-gridup}
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=gridup
       - TZ=Europe/Istanbul
-    ports:
-      - "5432:5432"
     volumes:
       - gridup_db_data:/var/lib/postgresql/data
     healthcheck:
@@ -35,15 +32,14 @@ services:
     build:
       context: ..
       dockerfile: toplama/Dockerfile
-    container_name: gridup_toplama
     environment:
       - TOPLAMA_KAYIT=postgres
-      - DATABASE_URL=postgresql://postgres:gridup@veritabani:5432/gridup
+      - DATABASE_URL=postgresql://postgres:gridup@veritabani:5432/${GRIDUP_DB_NAME:-gridup}
       - TOPLAMA_HOST=0.0.0.0
       - TOPLAMA_PORT=8000
       - TZ=Europe/Istanbul
     ports:
-      - "8000:8000"
+      - "127.0.0.1:${GRIDUP_TOPLAMA_PORT:-8000}:8000"
     depends_on:
       veritabani:
         condition: service_healthy
@@ -61,13 +57,12 @@ services:
       context: ..
       dockerfile: deploy/Dockerfile.analiz
     image: deploy-analiz:latest
-    container_name: gridup_analiz_api
     environment:
-      - GRIDUP_ANALIZ_VERITABANI_DSN=postgresql://postgres:gridup@veritabani:5432/gridup
+      - GRIDUP_ANALIZ_VERITABANI_DSN=postgresql://postgres:gridup@veritabani:5432/${GRIDUP_DB_NAME:-gridup}
       - GRIDUP_ANALIZ_OLAY_HISTEREZIS_SN=31536000
       - TZ=Europe/Istanbul
     ports:
-      - "8080:8080"
+      - "127.0.0.1:${GRIDUP_API_PORT:-8080}:8080"
     healthcheck:
       test: ["CMD-SHELL", "curl -f http://localhost:8080/saglik || exit 1"]
       interval: 5s
@@ -86,10 +81,9 @@ services:
   # --------------------------------------------------------------------------
   analiz_tara:
     image: deploy-analiz:latest
-    container_name: gridup_analiz_tara
     command: ["sh", "-c", "sleep 5 && python -m analiz tara --periyot 30"]
     environment:
-      - GRIDUP_ANALIZ_VERITABANI_DSN=postgresql://postgres:gridup@veritabani:5432/gridup
+      - GRIDUP_ANALIZ_VERITABANI_DSN=postgresql://postgres:gridup@veritabani:5432/${GRIDUP_DB_NAME:-gridup}
       - GRIDUP_ANALIZ_OLAY_HISTEREZIS_SN=31536000
       - TZ=Europe/Istanbul
     depends_on:
@@ -106,16 +100,18 @@ services:
     build:
       context: ../arayuz
       dockerfile: Dockerfile
-    container_name: gridup_arayuz
     ports:
-      - "80:80"
-    volumes:
-      - ../arayuz:/usr/share/nginx/html:ro
+      - "${GRIDUP_WEB_PORT:-80}:80"
     environment:
       - TZ=Europe/Istanbul
     depends_on:
       analiz_api:
         condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1/"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
     networks:
       - gridup_network
     restart: unless-stopped
@@ -127,9 +123,8 @@ services:
     build:
       context: ../modbus
       dockerfile: Dockerfile
-    container_name: gridup_modbus
     ports:
-      - "5020:5020"
+      - "${GRIDUP_MODBUS_PORT:-5020}:5020"
     environment:
       - API_URL=http://analiz_api:8080
       - MODBUS_PORT=5020
@@ -138,6 +133,11 @@ services:
     depends_on:
       analiz_api:
         condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import socket; s=socket.create_connection(('127.0.0.1', 5020), 3); s.close()"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     networks:
       - gridup_network
     restart: unless-stopped
@@ -203,7 +203,6 @@ services:
     build:
       context: ..
       dockerfile: deploy/Dockerfile.sim
-    container_name: gridup_simulator
     environment:
       - TOPLAMA_URL=http://toplama:8000/paket
       - SIM_MODUL_SAYISI=15
@@ -211,7 +210,7 @@ services:
       - TZ=Europe/Istanbul
     depends_on:
       toplama:
-        condition: service_started
+        condition: service_healthy
     networks:
       - gridup_network
     restart: unless-stopped

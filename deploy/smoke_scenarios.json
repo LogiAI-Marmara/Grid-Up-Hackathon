@@ -1,0 +1,8 @@
+{
+  "surum": 1,
+  "moduller": {
+    "TR041-P01-M2": "temiz",
+    "TR041-P01-M1": ["gevsek_klemens", "seviye_gecisi"],
+    "TR063-P02-M3": "besleme_kaybi"
+  }
+}

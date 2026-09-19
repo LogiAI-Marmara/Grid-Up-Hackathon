@@ -15,6 +15,7 @@ COPY sozlesmeler/ /app/sozlesmeler/
 
 # Streamer script
 COPY deploy/sim_streamer.py /app/sim_streamer.py
+COPY deploy/smoke_probe.py /app/smoke_probe.py
 
 # PYTHONPATH: sim_streamer.py'nin beklediği yol yapısı:
 #   repo_kok/modul-sim  ve  repo_kok

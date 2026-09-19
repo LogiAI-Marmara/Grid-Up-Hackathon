@@ -73,3 +73,7 @@ docs/track-a/eda/.history/
 
 # PlatformIO
 firmware/.pio/
+
+# Markdown dokümanları
+*.md
+!deploy/README.md
