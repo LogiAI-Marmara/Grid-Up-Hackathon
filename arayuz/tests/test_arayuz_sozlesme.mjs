@@ -139,7 +139,11 @@ class MockElement {
             moveTo: () => {},
             lineTo: () => {},
             closePath: () => {},
-            fillText: () => {}
+            fillText: () => {},
+            save: () => {},
+            restore: () => {},
+            scale: () => {},
+            setLineDash: () => {}
         };
     }
 
@@ -200,8 +204,8 @@ function setupMockEnvironment() {
         'thermal-status-banner', 'banner-icon', 'banner-title', 'banner-desc',
         'active-alarm-count', 'alarms-container', 'audit-container',
         'operator-id-input',
-        'timeseries-metric', 'timeseries-interval', 'btn-refresh-series',
-        'timeseriesCanvas', 'timeseries-message', 'timeseries-info',
+        'timeseries-metric', 'timeseries-range', 'timeseries-interval', 'btn-refresh-series',
+        'timeseriesCanvas', 'timeseries-message', 'timeseries-info', 'timeseries-tooltip',
         'api-status-led', 'api-status-text', 'clock-display'
     ];
 
@@ -317,6 +321,48 @@ test('UI-01: Saha/pano/modül ağacı, boş pano ve modül cihaz durumu doğrula
     assert.equal(app.state.modulDurumlari['M-AKTIF'].durum, 'aktif');
     assert.equal(app.state.modulDurumlari['M-SESSIZ'].durum, 'sessiz');
     assert.equal(app.state.modulDurumlari['M-PASIF'].durum, 'pasif');
+
+    // 4. Modülün cihaz durumu sonradan değişirse (aktif -> sessiz -> pasif -> aktif) ağaç ve üst panel güncellenmeli
+    const subAktif = document.getElementById('modul-sub-text-M-AKTIF');
+    assert.ok(subAktif, "Modül sub-text elementi ID ile erişilebilir olmalı");
+    assert.equal(subAktif.textContent, 'Aktif');
+
+    // M-AKTIF için durum sonradan 'sessiz'e değişirse:
+    global.fetch = async (url) => {
+        if (url.includes('/moduller?limit=')) {
+            return {
+                ok: true,
+                json: async () => ({
+                    toplam: 1,
+                    ofset: 0,
+                    limit: 50,
+                    veriler: [
+                        { modul_id: 'M-AKTIF', durum: 'sessiz', son_gorulme: '2026-09-19T09:30:00Z', seviye: 'normal' }
+                    ]
+                })
+            };
+        }
+        return { ok: false, status: 404 };
+    };
+
+    app.state.aktifModulId = 'M-AKTIF';
+    await app.modulDurumlariniGuncelle();
+
+    assert.equal(subAktif.textContent, 'Sessiz', "Modül durumu sessiz olarak güncellenmeli");
+    assert.match(subAktif.className, /sessiz/, "Sessiz sınıfı eklenmeli");
+    const deviceBadge = document.getElementById('active-module-device-badge');
+    assert.equal(deviceBadge.textContent, 'CİHAZ: SESSİZ', "Üst paneldeki rozet de SESSİZ olarak güncellenmeli");
+
+    // Pasif'e değişirse:
+    app.modulCihazDurumunuAğactaGuncelle('M-AKTIF', 'pasif', false);
+    assert.equal(subAktif.textContent, 'Pasif', "Ağaçta Pasif yazmalı");
+    assert.match(subAktif.className, /pasif/, "Pasif sınıfı eklenmeli");
+    assert.equal(deviceBadge.textContent, 'CİHAZ: PASİF', "Üst panelde PASİF yazmalı");
+
+    // Tekrar aktif olursa:
+    app.modulCihazDurumunuAğactaGuncelle('M-AKTIF', 'aktif', true);
+    assert.equal(subAktif.textContent, 'Aktif', "Ağaçta Aktif yazmalı");
+    assert.equal(deviceBadge.textContent, 'CİHAZ: AKTİF', "Üst panelde AKTİF yazmalı");
 });
 
 test('UI-02: Modül seçimi yarış durumu (Race Condition) ve servis hatası izolasyonu', async () => {
@@ -621,6 +667,7 @@ test('UI-06: Zaman serisi ham ve kovalanmış noktalar, şüpheli işaretleme ve
     app.state.aktifModulId = 'M-SERI';
     document.getElementById('timeseries-metric').value = 'ortam_sicaklik';
     document.getElementById('timeseries-interval').value = ''; // Ham
+    document.getElementById('timeseries-range').value = ''; // Tüm Geçmiş
 
     global.fetch = async (url) => {
         if (url.includes('/seri') && !url.includes('aralik=')) {
@@ -652,6 +699,66 @@ test('UI-06: Zaman serisi ham ve kovalanmış noktalar, şüpheli işaretleme ve
     await app.zamanSerisiYukle();
     const msgEl = document.getElementById('timeseries-message');
     assert.equal(msgEl.textContent, 'Bu aralıkta ölçüm yok', 'Boş seride doğru mesaj gösterilmeli');
+
+    // 3. Geçmiş zaman aralığı (bas parametresi) testi
+    let sonCagirilanUrl = '';
+    document.getElementById('timeseries-range').value = '24h';
+    global.fetch = async (url) => {
+        sonCagirilanUrl = url;
+        return {
+            ok: true,
+            json: async () => ({ modul_id: 'M-SERI', olcum_tipi: 'ortam_sicaklik', noktalar: [] })
+        };
+    };
+    await app.zamanSerisiYukle();
+    assert.ok(sonCagirilanUrl.includes('bas='), 'Son 24 saat geçmişi seçildiğinde bas parametresi gönderilmeli');
+
+    // 4. cok_fazla_nokta hatasında otomatik kova seçimi
+    document.getElementById('timeseries-interval').value = '';
+    let denemeSayisi = 0;
+    global.fetch = async (url) => {
+        denemeSayisi++;
+        if (!url.includes('aralik=')) {
+            return {
+                ok: false,
+                status: 400,
+                json: async () => ({
+                    hata: { kod: 'cok_fazla_nokta', mesaj: '5000 noktayı aşıyor' }
+                })
+            };
+        }
+        return {
+            ok: true,
+            json: async () => ({
+                modul_id: 'M-SERI',
+                olcum_tipi: 'ortam_sicaklik',
+                aralik: '10s',
+                noktalar: [{ zaman: '2026-09-19T10:00:00Z', ort: 25.0, asgari: 24.0, azami: 26.0, supheli: 0 }]
+            })
+        };
+    };
+    await app.zamanSerisiYukle();
+    assert.ok(document.getElementById('timeseries-interval').value !== '', 'cok_fazla_nokta sonrası kova boyutu otomatik yükseltilmeli');
+
+    // 5. 3-Faz Akımları (L1, L2, L3) çoklu karşılaştırma testi
+    document.getElementById('timeseries-metric').value = 'akim_hepsi';
+    const cagirilanTipler = [];
+    global.fetch = async (url) => {
+        if (url.includes('tip=akim_l1')) cagirilanTipler.push('akim_l1');
+        if (url.includes('tip=akim_l2')) cagirilanTipler.push('akim_l2');
+        if (url.includes('tip=akim_l3')) cagirilanTipler.push('akim_l3');
+        return {
+            ok: true,
+            json: async () => ({
+                modul_id: 'M-SERI',
+                olcum_tipi: 'akim',
+                noktalar: [{ zaman: '2026-09-19T10:00:00Z', deger: 75.0, birim: 'A', kalite: 'iyi' }]
+            })
+        };
+    };
+    await app.zamanSerisiYukle();
+    assert.ok(cagirilanTipler.includes('akim_l1') && cagirilanTipler.includes('akim_l2') && cagirilanTipler.includes('akim_l3'), '3-Faz akımları için L1, L2 ve L3 birlikte çekilmeli');
+    assert.ok(app.state.seriCokluVeri && app.state.seriCokluVeri.l1 && app.state.seriCokluVeri.l2 && app.state.seriCokluVeri.l3, 'seriCokluVeri nesnesi L1, L2, L3 verileriyle doldurulmalı');
 });
 
 test('UI-07: Operasyon günlüğü artan sıradan en büyük son 30 geçişin alınması ve 61 numaralı geçiş', async () => {

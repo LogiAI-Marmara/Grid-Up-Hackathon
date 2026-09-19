@@ -61,8 +61,13 @@ const state = {
     // Zaman serisi grafiği
     seriKanal: 'ortam_sicaklik',
     seriAralik: '',
+    seriZamanAralik: '24h',
     seriNoktalar: [],
-    seriHataMesaji: null
+    seriCokluVeri: null,
+    aktifSeriCizimVerisi: null,
+    seriHataMesaji: null,
+    sonGorulmeZamani: null,
+    seriesPollCounter: 0
 };
 
 // Asenkron Yarış Durumu (Race Condition) Sayaçları (UI-02, UI-06)
@@ -222,6 +227,58 @@ async function tumModulDurumlariniCek() {
     return durumHaritasi;
 }
 
+// UI-01: Modülün cihaz durumunu (aktif, sessiz, pasif) ağaçta ve seçiliyse üst panelde anında güncelle
+function modulCihazDurumunuAğactaGuncelle(modulId, durum, aktif) {
+    let cihazDurumuText = 'Durum bilinmiyor';
+    let cihazDurumuClass = '';
+
+    if (aktif === false || durum === 'pasif') {
+        cihazDurumuText = 'Pasif';
+        cihazDurumuClass = 'pasif';
+    } else if (durum === 'sessiz') {
+        cihazDurumuText = 'Sessiz';
+        cihazDurumuClass = 'sessiz';
+    } else if (durum === 'aktif') {
+        cihazDurumuText = 'Aktif';
+    }
+
+    const subSpan = document.getElementById(`modul-sub-text-${modulId}`);
+    if (subSpan) {
+        subSpan.className = `modul-sub-text ${cihazDurumuClass}`.trim();
+        subSpan.textContent = cihazDurumuText;
+    }
+
+    // Eğer bu modül seçili modül ise üst panel rozetini de güncelle
+    if (modulId === state.aktifModulId) {
+        const deviceBadge = document.getElementById('active-module-device-badge');
+        if (deviceBadge) {
+            const devKey = (aktif === false || durum === 'pasif') ? 'pasif' : (durum || 'bilinmiyor');
+            deviceBadge.className = `status-badge badge-device-${devKey}`;
+            deviceBadge.textContent = `CİHAZ: ${cihazDurumuText.toLocaleUpperCase('tr-TR')}`;
+        }
+    }
+}
+
+// UI-01: Periyodik olarak tüm modüllerin güncel durumlarını /moduller'den çekip ağacı dinamik güncelle
+async function modulDurumlariniGuncelle() {
+    try {
+        const yeniDurumlar = await tumModulDurumlariniCek();
+        if (!yeniDurumlar || Object.keys(yeniDurumlar).length === 0) return;
+
+        state.modulDurumlari = { ...state.modulDurumlari, ...yeniDurumlar };
+
+        for (const [mId, info] of Object.entries(yeniDurumlar)) {
+            modulCihazDurumunuAğactaGuncelle(mId, info.durum, info.aktif);
+            if (info.seviye !== undefined) {
+                state.apiModulSeviyeleri[mId] = seviyeNormalize(info.seviye);
+                modulRozetiniGuncelle(mId);
+            }
+        }
+    } catch (err) {
+        console.warn("Modül durumları güncelleme hatası:", err);
+    }
+}
+
 async function hiyerarsiyiYukle() {
     const container = document.getElementById('hierarchy-container');
     const countTag = document.getElementById('hierarchy-count');
@@ -350,7 +407,8 @@ async function hiyerarsiyiYukle() {
                         idSpan.textContent = mId;
 
                         const subSpan = document.createElement('span');
-                        subSpan.className = `modul-sub-text ${cihazDurumuClass}`;
+                        subSpan.id = `modul-sub-text-${mId}`;
+                        subSpan.className = `modul-sub-text ${cihazDurumuClass}`.trim();
                         subSpan.textContent = cihazDurumuText;
 
                         infoLeft.appendChild(idSpan);
@@ -491,6 +549,12 @@ function resetModulEkranGorunumu(modulId, modulIsmi) {
     // Termal reticle gizle
     const reticle = document.getElementById('hotspot-reticle');
     if (reticle) reticle.style.display = 'none';
+    const reticleTempReset = document.getElementById('reticle-temp');
+    if (reticleTempReset && reticleTempReset.classList) {
+        reticleTempReset.classList.remove('pos-bottom');
+        reticleTempReset.classList.remove('pos-left');
+        reticleTempReset.classList.remove('pos-right');
+    }
 
     const bannerDesc = document.getElementById('banner-desc');
     const bannerTitle = document.getElementById('banner-title');
@@ -504,16 +568,46 @@ function resetModulEkranGorunumu(modulId, modulIsmi) {
         sourceBadge.className = 'thermal-resolution';
         sourceBadge.textContent = 'Veri Bekleniyor';
     }
+
+    // UI-02 / UI-06: Zaman serisi alanını anında sıfırla
+    state.seriNoktalar = [];
+    state.seriCokluVeri = null;
+    state.aktifSeriCizimVerisi = null;
+    const tsCanvas = document.getElementById('timeseriesCanvas');
+    if (tsCanvas) {
+        const tsCtx = tsCanvas.getContext('2d');
+        if (tsCtx) {
+            tsCtx.clearRect(0, 0, tsCanvas.width, tsCanvas.height);
+            tsCtx.fillStyle = '#070b14';
+            tsCtx.fillRect(0, 0, tsCanvas.width, tsCanvas.height);
+        }
+    }
+    const tsMsg = document.getElementById('timeseries-message');
+    if (tsMsg) {
+        tsMsg.style.display = 'flex';
+        tsMsg.className = 'timeseries-message';
+        tsMsg.textContent = 'Zaman serisi yükleniyor...';
+    }
+    const tsInfo = document.getElementById('timeseries-info');
+    if (tsInfo) tsInfo.textContent = 'Yükleniyor...';
+    const tsTooltip = document.getElementById('timeseries-tooltip');
+    if (tsTooltip) tsTooltip.style.display = 'none';
 }
 
-async function modulDetayYukle(modulId) {
+async function modulDetayYukle(modulId, isPolling = false) {
     if (!modulId) return;
 
     // UI-02: Asenkron yarış durumu koruması için istek jetonu
     const currentToken = ++detailRequestToken;
 
-    // Önceki modülün verilerini bir an bile göstermemek için anında sıfırla
-    resetModulEkranGorunumu(modulId, state.aktifModulIsmi);
+    const modulDegisti = (state.aktifModulId !== modulId);
+    state.aktifModulId = modulId;
+
+    // UI-02: Önceki modülün verilerini bir an bile göstermemek için modül DEĞİŞTİĞİNDE veya ilk seçimde sıfırla.
+    // Periyodik canlı telemetri taraması (isPolling=true) sırasında aynı modül için ekranı ve zaman serisi grafiğini asla sıfırlama!
+    if (modulDegisti && !isPolling) {
+        resetModulEkranGorunumu(modulId, state.aktifModulIsmi);
+    }
 
     try {
         const res = await apiFetch(`/moduller/${encodeURIComponent(modulId)}`);
@@ -528,6 +622,11 @@ async function modulDetayYukle(modulId) {
         const data = await res.json();
         if (currentToken !== detailRequestToken) return;
 
+        // Son görülme referans zamanını kaydet
+        if (data.son_gorulme) {
+            state.sonGorulmeZamani = data.son_gorulme;
+        }
+
         // 1. Cihaz Durumu ve Zaman
         const modulDurumKaydi = state.modulDurumlari[modulId] || {};
         let cihazDurumu = modulDurumKaydi.durum;
@@ -536,11 +635,8 @@ async function modulDetayYukle(modulId) {
             else cihazDurumu = 'bilinmiyor';
         }
 
-        const deviceBadge = document.getElementById('active-module-device-badge');
-        if (deviceBadge) {
-            deviceBadge.className = `status-badge badge-device-${cihazDurumu}`;
-            deviceBadge.textContent = `CİHAZ: ${cihazDurumu.toUpperCase()}`;
-        }
+        // Ağaçtaki ve üst başlıktaki cihaz durumunu hemen güncelle
+        modulCihazDurumunuAğactaGuncelle(modulId, cihazDurumu, data.aktif);
 
         // Son görülme zamanı (TSİ)
         const valTime = document.getElementById('val-time');
@@ -1014,7 +1110,7 @@ function termalKareCiz() {
 
     if (state.termalOzet && state.termalOzet.maks_konum && reticle) {
         const [hx, hy] = state.termalOzet.maks_konum;
-        const rect = canvas.getBoundingClientRect();
+        const rect = canvas.getBoundingClientRect ? canvas.getBoundingClientRect() : { width: 480, height: 360 };
         const rw = rect.width || width;
         const rh = rect.height || height;
         const cW = rw / 32;
@@ -1030,6 +1126,38 @@ function termalKareCiz() {
         if (reticleTemp) {
             const val = state.termalOzet.maks !== undefined ? Number(state.termalOzet.maks).toFixed(1) : '--';
             reticleTemp.textContent = `${val} °C`;
+
+            // Üst sınıra yakınsa (posY < 55 veya hy <= 3) derece etiketini reticle altına al (kesilmeyi kesin olarak önle)
+            if (posY < 55 || hy <= 3) {
+                reticleTemp.style.top = '28px';
+                reticleTemp.style.bottom = 'auto';
+                reticleTemp.classList.add('pos-bottom');
+            } else {
+                reticleTemp.style.top = '-26px';
+                reticleTemp.style.bottom = 'auto';
+                reticleTemp.classList.remove('pos-bottom');
+            }
+
+            // Yatay sınırlarda sağa/sola taşmayı engelle
+            if (posX < 55) {
+                reticleTemp.style.left = '0';
+                reticleTemp.style.right = 'auto';
+                reticleTemp.style.transform = 'none';
+                reticleTemp.classList.add('pos-right');
+                reticleTemp.classList.remove('pos-left');
+            } else if (posX > rw - 55) {
+                reticleTemp.style.left = 'auto';
+                reticleTemp.style.right = '0';
+                reticleTemp.style.transform = 'none';
+                reticleTemp.classList.add('pos-left');
+                reticleTemp.classList.remove('pos-right');
+            } else {
+                reticleTemp.style.left = '50%';
+                reticleTemp.style.right = 'auto';
+                reticleTemp.style.transform = 'translateX(-50%)';
+                reticleTemp.classList.remove('pos-left');
+                reticleTemp.classList.remove('pos-right');
+            }
         }
     }
 }
@@ -1282,8 +1410,57 @@ async function alarmOnayla(alarmId, modulId) {
 }
 
 // --------------------------------------------------------------------------
-// UI-06: ZAMAN SERİSİ GRAFİĞİ (ORTAM, TERMAL MAKS, L1, L2, L3)
+// UI-06: ZAMAN SERİSİ GRAFİĞİ (ORTAM, TERMAL MAKS, L1, L2, L3 VE TÜM METRİKLER)
 // --------------------------------------------------------------------------
+
+function getMetrikAyar(metrik) {
+    const ayarlar = {
+        'ortam_sicaklik': { ad: 'Ortam Sıcaklığı', birim: '°C', renk: '#38bdf8' },
+        'termal_maks': { ad: 'Termal Maks. Sıcaklık', birim: '°C', renk: '#ef4444' },
+        'termal_ort': { ad: 'Termal Ort. Sıcaklık', birim: '°C', renk: '#f97316' },
+        'akim_l1': { ad: 'Akım L1', birim: 'A', renk: '#f59e0b' },
+        'akim_l2': { ad: 'Akım L2', birim: 'A', renk: '#10b981' },
+        'akim_l3': { ad: 'Akım L3', birim: 'A', renk: '#f43f5e' },
+        'akim_notr': { ad: 'Nötr Akımı', birim: 'A', renk: '#a855f7' },
+        'nem': { ad: 'Bağıl Nem', birim: '%', renk: '#0ea5e9' },
+        'ark_olay': { ad: 'Ark Olay Sayısı', birim: 'adet', renk: '#dc2626' }
+    };
+    return ayarlar[metrik] || { ad: metrik, birim: '', renk: '#38bdf8' };
+}
+
+function getZamanAraligiBas(aralikKodu, refZamanStr) {
+    if (!aralikKodu) return null;
+    const refDate = refZamanStr ? new Date(refZamanStr) : new Date();
+    const refMs = !isNaN(refDate.getTime()) ? refDate.getTime() : Date.now();
+    let diffMs = 0;
+    switch (aralikKodu) {
+        case '1h': diffMs = 1 * 3600 * 1000; break;
+        case '6h': diffMs = 6 * 3600 * 1000; break;
+        case '24h': diffMs = 24 * 3600 * 1000; break;
+        case '7d': diffMs = 7 * 24 * 3600 * 1000; break;
+        default: return null;
+    }
+    return new Date(refMs - diffMs).toISOString();
+}
+
+function handleCokFazlaNokta(intervalSelect, currentAralik) {
+    const kovaSirasi = ['', '10s', '1m', '5m', '15m', '1h', '1d'];
+    const idx = kovaSirasi.indexOf(currentAralik || '');
+    const sonrakiKova = (idx >= 0 && idx < kovaSirasi.length - 1) ? kovaSirasi[idx + 1] : '1h';
+
+    if (intervalSelect) {
+        intervalSelect.value = sonrakiKova;
+    }
+    state.seriAralik = sonrakiKova;
+
+    const infoEl = document.getElementById('timeseries-info');
+    if (infoEl) {
+        infoEl.textContent = `⚠️ 5000 nokta aşıldığı için kova otomatik olarak '${sonrakiKova}' seçildi.`;
+    }
+
+    return zamanSerisiYukle();
+}
+
 async function zamanSerisiYukle() {
     const modulId = state.aktifModulId;
     if (!modulId) return;
@@ -1291,23 +1468,96 @@ async function zamanSerisiYukle() {
     const currentToken = ++seriesRequestToken;
     const metricSelect = document.getElementById('timeseries-metric');
     const intervalSelect = document.getElementById('timeseries-interval');
+    const rangeSelect = document.getElementById('timeseries-range');
     const msgEl = document.getElementById('timeseries-message');
     const infoEl = document.getElementById('timeseries-info');
 
-    const metrik = (metricSelect && metricSelect.value) || state.seriKanal;
-    const aralik = (intervalSelect && intervalSelect.value) || state.seriAralik;
+    const metrik = (metricSelect && metricSelect.value) || state.seriKanal || 'ortam_sicaklik';
+    const aralik = (intervalSelect && intervalSelect.value) || state.seriAralik || '';
+    const range = (rangeSelect && rangeSelect.value) !== undefined ? rangeSelect.value : (state.seriZamanAralik || '');
 
-    if (msgEl) {
+    if (msgEl && (!state.seriNoktalar || state.seriNoktalar.length === 0)) {
         msgEl.style.display = 'flex';
         msgEl.className = 'timeseries-message';
         msgEl.textContent = 'Zaman serisi yükleniyor...';
     }
 
+    // bas zamanı hesapla (geçmiş filtresi)
+    const refZaman = state.sonGorulmeZamani || new Date().toISOString();
+    const basZaman = getZamanAraligiBas(range, refZaman);
+
+    // 3-Faz Akımları (L1, L2, L3) çoklu karşılaştırma
+    if (metrik === 'akim_hepsi') {
+        try {
+            const fetchFaz = async (fazTip) => {
+                let url = `/moduller/${encodeURIComponent(modulId)}/seri?tip=${encodeURIComponent(fazTip)}`;
+                if (aralik) url += `&aralik=${encodeURIComponent(aralik)}`;
+                if (basZaman) url += `&bas=${encodeURIComponent(basZaman)}`;
+                const res = await apiFetch(url);
+                if (!res.ok) {
+                    const err = await res.json().catch(() => ({}));
+                    throw { status: res.status, data: err };
+                }
+                return await res.json();
+            };
+
+            const [resL1, resL2, resL3] = await Promise.all([
+                fetchFaz('akim_l1'),
+                fetchFaz('akim_l2'),
+                fetchFaz('akim_l3')
+            ]);
+
+            if (currentToken !== seriesRequestToken) return;
+
+            const ptsL1 = Array.isArray(resL1.noktalar) ? resL1.noktalar : [];
+            const ptsL2 = Array.isArray(resL2.noktalar) ? resL2.noktalar : [];
+            const ptsL3 = Array.isArray(resL3.noktalar) ? resL3.noktalar : [];
+
+            state.seriNoktalar = ptsL1;
+            state.seriCokluVeri = { l1: ptsL1, l2: ptsL2, l3: ptsL3 };
+
+            if (ptsL1.length === 0 && ptsL2.length === 0 && ptsL3.length === 0) {
+                if (msgEl) {
+                    msgEl.style.display = 'flex';
+                    msgEl.className = 'timeseries-message';
+                    msgEl.textContent = 'Bu aralıkta ölçüm yok';
+                }
+                if (infoEl) infoEl.textContent = '3-Faz Akımları — Ölçüm bulunamadı';
+                zamanSerisiCizGenel([], metrik, aralik, state.seriCokluVeri);
+                return;
+            }
+
+            if (msgEl) msgEl.style.display = 'none';
+            if (infoEl) {
+                const maxLen = Math.max(ptsL1.length, ptsL2.length, ptsL3.length);
+                infoEl.textContent = `3-Faz Akımları (L1, L2, L3) (A) — ${maxLen} nokta (${aralik ? 'Kova: ' + aralik : 'Ham'})`;
+            }
+
+            zamanSerisiCizGenel(ptsL1, metrik, aralik, state.seriCokluVeri);
+            return;
+        } catch (err) {
+            if (currentToken !== seriesRequestToken) return;
+            if (err && err.data && err.data.hata && err.data.hata.kod === 'cok_fazla_nokta') {
+                return handleCokFazlaNokta(intervalSelect, aralik);
+            }
+            console.warn("3-Faz zaman serisi hatası:", err);
+            if (msgEl) {
+                msgEl.style.display = 'flex';
+                msgEl.className = 'timeseries-message error';
+                msgEl.textContent = 'Grafik yüklenemedi.';
+            }
+            state.seriNoktalar = [];
+            state.seriCokluVeri = null;
+            zamanSerisiCizGenel([], metrik, aralik, null);
+            return;
+        }
+    }
+
+    // Tekil metrik akışı
     try {
         let url = `/moduller/${encodeURIComponent(modulId)}/seri?tip=${encodeURIComponent(metrik)}`;
-        if (aralik) {
-            url += `&aralik=${encodeURIComponent(aralik)}`;
-        }
+        if (aralik) url += `&aralik=${encodeURIComponent(aralik)}`;
+        if (basZaman) url += `&bas=${encodeURIComponent(basZaman)}`;
 
         const res = await apiFetch(url);
         if (currentToken !== seriesRequestToken) return;
@@ -1317,11 +1567,7 @@ async function zamanSerisiYukle() {
             if (currentToken !== seriesRequestToken) return;
 
             if (errData && errData.hata && errData.hata.kod === 'cok_fazla_nokta') {
-                if (msgEl) {
-                    msgEl.style.display = 'flex';
-                    msgEl.className = 'timeseries-message error';
-                    msgEl.textContent = 'Çok fazla nokta: Lütfen daha geniş bir kova aralığı seçin.';
-                }
+                return handleCokFazlaNokta(intervalSelect, aralik);
             } else {
                 if (msgEl) {
                     msgEl.style.display = 'flex';
@@ -1330,7 +1576,8 @@ async function zamanSerisiYukle() {
                 }
             }
             state.seriNoktalar = [];
-            zamanSerisiCiz([], metrik, aralik);
+            state.seriCokluVeri = null;
+            zamanSerisiCizGenel([], metrik, aralik, null);
             return;
         }
 
@@ -1339,6 +1586,7 @@ async function zamanSerisiYukle() {
 
         const noktalar = Array.isArray(data.noktalar) ? data.noktalar : [];
         state.seriNoktalar = noktalar;
+        state.seriCokluVeri = null;
 
         if (noktalar.length === 0) {
             if (msgEl) {
@@ -1346,92 +1594,181 @@ async function zamanSerisiYukle() {
                 msgEl.className = 'timeseries-message';
                 msgEl.textContent = 'Bu aralıkta ölçüm yok';
             }
-            if (infoEl) infoEl.textContent = `${metrik} — Ölçüm bulunamadı`;
-            zamanSerisiCiz([], metrik, aralik);
+            const ayar = getMetrikAyar(metrik);
+            if (infoEl) infoEl.textContent = `${ayar.ad} — Ölçüm bulunamadı`;
+            zamanSerisiCizGenel([], metrik, aralik, null);
             return;
         }
 
         if (msgEl) msgEl.style.display = 'none';
+        const ayar = getMetrikAyar(metrik);
         if (infoEl) {
-            infoEl.textContent = `${metrik} — ${noktalar.length} nokta (${aralik ? 'Kova: ' + aralik : 'Ham'})`;
+            infoEl.textContent = `${ayar.ad} (${ayar.birim}) — ${noktalar.length} nokta (${aralik ? 'Kova: ' + aralik : 'Ham'})`;
         }
 
-        zamanSerisiCiz(noktalar, metrik, aralik);
+        zamanSerisiCizGenel(noktalar, metrik, aralik, null);
     } catch (err) {
         if (currentToken !== seriesRequestToken) return;
         console.warn("Zaman serisi hatası:", err);
         if (msgEl) {
             msgEl.style.display = 'flex';
             msgEl.className = 'timeseries-message error';
-            msgEl.textContent = 'Grafik yüklenemedi';
+            msgEl.textContent = 'Grafik yüklenemedi.';
         }
         state.seriNoktalar = [];
-        zamanSerisiCiz([], metrik, aralik);
+        state.seriCokluVeri = null;
+        zamanSerisiCizGenel([], metrik, aralik, null);
     }
 }
 
-function zamanSerisiCiz(noktalar, metrik, aralik) {
+function parseNoktalar(rawNoktalar, isAralik) {
+    if (!Array.isArray(rawNoktalar)) return [];
+    return rawNoktalar.map((pt, idx) => {
+        let val = null;
+        if (pt.val !== undefined && pt.val !== null) {
+            val = pt.val;
+        } else if (isAralik) {
+            val = pt.ort !== undefined ? pt.ort : pt.deger;
+        } else {
+            val = pt.deger !== undefined ? pt.deger : pt.ort;
+        }
+        const num = (val !== null && val !== undefined) ? Number(val) : null;
+        const isSupheli = pt.supheli !== undefined ? Boolean(pt.supheli) : (isAralik ? ((pt.supheli || 0) > 0) : (pt.kalite !== 'iyi'));
+        const asgariNum = (pt.asgari !== undefined && pt.asgari !== null) ? Number(pt.asgari) : null;
+        const azamiNum = (pt.azami !== undefined && pt.azami !== null) ? Number(pt.azami) : null;
+        const t = pt.t !== undefined ? pt.t : (pt.zaman ? new Date(pt.zaman).getTime() : NaN);
+        return {
+            idx,
+            val: (num !== null && !isNaN(num)) ? num : null,
+            asgari: (asgariNum !== null && !isNaN(asgariNum)) ? asgariNum : null,
+            azami: (azamiNum !== null && !isNaN(azamiNum)) ? azamiNum : null,
+            zaman: pt.zaman,
+            t: !isNaN(t) ? t : idx,
+            kalite: pt.kalite,
+            supheli: isSupheli,
+            aralik: isAralik
+        };
+    }).filter(p => p.val !== null);
+}
+
+function zamanSerisiCizGenel(noktalar, metrik, aralik, cokluVeri, crosshairX = null) {
     const canvas = document.getElementById('timeseriesCanvas');
     if (!canvas) return;
+
+    const rect = canvas.getBoundingClientRect ? canvas.getBoundingClientRect() : { width: 760, height: 210 };
+    const dpr = (typeof window !== 'undefined' && window.devicePixelRatio) || 1;
+    const displayWidth = Math.round(rect.width || (canvas.parentElement ? canvas.parentElement.clientWidth : 760) || 760);
+    const displayHeight = Math.round(rect.height || 210);
+
+    if (canvas.width !== displayWidth * dpr || canvas.height !== displayHeight * dpr) {
+        canvas.width = displayWidth * dpr;
+        canvas.height = displayHeight * dpr;
+    }
+
     const ctx = canvas.getContext('2d');
-    const w = canvas.width;
-    const h = canvas.height;
+    if (!ctx) return;
+
+    if (ctx.save) ctx.save();
+    if (ctx.scale) ctx.scale(dpr, dpr);
+
+    const w = displayWidth;
+    const h = displayHeight;
 
     ctx.clearRect(0, 0, w, h);
-
-    // Koyu SCADA arka plan
     ctx.fillStyle = '#070b14';
     ctx.fillRect(0, 0, w, h);
 
-    if (!noktalar || noktalar.length === 0) return;
+    const isMulti = metrik === 'akim_hepsi';
+    let seriesList = [];
 
-    const isCurrent = metrik.startsWith('akim_');
-    const unit = isCurrent ? 'A' : '°C';
+    if (isMulti && cokluVeri) {
+        const parsedL1 = parseNoktalar(cokluVeri.l1, Boolean(aralik));
+        const parsedL2 = parseNoktalar(cokluVeri.l2, Boolean(aralik));
+        const parsedL3 = parseNoktalar(cokluVeri.l3, Boolean(aralik));
+        seriesList = [
+            { id: 'l1', ad: 'L1', renk: '#f59e0b', unit: 'A', parsed: parsedL1 },
+            { id: 'l2', ad: 'L2', renk: '#10b981', unit: 'A', parsed: parsedL2 },
+            { id: 'l3', ad: 'L3', renk: '#f43f5e', unit: 'A', parsed: parsedL3 }
+        ];
+    } else {
+        const ayar = getMetrikAyar(metrik);
+        const parsed = parseNoktalar(noktalar, Boolean(aralik));
+        seriesList = [
+            { id: metrik, ad: ayar.ad, renk: ayar.renk, unit: ayar.birim, parsed }
+        ];
+    }
 
-    const paddingLeft = 60;
-    const paddingRight = 30;
-    const paddingTop = 25;
-    const paddingBottom = 30;
-    const plotW = w - paddingLeft - paddingRight;
-    const plotH = h - paddingTop - paddingBottom;
+    const allParsedPoints = seriesList.flatMap(s => s.parsed);
+    if (allParsedPoints.length === 0) {
+        if (ctx.restore) ctx.restore();
+        state.aktifSeriCizimVerisi = null;
+        return;
+    }
 
-    // Değerleri çıkar
-    const parsedPoints = noktalar.map((pt, idx) => {
-        const val = aralik ? pt.ort : pt.deger;
-        const num = (val !== null && val !== undefined) ? Number(val) : null;
-        const isSupheli = aralik ? ((pt.supheli || 0) > 0) : (pt.kalite !== 'iyi');
-        return {
-            xIdx: idx,
-            val: num,
-            asgari: pt.asgari !== undefined ? Number(pt.asgari) : null,
-            azami: pt.azami !== undefined ? Number(pt.azami) : null,
-            zaman: pt.zaman,
-            supheli: isSupheli
-        };
-    }).filter(p => p.val !== null && !isNaN(p.val));
+    const unit = seriesList[0].unit;
 
-    if (parsedPoints.length === 0) return;
+    const paddingLeft = 65;
+    const paddingRight = 35;
+    const paddingTop = 30;
+    const paddingBottom = 35;
+    const plotW = Math.max(50, w - paddingLeft - paddingRight);
+    const plotH = Math.max(50, h - paddingTop - paddingBottom);
 
-    let minVal = Math.min(...parsedPoints.map(p => p.asgari !== null ? p.asgari : p.val));
-    let maxVal = Math.max(...parsedPoints.map(p => p.azami !== null ? p.azami : p.val));
+    // Min ve Max Değerler
+    let minVal = Infinity;
+    let maxVal = -Infinity;
+    allParsedPoints.forEach(p => {
+        const lo = p.asgari !== null ? Math.min(p.asgari, p.val) : p.val;
+        const hi = p.azami !== null ? Math.max(p.azami, p.val) : p.val;
+        if (lo < minVal) minVal = lo;
+        if (hi > maxVal) maxVal = hi;
+    });
+
+    if (minVal === Infinity || maxVal === -Infinity) {
+        minVal = 0;
+        maxVal = 10;
+    }
     if (minVal === maxVal) {
         minVal -= 1;
         maxVal += 1;
     }
-    const valRange = maxVal - minVal;
+    const valSpan = maxVal - minVal;
+    const yMin = Math.max(0, minVal - valSpan * 0.05);
+    const yMax = maxVal + valSpan * 0.08;
+    const yRange = yMax - yMin;
 
-    // Izgara ve Y ekseni etiketleri
+    // Min ve Max Zamanlar
+    let minTime = Infinity;
+    let maxTime = -Infinity;
+    allParsedPoints.forEach(p => {
+        if (p.t < minTime) minTime = p.t;
+        if (p.t > maxTime) maxTime = p.t;
+    });
+    const timeSpan = maxTime - minTime;
+
+    function getScreenX(p, idx, totalLen) {
+        if (timeSpan > 0) {
+            return paddingLeft + ((p.t - minTime) / timeSpan) * plotW;
+        }
+        return totalLen > 1 ? paddingLeft + idx * (plotW / (totalLen - 1)) : paddingLeft + plotW / 2;
+    }
+
+    function getScreenY(val) {
+        return paddingTop + plotH * (1 - (val - yMin) / yRange);
+    }
+
+    // Y Ekseni ve Yatay Izgara Çizgileri
     ctx.strokeStyle = '#17233d';
     ctx.lineWidth = 1;
     ctx.fillStyle = '#64748b';
     ctx.font = '10px monospace';
     ctx.textAlign = 'right';
 
-    const yAdim = 4;
-    for (let i = 0; i <= yAdim; i++) {
-        const ratio = i / yAdim;
+    const ySteps = 4;
+    for (let i = 0; i <= ySteps; i++) {
+        const ratio = i / ySteps;
         const y = paddingTop + plotH * (1 - ratio);
-        const labelVal = (minVal + valRange * ratio).toFixed(1);
+        const labelVal = (yMin + yRange * ratio).toFixed(1);
 
         ctx.beginPath();
         ctx.moveTo(paddingLeft, y);
@@ -1441,66 +1778,291 @@ function zamanSerisiCiz(noktalar, metrik, aralik) {
         ctx.fillText(`${labelVal} ${unit}`, paddingLeft - 8, y + 3);
     }
 
-    // X ekseni ve çizgi
-    const xStep = parsedPoints.length > 1 ? plotW / (parsedPoints.length - 1) : plotW / 2;
+    // X Ekseni ve Dikey Izgara Çizgileri
+    const xSteps = Math.min(5, Math.max(2, Math.floor(plotW / 140)));
+    for (let i = 0; i <= xSteps; i++) {
+        const ratio = i / xSteps;
+        const x = paddingLeft + plotW * ratio;
 
-    // Kovalanmış aralık min-max bandı
-    if (aralik) {
-        ctx.fillStyle = isCurrent ? 'rgba(59, 130, 246, 0.12)' : 'rgba(239, 68, 68, 0.12)';
         ctx.beginPath();
-        parsedPoints.forEach((p, idx) => {
-            const x = paddingLeft + idx * xStep;
-            const yMax = paddingTop + plotH * (1 - (p.azami - minVal) / valRange);
-            if (idx === 0) ctx.moveTo(x, yMax);
-            else ctx.lineTo(x, yMax);
-        });
-        for (let idx = parsedPoints.length - 1; idx >= 0; idx--) {
-            const p = parsedPoints[idx];
-            const x = paddingLeft + idx * xStep;
-            const yMin = paddingTop + plotH * (1 - (p.asgari - minVal) / valRange);
-            ctx.lineTo(x, yMin);
+        ctx.moveTo(x, paddingTop);
+        ctx.lineTo(x, paddingTop + plotH);
+        ctx.stroke();
+
+        if (timeSpan > 0) {
+            const curTime = new Date(minTime + timeSpan * ratio);
+            const timeStr = curTime.toLocaleTimeString('tr-TR', {
+                timeZone: 'Europe/Istanbul',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+            ctx.textAlign = 'center';
+            ctx.fillStyle = '#64748b';
+            ctx.fillText(timeStr, x, h - 18);
         }
-        ctx.closePath();
-        ctx.fill();
     }
 
-    // Ana Seri Çizgisi
-    ctx.strokeStyle = isCurrent ? '#38bdf8' : '#ef4444';
-    ctx.lineWidth = 2;
-    ctx.beginPath();
+    // Her seriyi çiz
+    seriesList.forEach(s => {
+        const pts = s.parsed;
+        if (pts.length === 0) return;
 
-    parsedPoints.forEach((p, idx) => {
-        const x = paddingLeft + idx * xStep;
-        const y = paddingTop + plotH * (1 - (p.val - minVal) / valRange);
-        if (idx === 0) ctx.moveTo(x, y);
-        else ctx.lineTo(x, y);
-    });
-    ctx.stroke();
+        pts.forEach((p, idx) => {
+            p.screenX = getScreenX(p, idx, pts.length);
+            p.screenY = getScreenY(p.val);
+        });
 
-    // Noktalar ve Şüpheli Vurguları
-    parsedPoints.forEach((p, idx) => {
-        const x = paddingLeft + idx * xStep;
-        const y = paddingTop + plotH * (1 - (p.val - minVal) / valRange);
-
-        ctx.beginPath();
-        ctx.arc(x, y, p.supheli ? 4 : 2, 0, Math.PI * 2);
-        ctx.fillStyle = p.supheli ? '#f59e0b' : (isCurrent ? '#38bdf8' : '#ef4444');
-        ctx.fill();
-
-        if (p.supheli) {
-            ctx.strokeStyle = '#000';
-            ctx.lineWidth = 1;
-            ctx.stroke();
+        // Kova min-max alanı (aralık seçilmişse)
+        if (aralik) {
+            ctx.fillStyle = `${s.renk}1a`;
+            ctx.beginPath();
+            pts.forEach((p, idx) => {
+                const azamiVal = p.azami !== null ? p.azami : p.val;
+                const yHi = getScreenY(azamiVal);
+                if (idx === 0) ctx.moveTo(p.screenX, yHi);
+                else ctx.lineTo(p.screenX, yHi);
+            });
+            for (let idx = pts.length - 1; idx >= 0; idx--) {
+                const p = pts[idx];
+                const asgariVal = p.asgari !== null ? p.asgari : p.val;
+                const yLo = getScreenY(asgariVal);
+                ctx.lineTo(p.screenX, yLo);
+            }
+            ctx.closePath();
+            ctx.fill();
         }
+
+        // Ana çizgi
+        ctx.strokeStyle = s.renk;
+        ctx.lineWidth = isMulti ? 1.8 : 2;
+        ctx.beginPath();
+        pts.forEach((p, idx) => {
+            if (idx === 0) ctx.moveTo(p.screenX, p.screenY);
+            else ctx.lineTo(p.screenX, p.screenY);
+        });
+        ctx.stroke();
+
+        // Nokta işaretleyicileri
+        const drawAllDots = pts.length <= 60;
+        pts.forEach(p => {
+            if (drawAllDots || p.supheli) {
+                ctx.beginPath();
+                ctx.arc(p.screenX, p.screenY, p.supheli ? 4 : 2, 0, Math.PI * 2);
+                ctx.fillStyle = p.supheli ? '#f59e0b' : s.renk;
+                ctx.fill();
+
+                if (p.supheli) {
+                    ctx.strokeStyle = '#000';
+                    ctx.lineWidth = 1;
+                    ctx.stroke();
+                }
+            }
+        });
     });
 
-    // Zaman etiketleri (İlk ve Son)
+    // Başlangıç ve Bitiş Tarih Etiketleri (TSİ)
     ctx.fillStyle = '#94a3b8';
     ctx.font = '10px monospace';
     ctx.textAlign = 'left';
-    ctx.fillText(formatZamanTr(parsedPoints[0].zaman) + ' TSİ', paddingLeft, h - 10);
+    ctx.fillText(formatZamanTr(new Date(minTime).toISOString()) + ' TSİ', paddingLeft, h - 5);
     ctx.textAlign = 'right';
-    ctx.fillText(formatZamanTr(parsedPoints[parsedPoints.length - 1].zaman) + ' TSİ', w - paddingRight, h - 10);
+    ctx.fillText(formatZamanTr(new Date(maxTime).toISOString()) + ' TSİ', w - paddingRight, h - 5);
+
+    // Sağ Üst Lejant
+    let legendX = w - paddingRight;
+    ctx.font = '10px sans-serif';
+    ctx.textAlign = 'right';
+
+    for (let i = seriesList.length - 1; i >= 0; i--) {
+        const s = seriesList[i];
+        const lastVal = s.parsed.length > 0 ? s.parsed[s.parsed.length - 1].val.toFixed(1) : '--';
+        const label = `${s.ad}: ${lastVal} ${s.unit}`;
+
+        ctx.fillStyle = s.renk;
+        ctx.beginPath();
+        ctx.arc(legendX - 4, paddingTop - 12, 3.5, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.fillStyle = '#cbd5e1';
+        ctx.fillText(label, legendX - 12, paddingTop - 9);
+
+        const textMetrics = ctx.measureText ? ctx.measureText(label).width : 60;
+        legendX -= (textMetrics + 24);
+    }
+
+    // Hover Crosshair
+    // Hover Crosshair
+    if (crosshairX !== null && crosshairX >= paddingLeft && crosshairX <= paddingLeft + plotW) {
+        ctx.strokeStyle = 'rgba(56, 189, 248, 0.7)';
+        ctx.lineWidth = 1;
+        if (ctx.setLineDash) ctx.setLineDash([4, 3]);
+        ctx.beginPath();
+        ctx.moveTo(crosshairX, paddingTop);
+        ctx.lineTo(crosshairX, paddingTop + plotH);
+        ctx.stroke();
+        if (ctx.setLineDash) ctx.setLineDash([]);
+
+        // Çizgilerin kesim noktalarında parlak halka göster
+        seriesList.forEach(s => {
+            const hit = s.parsed.find(p => Math.abs(p.screenX - crosshairX) < 3) || s.parsed[0];
+            if (hit && hit.screenY !== undefined) {
+                ctx.beginPath();
+                ctx.arc(crosshairX, hit.screenY, 4.5, 0, Math.PI * 2);
+                ctx.fillStyle = s.renk;
+                ctx.fill();
+                ctx.strokeStyle = '#ffffff';
+                ctx.lineWidth = 1.5;
+                ctx.stroke();
+            }
+        });
+    }
+
+    if (ctx.restore) ctx.restore();
+
+    state.aktifSeriCizimVerisi = {
+        points: seriesList[0].parsed,
+        seriesList,
+        plotW,
+        plotH,
+        paddingLeft,
+        paddingRight,
+        paddingTop,
+        unit,
+        isMulti,
+        seriesData: isMulti ? { l1: seriesList[0], l2: seriesList[1], l3: seriesList[2] } : null,
+        lastCrosshairX: crosshairX
+    };
+}
+
+// Geriye dönük test uyumluluğu için
+function zamanSerisiCiz(noktalar, metrik, aralik) {
+    return zamanSerisiCizGenel(noktalar, metrik, aralik, null);
+}
+
+function zamanSerisiTekrarCiz(crosshairX) {
+    if (!state.aktifSeriCizimVerisi) return;
+    const { isMulti } = state.aktifSeriCizimVerisi;
+    const metrik = isMulti ? 'akim_hepsi' : state.seriKanal;
+    const aralik = state.seriAralik;
+    zamanSerisiCizGenel(
+        state.seriNoktalar || [],
+        metrik,
+        aralik,
+        state.seriCokluVeri,
+        crosshairX
+    );
+}
+
+function setupTimeseriesHover() {
+    const canvas = document.getElementById('timeseriesCanvas');
+    const tooltip = document.getElementById('timeseries-tooltip');
+    if (!canvas || !tooltip) return;
+
+    canvas.addEventListener('mousemove', (e) => {
+        if (!state.aktifSeriCizimVerisi || !state.aktifSeriCizimVerisi.points || state.aktifSeriCizimVerisi.points.length === 0) {
+            tooltip.style.display = 'none';
+            return;
+        }
+
+        const rect = canvas.getBoundingClientRect ? canvas.getBoundingClientRect() : { left: 0, top: 0, width: 760, height: 210 };
+        const mouseX = (e.clientX !== undefined ? e.clientX - rect.left : e.offsetX) || 0;
+        const mouseY = (e.clientY !== undefined ? e.clientY - rect.top : e.offsetY) || 0;
+
+        const { points, plotW, paddingLeft, paddingRight, paddingTop, plotH, unit, isMulti, seriesData } = state.aktifSeriCizimVerisi;
+
+        if (mouseX < paddingLeft || mouseX > paddingLeft + plotW) {
+            tooltip.style.display = 'none';
+            if (state.aktifSeriCizimVerisi.lastCrosshairX !== null) {
+                zamanSerisiTekrarCiz(null);
+            }
+            return;
+        }
+
+        let closestPt = points[0];
+        let minDiff = Math.abs((points[0].screenX || paddingLeft) - mouseX);
+        for (let i = 1; i < points.length; i++) {
+            const diff = Math.abs((points[i].screenX || paddingLeft) - mouseX);
+            if (diff < minDiff) {
+                minDiff = diff;
+                closestPt = points[i];
+            }
+        }
+
+        if (!closestPt) {
+            tooltip.style.display = 'none';
+            if (state.aktifSeriCizimVerisi.lastCrosshairX !== null) {
+                zamanSerisiTekrarCiz(null);
+            }
+            return;
+        }
+
+        // Yalnızca farklı bir dikey çizgi konumuna gelindiğinde yeniden çiz
+        if (state.aktifSeriCizimVerisi.lastCrosshairX !== closestPt.screenX) {
+            zamanSerisiTekrarCiz(closestPt.screenX);
+        }
+
+        tooltip.innerHTML = '';
+        const zDiv = document.createElement('div');
+        zDiv.style.fontWeight = '600';
+        zDiv.style.marginBottom = '3px';
+        zDiv.style.color = 'var(--accent-cyan)';
+        zDiv.textContent = `⏱️ ${formatZamanTr(closestPt.zaman)} TSİ`;
+        tooltip.appendChild(zDiv);
+
+        if (isMulti && seriesData) {
+            ['l1', 'l2', 'l3'].forEach(k => {
+                const s = seriesData[k];
+                if (s && s.parsed) {
+                    const match = s.parsed.find(p => p.zaman === closestPt.zaman) || s.parsed[closestPt.idx];
+                    if (match && match.val !== null) {
+                        const row = document.createElement('div');
+                        row.style.color = s.renk;
+                        row.style.fontWeight = '500';
+                        row.textContent = `${s.ad}: ${match.val.toFixed(2)} ${unit}`;
+                        tooltip.appendChild(row);
+                    }
+                }
+            });
+        } else {
+            const vDiv = document.createElement('div');
+            vDiv.style.fontWeight = '500';
+            if (closestPt.aralik && closestPt.asgari !== null && closestPt.azami !== null) {
+                vDiv.textContent = `Ort: ${closestPt.val.toFixed(2)} ${unit} (Min: ${closestPt.asgari.toFixed(1)}, Maks: ${closestPt.azami.toFixed(1)})`;
+            } else {
+                vDiv.textContent = `Değer: ${closestPt.val.toFixed(2)} ${unit}`;
+            }
+            tooltip.appendChild(vDiv);
+
+            if (closestPt.supheli) {
+                const sDiv = document.createElement('div');
+                sDiv.style.color = '#f59e0b';
+                sDiv.style.marginTop = '2px';
+                sDiv.textContent = `⚠️ Şüpheli Ölçüm (Kalite: ${closestPt.kalite || 'supheli'})`;
+                tooltip.appendChild(sDiv);
+            }
+        }
+
+        tooltip.style.display = 'block';
+        const tipWidth = tooltip.offsetWidth || 190;
+        const tipHeight = tooltip.offsetHeight || 50;
+
+        let leftPos = closestPt.screenX + 15;
+        if (leftPos + tipWidth > rect.width) {
+            leftPos = closestPt.screenX - tipWidth - 15;
+        }
+        let topPos = mouseY < 45 ? (mouseY + 16) : (mouseY - 20);
+        topPos = Math.max(8, Math.min(topPos, rect.height - tipHeight - 8));
+
+        tooltip.style.left = `${Math.max(5, leftPos)}px`;
+        tooltip.style.top = `${topPos}px`;
+    });
+
+    canvas.addEventListener('mouseleave', () => {
+        tooltip.style.display = 'none';
+        if (state.aktifSeriCizimVerisi && state.aktifSeriCizimVerisi.lastCrosshairX !== null) {
+            zamanSerisiTekrarCiz(null);
+        }
+    });
 }
 
 // --------------------------------------------------------------------------
@@ -1657,8 +2219,9 @@ function startPolling() {
     if (state.pollTimer) clearInterval(state.pollTimer);
     state.pollTimer = setInterval(() => {
         if (!state.kanitKareModu && !state.seciliAnomaliId && state.aktifModulId) {
-            modulDetayYukle(state.aktifModulId);
+            modulDetayYukle(state.aktifModulId, true);
         }
+        modulDurumlariniGuncelle();
         alarmlariYukle();
         operasyonGunluguYukle();
     }, state.pollIntervalMs);
@@ -1671,6 +2234,7 @@ if (typeof window !== 'undefined' && typeof document !== 'undefined') {
         setInterval(updateClock, 1000);
 
         setupCanvasHover();
+        setupTimeseriesHover();
 
         const btnRefresh = document.getElementById('btn-manual-refresh');
         if (btnRefresh) {
@@ -1733,6 +2297,14 @@ if (typeof window !== 'undefined' && typeof document !== 'undefined') {
         if (metricSelect) {
             metricSelect.addEventListener('change', (e) => {
                 state.seriKanal = e.target.value;
+                zamanSerisiYukle();
+            });
+        }
+
+        const rangeSelect = document.getElementById('timeseries-range');
+        if (rangeSelect) {
+            rangeSelect.addEventListener('change', (e) => {
+                state.seriZamanAralik = e.target.value;
                 zamanSerisiYukle();
             });
         }
@@ -1801,9 +2373,15 @@ if (typeof globalThis !== 'undefined') {
         canliTermalYukle,
         anomaliSec,
         alarmOnayla,
+        getMetrikAyar,
+        getZamanAraligiBas,
         zamanSerisiYukle,
         zamanSerisiCiz,
+        zamanSerisiCizGenel,
+        setupTimeseriesHover,
         hiyerarsiyiYukle,
+        modulCihazDurumunuAğactaGuncelle,
+        modulDurumlariniGuncelle,
         alarmlariYukle,
         operasyonGunluguYukle
     };
