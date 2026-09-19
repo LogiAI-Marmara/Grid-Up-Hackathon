@@ -61,19 +61,41 @@ const state = {
     // Zaman serisi grafiği
     seriKanal: 'ortam_sicaklik',
     seriAralik: '',
-    seriZamanAralik: '24h',
+    seriZamanAralik: '',
     seriNoktalar: [],
     seriCokluVeri: null,
     aktifSeriCizimVerisi: null,
     seriHataMesaji: null,
     sonGorulmeZamani: null,
+    seriBasZamanMs: null,
+    seriBitZamanMs: null,
     seriesPollCounter: 0
 };
 
-// Asenkron Yarış Durumu (Race Condition) Sayaçları (UI-02, UI-06)
+// Asenkron Yarış Durumu (Race Condition) Sayaçları (UI-02, UI-04, UI-06)
 let detailRequestToken = 0;
 let thermalRequestToken = 0;
 let seriesRequestToken = 0;
+let evidenceRequestToken = 0;
+
+// UI-03: Desteklenen kanal/birim eşleşmeleri sözlüğü
+const DESTEKLENEN_BIRIMLER = {
+    'ortam_sicaklik': ['C', '°C'],
+    'nem': ['%'],
+    'akim_l1': ['A'],
+    'akim_l2': ['A'],
+    'akim_l3': ['A'],
+    'akim_notr': ['A'],
+    'ark_olay': ['adet', 'sayi', '']
+};
+
+function birimGecerliMi(olcumTipi, birim) {
+    if (!olcumTipi || !DESTEKLENEN_BIRIMLER[olcumTipi]) return true;
+    if (birim === null || birim === undefined) return true;
+    const b = String(birim).trim();
+    const gecerliler = DESTEKLENEN_BIRIMLER[olcumTipi];
+    return gecerliler.some(g => g.toLowerCase() === b.toLowerCase());
+}
 
 // Türkiye Saati (Europe/Istanbul - UTC+3) Formatlayıcı
 function formatZamanTr(isoStr) {
@@ -208,10 +230,13 @@ async function tumModulDurumlariniCek() {
             const veriler = data.veriler || [];
             veriler.forEach(m => {
                 if (m.modul_id) {
+                    const isPasif = (m.durum === 'pasif' || m.aktif === false);
+                    const durum = isPasif ? 'pasif' : (m.durum || (m.aktif ? 'aktif' : 'bilinmiyor'));
                     durumHaritasi[m.modul_id] = {
-                        durum: m.durum || 'bilinmiyor',
+                        durum: durum,
                         son_gorulme: m.son_gorulme,
-                        seviye: m.seviye
+                        seviye: m.seviye,
+                        aktif: !isPasif
                     };
                 }
             });
@@ -242,10 +267,26 @@ function modulCihazDurumunuAğactaGuncelle(modulId, durum, aktif) {
         cihazDurumuText = 'Aktif';
     }
 
+    // State'i de senkronize et
+    if (!state.modulDurumlari[modulId]) {
+        state.modulDurumlari[modulId] = {};
+    }
+    const finalDurum = (aktif === false || durum === 'pasif') ? 'pasif' : (durum || 'bilinmiyor');
+    state.modulDurumlari[modulId].durum = finalDurum;
+    state.modulDurumlari[modulId].aktif = !(aktif === false || durum === 'pasif');
+
     const subSpan = document.getElementById(`modul-sub-text-${modulId}`);
     if (subSpan) {
         subSpan.className = `modul-sub-text ${cihazDurumuClass}`.trim();
         subSpan.textContent = cihazDurumuText;
+    }
+
+    const itemEl = document.getElementById(`modul-item-${modulId}`);
+    if (itemEl) {
+        if (itemEl.classList) {
+            itemEl.classList.remove('device-aktif', 'device-sessiz', 'device-pasif');
+            if (cihazDurumuClass) itemEl.classList.add(`device-${cihazDurumuClass}`);
+        }
     }
 
     // Eğer bu modül seçili modül ise üst panel rozetini de güncelle
@@ -569,6 +610,26 @@ function resetModulEkranGorunumu(modulId, modulIsmi) {
         sourceBadge.textContent = 'Veri Bekleniyor';
     }
 
+    // UI-02: Termal görseli ve durumunu anında temizle (eski modülün görüntüsü kalmasın)
+    state.termalMatris = null;
+    state.termalOzet = null;
+    state.kanitKareModu = false;
+    state.termalKaynak = 'canli';
+    state.seciliAnomaliId = null;
+    state.kanitAnomali = null;
+    ++evidenceRequestToken;
+
+    const tCanvas = document.getElementById('thermalCanvas');
+    if (tCanvas) {
+        const tCtx = tCanvas.getContext('2d');
+        if (tCtx) {
+            tCtx.clearRect(0, 0, tCanvas.width, tCanvas.height);
+            tCtx.fillStyle = '#070b14';
+            tCtx.fillRect(0, 0, tCanvas.width, tCanvas.height);
+        }
+    }
+    termalKareCiz();
+
     // UI-02 / UI-06: Zaman serisi alanını anında sıfırla
     state.seriNoktalar = [];
     state.seriCokluVeri = null;
@@ -627,15 +688,18 @@ async function modulDetayYukle(modulId, isPolling = false) {
             state.sonGorulmeZamani = data.son_gorulme;
         }
 
-        // 1. Cihaz Durumu ve Zaman
+        // 1. Cihaz Durumu ve Zaman (UI-01)
         const modulDurumKaydi = state.modulDurumlari[modulId] || {};
         let cihazDurumu = modulDurumKaydi.durum;
-        if (!cihazDurumu) {
-            if (data.aktif === false) cihazDurumu = 'pasif';
-            else cihazDurumu = 'bilinmiyor';
+        if (data.aktif === false) {
+            cihazDurumu = 'pasif';
+        } else if (data.durum) {
+            cihazDurumu = data.durum;
+        } else if (!cihazDurumu) {
+            cihazDurumu = 'bilinmiyor';
         }
 
-        // Ağaçtaki ve üst başlıktaki cihaz durumunu hemen güncelle
+        // Ağaçtaki ve üst başlıktaki cihaz durumunu hemen güncelle ve state'i senkronize et
         modulCihazDurumunuAğactaGuncelle(modulId, cihazDurumu, data.aktif);
 
         // Son görülme zamanı (TSİ)
@@ -667,7 +731,7 @@ async function modulDetayYukle(modulId, isPolling = false) {
             }
         }
 
-        // 2. Canlı Ölçümler (UI-03 Kuralları)
+        // 2. Canlı Ölçümler (UI-03 Kuralları: birim kontrolü, her kanalın kalite ve zamanı)
         const sonOlcumler = Array.isArray(data.son_olcumler) ? data.son_olcumler : [];
         const olcumMap = {};
         sonOlcumler.forEach(o => {
@@ -677,21 +741,66 @@ async function modulDetayYukle(modulId, isPolling = false) {
         });
 
         // Metrik kartlarını güvenli doldur
-        olcumKartiniGuncelle('val-temp', 'card-temp', 'temp-status', olcumMap.ortam_sicaklik, 'Sensör: SHT31', 1);
-        olcumKartiniGuncelle('val-hum', 'card-hum', 'hum-status', olcumMap.nem, 'Optimum: %40-60', 1);
-        olcumKartiniGuncelle('val-l1', 'card-current', null, olcumMap.akim_l1, '', 1);
-        olcumKartiniGuncelle('val-l2', 'card-current', null, olcumMap.akim_l2, '', 1);
-        olcumKartiniGuncelle('val-l3', 'card-current', null, olcumMap.akim_l3, '', 1);
-        olcumKartiniGuncelle('val-notr', 'card-notr', 'notr-status', olcumMap.akim_notr, 'Dönüş Hattı Akımı', 1);
-        olcumKartiniGuncelle('val-arc', 'card-arc', 'arc-status', olcumMap.ark_olay, 'TVOC-2 Optik Koruma', 0);
+        olcumKartiniGuncelle('val-temp', 'card-temp', 'temp-status', olcumMap.ortam_sicaklik, 'Sensör: SHT31', 1, 'ortam_sicaklik');
+        olcumKartiniGuncelle('val-hum', 'card-hum', 'hum-status', olcumMap.nem, 'Optimum: %40-60', 1, 'nem');
+        olcumKartiniGuncelle('val-notr', 'card-notr', 'notr-status', olcumMap.akim_notr, 'Dönüş Hattı Akımı', 1, 'akim_notr');
+        olcumKartiniGuncelle('val-arc', 'card-arc', 'arc-status', olcumMap.ark_olay, 'TVOC-2 Optik Koruma', 0, 'ark_olay');
 
-        // Faz Dengesizliği: Yalnızca L1, L2, L3'ün üçü de varsa, sayısal ve kalite=iyi ise hesaplanır
-        const diffEl = document.getElementById('current-diff');
+        // 3-Faz Akım Yükü (L1, L2, L3) birim, kalite ve zaman kontrolleri
         const oL1 = olcumMap.akim_l1;
         const oL2 = olcumMap.akim_l2;
         const oL3 = olcumMap.akim_l3;
+        const cardCurrent = document.getElementById('card-current');
+
+        if (cardCurrent) {
+            const eskiWarn = cardCurrent.querySelector('.card-quality-warning, .card-quality-bad, .card-unit-warning');
+            if (eskiWarn) eskiWarn.remove();
+        }
+
+        const l1Uyumsuz = oL1 && !birimGecerliMi('akim_l1', oL1.birim);
+        const l2Uyumsuz = oL2 && !birimGecerliMi('akim_l2', oL2.birim);
+        const l3Uyumsuz = oL3 && !birimGecerliMi('akim_l3', oL3.birim);
+
+        const valL1 = document.getElementById('val-l1');
+        const valL2 = document.getElementById('val-l2');
+        const valL3 = document.getElementById('val-l3');
+
+        if (valL1) {
+            if (l1Uyumsuz) valL1.textContent = 'Birim Uyumsuz';
+            else if (!oL1 || oL1.deger === null || oL1.kalite === 'yok' || isNaN(Number(oL1.deger))) valL1.textContent = '--';
+            else valL1.textContent = Number(oL1.deger).toFixed(1);
+        }
+        if (valL2) {
+            if (l2Uyumsuz) valL2.textContent = 'Birim Uyumsuz';
+            else if (!oL2 || oL2.deger === null || oL2.kalite === 'yok' || isNaN(Number(oL2.deger))) valL2.textContent = '--';
+            else valL2.textContent = Number(oL2.deger).toFixed(1);
+        }
+        if (valL3) {
+            if (l3Uyumsuz) valL3.textContent = 'Birim Uyumsuz';
+            else if (!oL3 || oL3.deger === null || oL3.kalite === 'yok' || isNaN(Number(oL3.deger))) valL3.textContent = '--';
+            else valL3.textContent = Number(oL3.deger).toFixed(1);
+        }
+
+        const fazlarSupheli = (oL1 && oL1.kalite === 'supheli') || (oL2 && oL2.kalite === 'supheli') || (oL3 && oL3.kalite === 'supheli');
+        if (cardCurrent) {
+            if (l1Uyumsuz || l2Uyumsuz || l3Uyumsuz) {
+                const warn = document.createElement('span');
+                warn.className = 'card-quality-warning card-unit-warning';
+                warn.textContent = '⚠️ Akım Birim Uyumsuz';
+                cardCurrent.appendChild(warn);
+            } else if (fazlarSupheli) {
+                const warn = document.createElement('span');
+                warn.className = 'card-quality-warning';
+                warn.textContent = '⚠️ Şüpheli faz ölçümü';
+                cardCurrent.appendChild(warn);
+            }
+        }
+
+        // Faz Dengesizliği: Yalnızca L1, L2, L3'ün üçü de varsa, birimleri geçerli, sayısal ve kalite=iyi ise hesaplanır
+        const diffEl = document.getElementById('current-diff');
 
         if (oL1 && oL2 && oL3 &&
+            !l1Uyumsuz && !l2Uyumsuz && !l3Uyumsuz &&
             oL1.kalite === 'iyi' && oL2.kalite === 'iyi' && oL3.kalite === 'iyi' &&
             oL1.deger !== null && oL2.deger !== null && oL3.deger !== null &&
             !isNaN(Number(oL1.deger)) && !isNaN(Number(oL2.deger)) && !isNaN(Number(oL3.deger))) {
@@ -741,6 +850,11 @@ async function modulDetayYukle(modulId, isPolling = false) {
         if (currentToken !== detailRequestToken) return;
         console.warn(`Modül detayı yüklenemedi (${modulId}):`, err);
 
+        // UI-02: Hata anında önceki metrikleri ve termal görüntüyü sıfırla
+        state.termalMatris = null;
+        state.termalOzet = null;
+        termalKareCiz();
+
         const errorBanner = document.getElementById('module-error-banner');
         if (errorBanner) {
             errorBanner.style.display = 'flex';
@@ -756,21 +870,35 @@ async function modulDetayYukle(modulId, isPolling = false) {
     }
 }
 
-// UI-03: Ölçüm kartı güncelleme yardımcısı
-function olcumKartiniGuncelle(valId, cardId, statusSubId, olcum, defaultSub, ondalik) {
+// UI-03: Ölçüm kartı güncelleme yardımcısı (birim, kalite ve zaman doğrulamasıyla)
+function olcumKartiniGuncelle(valId, cardId, statusSubId, olcum, defaultSub, ondalik, olcumTipi) {
     const valEl = document.getElementById(valId);
     const cardEl = cardId ? document.getElementById(cardId) : null;
     const subEl = statusSubId ? document.getElementById(statusSubId) : null;
 
-    // Önceki kalite uyarılarını temizle
+    // Önceki kalite ve birim uyarılarını temizle
     if (cardEl) {
-        const eskiUyari = cardEl.querySelector('.card-quality-warning, .card-quality-bad');
+        const eskiUyari = cardEl.querySelector('.card-quality-warning, .card-quality-bad, .card-unit-warning');
         if (eskiUyari) eskiUyari.remove();
     }
 
     if (!olcum || olcum.deger === null || olcum.deger === undefined || olcum.kalite === 'yok') {
         if (valEl) valEl.textContent = '--';
         if (subEl) subEl.textContent = defaultSub || 'Veri yok';
+        return;
+    }
+
+    const tip = olcumTipi || olcum.olcum_tipi;
+    // UI-03 Kural 5: Desteklenen kanal/birim eşleşmesi doğrulanır
+    if (!birimGecerliMi(tip, olcum.birim)) {
+        if (valEl) valEl.textContent = '--';
+        if (subEl) subEl.textContent = `Birim uyumsuz (${olcum.birim || 'belirtilmemiş'})`;
+        if (cardEl) {
+            const warnSpan = document.createElement('span');
+            warnSpan.className = 'card-quality-warning card-unit-warning';
+            warnSpan.textContent = `⚠️ Birim Uyumsuz (${olcum.birim})`;
+            cardEl.appendChild(warnSpan);
+        }
         return;
     }
 
@@ -784,8 +912,11 @@ function olcumKartiniGuncelle(valId, cardId, statusSubId, olcum, defaultSub, ond
         valEl.textContent = ondalik > 0 ? valNum.toFixed(ondalik) : String(Math.round(valNum));
     }
 
-    if (subEl && olcum.zaman) {
-        subEl.textContent = `${defaultSub ? defaultSub + ' | ' : ''}${formatZamanTr(olcum.zaman)} TSİ`;
+    // UI-03 Kural 4: Her gösterilen kanalın kendi zaman damgası ve kalite bilgisi
+    if (subEl) {
+        const zamanStr = olcum.zaman ? `${formatZamanTr(olcum.zaman)} TSİ` : 'Zaman yok';
+        const kaliteStr = olcum.kalite ? ` [Kalite: ${olcum.kalite}]` : '';
+        subEl.textContent = `${defaultSub ? defaultSub + ' | ' : ''}${zamanStr}${kaliteStr}`;
     }
 
     if (olcum.kalite === 'supheli' && cardEl) {
@@ -963,9 +1094,13 @@ async function anomaliSec(anomaliId) {
     const anomali = state.cozulmemisAnomaliler.find(a => a.id === anomaliId);
     if (!anomali) return;
 
+    // UI-04: Asenkron yarış durumu (geç gelen kanıt yanıtı) için jeton
+    const currentToken = ++evidenceRequestToken;
+
     state.seciliAnomaliId = anomaliId;
     state.kanitAnomali = anomali;
     state.kanitKareModu = true;
+    state.termalKaynak = 'kanit';
 
     document.querySelectorAll('.alarm-card').forEach(c => c.classList.remove('selected-alarm'));
     const seciliKart = document.getElementById(`alarm-card-${anomaliId}`);
@@ -995,8 +1130,13 @@ async function anomaliSec(anomaliId) {
     if (kareId) {
         try {
             const res = await apiFetch(`/termal/kare/${encodeURIComponent(kareId)}`);
+            // UI-04: Geç gelen kanıt kontrolü (seçim değişmişse veya canlıya dönülmüşse işleme alma)
+            if (currentToken !== evidenceRequestToken || state.seciliAnomaliId !== anomaliId || !state.kanitKareModu) return;
+
             if (res.ok) {
                 const kareData = await res.json();
+                if (currentToken !== evidenceRequestToken || state.seciliAnomaliId !== anomaliId || !state.kanitKareModu) return;
+
                 if (tamKareyiDogrula(kareData, anomali.modul_id, null)) {
                     state.termalMatris = kareData.piksel_verisi;
 
@@ -1037,6 +1177,8 @@ async function anomaliSec(anomaliId) {
         }
     }
 
+    if (currentToken !== evidenceRequestToken || state.seciliAnomaliId !== anomaliId || !state.kanitKareModu) return;
+
     // Kare yoksa veya doğrulanamadıysa eski kare kanıt diye sunulmaz!
     state.termalMatris = null;
     state.termalOzet = null;
@@ -1050,7 +1192,10 @@ async function anomaliSec(anomaliId) {
 }
 
 function canliGoruntuyeDon() {
+    // UI-04: Canlı görünüme dönülürken bekleyen kanıt isteklerini geçersiz kıl
+    ++evidenceRequestToken;
     state.kanitKareModu = false;
+    state.termalKaynak = 'canli';
     state.seciliAnomaliId = null;
     state.kanitAnomali = null;
 
@@ -1213,25 +1358,22 @@ async function sayfaliAnomalileriGetir(durumFiltresi) {
     const limit = 50;
 
     while (devam) {
-        try {
-            let url = `/anomaliler?durum=${durumFiltresi}&limit=${limit}`;
-            if (sonra !== null) {
-                url += `&sonra=${sonra}`;
-            }
-            const res = await apiFetch(url);
-            if (!res.ok) break;
-            const data = await res.json();
-            const veriler = data.veriler || [];
-            sonuclar.push(...veriler);
+        let url = `/anomaliler?durum=${durumFiltresi}&limit=${limit}`;
+        if (sonra !== null) {
+            url += `&sonra=${sonra}`;
+        }
+        const res = await apiFetch(url);
+        if (!res.ok) {
+            throw new Error(`HTTP ${res.status}: Alarm servisi hatası (${durumFiltresi})`);
+        }
+        const data = await res.json();
+        const veriler = data.veriler || [];
+        sonuclar.push(...veriler);
 
-            if (data.sonraki !== null && data.sonraki !== undefined && veriler.length > 0) {
-                sonra = data.sonraki;
-            } else {
-                devam = false;
-            }
-        } catch (err) {
-            console.warn(`Anomali (${durumFiltresi}) getirme hatası:`, err);
-            break;
+        if (data.sonraki !== null && data.sonraki !== undefined && veriler.length > 0) {
+            sonra = data.sonraki;
+        } else {
+            devam = false;
         }
     }
     return sonuclar;
@@ -1350,6 +1492,19 @@ async function alarmlariYukle() {
         });
     } catch (err) {
         console.warn("Alarmlar yüklenemedi:", err);
+        // UI-05: Alarm servisi hata verdiğinde kesinlikle 'Sistem Stabil' denmez!
+        if (counterEl) {
+            counterEl.textContent = '--';
+        }
+        container.innerHTML = '';
+        const errDiv = document.createElement('div');
+        errDiv.className = 'empty-alarms alarm-error-state';
+        errDiv.innerHTML = `
+            <span class="empty-icon">⚠️</span>
+            <strong style="color:var(--color-critical); font-size: 1.1rem;">Alarm Servisi Hatası</strong>
+            <p style="margin-top:6px; color: var(--text-muted); font-size: 0.85rem;">Alarm servisi ile bağlantı kurulamadı veya sunucu hatası oluştu (${escapeHtml(err.message || 'Hata')}).</p>
+        `;
+        container.appendChild(errDiv);
     }
 }
 
@@ -1485,6 +1640,8 @@ async function zamanSerisiYukle() {
     // bas zamanı hesapla (geçmiş filtresi)
     const refZaman = state.sonGorulmeZamani || new Date().toISOString();
     const basZaman = getZamanAraligiBas(range, refZaman);
+    state.seriBasZamanMs = basZaman ? new Date(basZaman).getTime() : null;
+    state.seriBitZamanMs = range ? (!isNaN(new Date(refZaman).getTime()) ? new Date(refZaman).getTime() : Date.now()) : null;
 
     // 3-Faz Akımları (L1, L2, L3) çoklu karşılaştırma
     if (metrik === 'akim_hepsi') {
@@ -1668,8 +1825,11 @@ function zamanSerisiCizGenel(noktalar, metrik, aralik, cokluVeri, crosshairX = n
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    if (ctx.save) ctx.save();
-    if (ctx.scale) ctx.scale(dpr, dpr);
+    if (ctx.setTransform) {
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    } else if (ctx.scale) {
+        ctx.scale(dpr, dpr);
+    }
 
     const w = displayWidth;
     const h = displayHeight;
@@ -1707,7 +1867,7 @@ function zamanSerisiCizGenel(noktalar, metrik, aralik, cokluVeri, crosshairX = n
 
     const unit = seriesList[0].unit;
 
-    const paddingLeft = 65;
+    const paddingLeft = 75;
     const paddingRight = 35;
     const paddingTop = 30;
     const paddingBottom = 35;
@@ -1737,17 +1897,29 @@ function zamanSerisiCizGenel(noktalar, metrik, aralik, cokluVeri, crosshairX = n
     const yMax = maxVal + valSpan * 0.08;
     const yRange = yMax - yMin;
 
-    // Min ve Max Zamanlar
+    // Min ve Max Zamanlar (Gerçek zaman aralıklarına göre ölçekleme)
     let minTime = Infinity;
     let maxTime = -Infinity;
     allParsedPoints.forEach(p => {
-        if (p.t < minTime) minTime = p.t;
-        if (p.t > maxTime) maxTime = p.t;
+        if (!isNaN(p.t)) {
+            if (p.t < minTime) minTime = p.t;
+            if (p.t > maxTime) maxTime = p.t;
+        }
     });
+
+    if (minTime === Infinity || maxTime === -Infinity) {
+        minTime = Date.now() - 3600000;
+        maxTime = Date.now();
+    }
+    if (minTime === maxTime) {
+        minTime -= 1000;
+        maxTime += 1000;
+    }
+
     const timeSpan = maxTime - minTime;
 
     function getScreenX(p, idx, totalLen) {
-        if (timeSpan > 0) {
+        if (timeSpan > 0 && !isNaN(p.t)) {
             return paddingLeft + ((p.t - minTime) / timeSpan) * plotW;
         }
         return totalLen > 1 ? paddingLeft + idx * (plotW / (totalLen - 1)) : paddingLeft + plotW / 2;
@@ -1832,13 +2004,25 @@ function zamanSerisiCizGenel(noktalar, metrik, aralik, cokluVeri, crosshairX = n
             ctx.fill();
         }
 
-        // Ana çizgi
+        // Ana çizgi (Ölçümler gerçek zaman aralıklarına göre çizilir; eksik zaman aralığı sahte çizgiyle birleştirilmez)
         ctx.strokeStyle = s.renk;
         ctx.lineWidth = isMulti ? 1.8 : 2;
         ctx.beginPath();
+        let prevP = null;
+        let maxGapMs = Infinity;
+        if (timeSpan > 0 && pts.length > 1) {
+            const avgDiff = timeSpan / (pts.length - 1);
+            maxGapMs = Math.max(60000, avgDiff * 3);
+        }
+
         pts.forEach((p, idx) => {
-            if (idx === 0) ctx.moveTo(p.screenX, p.screenY);
-            else ctx.lineTo(p.screenX, p.screenY);
+            const isGap = prevP && (p.t - prevP.t > maxGapMs);
+            if (idx === 0 || isGap) {
+                ctx.moveTo(p.screenX, p.screenY);
+            } else {
+                ctx.lineTo(p.screenX, p.screenY);
+            }
+            prevP = p;
         });
         ctx.stroke();
 
@@ -2093,7 +2277,7 @@ async function operasyonGunluguYukle() {
                 const veriler = data.veriler || [];
                 tumGecisler.push(...veriler);
 
-                if (data.sonraki !== null && data.sonraki !== undefined && veriler.length > 0) {
+                if (data.sonraki !== null && data.sonraki !== undefined && veriler.length >= limit && data.sonraki !== cursor) {
                     cursor = data.sonraki;
                 } else {
                     devam = false;
@@ -2105,14 +2289,26 @@ async function operasyonGunluguYukle() {
                 state.sonGecisId = tumGecisler[tumGecisler.length - 1].id;
             }
         } else {
-            // Sonraki yenilemelerde yalnız yeni gelenleri al
-            const res = await apiFetch(`/gecisler?sonra=${state.sonGecisId}&limit=${limit}`);
-            if (!res.ok) throw new Error(`HTTP ${res.status}`);
-            const data = await res.json();
-            const yeniVeriler = data.veriler || [];
-            if (yeniVeriler.length > 0) {
-                state.gecisler = [...state.gecisler, ...yeniVeriler].slice(-30);
-                state.sonGecisId = yeniVeriler[yeniVeriler.length - 1].id;
+            // UI-07: Sonraki yenilemelerde 50'den fazla yeni kayıt gelirse tüm sayfaları cursor ile tara
+            let cursor = state.sonGecisId;
+            let tumYeniVeriler = [];
+            let devamYeni = true;
+            while (devamYeni) {
+                const res = await apiFetch(`/gecisler?sonra=${cursor}&limit=${limit}`);
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                const data = await res.json();
+                const veriler = data.veriler || [];
+                tumYeniVeriler.push(...veriler);
+
+                if (data.sonraki !== null && data.sonraki !== undefined && veriler.length >= limit && data.sonraki !== cursor) {
+                    cursor = data.sonraki;
+                } else {
+                    devamYeni = false;
+                }
+            }
+            if (tumYeniVeriler.length > 0) {
+                state.gecisler = [...state.gecisler, ...tumYeniVeriler].slice(-30);
+                state.sonGecisId = tumYeniVeriler[tumYeniVeriler.length - 1].id;
             }
         }
 
@@ -2364,6 +2560,8 @@ if (typeof globalThis !== 'undefined') {
         seviyeNormalize,
         enYuksekSeviye,
         modulSeviyesiniGetir,
+        DESTEKLENEN_BIRIMLER,
+        birimGecerliMi,
         tamKareyiDogrula,
         bolgelerdenTahminiMatrisUret,
         sicaklikToRenk,
@@ -2371,6 +2569,8 @@ if (typeof globalThis !== 'undefined') {
         modulSec,
         modulDetayYukle,
         canliTermalYukle,
+        termalKareCiz,
+        canliGoruntuyeDon,
         anomaliSec,
         alarmOnayla,
         getMetrikAyar,

@@ -385,6 +385,47 @@ body {
     color: var(--text-muted);
 }
 
+.modul-sub-text.aktif {
+    color: var(--color-normal);
+}
+
+.modul-sub-text.sessiz {
+    color: var(--color-warning);
+}
+
+.modul-sub-text.pasif {
+    color: var(--text-muted);
+}
+
+.badge-device {
+    background: rgba(100, 116, 139, 0.2);
+    color: var(--text-secondary);
+    border: 1px solid var(--border-subtle);
+}
+
+.badge-device-aktif {
+    background: rgba(16, 185, 129, 0.15);
+    color: var(--color-normal);
+    border: 1px solid var(--color-normal);
+}
+
+.badge-device-sessiz {
+    background: rgba(245, 158, 11, 0.15);
+    color: var(--color-warning);
+    border: 1px solid var(--color-warning);
+}
+
+.badge-device-pasif, .badge-device-bilinmiyor {
+    background: rgba(100, 116, 139, 0.2);
+    color: var(--text-muted);
+    border: 1px solid rgba(100, 116, 139, 0.4);
+}
+
+.alarm-error-state {
+    border-color: rgba(239, 68, 68, 0.4) !important;
+    background: rgba(239, 68, 68, 0.08) !important;
+}
+
 .status-badge {
     font-size: 0.68rem;
     font-weight: 700;

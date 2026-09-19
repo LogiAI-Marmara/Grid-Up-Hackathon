@@ -96,11 +96,11 @@
                     <div class="module-title-wrap">
                         <span class="module-code-badge" id="active-module-badge">--</span>
                         <h2 id="active-module-name">Modül Seçiniz</h2>
-                        <span class="status-badge badge-normal" id="active-module-status-badge">DURUM BİLİNMİYOR</span>
+                        <span class="status-badge badge-normal" id="active-module-status-badge">ALARM: NORMAL</span>
                         <span class="status-badge badge-device" id="active-module-device-badge">CİHAZ: --</span>
                     </div>
                     <div class="module-meta">
-                        <span class="meta-item">🕒 Son Görülme: <strong id="val-time">--:--:--</strong> <span class="badge-tz">TSİ</span></span>
+                        <span class="meta-item" title="Cihazın ağda son görüldüğü zaman. Her kanal bağımsız zaman damgasına sahiptir.">🕒 Cihaz Son Görülme: <strong id="val-time">--:--:--</strong> <span class="badge-tz">TSİ</span></span>
                         <span class="meta-item">⚡ Besleme: <strong id="val-feed" class="badge-feed">BİLİNMİYOR</strong></span>
                         <span class="meta-item">📶 RSSI: <strong id="val-rssi">-- dBm</strong></span>
                     </div>
@@ -245,11 +245,11 @@
                             </select>
                             <label for="timeseries-range" class="control-label">Geçmiş:</label>
                             <select id="timeseries-range" class="select-box">
+                                <option value="" selected>Tüm Geçmiş</option>
                                 <option value="1h">Son 1 Saat</option>
                                 <option value="6h">Son 6 Saat</option>
-                                <option value="24h" selected>Son 24 Saat (1 Gün)</option>
+                                <option value="24h">Son 24 Saat (1 Gün)</option>
                                 <option value="7d">Son 7 Gün</option>
-                                <option value="">Tüm Geçmiş</option>
                             </select>
                             <label for="timeseries-interval" class="control-label">Aralık:</label>
                             <select id="timeseries-interval" class="select-box">
