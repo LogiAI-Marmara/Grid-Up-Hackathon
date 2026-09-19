@@ -44,7 +44,8 @@ static bool kabinHazir = false;
 static uint32_t cevrimSayaci = 0;          // Modul._sayac
 static uint32_t arkSayaci = 0;             // Modul._ark_sayaci: TVOC-2 kümülatif trip
 static uint32_t sonTvocTrip = 0;
-static uint32_t yedekBaslangicMs = 0;      // 0 = şebekede
+static bool yedekte = false;               // şebeke kaybı görüldü mü
+static uint32_t yedekBaslangicMs = 0;      // kaybın görüldüğü an (yedekte iken anlamlı)
 static char yazBuf[20 * 1024];             // paket JSON'u (768 değer ≈ 5–6 KB)
 
 // ---------------------------------------------------------------------------
@@ -188,12 +189,15 @@ static bool sebekedeMi() {
 // ---------------------------------------------------------------------------
 
 struct Yazici {
-    char* p; size_t kalan;
+    char* p; size_t kalan; bool tasti;
+    // vsnprintf `kalan` > 0 iken her zaman NUL yazar; sığmayan parça atılır ve `tasti`
+    // işaretlenir, kesik JSON gönderilmez (tampon 20 KB, en kötü paket ~7 KB).
     void yaz(const char* fmt, ...) {
         va_list ap; va_start(ap, fmt);
         const int n = vsnprintf(p, kalan, fmt, ap);
         va_end(ap);
-        if (n > 0 && (size_t)n < kalan) { p += n; kalan -= n; }
+        if (n < 0 || (size_t)n >= kalan) { tasti = true; return; }
+        p += n; kalan -= n;
     }
 };
 
@@ -248,8 +252,8 @@ void loop() {
 
     // ---- adım 9'un girdisi erken okunur: besleme durumu düşük güç kararını belirler ----
     const bool sebeke = sebekedeMi();
-    if (sebeke) yedekBaslangicMs = 0;
-    else if (yedekBaslangicMs == 0) yedekBaslangicMs = millis();
+    if (sebeke) yedekte = false;
+    else if (!yedekte) { yedekte = true; yedekBaslangicMs = millis(); }
     // Süperkap gerilimi ölçülmüyor; bütçe zamanla: 3 dk yedekten sonra yalnız kalp atışı
     // (07 §7.6: "termal dizi ile radyo aynı anda karşılanamaz").
     const bool dusukGuc = !sebeke && (millis() - yedekBaslangicMs) / 1000 >= YEDEK_DUSUK_GUC_S;
@@ -271,7 +275,9 @@ void loop() {
             if (a.gecerli) { l1 += a.l1; l2 += a.l2; l3 += a.l3; notr += a.notr; akimN++; }
             if (alt % TERMAL_HER_N_ALT_ADIM == 0) termalAltKareEkle();   // alt 0,3,6,9,12 → 5 kare
         }
-        // alt adımı 2 sn'ye tamamla
+        // alt adımı 2 sn'ye tamamla (CT 4 × 100 ms + I²C okumaları ≈ 0,5 s sığar; yalnız
+        // analizör Modbus zaman aşımı (ModbusMaster 2 s) alt adımı aşabilir → çevrim uzar,
+        // toplayıcı bunu `zaman` aralığından görür)
         const uint32_t gecen = millis() - altBaslangic;
         if (gecen < AKIM_OKUMA_S * 1000) delay(AKIM_OKUMA_S * 1000 - gecen);
     }
@@ -301,7 +307,7 @@ void loop() {
     const bool termalVar = !dusukGuc && termalKareBitir(ozet);
 
     // ---- adım 8: ölçüm satırları (sözleşme ①) ----
-    Yazici y{yazBuf, sizeof yazBuf};
+    Yazici y{yazBuf, sizeof yazBuf, false};
     y.yaz("{\"modul_id\":\"%s\",\"zaman\":\"%s\",\"olcumler\":[", MODUL_ID, zaman);
     bool ilk = true;
     if (!dusukGuc) {
@@ -341,7 +347,9 @@ void loop() {
           sebeke ? "sebeke" : "yedek", sinyal, YAZILIM_SURUMU);
 
     // ---- gönder: paket → saha gateway'i → toplama POST /paket (sözleşme ②) ----
-    if (WiFi.status() == WL_CONNECTED) {
+    if (y.tasti) {
+        Serial.println("paket tampona sigmadi, gonderilmedi");
+    } else if (WiFi.status() == WL_CONNECTED) {
         HTTPClient http;
         http.begin(TOPLAMA_URL);
         http.addHeader("Content-Type", "application/json");
