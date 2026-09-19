@@ -29,8 +29,10 @@ to land here; this delivery covers ①②③.
 
 ## Vocabularies
 
-Verbatim from section 10 of the decision record. Values are Turkish because they
-are on the wire; code and comments are English.
+Section 10 of the decision record, plus one integration follow-up (`asiri_yuk`,
+see the comment in `enums.py`; the decision record's section 10 still lists eight
+`tip` values and is the lead's to update). Values are Turkish because they are
+on the wire; code and comments are English.
 
 ```
 olcum_tipi:  ortam_sicaklik | nem | akim_l1 | akim_l2 | akim_l3 |
@@ -38,7 +40,7 @@ olcum_tipi:  ortam_sicaklik | nem | akim_l1 | akim_l2 | akim_l3 |
 seviye:      normal | izle | uyari | kritik
 tip:         sicak_nokta | akim_sicaklik_sapmasi | faz_dengesizligi |
              nem_yuksek | ortam_sicaklik_yuksek | ark | sensor_arizasi |
-             modul_saglik
+             modul_saglik | asiri_yuk
 kalite:      iyi | supheli | yok
 durum:       acik | onaylandi | kapandi
 besleme:     sebeke | yedek

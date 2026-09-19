@@ -81,7 +81,7 @@ svg.view(rest, ox, oy, S, (-5, -80), stroke=GREY, sw=1.6, colors=rest_col)
 x, y = B(52, 42.5)
 svg.add('<line x1="%g" y1="%g" x2="%g" y2="%g" stroke="%s" stroke-width="3" marker-start="url(#arr)"/>' % (x + 40, y, x + 10, y, RED))
 svg.text(x + 24, y + 62, 'IR pencere', 12, RED, 'middle', rotate=-90)
-x, y = B(41, 42.5); svg.leader(x - 2, y - 12, x - 30, y - 12, ['MLX90640 TO-39 Ø9,3', 'pencereye dayalı'], 11, DARK, 'end')
+x, y = B(41, 42.5); svg.leader(x - 2, y - 12, x - 30, y - 4, ['MLX90640 TO-39 Ø9,3', 'pencereye dayalı'], 11, DARK, 'end')   # yazı RAC05 (pembe) ile süperkap (turuncu) arasında
 x, y = B(40.2, 5); svg.add('<circle cx="%g" cy="%g" r="2" fill="#2e7d32"/><line x1="%g" y1="%g" x2="%g" y2="%g" stroke="#2e7d32" stroke-width="1.2"/>' % (x, y, x, y, x, y + 24)); svg.text(x, y + 35, 'PCB 1,6', 10, '#2e7d32', 'middle')
 x, y = B(34.15, 22.75); svg.text(x, y - 4, '2× süperkap.', 12, '#f57f17', 'middle'); svg.text(x, y + 12, 'Ø10,5 yatık', 11, '#f57f17', 'middle')
 x, y = B(28.5, 60.35); svg.text(x, y - 2, 'RAC05', 12, '#ad1457', 'middle', '700'); svg.text(x, y + 12, '21,8 mm', 10, '#ad1457', 'middle')
@@ -92,7 +92,8 @@ svg.text(ox + 114, oy + 392, 'bakış yönü → (klemenslere)', 12, MUTED, 'mid
 # ---------- E / ALT YÜZ ----------
 ox, oy = 980, 100
 svg.text(ox + 240, oy - 14, 'E / ALT YÜZ / kablo girişleri (120 × 50)', 20, DIM, 'middle', '700')
-svg.view(V['alt'], ox, oy, S, (0, -52), colors=COL,
+alt_polys = [pl for pl in V['alt'] if not (pl.get('kind') == 'sil' and abs(pl['pts'][0][0] - pl['pts'][-1][0]) < 0.5 and 5 < pl['pts'][0][0] < 115)]   # PG7 deliğinden görünen dikme siluetleri gizli (kroki deliği gösterir)
+svg.view(alt_polys, ox, oy, S, (0, -52), colors=COL,
          bg='<rect x="0" y="8" width="480" height="200" rx="12" fill="#eceff1"/>')
 def E(x, z): return ox + x * S, oy + (52 - z) * S
 for (xm, d, t1, t2) in [(17.5, 12.5, 'RS-485', 'PG7 Ø12,5'), (40, 6.4, 'SMA panel', 'Ø6,4 → anten'),
@@ -102,7 +103,7 @@ for (xm, d, t1, t2) in [(17.5, 12.5, 'RS-485', 'PG7 Ø12,5'), (40, 6.4, 'SMA pan
     svg.add('<g stroke="#455a64" stroke-width="0.8"><line x1="%g" y1="%g" x2="%g" y2="%g"/><line x1="%g" y1="%g" x2="%g" y2="%g"/></g>' % (x - r, y, x + r, y, x, y - r, x, y + r))
     svg.text(x, y + 52, t1, 13, DARK, 'middle', '700')
     svg.text(x, y + 68, t2, 12, GREY, 'middle')
-svg.text(ox + 240, oy + 250, 'her giriş kendi klemensinin altında; 230 V sağ uçta, alçak gerilim girişlerinden ayrı', 11, MUTED, 'middle')
+svg.text(ox + 240, oy + 250, 'her giriş kendi klemensine yakın; 230 V sağ uçta, alçak gerilim girişlerinden ayrı', 11, MUTED, 'middle')
 svg.text(ox + 240, oy + 266, 'RS-485: analizör / TVOC-2 · SMA: dış anten · CT: analizör yoksa', 11, MUTED, 'middle')
 svg.text(ox + 240, oy + 282, 'kablolar menteşeye doğru iner (kıvrım payı, §4.7); merkez Z = 23', 11, MUTED, 'middle')
 svg.dim_v(ox - 22, E(0, 50)[1], E(0, 0)[1], '50 mm', off=-16)
@@ -140,8 +141,9 @@ g.append('</g>')
 svg.add('\n'.join(g))
 ic_col = {n: col_of(n) for n in {pl['body'] for pl in M['ic']}}
 svg.view(M['ic'], ox, oy, S, (0, -80), stroke=INK, sw=1.4, colors=ic_col)
+svg.add('<circle cx="%g" cy="%g" r="4.5" fill="#43a047"/>' % C(30, 70))   # durum LED içi dolu (02 ile aynı; kutu dikmesi halkasıyla karışmasın)
 svg.text(C(60, 42.5)[0], C(60, 42.5)[1] + 34, 'MLX90640', 11, DARK, 'middle', '700')
-svg.text(C(12, 36)[0], C(12, 36)[1] + 22, 'SHT31', 10, '#1565c0', 'middle')
+svg.text(C(12, 36)[0], C(12, 36)[1] - 13, 'SHT31', 10, '#1565c0', 'middle')   # karenin üstünde (altı RS-485 kutusuna giriyordu)
 svg.text(C(24, 55.4)[0], C(24, 55.4)[1], 'ESP32-S3', 10, '#455a64', 'middle')
 svg.text(C(84.85, 60.35)[0], C(84.85, 60.35)[1], 'RAC05', 10, '#ad1457', 'middle')
 svg.text(C(71.5, 22.75)[0], C(71.5, 22.75)[1], '2× süperkap.', 10, '#f57f17', 'middle')
@@ -180,7 +182,7 @@ notes = [
     ('Isı:', ' AC/DC modül PCB\'nin arkasında, sensörlerden uzak; SHT31'),
     (None, 'güç modülüne en uzak köşede (öz-ısınma hatası).'),
     ('Kablolar:', ' tüm girişler alt yüzde, soldan sağa RS-485 / SMA / CT / 230 V;'),
-    (None, 'her giriş kendi klemensinin altında, 230 V kablosu alçak gerilim'),
+    (None, 'her giriş kendi klemensine yakın, 230 V kablosu alçak gerilim'),
     (None, 'bölgesini geçmez. Kapak içi montajda kablolar menteşeye iner, kıvrım'),
     (None, 'payı bırakılır (§4.7). Anten kablosu SMA\'dan pano dışına (§7.4).'),
     ('Sabitleme:', ' DIN klips veya oval yuvalardan mevcut cıvataya;'),

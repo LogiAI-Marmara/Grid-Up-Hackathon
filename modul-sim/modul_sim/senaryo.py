@@ -80,6 +80,14 @@ class Senaryo:
     baslik: str = ""
     belirti: str = ""
     beklenen_tip: tuple[Tip, ...] = ()
+    #: Name in track B's label file (`analiz/README.md`, "Etiket dosyası formatı").
+    #: The label vocabulary predates the CLI names and differs for four of the
+    #: seven; the CLI keeps its names, the label file gets these.
+    etiket_adi: str = ""
+    #: Where on the 0..1 ramp the fault counts as critical — the `kritik_esik`
+    #: track B subtracts lead time from. 1.0 is the end of the ramp; an
+    #: instantaneous event overrides it with the moment the event fires.
+    kritik_oran: float = 1.0
 
     def uygula(self, b: Baglam, rng: random.Random) -> None:  # pragma: no cover - interface
         raise NotImplementedError
@@ -103,6 +111,7 @@ class GevsekKlemens(Senaryo):
     """
 
     ad = "gevsek_klemens"
+    etiket_adi = "gevsek_klemens"
     baslik = "Loose terminal"
     belirti = (
         "termal_maks rises while akim_l* stay on their normal profile; maks_konum "
@@ -138,6 +147,7 @@ class AsiriYuk(Senaryo):
     """Demand climbs past the feeder rating; everything warms together."""
 
     ad = "asiri_yuk"
+    etiket_adi = "asiri_yuk"
     baslik = "Overload heating"
     belirti = (
         "all three phase currents rise past nominal together, the cabinet and the "
@@ -167,6 +177,7 @@ class FazDengesizlik(Senaryo):
     """Load migrates onto L1 and off L3; the neutral carries the difference."""
 
     ad = "faz_dengesizlik"
+    etiket_adi = "faz_dengesizligi"
     baslik = "Phase imbalance"
     belirti = (
         "the L1/L3 spread grows well past the standing few percent and akim_notr "
@@ -206,6 +217,7 @@ class NemYuksek(Senaryo):
     """
 
     ad = "nem_yuksek"
+    etiket_adi = "nem_yukselmesi"
     baslik = "Humidity rise / condensation risk"
     belirti = (
         "nem climbs to 90 %+ and stays there while the cabinet cools toward the "
@@ -239,6 +251,7 @@ class ArkOlay(Senaryo):
     """
 
     ad = "ark_olay"
+    etiket_adi = "ark_olayi"
     baslik = "Arc event (TVOC-2 trip)"
     belirti = (
         "an ark_olay row appears with the trip counter incremented, the thermal "
@@ -249,6 +262,8 @@ class ArkOlay(Senaryo):
 
     #: Trip points as a fraction of the scenario ramp.
     TETIKLER = (0.45, 0.78)
+    #: The arc is critical the moment the first trip fires; nothing ramps.
+    kritik_oran = TETIKLER[0]
 
     def __init__(self, parlama_c: float = 58.0, bozunma_tau_s: float = 35.0) -> None:
         self.parlama_c = parlama_c
@@ -293,6 +308,7 @@ class SensorAriza(Senaryo):
     """
 
     ad = "sensor_ariza"
+    etiket_adi = "sensor_arizasi"
     baslik = "Sensor failure"
     belirti = (
         "ortam_sicaklik and nem first freeze at one value (kalite 'supheli'), then "
@@ -333,6 +349,7 @@ class ModulSaglik(Senaryo):
     """
 
     ad = "modul_saglik"
+    etiket_adi = "modul_saglik"
     baslik = "Module health degradation"
     belirti = (
         "modul_durum.besleme flips to 'yedek', sinyal fades by ~30 dBm, and the "

@@ -19,7 +19,7 @@
 | # | Bileşen | Parça kodu | Adet | Birim $ | Birim ₺ | İşlevi | Sıcaklık sınıfı | Kaynak |
 |---|---|---|---|---|---|---|---|---|
 | 1 | **Termal dizi** | `MLX90640ESF-BAA-000-TU` | 1 | 28,62 | 1.393 | 32×24 nokta sıcaklık; nokta bazında erken tespit | −40…+85 °C | Mouser |
-| 2 | **Mikrodenetleyici + radyo** | `ESP32-S3-WROOM-1U-N8` | 1 | 5,66 | 275 | Okuma, özet, eşik mantığı, Wi-Fi/BLE, harici anten | −40…+85 °C | DigiKey |
+| 2 | **Mikrodenetleyici + radyo** | `ESP32-S3-WROOM-1U-N8` | 1 | 5,66 | 275 | Okuma, termal özet, paketleme, Modbus master, Wi-Fi/BLE, harici anten | −40…+85 °C | DigiKey |
 | 3 | **Sıcaklık + nem** | `SHT31-DIS-B2.5KS` | 1 | 4,50 | 219 | Referans çizgisi + yoğuşma riski | −40…+125 °C | DigiKey |
 | 4 | **AC/DC güç modülü** | `RECOM RAC05-05SK/277` | 1 | 10,25 | 499 | 230 V → 5 V, izoleli | −40…+90 °C *(5 V tam yükte +75 °C; +90 °C derating ile — yükümüz %15–40, sınır içi)* | Link Electronics |
 | 5a | **Yedek depo — süperkapasitör** | `Eaton HV1030-2R7106-R` (10 F / 2,7 V) **×2 seri** | 2 | ~2,40 | ~117 | 5 F / 5,4 V (4,6 V derate) yedek depo; kesintide birkaç dk | −40…+65 °C; **−40…+85 °C** (2,3 V/hücre derate) | DigiKey / Mouser |
@@ -71,7 +71,7 @@ kutu koordinatı (55, 37,5), IR pencere (60, 42,5). Hatlar
 | Ölçek | Tutar |
 |---|---|
 | Demo (9 modül) | ~$772 ≈ ₺37.575 |
-| 100 modül (T5 senaryosu) | ~$8.581 ≈ 417.500 |
+| 100 modül (T5 senaryosu) | ~$8.581 ≈ ₺417.500 |
 
 > **Dikkat — tam sistem maliyeti bundan fazladır.** Bu tablo yalnız **modül** maliyetidir. Saha
 > gateway'i, on-prem sunucu ve yazılım altyapısı ayrıca değerlendirilir (İZ C kapsamı). 100 modül
@@ -129,7 +129,7 @@ Karar kaydı §7.3 satır 268 seçimi izime bırakmıştır (*"süperkapasitör 
 
 | Aday | Sıcaklık aralığı | Sonuç |
 |---|---|---|
-| Panasonic EECF5R5H105 (1 F / 5,5 V) | **−25…+85 °C** |  −40 °C şartını karşılamıyor |
+| Panasonic EECF5R5H105 (1 F / 5,5 V) | **−25…+85 °C** | ✗ −40 °C şartını karşılamıyor |
 | Panasonic NF / EEC-S5R5 (1–1,5 F) | −25…+70 °C | ✗ Aynı |
 | Kamcap SE serisi | −25…+70 °C | ✗ Aynı |
 | Eaton PM serisi (5,0 V / 1 F modül) | −40…+60 °C; genişletilmiş **−40…+85 °C** | △ Ama enerji yetersiz (aşağıya bak) |
@@ -209,8 +209,8 @@ depo teknolojisinin kullanıldığı sözleşmeye yansımaz.
 
 ## 2.8 Sözleşmeye bağlılık kontrolü
 
-- [ ] Tüm bileşenler −40…+85 °C endüstriyel sınıfta mı (istisnalar gerekçeli mi)? → 2.5'te bir istisna var, gerekçeli
-- [ ] Ölçüm tipleri `olcum_tipi` enum'ıyla uyumlu mu? → [1. doküman §1.4](01-blok-sema.md)
-- [ ] `modul_durum.besleme` alanı `sebeke`/`yedek` değerlerini üretebiliyor mu? → Evet (süperkapasitör)
-- [ ] Genişleme payı hem donanımda hem BOM'da mı? → Ayrılmış pinler var, ek parça gerekmiyor
-- [ ] Anten panodan dışarı çıkabiliyor mu? → Evet, mevcut kablo girişi + U.FL pigtail
+- [x] Tüm bileşenler −40…+85 °C endüstriyel sınıfta mı (istisnalar gerekçeli mi)? → 2.5'te bir istisna var, gerekçeli
+- [x] Ölçüm tipleri `olcum_tipi` enum'ıyla uyumlu mu? → [1. doküman §1.4](01-blok-sema.md)
+- [x] `modul_durum.besleme` alanı `sebeke`/`yedek` değerlerini üretebiliyor mu? → Evet (süperkapasitör)
+- [x] Genişleme payı hem donanımda hem BOM'da mı? → Ayrılmış pinler var, ek parça gerekmiyor
+- [x] Anten panodan dışarı çıkabiliyor mu? → Evet, mevcut kablo girişi + U.FL pigtail

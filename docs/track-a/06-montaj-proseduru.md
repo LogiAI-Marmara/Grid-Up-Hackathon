@@ -25,9 +25,9 @@ geldiği** ve **hangi riskin karşılandığı** ile birlikte verilmiştir.
 | **1** | **Yardımcı devre sigortası çekilir** | Pano iç ihtiyaç devresinin sigortası çekilir. **Abonelere giden elektrik kesilmez.** | İş güvenliği + müşteri kesintisi önlenir |
 | **2** | **Pano kapağı açılır** | Ön kapak açılır; iç klemens sıraları ve kablo yönlendirme alanı erişilebilir hale gelir | Fiziksel erişim |
 | **3** | **Modül konumlandırılır, klemens sırasına hizalanır** | Modül, termal sensör klemenslere **dik bakacak** şekilde konumlandırılır; kadraj ayarı yapılır | Görüş hattı bütünlüğü (sessiz körlük) |
-| **4** | **Besleme kablosu iç ihtiyaç klemensine bağlanır** | 230 V besleme, iç ihtiyaç devresinin klemensine bağlanır | Enerji kaynağı (§7.3) |
+| **4** | **Besleme kablosu iç ihtiyaç klemensine bağlanır** | 230 V besleme, iç ihtiyaç devresinin klemensine bağlanır; PE panonun koruma iletkenine. Panoda analizör varsa RS-485 A/B çifti de bu adımda analizörün Modbus klemensine bağlanır (pano içi, kısa) | Enerji kaynağı (§7.3) |
 | **5** | **Anten kablosu mevcut kablo giriş noktasından dışarı çıkarılır, anten dışa monte edilir** | U.FL pigtail panonun mevcut kablo girişinden geçirilir; panel anteni **dışa** monte edilir | Metal pano radyo kesintisi (sessiz arıza) |
-| **6** | **Sigorta takılır, modül gateway'e kaydolur** | Yardımcı devre sigortası geri takılır; modül önyüklenip saha gateway'ine bağlanır | Devreye alma |
+| **6** | **Sigorta takılır, modül gateway'e kaydolur** | Yardımcı devre sigortası geri takılır; modül önyüklenip saha gateway'ine bağlanır. Kapaktaki durum LED'i (02 kart yerleşimi) gateway bağlantısı kurulunca sabit yeşil yanar; ilk paket merkeze `modul_id` ile düşer | Devreye alma |
 | **7** | **Ekrandan kapsama doğrulanır** | Termal kadraj ekrandan kontrol edilir: klemens sırası görüş alanında mı? | **Montaj hatasının yakalanması** |
 
 **Süre ve işgücü (satır 351, birebir):**
