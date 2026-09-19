@@ -73,4 +73,4 @@ docs/track-a/eda/.history/
 
 # Markdown dokümanları
 *.md
-
+!deploy/README.md

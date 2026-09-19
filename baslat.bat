@@ -8,11 +8,13 @@ echo =======================================================
 set COMPOSE_FILE=%~dp0deploy\docker-compose.yml
 
 echo 🚀 Docker Compose servisleri başlatılıyor...
-docker compose -f "%COMPOSE_FILE%" up -d --build
+docker compose -f "%COMPOSE_FILE%" up -d --build --wait
+if errorlevel 1 exit /b %errorlevel%
 
 echo.
 echo 📊 Servis Durumları:
 docker compose -f "%COMPOSE_FILE%" ps
+if errorlevel 1 exit /b %errorlevel%
 
 echo.
 echo ✅ Sistem hazır:
