@@ -3,7 +3,24 @@
 **Teslimat karşılığı:** T3 (yazılım mimarisi — modül kısmı)
 **Dayandığı kararlar:** §7.2 örnekleme sıklığı · §7.4 veri politikası
 **Yöntem:** Bu diyagram **uydurulmamıştır** — `/modul-sim/modul_sim/modul.py` içindeki gerçek
-firmware akışından türetilmiştir. Kod tarafı PR #1 ile teslim edilmiştir.
+firmware akışından türetilmiştir. Kod tarafı PR #1 ile teslim edilmiş, entegrasyon kararıyla
+(17 Eyl, commit `3b83483`) güncellenmiştir.
+
+> **Politika notu (entegrasyon kararı, 17 Eyl 2026, madde 2):** Karar kaydı §7.4'teki *"normalde
+> özet, anomali anında tam kare"* politikası entegrasyonda değiştirildi: **tam kare her paketle
+> gider**, paket ve termal çevrimi **30 sn**'ye hizalandı, modül içi eşik kapısı kaldırıldı.
+> Belge: [`entegrasyon-gorev-dagilimi.md`](../../entegrasyon-gorev-dagilimi.md) §2.4 ve İZ A madde 2.
+> Gerekçe ve etkisi §7.3'te. Karar kaydı §7.2 / §7.4 henüz bu karara göre güncellenmedi (lider).
+
+> **Kapsam notu — mikrodenetleyici kodu (T3):** Brief T3 *"mikrodenetleyici üzerinde çalışan
+> kaynak kodlar"* der. İki gerçekleme var: (1) `/modul-sim` (Python) — modül mantığı + 7 arıza
+> senaryosu, gerçek toplama servisine karşı koşan **asıl** kod (karar kaydı §12: *"modül mantığı"* =
+> `modul-sim`); bu doküman onun akışıdır. (2) [`/firmware`](../../firmware/README.md) — aynı dokuz
+> adımın ESP32-S3-WROOM-1U-N8 için C++ karşılığı (PlatformIO, Arduino): pinler
+> [3. doküman §3.1](03-pinout.md)'den, sabitler `ayar.py`'den, paket sözleşme ② `POST /paket`.
+> **Derlenir (RAM %26, flash %28); fiziksel modül üretilmediği için (§1.4) donanımda doğrulanmadı.**
+> CT ön ucu ve Modbus register sabitleri sahadaki cihaza göre ayarlanacak varsayımlardır. Firmware
+> senaryo üretmez; kaynak-doğruluk sırası: bu doküman ↔ `modul.py` ↔ `main.cpp` (§7.8).
 
 ---
 
@@ -12,27 +29,19 @@ firmware akışından türetilmiştir. Kod tarafı PR #1 ile teslim edilmiştir.
 ```mermaid
 flowchart TD
     START(["UYAN<br/>(paket çevrimi başlar)"]) --> W["Dünyayı oku<br/>dış hava, yük profili<br/>(simülatörde; sahada fiziksel dünya)"]
-    W --> A["AKIM OKU<br/>2 sn alt örnekleme<br/>→ 10 sn ortalaması<br/>L1 / L2 / L3 / nötr"]
+    W --> A["AKIM OKU<br/>2 sn alt örnekleme<br/>→ 30 sn ortalaması<br/>L1 / L2 / L3 / nötr"]
     A --> D["KABİN HAVASI<br/>sıcaklık + iç bağıl nem"]
     D --> ARC["ARK SAYACI<br/>TVOC-2 trip sayacı<br/>(olay bazlı, periyot yok)"]
     ARC --> CLK["MODÜL SAATİ<br/>serbest çalışır → kayma<br/>zaman damgası üret"]
     CLK --> LP{"Düşük güç?<br/>(yedek besleme, kritik)"}
     LP -->|"Evet — termal ve<br/>ölçümler atlanır"| ASM
-    LP -->|"Hayır"| TERM{"Bu çevrimde<br/>termal okunacak mı?<br/>(her 20 sn)"}
-
-    TERM -->|"Hayır"| ASM
-    TERM -->|"Evet"| FRAME["768 DEĞER OKU<br/>32×24 termal kare"]
+    LP -->|"Hayır"| FRAME["768 DEĞER OKU<br/>32×24 termal kare<br/>(6 sn'de bir 5 alt kare → ortalama)"]
     FRAME --> SUM["ÖZETLE<br/>maks + konumu + 4 bölge ort.<br/>(768 → 7 sayı; kare ort. ayrı satır)"]
-    SUM --> TH{"EŞİK KONTROLÜ<br/>tam kare eklensin mi?"}
-
-    TH -->|"Tetik yok"| ASM
-    TH -->|"Tetik var"| RATE{"Hız sınırı<br/>son 60 sn içinde<br/>kare gönderildi mi?"}
-    RATE -->|"Evet, ve ark değil"| ASM
-    RATE -->|"Hayır / ark"| ATTACH["TAM KAREYİ EKLE<br/>768 değer = kanıt"]
+    SUM --> ATTACH["TAM KAREYİ EKLE<br/>her çevrimde, koşulsuz<br/>(entegrasyon kararı madde 2)"]
     ATTACH --> ASM
 
     ASM["ÖLÇÜM SATIRLARINI KUR<br/>(sözleşme ① formatı)<br/>ark olayı varsa ark_olay satırı"]
-    ASM --> CEVRE{"Ortam/nem çevrimi?<br/>(her 60 sn)"}
+    ASM --> CEVRE{"Ortam/nem çevrimi?<br/>(her 60 sn = 2 çevrimde bir)"}
     CEVRE -->|"Evet"| ENV["Ortam sıcaklık + nem ekle"]
     CEVRE -->|"Hayır"| HEALTH
     ENV --> HEALTH
@@ -46,13 +55,13 @@ flowchart TD
     classDef frame fill:#ffe0b2,stroke:#e65100,color:#000
     classDef out fill:#c8e6c9,stroke:#2e7d32,color:#000
     class W,A,D,ARC,CLK,ASM,ENV,HEALTH read
-    class LP,TERM,TH,RATE,CEVRE dec
+    class LP,CEVRE dec
     class FRAME,SUM,ATTACH frame
     class START,SEND out
 ```
 
-> **Okuma notu:** Terimler karar kaydı Türkçesiyle hizalıdır — *uyan → oku → özetle → eşik
-> kontrolü → gönder* (§7 doküman çıktıları satır 630).
+> **Okuma notu:** Terimler karar kaydı Türkçesiyle hizalıdır — *uyan → oku → özetle → gönder*
+> (§7 doküman çıktıları satır 630'daki *"eşik kontrol"* adımı entegrasyon kararıyla düştü, §7.3).
 
 ---
 
@@ -60,39 +69,49 @@ flowchart TD
 
 | Ölçüm | Karar kaydı §7.2 | Koddaki değer | Kaynak |
 |---|---|---|---|
-| Akım | 1–5 sn okunur, 10 sn ort. kaydedilir | `akim_okuma_s=2`, `paket_s=10` | `OrneklemeAyar` |
-| Termal özet | 10–30 sn | `termal_s=20` | `OrneklemeAyar` |
-| Termal tam kare | Sadece anomali anında | `EsikAyar` tetikleri | `modul.py` |
-| Ortam sıcaklık / nem | 30–60 sn | `cevre_s=60` | `OrneklemeAyar` |
-| Ark | Olay bazlı, örnekleme yok | `ark_tetik` olayı | `modul.py` |
+| Paket | — | `paket_s=30` | `OrneklemeAyar` |
+| Akım | 1–5 sn okunur, 10 sn ort. kaydedilir | `akim_okuma_s=2` alt örnek, **30 sn** ort. (paket penceresi) | `OrneklemeAyar`, `modul.py` adım 3 |
+| Termal özet | 10–30 sn | `termal_s=30`; sensör `termal_okuma_s=6` sn'de bir okunur, 5 alt kare ortalanır | `OrneklemeAyar`, adım 7 |
+| Termal tam kare | Sadece anomali anında | **Her pakette** (entegrasyon kararı madde 2) | `modul.py` adım 7 |
+| Ortam sıcaklık / nem | 30–60 sn | `cevre_s=60` (2 çevrimde bir) | `OrneklemeAyar` |
+| Ark | Olay bazlı, örnekleme yok | `ark_tetik` olayı | `modul.py` adım 5 |
 
-**Paket temposu neden 10 sn:** Paket periyodu **akım ortalama penceresidir**. Akım 2 sn'de bir
-okunur ve 10 sn ortalaması kaydedilir; yani 10 sn'de bir paket = pencere başına bir kayıt ve
-**hiçbir veri atılmaz.**
+**Paket temposu neden 30 sn:** Paket periyodu **akım ortalama penceresidir**: akım 2 sn'de bir
+okunur, 15 alt örneğin ortalaması kaydedilir; paket başına bir kayıt, **hiçbir veri atılmaz.**
+Termal çevrim paketle aynı süreye hizalandı ki her pakette özet + kare birlikte gitsin ve
+merkezdeki dedektör (İZ B, 30 sn tarama) her taramada yeni bir kare bulsun. Karar kaydı §7.2'nin
+*"10 sn"* ve *"10–30 sn"* değerleri bu hizalamadan önceki değerlerdir.
 
 ---
 
-## 7.3 Eşik kontrolü — modülün karar noktası
+## 7.3 Eşik kontrolü — kaldırıldı (entegrasyon kararı madde 2)
 
-**Üç bağımsız tetik + ark geçersiz kılma + hız sınırı.** Karar kaydı §7.4 satır 304'ün zorunlu
-kıldığı "modülün anomaliyi kendi başına tanıması" burada gerçekleşir.
+**Eski tasarım (karar kaydı §7.4 satır 298–304):** normalde yalnız özet gider; modül üç bağımsız
+tetikle (`maks_c` 65 °C, `delta_c` 14 °C, `kabin_delta_c` 22 °C) + ark geçersiz kılma + 60 sn hız
+sınırıyla *"bu çevrimde tam kare eklensin mi"* kararını verir. Bu, §7.4 satır 304'ün *"modülün
+anomaliyi kendi başına tanıyabilmesi"* şartının karşılığıydı.
 
-| Tetik | Değer | Neden gerekli (koddan) |
-|---|---|---|
-| **`maks_c`** | **65,0 °C** | Mutlak sıcak piksel sıcaklığı |
-| **`delta_c`** | **14,0 °C** | Sıcak piksel − kare ortalaması. *"55 °C'lik bir nokta 25 °C kabinde arızadır; 50 °C kabinde sıcak bir ağustos öğleden sonrasında tüm kart sıcaktır — ikisini ayıran yalnızca deltadır."* |
-| **`kabin_delta_c`** | **22,0 °C** | Sıcak piksel − kabin ortamı. Merkezin hesapladığı akım/sıcaklık korelasyonunun **modül üstündeki ucuz karşılığı** |
-| **`ark`** | Her zaman (`ark_kare=True`) | *"Operatörün kesinlikle bakmak isteyeceği tek paket"* |
-| **`min_aralik_s`** | **60 sn** | Hız sınırı: *"sürekli arızada olan bir modül, tüm uplink bütçesini 768 değeri tekrar tekrar göndermeye harcamasın"* |
+**Bugünkü durum (kod):** `modul.py` adım 7 kareyi **her çevrimde koşulsuz** ekler; eşik fonksiyonu
+(`_kare_gerekli`) koddan çıkarıldı. `EsikAyar` yapılandırma nesnesi **duruyor ama değerlendirilmiyor**:
+politika geri istenirse tek noktadan takılsın diye ve merkezden modüle ayar gönderme kavramının
+(§7.4 satır 304, T5) yeri belli olsun diye korunmuştur.
 
-### Neden üç ayrı tetik? (koddaki gerekçe, birebir çeviri)
+**Neden değişti** ([`entegrasyon-gorev-dagilimi.md`](../../entegrasyon-gorev-dagilimi.md) §2.4, İZ A
+madde 2–3): *"Eski politikanın dayanağı ölçülmemişti."* Belgenin saydığı üç kazanım: (1) modül içi
+eşik mantığı ortadan kalkar, varlık sebebi karenin ne zaman gönderileceğine karar vermekti;
+(2) kanıt karesinin *"en yakını hangisi"* sorunu kalkar, her olay anının kendi karesi vardır
+(`kanit.kare_id`, `analiz/README` 10–11); (3) geçmişe dönük yeniden tarama gerçekten mümkün olur,
+eski politikada geçmiş veri o zamanki eşiğin gönderdikleriyle sınırlıydı. Uygulama: commit
+`3b83483`, `toplama/migrations/004`.
 
-Tek bir mutlak sıcaklık eşiği **yetmez**, çünkü sıcak nokta her zaman mutlak olarak sıcak değildir:
+**Maliyeti:** kare başına 768 × int16 = **1 536 B** (DB'de, `toplama/migrations/004`; JSONB olarak
+tutulsaydı 100 modülde ~430 MB/gün olacağı için ikili biçime geçildi); tel üzerinde JSON ≈ 3–4 KB.
+100 modül × 30 sn → **≈ 5 KB/sn** DB yazımı, ≈ 12 KB/sn HTTP. On-prem sunucu ve saha gateway'i için
+önemsiz; §7.4 satır 302'deki *"bant genişliğini düşük tutar"* gerekçesi bu ölçekte belirleyici
+değildir. Modül tarafında ek yük yok: kare zaten her çevrim okunuyordu.
 
-- **Yaz günü, tüm pano sıcak:** mutlak eşik yanlış alarm verir → `delta_c` bunu ayıklar
-- **Kış günü, normal oda, tek klemens ısınmış:** mutlak eşik yakalar → `maks_c`
-- **Kabin dışına göre aşırı ısınma:** `kabin_delta_c` bağlamı verir
-
+**Modül hâlâ ne yapar:** 768 değeri yuvarlayıp özetler (maks, konum, 4 bölge ortalaması) ve
+kareyle birlikte paketler. Özet, dedektörün ucuz ilk bakışı; kare, kanıt. İkisi de her pakette.
 ---
 
 ## 7.4 ⚠️ Kritik mimari sınır — modül hüküm VERMEZ
@@ -102,21 +121,20 @@ Bu, dokümanın en önemli ayrımıdır ve karıştırılırsa sistem yanlış a
 | Karar | Kim verir | Nerede |
 |---|---|---|
 | *"Kaç derece?"* | Sensör | Pano içi |
-| *"768'den özet çıkar"* | **ESP32** | Pano içi |
-| *"Bu çevrimde tam kare eklensin mi?"* | **ESP32** (üç tetik) | Pano içi |
+| *"768'den özet çıkar, kareyle birlikte paketle"* | **ESP32** | Pano içi |
 | **"Bu bir anomali mi? Hangi tip? Hangi seviye?"** | **Anomali motoru** | **On-prem sunucu** |
 | *"Alarm gönderilsin mi, kime?"* | Alarm servisi | On-prem sunucu |
 
 **Modülün ürettiği pakette `seviye` ve `tip` alanları YOKTUR.** Bu alanlar anomali motorunun
 çıktısıdır (sözleşme ③). Modül yalnızca *"şüpheli bir şey var, kanıtı da gönderiyorum"* der.
 
-**Eşik mantığı = dedektör değil, tetikleyici.** Karar kaydı §7.4 satır 304:
-> *"Dolayısıyla tespit iki katmanlıdır: **modülde basit eşik mantığı, merkezde asıl dedektör.**"*
+**Tespit tek katmanda, merkezde.** Karar kaydı §7.4 satır 304 *"modülde basit eşik mantığı,
+merkezde asıl dedektör"* diyordu; entegrasyon kararıyla modül tarafındaki eşik kalktı (§7.3),
+asıl dedektör zaten merkezdeydi. Modül hiçbir hüküm vermez, kanıtı (kare) her pakette gönderir.
 
-**Bunun ters yönlü sonucu:** eşiği değiştirmek için 100 sahayı gezmek mümkün olmadığından
-**merkezden modüle ayar gönderme** ihtiyacı doğar — bu, T5 ölçeklenebilirlik açısından kazançtır
-(§7.4 satır 304). Kodda `EsikAyar` bir **yapılandırma nesnesidir**, sabit değil; tıpkı
-*"merkezden modüle ayar gönderme"*nin karşılığı olduğu gibi.
+**Merkezden modüle ayar:** 100 sahayı gezmemek için gerekli olan bu kanal (§7.4 satır 304, T5)
+kodda `OrneklemeAyar` / `EsikAyar` yapılandırma nesneleriyle temsil edilir; protokolü sözleşme
+kapsamı dışındadır (§7.9).
 
 ---
 
@@ -124,14 +142,12 @@ Bu, dokümanın en önemli ayrımıdır ve karıştırılırsa sistem yanlış a
 
 | Durum | Gönderilen | Boyut |
 |---|---|---|
-| **Normal çalışma** | `termal_ozet`: maks + konum (2) + 4 bölge ortalaması | 7 sayı (~30 B) |
-| **Tetik aktif** | `termal_ozet` **+** `termal_kare` (768 değer, kanıt) | ~3 KB |
+| **Her paket (30 sn)** | `termal_ozet` (maks + konum (2) + 4 bölge ort. = 7 sayı) **+** `termal_kare` (768 değer) | JSON ≈ 3–4 KB; DB 1 536 B (int16, 0,1 °C) |
+| **Düşük güç** (`dusuk_guc`) | Yalnız `modul_durum` (+ varsa `ark_olay`) | < 200 B |
 
-**Gerekçe (§7.4 satır 302):** *"Özet + olay bazlı tam kare politikası bant genişliğini düşük tutar
-ve 'edge'de işlem yapıyoruz' iddiasının somut karşılığıdır."*
-
-**Sayısal karşılığı:** 768 değer ≈ 3 KB. 100 modül bunu her 10 saniyede gönderse iletişim hattı
-çöker. Özet politikasıyla normal trafik **7 sayı** düzeyinde kalır.
+**Eski gerekçe (§7.4 satır 302)** *"özet + olay bazlı tam kare bant genişliğini düşük tutar"*
+entegrasyon kararıyla terk edildi; sayısal karşılığı §7.3'te (100 modül ≈ 5 KB/sn). *"Edge'de
+işlem"* iddiasının bugünkü karşılığı **özet çıkarma + düşük güç modu**dur, kare seçimi değil.
 
 **Özetin içeriği (sözleşme ② ile birebir):**
 
@@ -183,23 +199,23 @@ kullanmak, demoda *"bu yerel saat mi UTC mi"* sorusunu tamamen ortadan kaldırı
 
 ## 7.8 Akışın kodla eşleşmesi (doğrulama)
 
-| Diyagram adımı | Kod karşılığı (`modul.py`) |
-|---|---|
-| Dünyayı oku | adım 1 — `hava.ilerle()`, `Baglam` |
-| Senaryo uygula | adım 2 — `senaryo.uygula()` |
-| Akım oku (2 sn → 10 sn ort.) | adım 3 — `alt_adim` döngüsü |
-| Kabin havası | adım 4 — `_kabin.ilerle()`, `ic_bagil_nem()` |
-| Ark sayacı | adım 5 — `ark_tetik` |
-| Modül saati | adım 6 — `saat_kayma_ppm` |
-| Düşük güç? | `b.dusuk_guc` — adım 7 ve 8'i atlar |
-| Termal oku + özetle | adım 7 — `dizi.kare()`, `TermalDizi.ozet()` |
-| Eşik kontrolü | `_kare_gerekli()` |
-| Ölçüm satırlarını kur | adım 8 |
-| Modül sağlığı | adım 9 — `modul_durum` |
-| Gönder | `UretilenPaket` döner |
+| Diyagram adımı | Simülatör (`modul-sim/modul_sim/modul.py`) | Firmware (`firmware/src/main.cpp`) |
+|---|---|---|
+| Dünyayı oku | adım 1 — `hava.ilerle()`, `Baglam` | sahada fiziksel; sensör okumasının içinde |
+| Senaryo uygula | adım 2 — `senaryo.uygula()` | yok (senaryo simülatörün işi) |
+| Akım oku (2 sn → 30 sn ort.) | adım 3 — `alt_adim` döngüsü | `akimOku()` × 15: `ctRmsAmper()` (ADC1) veya Modbus analizör |
+| Kabin havası | adım 4 — `_kabin.ilerle()`, `ic_bagil_nem()` | `Adafruit_SHT31` sıcaklık + nem |
+| Ark sayacı | adım 5 — `ark_tetik` | `arkTetikOku()`: TVOC-2 trip register farkı |
+| Modül saati | adım 6 — `saat_kayma_ppm` | SNTP → `zamanYaz()`; saat yoksa paket atlanır |
+| Düşük güç? | `b.dusuk_guc` — adım 7 ve 8'i atlar | yedekte ≥ 3 dk (`YEDEK_DUSUK_GUC_S`) — aynı atlama |
+| Termal oku + özetle + kareyi ekle | adım 7 — `dizi.kare()` × 5 alt kare, `TermalDizi.ozet()`, `termal_kare = kare` | `termalAltKareEkle()` × 5, `termalKareBitir()` (yuvarla → maks, konum, 4 bölge) |
+| Ölçüm satırlarını kur | adım 8 | `olcumSatiri()`, yalnız `kalite: yok` `null` |
+| Modül sağlığı | adım 9 — `modul_durum` | VSENSE → `besleme`, `WiFi.RSSI()` → `sinyal` |
+| Gönder | `UretilenPaket` döner | `HTTPClient.POST(TOPLAMA_URL)` |
 
-**Doğrulama:** Diyagramdaki dokuz adım, kodun `ilerle()` fonksiyonundaki dokuz numaralı adımla
-**birebir** eşleşir. Kod ve doküman arasında çelişki yoktur.
+**Doğrulama:** Diyagramdaki dokuz adım, `ilerle()` fonksiyonundaki dokuz numaralı adımla ve
+`main.cpp`'deki `loop()` yorumlarıyla **birebir** eşleşir. Sabitler tek yerden gelir
+(`ayar.py` ↔ `firmware/include/ayar.h`). Simülatör test edilmiştir (39 test); firmware yalnız derlenmiştir.
 
 ---
 

@@ -112,8 +112,20 @@ def run(_ctx):
                     midp = adsk.core.Point3D.create(*mul(add(p0, p1), 0.5))
                     ok, prm = f.evaluator.getParameterAtPoint(midp)
                     if not ok or not f.evaluator.isParameterOnFace(prm): continue
-                    if visible(add(mul(add(p0, p1), 0.5), mul(s, sign*0.001))):
-                        polys.append(dict(body=bname, kind='sil', pts=[proj(p0), proj(p1)]))
+                    # siluet boyunca ornekle: yalniz orta nokta testi, delikten gorunen kisa bir parca icin tum cizgiyi gecirir
+                    # (alt gorunuste PCB dikmeleri PG7 deliginden 'goruluyor' diye tam boy ciziliyordu)
+                    L = dist3(p0, p1); nseg = max(2, int(L / 0.15) + 1); off = mul(s, sign*0.001)
+                    Q = [add(p0, mul(sub(p1, p0), k / nseg)) for k in range(nseg + 1)]
+                    cur = [Q[0]]; curvis = None
+                    def flush_sil(cur, vis):
+                        if len(cur) >= 2 and vis: polys.append(dict(body=bname, kind='sil', pts=[proj(cur[0]), proj(cur[-1])]))
+                    for k in range(1, len(Q)):
+                        vis = visible(add(mul(add(Q[k-1], Q[k]), 0.5), off))
+                        if curvis is None: curvis = vis
+                        if vis != curvis:
+                            flush_sil(cur, curvis); cur = [Q[k-1]]; curvis = vis
+                        cur.append(Q[k])
+                    flush_sil(cur, curvis)
                 if abs(dot(a, d)) < 1e-3:   # eksen bakisa dik: uc daireleri yandan cizgi olur; kenar orneklemesi uclara ulasmaz -> tam capli kirisi ekle
                     for t in (tmin, tmax):
                         c = add(o, mul(a, t)); q0 = add(c, mul(s, g.radius)); q1 = add(c, mul(s, -g.radius))

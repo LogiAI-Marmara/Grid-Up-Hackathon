@@ -39,6 +39,10 @@ from .ayar import EsikAyar, OrneklemeAyar, SahaAyar, topoloji
 from .fizik import Hava, HavaDurumu
 from .modul import Modul, UretilenPaket
 from .senaryo import Senaryo, senaryo_olustur
+from .sozlesme import zaman_yaz
+
+#: Label file format version, `analiz/README.md` "Etiket dosyası formatı".
+ETIKET_SURUM = 1
 
 #: Default root seed. Same seed plus same start time reproduces a run exactly.
 VARSAYILAN_TOHUM = 20260914
@@ -92,6 +96,13 @@ class KosuAyar:
     senaryo_sure_orani: float = 0.55
     senaryo_bas_s: float | None = None
     senaryo_sure_s: float | None = None
+    #: Which modules get the fault. `None` injects it into every module (the
+    #: original behaviour); a tuple of module ids restricts it to those, and
+    #: `senaryo_oran` picks a deterministic fraction of the fleet instead. The
+    #: rest stay clean, which is what a blind set needs: track B's false-alarm
+    #: rate is counted on `temiz_moduller`, and a run with none cannot measure it.
+    senaryo_moduller: tuple[str, ...] | None = None
+    senaryo_oran: float | None = None
     ornekleme: OrneklemeAyar = field(default_factory=OrneklemeAyar)
     esik: EsikAyar = field(default_factory=EsikAyar)
 
@@ -102,6 +113,10 @@ class KosuAyar:
             raise ValueError("sure_dk must be positive")
         if self.baslangic is not None and self.baslangic.tzinfo is None:
             raise ValueError("baslangic must be timezone-aware (UTC)")
+        if self.senaryo_oran is not None and not 0.0 < self.senaryo_oran <= 1.0:
+            raise ValueError("senaryo_oran must be in (0, 1]")
+        if self.senaryo_moduller is not None and self.senaryo_oran is not None:
+            raise ValueError("give senaryo_moduller or senaryo_oran, not both")
 
     @property
     def sure_s(self) -> float:
@@ -192,6 +207,23 @@ class Filo:
             else max(ayar.sure_s * ayar.senaryo_sure_orani, float(ayar.ornekleme.paket_s))
         )
 
+        # Which modules carry the fault: an explicit list, a seeded fraction,
+        # or (default) all of them.
+        tum_idler = tuple(m.modul_id for saha in self.sahalar for m in saha.modul_ayarlari)
+        if ayar.senaryo_ad is None:
+            self.senaryo_moduller: frozenset[str] = frozenset()
+        elif ayar.senaryo_moduller is not None:
+            bilinmeyen = sorted(set(ayar.senaryo_moduller) - set(tum_idler))
+            if bilinmeyen:
+                raise ValueError(f"senaryo_moduller not in this fleet: {', '.join(bilinmeyen)}")
+            self.senaryo_moduller = frozenset(ayar.senaryo_moduller)
+        elif ayar.senaryo_oran is not None:
+            adet = max(1, round(len(tum_idler) * ayar.senaryo_oran))
+            secici = random.Random(ayar.tohum ^ 0x5E7A)
+            self.senaryo_moduller = frozenset(secici.sample(tum_idler, adet))
+        else:
+            self.senaryo_moduller = frozenset(tum_idler)
+
         self.moduller: list[Modul] = []
         self.senaryolar: list[Senaryo | None] = []
         for saha in self.sahalar:
@@ -201,7 +233,7 @@ class Filo:
                 # per-module state (which trips have fired, when), so sharing one
                 # object across the fleet would let one module's arc suppress
                 # another's.
-                senaryo = senaryo_olustur(ayar.senaryo_ad) if ayar.senaryo_ad else None
+                senaryo = senaryo_olustur(ayar.senaryo_ad) if m_ayar.modul_id in self.senaryo_moduller else None
                 self.senaryolar.append(senaryo)
                 self.moduller.append(
                     Modul(
@@ -224,6 +256,48 @@ class Filo:
     def tick_sayisi(self) -> int:
         """Number of clock steps, endpoints included."""
         return int(self.ayar.sure_s // self.ayar.ornekleme.paket_s) + 1
+
+    @property
+    def temiz_moduller(self) -> tuple[str, ...]:
+        """Modules that carry no fault, in packet order."""
+        return tuple(m.modul_id for m in self.moduller if m.modul_id not in self.senaryo_moduller)
+
+    def etiket(self, uretim_zamani: datetime | None = None) -> dict:
+        """The blind-test label file for this run, in track B's format.
+
+        `analiz/README.md`, "Etiket dosyası formatı": the data goes to the
+        database, this stays with the generator until the detector's output
+        has been frozen. `kritik_esik` is the end of the ramp (or the first trip
+        for an arc), which is the moment lead time is measured from; without it
+        the project's headline metric cannot be computed. `beklenen_tip` is
+        deliberately absent — the scenario-to-tip mapping is track B's.
+        """
+        simdi = uretim_zamani or datetime.now(timezone.utc)
+        senaryolar = []
+        sira = 0
+        for modul, senaryo in zip(self.moduller, self.senaryolar):
+            if senaryo is None:
+                continue
+            sira += 1
+            kritik = self.senaryo_baslangic + timedelta(seconds=self.senaryo_sure_s * senaryo.kritik_oran)
+            senaryolar.append(
+                {
+                    "senaryo_id": f"senaryo_{sira:02d}",
+                    "modul_id": modul.modul_id,
+                    "senaryo": senaryo.etiket_adi,
+                    "baslangic": zaman_yaz(self.senaryo_baslangic),
+                    "kritik_esik": zaman_yaz(kritik),
+                    "aciklama": senaryo.baslik,
+                }
+            )
+        return {
+            "surum": ETIKET_SURUM,
+            "tohum": self.ayar.tohum,
+            "uretim_zamani": zaman_yaz(simdi),
+            "kapsam": {"bas": zaman_yaz(self.baslangic), "bit": zaman_yaz(self.bitis)},
+            "senaryolar": senaryolar,
+            "temiz_moduller": list(self.temiz_moduller),
+        }
 
     # -- the run ----------------------------------------------------------
 

@@ -71,6 +71,5 @@ $RECYCLE.BIN/
 docs/track-a/eda/.history/
 *.lck
 
-# Markdown dokümanları
-*.md
-
+# PlatformIO
+firmware/.pio/

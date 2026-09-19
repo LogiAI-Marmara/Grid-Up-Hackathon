@@ -20,16 +20,23 @@ kart yapısı, giriş-çıkış bağlantıları, bağlantı şemaları, temel bi
 | 4 | [Mekanik yerleşim ve görüş hattı](04-mekanik-yerlesim.md) | Kutu ölçüsü, panodaki konum, kadraj krokisi ([yerleşim](04-yerlesim-krokisi.svg) · [kutu](04-kutu-krokisi.svg)), sabitleme | T1, T2 |
 | 5 | [Saha koşulları gerekçesi](05-saha-kosullari.md) | Sıcaklık, nem, IP, manyetik alan, kısa devre darbesi, yabancı cisim | T1, T2 · kriter 3 |
 | 6 | [Montaj prosedürü](06-montaj-proseduru.md) | 7 adım, süre, "kesinti yok" gerekçesi + [adım akışı](09-montaj-adimlari.svg) | T1 · kriter 3 |
-| 7 | [Modül yazılım akış diyagramı](07-yazilim-akis.md) | Uyan → oku → özetle → eşik kontrol → gönder | T3 (modül kısmı) |
+| 7 | [Modül yazılım akış diyagramı](07-yazilim-akis.md) | Uyan → oku → özetle → paketle → gönder; kod: `/modul-sim` (Python, test edilmiş) + [`/firmware`](../../firmware/README.md) (ESP32-S3 C++, derlenir) | T3 (modül kısmı) |
+| 8 | [**Sistem mimarisi / uçtan uca veri akışı**](08-sistem-mimarisi.svg) | Pano içi → saha gateway → on-prem sunucu: üç izin gerçek servisleri, sözleşme ①–⑤ şeridi, ortak sözlük, hedef/gerçek durum notu | Demo beklentisi "sistem mimarisi", T4/T6/T7 bağlamı · kriter 4 |
 | — | [**Kaynakça**](KAYNAKCA.md) | Dokümanlarda geçen her dış teknik değerin kaynağı, doküman no/sayfa/URL ve **doğrulama durumu** (okundu / özet / atıf / seçim) | — |
 
 ---
 
-## CAD kaynakları
+## Çizim kaynakları (elle SVG yok)
 
-Kroki SVG'leri (`02-pcb-yerlesimi`, `04-kutu-krokisi`, `04-yerlesim-krokisi`) **Fusion 360 modellerinden** üretilir:
-modeller (`.f3d` / `.step`), model script'leri, projeksiyon/kesit üreteci ve SVG kompozisyon script'leri
-[`cad/`](cad/README.md) altındadır. Elle düzenleme yerine script'i değiştirip yeniden üretin.
+- **Fusion 360 zinciri** [`cad/`](cad/README.md): `02-pcb-yerlesimi`, `04-kutu-krokisi`, `04-yerlesim-krokisi` —
+  modeller (`.f3d` / `.step`), model script'leri, projeksiyon/kesit üreteci ve SVG kompozisyon script'leri.
+- **KiCad zinciri** [`eda/`](eda/README.md): `03-baglanti-semasi` — `gen_sch.py` → `.kicad_sch` → `kicad-cli` ERC +
+  netlist (`verify_netlist.py`, 103 kontrol) → SVG (`build.py`).
+- **Mimari üreteci** [`eda/gen_mimari.py`](eda/gen_mimari.py): `08-sistem-mimarisi` — kutu içerikleri repodaki servislerden,
+  PIL ile metin taşma denetimi.
+- `09-montaj-adimlari` elle çizilmiş tek SVG'dir (06 §6.1 tablosuna bağlı).
+
+Elle düzenleme yerine script'i değiştirip yeniden üretin.
 
 ---
 
@@ -59,7 +66,9 @@ Bu tablo, "bu doküman neden böyle yazılmış" sorusunun cevabıdır. Atıflar
    dışa bakar halde.
 5. **Mıknatıs + CT uyarısı** (§7.5 satır 337): güçlü mıknatıs akım trafolarının yakınına konmaz.
 6. **Örnekleme tablosu** (§7.2): akım 1–5 sn (10 sn ort.), termal özet 10–30 sn, tam kare yalnız
-   anomali anında, ortam/nem 30–60 sn, ark olay bazlı.
+   anomali anında, ortam/nem 30–60 sn, ark olay bazlı. **Entegrasyon kararıyla (17 Eyl, madde 2)
+   değişti:** paket ve termal 30 sn, tam kare her pakette; karar kaydı henüz güncellenmedi, kod ve
+   [7. doküman §7.2–7.3](07-yazilim-akis.md) yeni değeri taşır.
 7. **Ark tespiti iddiası yok** (§7.1 satır 230): ark algılamayı biz yapmıyoruz; TVOC-2 kaydını
    okuyoruz. "Tespit" diye yazmak yanlış beyan olur.
 
