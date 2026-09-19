@@ -12,15 +12,15 @@ firmware akışından türetilmiştir. Kod tarafı PR #1 ile teslim edilmiş, en
 > Belge: [`entegrasyon-gorev-dagilimi.md`](../../entegrasyon-gorev-dagilimi.md) §2.4 ve İZ A madde 2.
 > Gerekçe ve etkisi §7.3'te. Karar kaydı §7.2 / §7.4 henüz bu karara göre güncellenmedi (lider).
 
-> **Kapsam notu — mikrodenetleyici kodu (T3):** Brief T3 *"mikrodenetleyici kodları"* der. Bu
-> projede ESP32 firmware'i **yazılmamıştır**; fiziksel donanım üretilmediği için (§1.4) modül
-> mantığı `/modul-sim` içinde Python olarak gerçeklenmiş ve gerçek toplama servisine karşı
-> çalıştırılmıştır (karar kaydı §12: *"modül mantığı"* = `modul-sim`). Bu doküman o kodun
-> akışıdır. Sahaya taşıma yolu: ESP32-S3 üzerinde Arduino/ESP-IDF; pinler [3. doküman §3.1](03-pinout.md);
-> MLX90640 ve SHT31 için üretici I²C sürücüleri, akım için ADC1 okuma (CT senaryosu) veya
-> Modbus RTU master (analizör senaryosu), zaman SNTP ile UTC, paket sözleşme ② JSON olarak
-> `POST /paket`. `modul.py`'deki dokuz adım (§7.8) firmware'in `loop()` iskeletidir; bu dokümandaki
-> sabitler (`OrneklemeAyar`, `EsikAyar`) firmware'de merkezden güncellenebilir yapılandırma olur.
+> **Kapsam notu — mikrodenetleyici kodu (T3):** Brief T3 *"mikrodenetleyici üzerinde çalışan
+> kaynak kodlar"* der. İki gerçekleme var: (1) `/modul-sim` (Python) — modül mantığı + 7 arıza
+> senaryosu, gerçek toplama servisine karşı koşan **asıl** kod (karar kaydı §12: *"modül mantığı"* =
+> `modul-sim`); bu doküman onun akışıdır. (2) [`/firmware`](../../firmware/README.md) — aynı dokuz
+> adımın ESP32-S3-WROOM-1U-N8 için C++ karşılığı (PlatformIO, Arduino): pinler
+> [3. doküman §3.1](03-pinout.md)'den, sabitler `ayar.py`'den, paket sözleşme ② `POST /paket`.
+> **Derlenir (RAM %26, flash %28); fiziksel modül üretilmediği için (§1.4) donanımda doğrulanmadı.**
+> CT ön ucu ve Modbus register sabitleri sahadaki cihaza göre ayarlanacak varsayımlardır. Firmware
+> senaryo üretmez; kaynak-doğruluk sırası: bu doküman ↔ `modul.py` ↔ `main.cpp` (§7.8).
 
 ---
 
@@ -199,22 +199,23 @@ kullanmak, demoda *"bu yerel saat mi UTC mi"* sorusunu tamamen ortadan kaldırı
 
 ## 7.8 Akışın kodla eşleşmesi (doğrulama)
 
-| Diyagram adımı | Kod karşılığı (`modul.py`) |
-|---|---|
-| Dünyayı oku | adım 1 — `hava.ilerle()`, `Baglam` |
-| Senaryo uygula | adım 2 — `senaryo.uygula()` |
-| Akım oku (2 sn → 30 sn ort.) | adım 3 — `alt_adim` döngüsü |
-| Kabin havası | adım 4 — `_kabin.ilerle()`, `ic_bagil_nem()` |
-| Ark sayacı | adım 5 — `ark_tetik` |
-| Modül saati | adım 6 — `saat_kayma_ppm` |
-| Düşük güç? | `b.dusuk_guc` — adım 7 ve 8'i atlar |
-| Termal oku + özetle + kareyi ekle | adım 7 — `dizi.kare()` × 5 alt kare, `TermalDizi.ozet()`, `termal_kare = kare` |
-| Ölçüm satırlarını kur | adım 8 |
-| Modül sağlığı | adım 9 — `modul_durum` |
-| Gönder | `UretilenPaket` döner |
+| Diyagram adımı | Simülatör (`modul-sim/modul_sim/modul.py`) | Firmware (`firmware/src/main.cpp`) |
+|---|---|---|
+| Dünyayı oku | adım 1 — `hava.ilerle()`, `Baglam` | sahada fiziksel; sensör okumasının içinde |
+| Senaryo uygula | adım 2 — `senaryo.uygula()` | yok (senaryo simülatörün işi) |
+| Akım oku (2 sn → 30 sn ort.) | adım 3 — `alt_adim` döngüsü | `akimOku()` × 15: `ctRmsAmper()` (ADC1) veya Modbus analizör |
+| Kabin havası | adım 4 — `_kabin.ilerle()`, `ic_bagil_nem()` | `Adafruit_SHT31` sıcaklık + nem |
+| Ark sayacı | adım 5 — `ark_tetik` | `arkTetikOku()`: TVOC-2 trip register farkı |
+| Modül saati | adım 6 — `saat_kayma_ppm` | SNTP → `zamanYaz()`; saat yoksa paket atlanır |
+| Düşük güç? | `b.dusuk_guc` — adım 7 ve 8'i atlar | yedekte ≥ 3 dk (`YEDEK_DUSUK_GUC_S`) — aynı atlama |
+| Termal oku + özetle + kareyi ekle | adım 7 — `dizi.kare()` × 5 alt kare, `TermalDizi.ozet()`, `termal_kare = kare` | `termalAltKareEkle()` × 5, `termalKareBitir()` (yuvarla → maks, konum, 4 bölge) |
+| Ölçüm satırlarını kur | adım 8 | `olcumSatiri()`, yalnız `kalite: yok` `null` |
+| Modül sağlığı | adım 9 — `modul_durum` | VSENSE → `besleme`, `WiFi.RSSI()` → `sinyal` |
+| Gönder | `UretilenPaket` döner | `HTTPClient.POST(TOPLAMA_URL)` |
 
-**Doğrulama:** Diyagramdaki dokuz adım, kodun `ilerle()` fonksiyonundaki dokuz numaralı adımla
-**birebir** eşleşir. Kod ve doküman arasında çelişki yoktur.
+**Doğrulama:** Diyagramdaki dokuz adım, `ilerle()` fonksiyonundaki dokuz numaralı adımla ve
+`main.cpp`'deki `loop()` yorumlarıyla **birebir** eşleşir. Sabitler tek yerden gelir
+(`ayar.py` ↔ `firmware/include/ayar.h`). Simülatör test edilmiştir (39 test); firmware yalnız derlenmiştir.
 
 ---
 
