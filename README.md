@@ -54,7 +54,7 @@ Sistem, fiziksel pano içi donanımdan merkezi operasyon yüzüne kadar birbirin
         │         │                                         │
         │         └──► ⑥ Alarm Servisi                      │
         │                 ├─► Android SMS Gateway (LAN)     │
-        │                 └─► Telegram (isteğe bağlı; kapalı) │
+        │                 └─► Telegram (seçmeli, kapalı)     │
         ═════════════════════════════════════════════════════
 ```
 
