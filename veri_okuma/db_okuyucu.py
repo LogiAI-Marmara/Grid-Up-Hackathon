@@ -15,8 +15,8 @@ try:
     import psycopg
     from psycopg.rows import dict_row
 except ImportError:
-    psycopg = None
-    dict_row = None
+    psycopg = None  # type: ignore
+    dict_row = None  # type: ignore
 
 
 class DbOlcumOkuyucu:
@@ -34,8 +34,13 @@ class DbOlcumOkuyucu:
             )
         self.dsn = dsn or self.VARSAYILAN_DSN
 
-    def _baglan(self):
-        return psycopg.connect(self.dsn, row_factory=dict_row)
+    def _baglan(self) -> Any:
+        if psycopg is None or dict_row is None:
+            raise ImportError(
+                "psycopg kütüphanesi yüklü değil! Kurulum: pip install psycopg[binary]"
+            )
+        return psycopg.connect(self.dsn, row_factory=dict_row)  # type: ignore
+
 
     def modulleri_getir(self) -> List[Dict[str, Any]]:
         """Veritabanında kayıtlı tüm modülleri döner."""

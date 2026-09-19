@@ -6,6 +6,7 @@ Hem REST API (FastAPI Port 8080) hem de doğrudan PostgreSQL (Port 5432)
 hazır sınıflar ve kolaylık fonksiyonları sunar.
 """
 
+from typing import Optional
 from .api_okuyucu import ApiOlcumOkuyucu
 from .db_okuyucu import DbOlcumOkuyucu
 
@@ -23,7 +24,8 @@ def son_olcumler_api(modul_id: str, api_url: str = "http://localhost:8080") -> d
     return okuyucu.son_olcumler(modul_id)
 
 
-def son_olcumler_db(modul_id: str, dsn: str = None) -> dict:
+def son_olcumler_db(modul_id: str, dsn: Optional[str] = None) -> dict:
     """Veritabanından hızlıca bir modülün son ölçümlerini çeker."""
     okuyucu = DbOlcumOkuyucu(dsn=dsn)
     return okuyucu.son_olcumleri_getir(modul_id)
+

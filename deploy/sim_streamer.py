@@ -84,7 +84,7 @@ def filo_hazirla(modul_sayisi: int, tohum: int, senaryo_ad: str | None = None):
             senaryo = senaryo_olustur(senaryo_ad) if senaryo_ad else None
             modul = Modul(
                 m_ayar,
-                hava,
+                hava,  # type: ignore[arg-type]  # PaylasilanHava, Hava arayüzünü (taban_sicaklik, ilerle) karşılar
                 baslangic=simdi,
                 senaryo=senaryo
             )

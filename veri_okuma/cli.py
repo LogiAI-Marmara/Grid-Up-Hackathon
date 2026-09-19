@@ -14,10 +14,12 @@ from typing import Optional
 
 # Windows konsol UTF-8 desteği
 try:
-    if hasattr(sys.stdout, "reconfigure"):
-        sys.stdout.reconfigure(encoding="utf-8")
-    if hasattr(sys.stderr, "reconfigure"):
-        sys.stderr.reconfigure(encoding="utf-8")
+    reconfig_out = getattr(sys.stdout, "reconfigure", None)
+    if callable(reconfig_out):
+        reconfig_out(encoding="utf-8")
+    reconfig_err = getattr(sys.stderr, "reconfigure", None)
+    if callable(reconfig_err):
+        reconfig_err(encoding="utf-8")
 except Exception:
     pass
 
@@ -80,6 +82,8 @@ def calistir(argv: Optional[list[str]] = None) -> int:
 
     args = parser.parse_args(argv)
 
+    api: Optional[ApiOlcumOkuyucu] = None
+    db: Optional[DbOlcumOkuyucu] = None
     if args.kaynak == "api":
         api = ApiOlcumOkuyucu(api_url=args.api_url)
     else:
@@ -87,10 +91,12 @@ def calistir(argv: Optional[list[str]] = None) -> int:
 
     # 1. Modül Listesi
     if args.listele:
-        if args.kaynak == "api":
+        if api is not None:
             moduller = api.moduller()
-        else:
+        elif db is not None:
             moduller = db.modulleri_getir()
+        else:
+            moduller = []
 
         if args.json:
             print(json.dumps(moduller, ensure_ascii=False, indent=2))
@@ -116,15 +122,18 @@ def calistir(argv: Optional[list[str]] = None) -> int:
 
     # 2. Termal Sorgulama
     if args.termal:
-        if args.kaynak == "api":
+        if api is not None:
             ozet = api.termal_son(args.modul)
             kare_id = ozet.get("kare_id")
             kare = api.termal_kare(kare_id) if kare_id else {}
             pikseller = kare.get("piksel_verisi") or []
-        else:
+        elif db is not None:
             kare = db.termal_kare_getir(modul_id=args.modul)
             ozet = kare or {}
             pikseller = kare.get("pikseller") if kare else []
+        else:
+            ozet = {}
+            pikseller = []
 
         if args.json:
             print(json.dumps({"ozet": ozet, "pikseller": pikseller}, ensure_ascii=False, indent=2))
@@ -148,11 +157,13 @@ def calistir(argv: Optional[list[str]] = None) -> int:
 
     # 3. Zaman Serisi
     if args.seri:
-        if args.kaynak == "api":
+        if api is not None:
             seri_veri = api.zaman_serisi(args.modul, args.seri)
             noktalar = seri_veri.get("noktalar", [])[:args.limit]
-        else:
+        elif db is not None:
             noktalar = db.zaman_serisi_getir(args.modul, args.seri, limit=args.limit)
+        else:
+            noktalar = []
 
         if args.json:
             print(json.dumps(noktalar, ensure_ascii=False, indent=2, default=str))
@@ -172,7 +183,7 @@ def calistir(argv: Optional[list[str]] = None) -> int:
         return 0
 
     # 4. Anlık En Son Ölçümler (Varsayılan)
-    if args.kaynak == "api":
+    if api is not None:
         detay = api.modul_detay(args.modul)
         olcumler = api.son_olcumler(args.modul)
         durum_bilgi = {
@@ -181,7 +192,7 @@ def calistir(argv: Optional[list[str]] = None) -> int:
             "sinyal": detay.get("sinyal"),
             "seviye": detay.get("seviye")
         }
-    else:
+    elif db is not None:
         db_sonuc = db.son_olcumleri_getir(args.modul)
         olcum_harita = db_sonuc.get("olcumler", {})
         olcumler = {k: v["deger"] for k, v in olcum_harita.items()}
@@ -192,6 +203,9 @@ def calistir(argv: Optional[list[str]] = None) -> int:
             "sinyal": modul_durum.get("sinyal"),
             "seviye": "bilinmiyor"
         }
+    else:
+        durum_bilgi = {}
+        olcumler = {}
 
     if args.json:
         print(json.dumps({"modul_id": args.modul, "durum": durum_bilgi, "olcumler": olcumler}, ensure_ascii=False, indent=2))

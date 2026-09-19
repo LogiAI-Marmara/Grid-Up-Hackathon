@@ -101,7 +101,7 @@ class ApiOlcumOkuyucu:
         bas, bit: ISO 8601 string örn. '2026-09-18T00:00:00Z'
         aralik: saniye cinsinden kovalama/downsampling periyodu
         """
-        params = {"tip": olcum_tipi}
+        params: Dict[str, Any] = {"tip": olcum_tipi}
         if bas:
             params["bas"] = bas
         if bit:
@@ -127,7 +127,7 @@ class ApiOlcumOkuyucu:
         durum: Optional[str] = "acik"
     ) -> List[Dict[str, Any]]:
         """Anomali listesini filtreleyerek döner."""
-        params = {}
+        params: Dict[str, Any] = {}
         if modul_id:
             params["modul"] = modul_id
         if seviye:
@@ -136,7 +136,9 @@ class ApiOlcumOkuyucu:
             params["durum"] = durum
         yanit = self._get("/anomaliler", params)
         if isinstance(yanit, dict) and "anomaliler" in yanit:
-            return yanit["anomaliler"]
+            val = yanit["anomaliler"]
+            if isinstance(val, list):
+                return val
         elif isinstance(yanit, list):
             return yanit
-        return yanit
+        return []
