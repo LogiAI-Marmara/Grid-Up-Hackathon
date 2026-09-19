@@ -20,7 +20,7 @@ kart yapısı, giriş-çıkış bağlantıları, bağlantı şemaları, temel bi
 | 4 | [Mekanik yerleşim ve görüş hattı](04-mekanik-yerlesim.md) | Kutu ölçüsü, panodaki konum, kadraj krokisi ([yerleşim](04-yerlesim-krokisi.svg) · [kutu](04-kutu-krokisi.svg)), sabitleme | T1, T2 |
 | 5 | [Saha koşulları gerekçesi](05-saha-kosullari.md) | Sıcaklık, nem, IP, manyetik alan, kısa devre darbesi, yabancı cisim | T1, T2 · kriter 3 |
 | 6 | [Montaj prosedürü](06-montaj-proseduru.md) | 7 adım, süre, "kesinti yok" gerekçesi + [adım akışı](09-montaj-adimlari.svg) | T1 · kriter 3 |
-| 7 | [Modül yazılım akış diyagramı](07-yazilim-akis.md) | Uyan → oku → özetle → paketle → gönder | T3 (modül kısmı) |
+| 7 | [Modül yazılım akış diyagramı](07-yazilim-akis.md) | Uyan → oku → özetle → paketle → gönder; kod: `/modul-sim` (Python, test edilmiş) + [`/firmware`](../../firmware/README.md) (ESP32-S3 C++, derlenir) | T3 (modül kısmı) |
 | 8 | [**Sistem mimarisi / uçtan uca veri akışı**](08-sistem-mimarisi.svg) | Pano içi → saha gateway → on-prem sunucu: üç izin gerçek servisleri, sözleşme ①–⑤ şeridi, ortak sözlük, hedef/gerçek durum notu | Demo beklentisi "sistem mimarisi", T4/T6/T7 bağlamı · kriter 4 |
 | — | [**Kaynakça**](KAYNAKCA.md) | Dokümanlarda geçen her dış teknik değerin kaynağı, doküman no/sayfa/URL ve **doğrulama durumu** (okundu / özet / atıf / seçim) | — |
 
