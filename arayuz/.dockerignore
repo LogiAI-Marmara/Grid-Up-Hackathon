@@ -1,2 +1,8 @@
+# Arayüz imajına yalnız tarayıcıya sunulacak dosyalar girer.
 tests/
 *.md
+Dockerfile
+.dockerignore
+# nginx.conf imaja COPY ile ayrıca alınır; web köküne kopyalanıp
+# yayımlanmamalıdır (iç upstream adını açığa çıkarır).
+nginx.conf

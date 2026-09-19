@@ -4,22 +4,36 @@
  * UI-01 - UI-08 gereksinimlerini eksiksiz karşılar.
  */
 
-// API Base URL tespiti:
+// API Base URL tespiti (açık ve kestirilebilir sıra):
+//   1. window.GRIDUP_API_URL verilmişse ona uyulur (dağıtım kararı).
+//   2. file:// ile açıldıysa vekil yoktur; doğrudan API'ye gidilir.
+//   3. Sayfa 8080'den geliyorsa API sayfayı zaten kendisi sunuyordur; göreli yol.
+//   4. Diğer tüm HTTP(S) durumlarında sayfa Nginx arkasındadır → /api vekili.
+//      (Konteyner 80 yerine 8081 gibi bir konak portuna bağlandığında da vekil
+//      yolu korunur; port tahminine dayalı `http://host:8080` sapması yapılmaz.)
 const API_HOST = (typeof window !== 'undefined' && window.location && window.location.hostname) || "localhost";
 const API_BASE = (typeof window !== 'undefined' && window.GRIDUP_API_URL)
     || (typeof window !== 'undefined' && window.location && window.location.protocol === "file:"
-        ? "http://localhost:8080"
+        ? `http://${API_HOST}:8080`
         : (typeof window !== 'undefined' && window.location && window.location.port === "8080"
             ? ""
-            : (typeof window !== 'undefined' && window.location && (window.location.port === "80" || !window.location.port)
-                ? "/api"
-                : `http://${API_HOST}:8080`)));
+            : "/api"));
 
 // Güvenli API Çağrısı (UI-02: 4xx/5xx durumunda sessizce 8080'e fallback yapmaz, POST'u tekrarlamaz)
 async function apiFetch(path, options = {}) {
     const cleanPath = path.startsWith('/') ? path : `/${path}`;
     const primaryUrl = `${API_BASE}${cleanPath}`;
-    return await fetch(primaryUrl, options);
+    try {
+        const res = await fetch(primaryUrl, options);
+        // UI-07 kural 4: Gösterge yalnız API'ye ERİŞİLEBİLDİĞİNİ söyler. HTTP 4xx/5xx
+        // de erişilebilir bir API'dir; ilgili bölüm kendi hatasını ayrıca gösterir.
+        setOnlineStatus(true);
+        return res;
+    } catch (err) {
+        // Ağ/DNS/zaman aşımı: API'ye hiç ulaşılamadı
+        setOnlineStatus(false);
+        throw err;
+    }
 }
 
 // Güvenli HTML Kaçış Yardımcısı (UI-08 XSS Koruması)
@@ -37,7 +51,11 @@ function escapeHtml(str) {
 const state = {
     aktifModulId: null,
     aktifModulIsmi: '',
+    // UI-02: Ekranda hâlihazırda verisi boyalı olan modül (aktifModulId'den ayrıdır)
+    ekrandakiModulId: null,
     termalMatris: null,
+    // UI-04: Ekrandaki 768 piksel ÖLÇÜLMÜŞ tam kare mi, yoksa özetten türetilmiş tahmin mi?
+    termalMatrisOlculdu: false,
     termalOzet: null,
     kanitKareModu: false,
     seciliAnomaliId: null,
@@ -77,6 +95,9 @@ let detailRequestToken = 0;
 let thermalRequestToken = 0;
 let seriesRequestToken = 0;
 let evidenceRequestToken = 0;
+
+// UI-04 kural 2: Ölçülmemiş termal görselin üzerinde sürekli duran zorunlu ibare
+const SENTETIK_GORSEL_UYARISI = 'Özetten üretilmiş tahmini görsel — ölçülmüş piksel değildir';
 
 // UI-03: Desteklenen kanal/birim eşleşmeleri sözlüğü
 const DESTEKLENEN_BIRIMLER = {
@@ -132,14 +153,17 @@ function enYuksekSeviye(...seviyeler) {
 }
 
 function modulSeviyesiniGetir(modulId) {
+    // UI-03 kural 8: Resmî seviye yalnız API'nin tanınan `seviye` değerinden ve
+    // kapanmamış anomalilerden gelir. Değer hiç yoksa ya da tanınmıyorsa (bozuk,
+    // yazım hatalı, eksik) "normal" İDDİA EDİLMEZ; "bilinmiyor" gösterilir.
     const apiSev = state.apiModulSeviyeleri[modulId];
     const alarmSev = state.alarmModulSeviyeleri[modulId];
 
-    // Eğer seviye değeri tanınmıyorsa "bilinmiyor" döner
-    if (apiSev === null && alarmSev === null) {
+    const taninanlar = [apiSev, alarmSev].filter(s => seviyeNormalize(s) !== null);
+    if (taninanlar.length === 0) {
         return 'bilinmiyor';
     }
-    return enYuksekSeviye(apiSev, alarmSev);
+    return enYuksekSeviye(...taninanlar);
 }
 
 function modulRozetiniGuncelle(modulId) {
@@ -333,7 +357,6 @@ async function hiyerarsiyiYukle() {
         const res = await apiFetch('/sahalar');
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = await res.json();
-        setOnlineStatus(true);
 
         const sahalar = data.sahalar || [];
         container.innerHTML = '';
@@ -391,11 +414,17 @@ async function hiyerarsiyiYukle() {
 
                 const moduller = pano.moduller || [];
                 if (moduller.length > 0) {
+                    // UI-01 kural 4: Tıklamanın hangi modülü seçeceği açıkça anlaşılır olmalı;
+                    // boş panoda sahte modül seçilmez (bu dal zaten yalnız dolu panoda çalışır).
+                    const ilkModulId = moduller[0].modul_id;
                     panoHeader.style.cursor = 'pointer';
-                    panoHeader.title = 'İlk modülü seç';
+                    panoHeader.title = `İlk modülü seç: ${ilkModulId}`;
+                    const ilkModulIpucu = document.createElement('span');
+                    ilkModulIpucu.className = 'pano-ilk-modul-hint';
+                    ilkModulIpucu.textContent = `↳ ilk modül: ${ilkModulId}`;
+                    panoHeader.appendChild(ilkModulIpucu);
                     panoHeader.addEventListener('click', () => {
-                        const ilk = moduller[0];
-                        modulSec(ilk.modul_id, `${panoBaslik} - ${ilk.modul_id}`);
+                        modulSec(ilkModulId, `${panoBaslik} - ${ilkModulId}`);
                     });
                 }
                 panoDiv.appendChild(panoHeader);
@@ -538,6 +567,8 @@ function _modulSecProgramatik(modulId, modulIsmi) {
 
 // UI-02: Modül seçildiğinde alanları anında temizleyen yardımcı fonksiyon
 function resetModulEkranGorunumu(modulId, modulIsmi) {
+    // UI-02: Ekran bundan sonra bu modüle aittir
+    state.ekrandakiModulId = modulId;
     const badgeEl = document.getElementById('active-module-badge');
     const nameEl = document.getElementById('active-module-name');
     const statusBadge = document.getElementById('active-module-status-badge');
@@ -570,6 +601,8 @@ function resetModulEkranGorunumu(modulId, modulIsmi) {
         valFeed.className = 'badge-feed';
     }
     if (valRssi) valRssi.textContent = 'Bilinmiyor';
+    const valDurumZaman = document.getElementById('val-durum-zaman');
+    if (valDurumZaman) valDurumZaman.textContent = '🛈 Durum bildirimi: Yükleniyor...';
 
     // 6'lı kartları "--" durumuna al
     const kartDegerleri = ['val-temp', 'val-hum', 'val-tmax', 'val-l1', 'val-l2', 'val-l3', 'val-notr', 'val-arc'];
@@ -612,6 +645,7 @@ function resetModulEkranGorunumu(modulId, modulIsmi) {
 
     // UI-02: Termal görseli ve durumunu anında temizle (eski modülün görüntüsü kalmasın)
     state.termalMatris = null;
+    state.termalMatrisOlculdu = false;
     state.termalOzet = null;
     state.kanitKareModu = false;
     state.termalKaynak = 'canli';
@@ -661,7 +695,11 @@ async function modulDetayYukle(modulId, isPolling = false) {
     // UI-02: Asenkron yarış durumu koruması için istek jetonu
     const currentToken = ++detailRequestToken;
 
-    const modulDegisti = (state.aktifModulId !== modulId);
+    // UI-02: "Ekranda hangi modülün verisi boyalı?" sorusunun yanıtı state.aktifModulId
+    // OLAMAZ: modulSec() çağrıdan önce aktif modülü değiştirdiği için karşılaştırma
+    // daima eşit çıkar ve önceki modülün değerleri yeni başlık altında ekranda kalırdı.
+    // Bu yüzden boyanmış modül ayrı izlenir.
+    const modulDegisti = (state.ekrandakiModulId !== modulId);
     state.aktifModulId = modulId;
 
     // UI-02: Önceki modülün verilerini bir an bile göstermemek için modül DEĞİŞTİĞİNDE veya ilk seçimde sıfırla.
@@ -728,6 +766,18 @@ async function modulDetayYukle(modulId, isPolling = false) {
                 rssiEl.textContent = `${data.sinyal} dBm`;
             } else {
                 rssiEl.textContent = 'Bilinmiyor';
+            }
+        }
+
+        // UI-03 kural 3: besleme/sinyal `modul_durum` kaydından gelir; bunların NE ZAMAN
+        // bildirildiğini yalnız `durum_zaman` söyler. durum_zaman yoksa bu değerlerin
+        // güncel olduğu iddia edilmez.
+        const durumZamanEl = document.getElementById('val-durum-zaman');
+        if (durumZamanEl) {
+            if (data.durum_zaman) {
+                durumZamanEl.textContent = `🛈 Durum bildirimi: ${formatZamanTr(data.durum_zaman)} TSİ`;
+            } else {
+                durumZamanEl.textContent = '🛈 Durum bildirimi: Bilinmiyor (besleme/RSSI güncelliği doğrulanamıyor)';
             }
         }
 
@@ -852,6 +902,7 @@ async function modulDetayYukle(modulId, isPolling = false) {
 
         // UI-02: Hata anında önceki metrikleri ve termal görüntüyü sıfırla
         state.termalMatris = null;
+        state.termalMatrisOlculdu = false;
         state.termalOzet = null;
         termalKareCiz();
 
@@ -882,9 +933,23 @@ function olcumKartiniGuncelle(valId, cardId, statusSubId, olcum, defaultSub, ond
         if (eskiUyari) eskiUyari.remove();
     }
 
+    // UI-03 kural 1 & 2: Kayıt yoksa, deger=null ise veya kalite='yok' ise kart
+    // "Veri yok" gösterir. Sabit kart altyazısı bu durumu ÖRTMEMELİDİR: aksi hâlde
+    // eksik ölçüm, sensör adını taşıyan sağlıklı bir kart gibi okunur.
     if (!olcum || olcum.deger === null || olcum.deger === undefined || olcum.kalite === 'yok') {
         if (valEl) valEl.textContent = '--';
-        if (subEl) subEl.textContent = defaultSub || 'Veri yok';
+        if (subEl) {
+            const zamanEki = (olcum && olcum.zaman) ? ` | ${formatZamanTr(olcum.zaman)} TSİ` : '';
+            subEl.textContent = (olcum && olcum.kalite === 'yok')
+                ? `Veri yok (kalite: yok)${zamanEki}`
+                : 'Veri yok';
+        }
+        if (cardEl && olcum && olcum.kalite === 'yok') {
+            const badSpan = document.createElement('span');
+            badSpan.className = 'card-quality-bad';
+            badSpan.textContent = '⛔ Ölçüm yok (kalite: yok)';
+            cardEl.appendChild(badSpan);
+        }
         return;
     }
 
@@ -1042,6 +1107,7 @@ async function canliTermalYukle(modulId, olcumMap) {
                         const kareData = await kareRes.json();
                         if (tamKareyiDogrula(kareData, modulId, ozet.zaman)) {
                             state.termalMatris = kareData.piksel_verisi;
+                            state.termalMatrisOlculdu = true;
                             tamKareGosterildi = true;
                             if (sourceBadge) {
                                 sourceBadge.className = 'thermal-resolution source-tam';
@@ -1057,10 +1123,11 @@ async function canliTermalYukle(modulId, olcumMap) {
 
             if (!tamKareGosterildi && currentToken === thermalRequestToken) {
                 // UI-04 Kural 2: Tam kare yoksa açıkça tahmini görsel olduğu belirtilir
+                state.termalMatrisOlculdu = false;
                 state.termalMatris = bolgelerdenTahminiMatrisUret(ozet, olcumMap);
                 if (sourceBadge) {
                     sourceBadge.className = 'thermal-resolution source-ozet';
-                    sourceBadge.textContent = 'Özetten Üretilmiş Tahmini Görsel — Ölçülmüş Piksel Değildir';
+                    sourceBadge.textContent = 'Tam kare mevcut değil; yalnız termal özet var';
                 }
                 termalKareCiz();
             }
@@ -1077,6 +1144,7 @@ async function canliTermalYukle(modulId, olcumMap) {
                 sourceBadge.textContent = 'Termal Veri Yok';
             }
             state.termalMatris = null;
+            state.termalMatrisOlculdu = false;
             state.termalOzet = null;
             if (valTmax) valTmax.textContent = '--';
             if (hotspotEl) hotspotEl.textContent = 'Konum: --';
@@ -1091,8 +1159,20 @@ async function canliTermalYukle(modulId, olcumMap) {
 
 // UI-04: Kanıt Karesi İnceleme
 async function anomaliSec(anomaliId) {
-    const anomali = state.cozulmemisAnomaliler.find(a => a.id === anomaliId);
-    if (!anomali) return;
+    // UI-05 kural 1: Olayın yüklenmiş listede bulunmaması onu yok sayma gerekçesi
+    // değildir; ayrıntı doğrudan /anomaliler/{id} ucundan okunur.
+    let anomali = state.cozulmemisAnomaliler.find(a => a.id === anomaliId);
+    if (!anomali) {
+        try {
+            const detayRes = await apiFetch(`/anomaliler/${encodeURIComponent(anomaliId)}`);
+            if (!detayRes.ok) return;
+            anomali = await detayRes.json();
+        } catch (e) {
+            console.warn(`Anomali ayrıntısı okunamadı (${anomaliId}):`, e);
+            return;
+        }
+        if (!anomali || !anomali.id) return;
+    }
 
     // UI-04: Asenkron yarış durumu (geç gelen kanıt yanıtı) için jeton
     const currentToken = ++evidenceRequestToken;
@@ -1139,6 +1219,7 @@ async function anomaliSec(anomaliId) {
 
                 if (tamKareyiDogrula(kareData, anomali.modul_id, null)) {
                     state.termalMatris = kareData.piksel_verisi;
+                    state.termalMatrisOlculdu = true;
 
                     // UI-04 Kural 3: Sıcaklık anomali skorundan (°C'ye çevrilerek) ALINMAZ!
                     // Hedef pikseli varsa piksel_verisi[y*32+x], yoksa gerçek piksel maksimumu
@@ -1181,6 +1262,7 @@ async function anomaliSec(anomaliId) {
 
     // Kare yoksa veya doğrulanamadıysa eski kare kanıt diye sunulmaz!
     state.termalMatris = null;
+    state.termalMatrisOlculdu = false;
     state.termalOzet = null;
     if (sourceBadge) {
         sourceBadge.className = 'thermal-resolution source-hata';
@@ -1211,6 +1293,20 @@ function canliGoruntuyeDon() {
 }
 
 function termalKareCiz() {
+    // UI-04 kural 2: Ölçülmemiş (özetten türetilmiş) görselde uyarı şeridi görüntünün
+    // üzerinde SÜREKLİ görünür; ölçülmüş tam karede ise kaldırılır.
+    const sentetikUyari = document.getElementById('thermal-synthetic-overlay');
+    if (sentetikUyari) {
+        const sentetikGoster = Boolean(state.termalMatris) && state.termalMatrisOlculdu !== true;
+        if (sentetikGoster) {
+            // İbarenin metni koda bağlıdır: şablon değişse de uyarı aynı kalır.
+            sentetikUyari.textContent = SENTETIK_GORSEL_UYARISI;
+            sentetikUyari.style.display = 'block';
+        } else {
+            sentetikUyari.style.display = 'none';
+        }
+    }
+
     const canvas = document.getElementById('thermalCanvas');
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
@@ -1351,6 +1447,9 @@ function setupCanvasHover() {
 // --------------------------------------------------------------------------
 // UI-05: ÇÖZÜLMEMİŞ ALARMLAR LİSTESİ VE OPERATÖR ONAYI
 // --------------------------------------------------------------------------
+// UI-05 kural 2: `sonraki` imleci sonuna kadar izlenir; ilk 50 olay "hepsi" sanılmaz.
+// Sayfalama döngüsü ilerlemeyen bir imleçte (bozuk/vekil yanıt) sonsuza kadar dönmemeli:
+// imleç artmıyorsa tarama durdurulur.
 async function sayfaliAnomalileriGetir(durumFiltresi) {
     const sonuclar = [];
     let sonra = null;
@@ -1358,9 +1457,9 @@ async function sayfaliAnomalileriGetir(durumFiltresi) {
     const limit = 50;
 
     while (devam) {
-        let url = `/anomaliler?durum=${durumFiltresi}&limit=${limit}`;
+        let url = `/anomaliler?durum=${encodeURIComponent(durumFiltresi)}&limit=${limit}`;
         if (sonra !== null) {
-            url += `&sonra=${sonra}`;
+            url += `&sonra=${encodeURIComponent(sonra)}`;
         }
         const res = await apiFetch(url);
         if (!res.ok) {
@@ -1370,8 +1469,10 @@ async function sayfaliAnomalileriGetir(durumFiltresi) {
         const veriler = data.veriler || [];
         sonuclar.push(...veriler);
 
-        if (data.sonraki !== null && data.sonraki !== undefined && veriler.length > 0) {
-            sonra = data.sonraki;
+        const sonraki = data.sonraki;
+        const ilerledi = (sonraki !== null && sonraki !== undefined && sonraki !== sonra);
+        if (ilerledi && veriler.length > 0) {
+            sonra = sonraki;
         } else {
             devam = false;
         }
@@ -1642,6 +1743,11 @@ async function zamanSerisiYukle() {
     const basZaman = getZamanAraligiBas(range, refZaman);
     state.seriBasZamanMs = basZaman ? new Date(basZaman).getTime() : null;
     state.seriBitZamanMs = range ? (!isNaN(new Date(refZaman).getTime()) ? new Date(refZaman).getTime() : Date.now()) : null;
+    // UI-06 kural 2: Pencerenin bitiş ucu da API'ye açıkça bildirilir; aksi hâlde
+    // sunucu "şimdiye kadar" varsayar ve çizilen aralık ile istenen aralık ayrışır.
+    const bitZaman = (range && state.seriBitZamanMs !== null)
+        ? new Date(state.seriBitZamanMs).toISOString()
+        : null;
 
     // 3-Faz Akımları (L1, L2, L3) çoklu karşılaştırma
     if (metrik === 'akim_hepsi') {
@@ -1650,6 +1756,7 @@ async function zamanSerisiYukle() {
                 let url = `/moduller/${encodeURIComponent(modulId)}/seri?tip=${encodeURIComponent(fazTip)}`;
                 if (aralik) url += `&aralik=${encodeURIComponent(aralik)}`;
                 if (basZaman) url += `&bas=${encodeURIComponent(basZaman)}`;
+                if (bitZaman) url += `&bit=${encodeURIComponent(bitZaman)}`;
                 const res = await apiFetch(url);
                 if (!res.ok) {
                     const err = await res.json().catch(() => ({}));
@@ -1715,6 +1822,7 @@ async function zamanSerisiYukle() {
         let url = `/moduller/${encodeURIComponent(modulId)}/seri?tip=${encodeURIComponent(metrik)}`;
         if (aralik) url += `&aralik=${encodeURIComponent(aralik)}`;
         if (basZaman) url += `&bas=${encodeURIComponent(basZaman)}`;
+        if (bitZaman) url += `&bit=${encodeURIComponent(bitZaman)}`;
 
         const res = await apiFetch(url);
         if (currentToken !== seriesRequestToken) return;
@@ -2561,6 +2669,7 @@ if (typeof globalThis !== 'undefined') {
         enYuksekSeviye,
         modulSeviyesiniGetir,
         DESTEKLENEN_BIRIMLER,
+        SENTETIK_GORSEL_UYARISI,
         birimGecerliMi,
         tamKareyiDogrula,
         bolgelerdenTahminiMatrisUret,
@@ -2583,7 +2692,13 @@ if (typeof globalThis !== 'undefined') {
         modulCihazDurumunuAğactaGuncelle,
         modulDurumlariniGuncelle,
         alarmlariYukle,
-        operasyonGunluguYukle
+        sayfaliAnomalileriGetir,
+        operasyonGunluguYukle,
+        renderAuditLog,
+        olcumKartiniGuncelle,
+        modulRozetiniGuncelle,
+        setOnlineStatus,
+        apiFetch
     };
 }
 
