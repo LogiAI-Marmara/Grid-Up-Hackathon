@@ -44,8 +44,35 @@ bağlanmaz**.
 sh arayuz/dogrulama/docker_dogrula.sh
 ```
 
-İmajı kurar, sahte bir `analiz_api` yanına koyar ve hem statik dosyayı hem
-`/api/...` vekil yolunu sınar. Çalışan bir Docker artalan süreci ister.
+İmajı kurar, önce **API yokken** arayüzün ayağa kalkabildiğini (Nginx üst akış
+adını çalışma anında çözer; sabit `proxy_pass` ile "host not found in upstream"
+deyip hiç açılmıyordu), sonra sahte bir `analiz_api` yanına koyup hem statik
+dosyayı hem `/api/...` vekil yolunu, hem de yapılandırma dosyalarının web
+kökünde yayımlanmadığını sınar. Çalışan bir Docker artalan süreci ister;
+Windows'ta Git Bash ile koşar.
+
+Son koşum: 19 Eylül 2026, Docker Desktop 29.5 — dört kontrol de geçti.
+
+### Manuel operatör senaryosu
+
+19 Eylül 2026'da gerçek yığında (compose: `veritabani`, `analiz_api`, `toplama`,
+`arayuz`, `alarm_service`; `deploy/smoke_seed.py` ile 28 modül / 14 anomali)
+Chrome'da elle geçildi. Sonuçlar:
+
+| Adım | Beklenen | Görülen |
+|---|---|---|
+| Modül geçişi (TR041-P01-M1 → P01-M2) | Başlık, rozet ve tüm kartlar yeni modüle döner | 32.0 → 31.9 °C, 80.2 → 50.4 °C, KRITIK → NORMAL, anında |
+| Özet/tam kare ayrımı | Tam kare yoksa görselin üstünde sürekli uyarı | P01-M1 "Ölçülmüş Tam Kare"; P01-M2 "Tam kare mevcut değil" + görselin üstünde "Özetten üretilmiş tahmini görsel" |
+| Şüpheli ölçüm (TR063-P01-M1, `termal_maks` kalite=supheli, `/termal/son` 404) | Değer + "⚠️ Şüpheli ölçüm" işareti | **İlk turda hata:** kart "--" / "Termal Veri Yok" diyordu, şüpheli 153.9 °C hiç görünmüyordu. Düzeltildi; şimdi 153.9 °C + uyarı + kalite altyazısı |
+| Eksik ölçüm (`ark_olay` yok) | "Veri yok", 0 uydurulmaz | "-- Trip / Veri yok" |
+| Boş operatör kimliğiyle onay | POST yapılmaz, uyarı | Uyarı çıktı, istek gitmedi |
+| Onay (op-efe, an_00014) | Kart kalır, "Onaylandı — Olay Devam Ediyor"; günlükte operatör satırı | Aynen; günlük `ID 35: Operatör Onayı: an_00014 (Operatör: op-efe)` |
+| API kesintisi (`analiz_api` durduruldu, Nginx 502/504) | "BAĞLANTI KESİLDİ", hata şeridi, bayat değer kalmaz | **İlk turda hata:** gösterge "API ÇEVRİMİÇİ" kaldı, şerit hiç çıkmadı, 32.0 °C bayat kaldı. Düzeltildi; şimdi "BAĞLANTI KESİLDİ", "HATA" rozeti, şerit, kartlar "--" |
+| Kesintide açılan sayfa | API dönünce ağaç kendiliğinden dolar | **İlk turda hata:** "Hiyerarşi taranıyor..." sonsuza kadar kalıyordu. Düzeltildi |
+| Toparlanma (API geri geldi) | Gösterge, rozet, kartlar döner; şerit kalkar | **İlk turda hata:** şerit kalıyordu. Düzeltildi; 10 sn içinde tam toparlanma |
+
+Bu senaryoda "SMS/Telegram gönderildi" iddiası **yoktur**; arayüz yalnız API'yi
+görür.
 
 ## Arayüz neyi gösterir, neyi göstermez
 
@@ -107,8 +134,14 @@ farklı şeye gelmesi bu panelde en kolay yapılan hatadır.
 - Üst çubuktaki **"API ÇEVRİMİÇİ"** göstergesi yalnız API'ye *erişilebildiğini*
   söyler. HTTP 500 de erişilebilir bir API'dir: gösterge çevrimiçi kalır,
   başarısız bölüm kendi hatasını ayrıca gösterir.
-- **"BAĞLANTI KESİLDİ"** yalnız isteğin hiç tamamlanamadığı (ağ/DNS/zaman
-  aşımı) durumda yazılır.
+- **"BAĞLANTI KESİLDİ"** isteğin hiç tamamlanamadığı (ağ/DNS/zaman aşımı)
+  durumda **ve** vekilin 502/503/504 döndürdüğü durumda yazılır. Dağıtımda
+  tarayıcı API'ye hiç değmez, Nginx'e konuşur; bu üç kod Nginx'in "arkadaki
+  API'ye ulaşamadım" demesidir.
+- Kesinti sırasında seçili modülün kartları "--" olur ve kırmızı şerit çıkar;
+  API dönünce şerit kalkar, sayfa kesintide açıldıysa ağaç kendiliğinden dolar.
+  Periyodik tarama süren bir isteğin üstüne yenisini bindirmez (vekil hatası
+  saniyeler sürebilir).
 - Hiyerarşi, modül detayı, alarm listesi ve günlük ayrı isteklerdir; birinin
   başarısı diğerinin hatasını silmez.
 - Operasyon günlüğü **sunucunun** geçiş akışıdır (`GET /gecisler`). Arayüzün

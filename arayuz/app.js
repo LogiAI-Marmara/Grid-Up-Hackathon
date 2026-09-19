@@ -19,6 +19,9 @@ const API_BASE = (typeof window !== 'undefined' && window.GRIDUP_API_URL)
             ? ""
             : "/api"));
 
+// Vekil (Nginx) katmanının arkadaki API'ye ulaşamadığını söyleyen durum kodları.
+const AGGECIDI_HATALARI = new Set([502, 503, 504]);
+
 // Güvenli API Çağrısı (UI-02: 4xx/5xx durumunda sessizce 8080'e fallback yapmaz, POST'u tekrarlamaz)
 async function apiFetch(path, options = {}) {
     const cleanPath = path.startsWith('/') ? path : `/${path}`;
@@ -27,7 +30,11 @@ async function apiFetch(path, options = {}) {
         const res = await fetch(primaryUrl, options);
         // UI-07 kural 4: Gösterge yalnız API'ye ERİŞİLEBİLDİĞİNİ söyler. HTTP 4xx/5xx
         // de erişilebilir bir API'dir; ilgili bölüm kendi hatasını ayrıca gösterir.
-        setOnlineStatus(true);
+        // İstisna: 502/503/504. Dağıtımda tarayıcı API'ye hiç değmez, Nginx'e
+        // (/api vekili) konuşur; bu üçü vekilin "arkadaki API'ye ulaşamadım"
+        // demesidir. Gerçek yığında görüldü: analiz_api durdurulunca Nginx 502/504
+        // döndü ve gösterge "API ÇEVRİMİÇİ" kaldı.
+        setOnlineStatus(!AGGECIDI_HATALARI.has(res.status));
         return res;
     } catch (err) {
         // Ağ/DNS/zaman aşımı: API'ye hiç ulaşılamadı
@@ -53,6 +60,9 @@ const state = {
     aktifModulIsmi: '',
     // UI-02: Ekranda hâlihazırda verisi boyalı olan modül (aktifModulId'den ayrıdır)
     ekrandakiModulId: null,
+    // UI-07: Hiyerarşi bir kez başarıyla ağaca basıldı mı? Sayfa API kesintisi
+    // sırasında açıldıysa false kalır ve periyodik tarama yeniden dener.
+    hiyerarsiYuklendi: false,
     termalMatris: null,
     // UI-04: Ekrandaki 768 piksel ÖLÇÜLMÜŞ tam kare mi, yoksa özetten türetilmiş tahmin mi?
     termalMatrisOlculdu: false,
@@ -92,6 +102,10 @@ const state = {
 
 // Asenkron Yarış Durumu (Race Condition) Sayaçları (UI-02, UI-04, UI-06)
 let detailRequestToken = 0;
+// Ekrana başarıyla boyanan son modül-detay isteğinin jetonu. Geç gelen bir HATA,
+// kendisinden yeni bir BAŞARI yoksa yine de boyanır (aşağıda, catch'te).
+let detailLastOkToken = 0;
+let detailInFlight = false;
 let thermalRequestToken = 0;
 let seriesRequestToken = 0;
 let evidenceRequestToken = 0;
@@ -344,10 +358,14 @@ async function modulDurumlariniGuncelle() {
     }
 }
 
+let hiyerarsiInFlight = false;
+
 async function hiyerarsiyiYukle() {
     const container = document.getElementById('hierarchy-container');
     const countTag = document.getElementById('hierarchy-count');
     if (!container) return;
+    if (hiyerarsiInFlight) return;
+    hiyerarsiInFlight = true;
 
     try {
         // Önce modüllerin yetkili aktif/sessiz/pasif durumlarını sayfalı olarak al
@@ -509,6 +527,7 @@ async function hiyerarsiyiYukle() {
         });
 
         if (countTag) countTag.textContent = `${toplamModulSayisi} Modül`;
+        state.hiyerarsiYuklendi = true;
 
         // Seçili modül listede yoksa ilk geçerli modülü otomatik seç
         if (tumModuller.length > 0 && (!state.aktifModulId || !tumModuller.includes(state.aktifModulId))) {
@@ -516,14 +535,18 @@ async function hiyerarsiyiYukle() {
         }
     } catch (err) {
         console.warn("Hiyerarşi yükleme hatası:", err);
-        // UI-02: Tek bir servisin hatası genel online durumunu ezmemeli, ağaç içine hata basılır
-        if (container.children.length === 0) {
+        // UI-02: Tek bir servisin hatası genel online durumunu ezmemeli, ağaç içine hata basılır.
+        // Ölçüt "çocuk yok" değil "ağaç hiç basılmadı": index.html'deki "Hiyerarşi
+        // taranıyor..." yer tutucusu da bir çocuktur ve hata mesajını örtüyordu.
+        if (!state.hiyerarsiYuklendi) {
             container.innerHTML = `
                 <div class="empty-state" style="padding: 1.5rem; text-align: center; color: #fca5a5;">
-                    <p>⚠️ Hiyerarşi verisi alınamadı.</p>
+                    <p>⚠️ Hiyerarşi verisi alınamadı (${escapeHtml(err.message || 'Hata')}). Bağlantı gelince yeniden denenecek.</p>
                 </div>
             `;
         }
+    } finally {
+        hiyerarsiInFlight = false;
     }
 }
 
@@ -566,6 +589,30 @@ function _modulSecProgramatik(modulId, modulIsmi) {
 }
 
 // UI-02: Modül seçildiğinde alanları anında temizleyen yardımcı fonksiyon
+// Ölçüm kartlarını "--" durumuna alır. Modül değişiminde ve modül detayı
+// alınamadığında kullanılır: hata anında bayat değerler ekranda kalmamalı (UI-02).
+function olcumKartlariniSifirla() {
+    const kartDegerleri = ['val-temp', 'val-hum', 'val-tmax', 'val-l1', 'val-l2', 'val-l3', 'val-notr', 'val-arc'];
+    kartDegerleri.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.textContent = '--';
+    });
+    const kartAltyazilari = ['temp-status', 'hum-status', 'hotspot-coord', 'notr-status', 'arc-status'];
+    kartAltyazilari.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.textContent = 'Veri yok';
+    });
+
+    const diffEl = document.getElementById('current-diff');
+    if (diffEl) {
+        diffEl.textContent = 'Faz Dengesizliği: Hesaplanamadı';
+        diffEl.style.color = 'var(--text-muted)';
+    }
+
+    // Varsa önceki kalite uyarılarını temizle
+    document.querySelectorAll('.card-quality-warning, .card-quality-bad, .card-unit-warning').forEach(e => e.remove());
+}
+
 function resetModulEkranGorunumu(modulId, modulIsmi) {
     // UI-02: Ekran bundan sonra bu modüle aittir
     state.ekrandakiModulId = modulId;
@@ -604,21 +651,7 @@ function resetModulEkranGorunumu(modulId, modulIsmi) {
     const valDurumZaman = document.getElementById('val-durum-zaman');
     if (valDurumZaman) valDurumZaman.textContent = '🛈 Durum bildirimi: Yükleniyor...';
 
-    // 6'lı kartları "--" durumuna al
-    const kartDegerleri = ['val-temp', 'val-hum', 'val-tmax', 'val-l1', 'val-l2', 'val-l3', 'val-notr', 'val-arc'];
-    kartDegerleri.forEach(id => {
-        const el = document.getElementById(id);
-        if (el) el.textContent = '--';
-    });
-
-    const diffEl = document.getElementById('current-diff');
-    if (diffEl) {
-        diffEl.textContent = 'Faz Dengesizliği: Hesaplanamadı';
-        diffEl.style.color = 'var(--text-muted)';
-    }
-
-    // Varsa önceki kalite uyarılarını temizle
-    document.querySelectorAll('.card-quality-warning, .card-quality-bad').forEach(e => e.remove());
+    olcumKartlariniSifirla();
 
     // Termal reticle gizle
     const reticle = document.getElementById('hotspot-reticle');
@@ -692,8 +725,15 @@ function resetModulEkranGorunumu(modulId, modulIsmi) {
 async function modulDetayYukle(modulId, isPolling = false) {
     if (!modulId) return;
 
+    // Periyodik tarama, süren bir isteğin üstüne yenisini bindirmez. Vekil
+    // 502/504'ü saniyeler sonra döndürdüğünde 3 sn'lik tarama istekleri
+    // birikiyor, her biri bir sonrakince "eski" sayılıp düşüyor ve hata hiç
+    // boyanmıyordu: operatör ekranda bayat değerleri sağlıklı sanıyordu.
+    if (isPolling && detailInFlight) return;
+
     // UI-02: Asenkron yarış durumu koruması için istek jetonu
     const currentToken = ++detailRequestToken;
+    detailInFlight = true;
 
     // UI-02: "Ekranda hangi modülün verisi boyalı?" sorusunun yanıtı state.aktifModulId
     // OLAMAZ: modulSec() çağrıdan önce aktif modülü değiştirdiği için karşılaştırma
@@ -720,6 +760,16 @@ async function modulDetayYukle(modulId, isPolling = false) {
 
         const data = await res.json();
         if (currentToken !== detailRequestToken) return;
+        detailLastOkToken = currentToken;
+
+        // Bağlantı geri geldi: kesinti sırasında basılan hata şeridi kalkmalı.
+        // Yalnız modül değişiminde temizlenmesi yetmiyordu; aynı modülde kalan
+        // operatör API döndükten sonra da "detay verisi alınamadı" görüyordu.
+        const kesintiSeridi = document.getElementById('module-error-banner');
+        if (kesintiSeridi) {
+            kesintiSeridi.style.display = 'none';
+            kesintiSeridi.textContent = '';
+        }
 
         // Son görülme referans zamanını kaydet
         if (data.son_gorulme) {
@@ -897,10 +947,15 @@ async function modulDetayYukle(modulId, isPolling = false) {
             await canliTermalYukle(modulId, olcumMap);
         }
     } catch (err) {
-        if (currentToken !== detailRequestToken) return;
+        // Geç gelen hata: bu istek eskimiş olsa da, ekranda ondan yeni bir BAŞARILI
+        // boyama yoksa ve modül hâlâ seçiliyse hata gösterilir; aksi hâlde bayat
+        // değerler "sağlıklı" görünmeye devam eder (UI-02).
+        if (modulId !== state.aktifModulId) return;
+        if (currentToken !== detailRequestToken && detailLastOkToken > currentToken) return;
         console.warn(`Modül detayı yüklenemedi (${modulId}):`, err);
 
         // UI-02: Hata anında önceki metrikleri ve termal görüntüyü sıfırla
+        olcumKartlariniSifirla();
         state.termalMatris = null;
         state.termalMatrisOlculdu = false;
         state.termalOzet = null;
@@ -918,6 +973,8 @@ async function modulDetayYukle(modulId, isPolling = false) {
             topBadge.style.color = 'var(--color-critical)';
             topBadge.textContent = 'HATA';
         }
+    } finally {
+        if (currentToken === detailRequestToken) detailInFlight = false;
     }
 }
 
@@ -1091,6 +1148,12 @@ async function canliTermalYukle(modulId, olcumMap) {
             if (currentToken !== thermalRequestToken) return;
 
             state.termalOzet = ozet;
+            // Özet varken kart özetten dolar; 404 dalının bıraktığı kalite uyarısı kalmasın.
+            const tmaxCard = document.getElementById('card-tmax');
+            if (tmaxCard) {
+                const eskiUyari = tmaxCard.querySelector('.card-quality-warning, .card-quality-bad, .card-unit-warning');
+                if (eskiUyari) eskiUyari.remove();
+            }
             if (valTmax && ozet.maks !== undefined && ozet.maks !== null) {
                 valTmax.textContent = Number(ozet.maks).toFixed(1);
             }
@@ -1138,7 +1201,10 @@ async function canliTermalYukle(modulId, olcumMap) {
                 bannerDesc.textContent = `Sıcak nokta: ${ozet.maks !== undefined ? Number(ozet.maks).toFixed(1) + ' °C' : '--'} (Zaman: ${formatZamanTr(ozet.zaman)} TSİ)`;
             }
         } else {
-            // Özet de yoksa
+            // Özet yok. Kart yine de son_olcumler'deki termal_maks kanalını gösterir:
+            // aksi hâlde şüpheli bir termal ölçüm (kalite=supheli, örn. 153.9 °C) ile
+            // hiç ölçüm olmaması aynı "Termal Veri Yok" görünümüne çöker (UI-03).
+            // Matris çizilmez; kanıt karesi yok.
             if (sourceBadge) {
                 sourceBadge.className = 'thermal-resolution source-hata';
                 sourceBadge.textContent = 'Termal Veri Yok';
@@ -1146,9 +1212,17 @@ async function canliTermalYukle(modulId, olcumMap) {
             state.termalMatris = null;
             state.termalMatrisOlculdu = false;
             state.termalOzet = null;
-            if (valTmax) valTmax.textContent = '--';
-            if (hotspotEl) hotspotEl.textContent = 'Konum: --';
-            if (bannerDesc) bannerDesc.textContent = 'Bu modül için termal ölçüm kaydı bulunmuyor.';
+            const sonTermal = olcumMap && olcumMap.termal_maks;
+            if (sonTermal && sonTermal.deger !== null && sonTermal.deger !== undefined && sonTermal.kalite !== 'yok') {
+                olcumKartiniGuncelle('val-tmax', 'card-tmax', 'hotspot-coord', sonTermal, 'Konum: -- (özet yok)', 1, 'termal_maks');
+                if (sourceBadge) sourceBadge.textContent = 'Termal özet yok; yalnız son termal_maks ölçümü var';
+                if (bannerDesc) {
+                    bannerDesc.textContent = `Termal özet/kare yok. Son termal_maks ölçümü: ${Number(sonTermal.deger).toFixed(1)} °C (Zaman: ${formatZamanTr(sonTermal.zaman)} TSİ, kalite: ${sonTermal.kalite || 'belirtilmemiş'}).`;
+                }
+            } else {
+                olcumKartiniGuncelle('val-tmax', 'card-tmax', 'hotspot-coord', sonTermal || null, 'Konum: --', 1, 'termal_maks');
+                if (bannerDesc) bannerDesc.textContent = 'Bu modül için termal ölçüm kaydı bulunmuyor.';
+            }
             termalKareCiz();
         }
     } catch (err) {
@@ -2522,6 +2596,11 @@ function updateClock() {
 function startPolling() {
     if (state.pollTimer) clearInterval(state.pollTimer);
     state.pollTimer = setInterval(() => {
+        // UI-07: Sayfa API kesintisinde açıldıysa ağaç boş kalır; operatörün
+        // "Yenile"ye basması beklenmez, bağlantı gelince kendiliğinden dolar.
+        if (!state.hiyerarsiYuklendi) {
+            hiyerarsiyiYukle();
+        }
         if (!state.kanitKareModu && !state.seciliAnomaliId && state.aktifModulId) {
             modulDetayYukle(state.aktifModulId, true);
         }
@@ -2689,6 +2768,7 @@ if (typeof globalThis !== 'undefined') {
         zamanSerisiCizGenel,
         setupTimeseriesHover,
         hiyerarsiyiYukle,
+        startPolling,
         modulCihazDurumunuAğactaGuncelle,
         modulDurumlariniGuncelle,
         alarmlariYukle,

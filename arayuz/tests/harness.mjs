@@ -104,6 +104,14 @@ class MockElement {
     }
 
     querySelector(selector) {
+        // Virgüllü seçici listesi ("a, b"): gerçek DOM gibi ilk eşleşeni döndür.
+        if (selector.includes(',')) {
+            for (const parca of selector.split(',').map(s => s.trim()).filter(Boolean)) {
+                const found = this.querySelector(parca);
+                if (found) return found;
+            }
+            return null;
+        }
         for (const child of this.children) {
             if (selector.startsWith('.') && child.className.split(' ').includes(selector.slice(1))) {
                 return child;
@@ -121,6 +129,15 @@ class MockElement {
     }
 
     querySelectorAll(selector) {
+        if (selector.includes(',')) {
+            const results = [];
+            for (const parca of selector.split(',').map(s => s.trim()).filter(Boolean)) {
+                for (const el of this.querySelectorAll(parca)) {
+                    if (!results.includes(el)) results.push(el);
+                }
+            }
+            return results;
+        }
         const results = [];
         for (const child of this.children) {
             if (selector.startsWith('.') && child.className.split(' ').includes(selector.slice(1))) {
@@ -194,6 +211,15 @@ class MockDocument {
     }
 
     querySelectorAll(selector) {
+        if (selector.includes(',')) {
+            const results = [];
+            for (const parca of selector.split(',').map(s => s.trim()).filter(Boolean)) {
+                for (const el of this.querySelectorAll(parca)) {
+                    if (!results.includes(el)) results.push(el);
+                }
+            }
+            return results;
+        }
         const results = [];
         for (const el of this.elements.values()) {
             if (selector.startsWith('[id^="') && selector.endsWith('"]')) {

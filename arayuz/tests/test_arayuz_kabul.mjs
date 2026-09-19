@@ -513,3 +513,175 @@ test('UI-03: kalite=yok kartı "Veri yok" der, sabit altyazı bunu örtmez', asy
     assert.equal(doc.getElementById('current-diff').textContent, 'Faz Dengesizliği: Hesaplanamadı',
         'L1/L2/L3 yokken faz dengesizliği hesaplanmaz');
 });
+
+// --------------------------------------------------------------------------
+test('UI-03: termal özet 404 iken son_olcumler.termal_maks (şüpheli) "Veri yok"a çökmez', async () => {
+    // Gerçek yığında görüldü (TR063-P01-M1, sensor_arizasi senaryosu): /termal/son 404,
+    // ama son_olcumler'de termal_maks=153.9 kalite=supheli var. Eski davranış kartı
+    // "--" + "Termal Veri Yok" yapıyordu; operatör şüpheli ölçümü hiç görmüyordu.
+    const doc = setupMockEnvironment();
+    const app = await loadApp();
+    // Önceki kanıt testi kanıt kipinde bırakmış olabilir; operatör "canlıya dön"e basar.
+    app.canliGoruntuyeDon();
+
+    global.fetch = async (url) => {
+        if (url.includes('/termal/son')) return yanit({}, { ok: false, status: 404 });
+        if (url.includes('/seri')) return yanit({ noktalar: [] });
+        return yanit(modulDetayi('M1', {
+            son_olcumler: [
+                { olcum_tipi: 'ortam_sicaklik', zaman: ZAMAN, deger: 32.6, birim: 'C', kalite: 'iyi' },
+                { olcum_tipi: 'termal_maks', zaman: ZAMAN, deger: 153.923, birim: 'C', kalite: 'supheli' }
+            ]
+        }));
+    };
+    await app.modulDetayYukle('M1');
+
+    assert.equal(doc.getElementById('val-tmax').textContent, '153.9',
+        'Şüpheli termal_maks değeri gösterilir, "--" yapılmaz');
+    assert.ok(doc.getElementById('card-tmax').querySelector('.card-quality-warning'),
+        'Şüpheli termal ölçüm aynı kartta işaretlenir');
+    assert.match(doc.getElementById('hotspot-coord').textContent, /Kalite: supheli/,
+        'Kart altyazısı kaliteyi söyler');
+    assert.match(doc.getElementById('thermal-source-badge').textContent, /özet yok/i,
+        'Rozet "özet yok" der, "Termal Veri Yok" demez');
+    assert.match(doc.getElementById('banner-desc').textContent, /153\.9/,
+        'Şerit son termal_maks ölçümünü ve kalitesini yazar');
+
+    // Özet gerçekten yoksa (termal_maks kaydı da yok) eski davranış korunur.
+    global.fetch = async (url) => {
+        if (url.includes('/termal/son')) return yanit({}, { ok: false, status: 404 });
+        if (url.includes('/seri')) return yanit({ noktalar: [] });
+        return yanit(modulDetayi('M2'));
+    };
+    await app.modulDetayYukle('M2');
+    assert.equal(doc.getElementById('val-tmax').textContent, '--');
+    assert.equal(doc.getElementById('thermal-source-badge').textContent, 'Termal Veri Yok');
+    assert.equal(doc.getElementById('card-tmax').querySelector('.card-quality-warning'), null,
+        'Modül değişince önceki şüpheli uyarısı kalmaz');
+});
+
+// --------------------------------------------------------------------------
+test('UI-07: vekil 502/503/504 döndürünce API çevrimdışı sayılır; 500 çevrimiçi kalır', async () => {
+    // Gerçek yığında görüldü: analiz_api konteyneri durdurulunca Nginx /api için
+    // 502/504 döndürdü, gösterge "API ÇEVRİMİÇİ" kaldı. Tarayıcı API'ye hiç değmez;
+    // vekilin ağ geçidi hatası, API'ye ulaşılamadığının tek belirtisidir.
+    const doc = setupMockEnvironment();
+    const app = await loadApp();
+
+    for (const kod of [502, 503, 504]) {
+        global.fetch = async () => yanit({}, { ok: false, status: kod });
+        await app.hiyerarsiyiYukle();
+        assert.equal(app.state.isOnline, false, `HTTP ${kod} = API'ye ulaşılamıyor`);
+        assert.equal(doc.getElementById('api-status-text').textContent, 'BAĞLANTI KESİLDİ');
+    }
+
+    global.fetch = async () => yanit({ hata: { mesaj: 'patladı' } }, { ok: false, status: 500 });
+    await app.hiyerarsiyiYukle();
+    assert.equal(app.state.isOnline, true, 'HTTP 500 API\'nin kendisinden gelir; erişilebilir');
+});
+
+// --------------------------------------------------------------------------
+test('UI-02: yavaş başarısız olan modül isteği, üstüne binen taramalar yüzünden hatayı gizlemez', async () => {
+    // Gerçek yığında görüldü: vekil 502'yi ~17 sn'de döndürüyor, tarama 3 sn'de bir
+    // yeni istek açıyordu. Her başarısızlık kendinden yenisi tarafından "eski"
+    // sayılıp düşüyor, hata şeridi hiç boyanmıyor, kartlar bayat değerle "sağlıklı"
+    // görünüyordu.
+    const doc = setupMockEnvironment();
+    const app = await loadApp();
+    app.canliGoruntuyeDon();
+
+    // 1) Önce sağlıklı bir boyama.
+    global.fetch = async (url) => {
+        if (url.includes('/termal/son')) return yanit({}, { ok: false, status: 404 });
+        if (url.includes('/seri')) return yanit({ noktalar: [] });
+        return yanit(modulDetayi('M1'));
+    };
+    app.modulSec('M1', 'M1');
+    await new Promise(r => setTimeout(r, 0));
+    await new Promise(r => setTimeout(r, 0));
+    assert.equal(doc.getElementById('val-temp').textContent, '25.0');
+
+    // 2) API düşer: istekler yavaş (bekletilen) 502 ile biter.
+    const bekleyenler = [];
+    global.fetch = (url) => new Promise((resolve) => {
+        bekleyenler.push(() => resolve(yanit({}, { ok: false, status: 502 })));
+    });
+
+    const t1 = app.modulDetayYukle('M1', true);   // tarama #1 (yavaş)
+    const t2 = app.modulDetayYukle('M1', true);   // tarama #2: süren istek varken atlanır
+    const t3 = app.modulDetayYukle('M1', true);   // tarama #3: atlanır
+    assert.equal(bekleyenler.length, 1, 'Süren istek varken tarama yeni istek açmaz');
+
+    bekleyenler[0]();
+    await Promise.all([t1, t2, t3]);
+
+    assert.equal(doc.getElementById('module-error-banner').style.display, 'flex',
+        'Geç gelen hata boyanır: hata şeridi görünür');
+    assert.match(doc.getElementById('module-error-banner').textContent, /HTTP 502/);
+    assert.equal(doc.getElementById('active-module-status-badge').textContent, 'HATA');
+    assert.equal(app.state.isOnline, false, '502 = çevrimdışı');
+    assert.equal(doc.getElementById('val-temp').textContent, '--',
+        'Hata anında bayat 25.0 ekranda kalmaz');
+
+    // 2b) API geri gelir, aynı modülde tarama sürer: hata şeridi kalkar, değerler döner.
+    global.fetch = async (url) => {
+        if (url.includes('/termal/son')) return yanit({}, { ok: false, status: 404 });
+        if (url.includes('/seri')) return yanit({ noktalar: [] });
+        return yanit(modulDetayi('M1'));
+    };
+    await app.modulDetayYukle('M1', true);
+    assert.equal(doc.getElementById('module-error-banner').style.display, 'none',
+        'Bağlantı dönünce kesinti şeridi kalkar');
+    assert.equal(doc.getElementById('val-temp').textContent, '25.0');
+    assert.equal(app.state.isOnline, true);
+
+    // 3) Operatör bu arada başka modüle geçtiyse eski modülün hatası boyanmaz.
+    global.fetch = (url) => new Promise((resolve) => {
+        bekleyenler.push(() => resolve(yanit({}, { ok: false, status: 502 })));
+    });
+    const t4 = app.modulDetayYukle('M1');
+    app.state.aktifModulId = 'M2';
+    doc.getElementById('module-error-banner').style.display = 'none';
+    doc.getElementById('module-error-banner').textContent = '';
+    bekleyenler[bekleyenler.length - 1]();
+    await t4;
+    assert.equal(doc.getElementById('module-error-banner').textContent, '',
+        'Seçili olmayan modülün geç hatası ekrana yazılmaz');
+});
+
+// --------------------------------------------------------------------------
+test('UI-07: sayfa API kesintisinde açıldıysa ağaç bağlantı gelince kendiliğinden dolar', async () => {
+    // Gerçek yığında görüldü: analiz_api kapalıyken açılan sayfa "Hiyerarşi taranıyor..."
+    // yazısında kalıyor, API dönünce de operatör "Yenile"ye basmadıkça dolmuyordu.
+    const doc = setupMockEnvironment();
+    const app = await loadApp();
+    app.state.hiyerarsiYuklendi = false;
+    app.state.aktifModulId = null;
+
+    global.fetch = async () => yanit({}, { ok: false, status: 502 });
+    await app.hiyerarsiyiYukle();
+    assert.equal(app.state.hiyerarsiYuklendi, false);
+    assert.match(doc.getElementById('hierarchy-container').innerHTML, /alınamadı/,
+        'Yer tutucu ("taranıyor") hata mesajını örtmemeli');
+
+    // API geri gelir; periyodik tarama ağacı yeniden dener.
+    global.fetch = async (url) => {
+        if (url.includes('/moduller?')) return yanit({ veriler: [], sonraki: null });
+        if (url.includes('/sahalar')) {
+            return yanit({ sahalar: [{ saha_kodu: 'TR1', ad: 'TR1', panolar: [
+                { pano_kodu: 'P1', ad: 'P1', moduller: [{ modul_id: 'TR1-P1-M1', aktif: true, seviye: 'normal' }] }
+            ] }] });
+        }
+        if (url.includes('/termal/son')) return yanit({}, { ok: false, status: 404 });
+        if (url.includes('/seri')) return yanit({ noktalar: [] });
+        if (url.includes('/anomaliler')) return yanit({ veriler: [], sonraki: null });
+        if (url.includes('/gecisler')) return yanit({ veriler: [], sonraki: null });
+        return yanit(modulDetayi('TR1-P1-M1'));
+    };
+    app.state.pollIntervalMs = 5;
+    app.startPolling();
+    await new Promise(r => setTimeout(r, 60));
+    clearInterval(app.state.pollTimer);
+    assert.equal(app.state.hiyerarsiYuklendi, true, 'Tarama ağacı yeniden yükledi');
+    assert.equal(app.state.aktifModulId, 'TR1-P1-M1', 'İlk modül kendiliğinden seçildi');
+});
