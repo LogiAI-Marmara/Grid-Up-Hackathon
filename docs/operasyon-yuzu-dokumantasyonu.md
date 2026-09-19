@@ -285,8 +285,12 @@ Sistem bileşenleri uçtan uca test edilmiş ve doğrulanmıştır:
    Her ikisi de geçmektedir. Hiçbiri gerçek veritabanına, gerçek `/gecisler`
    ucuna ya da gerçek bir alıcıya bağlanmaz: HTTP uçları ve SMS gateway
    sahtedir. Bu testler "kanal kabul etti"yi gösterir, **gerçek SMS teslimini
-   göstermez**. Konteyner yeniden oluşturma testi (`docker compose down && up`)
-   **henüz çalıştırılmamıştır**.
+   göstermez**.
+
+4. **Konteyner Kalıcılık Testi (A-04):** gerçek Docker ile çalıştırıldı ve
+   geçti. Konteyner `docker rm -f` ile yok edilip aynı volume'la yenisi
+   kurulduğunda alarm tekrar bildirilmedi; volume olmadan yapılan negatif
+   kontrolde ise tekrar bildirildi. Ayrıntı `alarm/README.md` §7'de.
 
 ---
 

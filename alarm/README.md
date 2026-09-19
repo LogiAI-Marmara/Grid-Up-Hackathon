@@ -241,29 +241,36 @@ alarmın teslim sayılmadığını, yeniden başlatmadan sonra bekleyen alarmın
 teslim edildiğini, üçüncü başlatmanın tekrar üretmediğini ve aynı moduldeki
 ikinci anomalinin bastırılmadığını gösterir. SMS gateway sahtedir.
 
-### Konteyner kabul testi — **ÇALIŞTIRILMADI**
+### Konteyner kabul testi — **ÇALIŞTIRILDI, GEÇTİ**
 
-Bu ortamda Docker daemon erişilebilir değil (`docker info` başarısız), bu
-yüzden konteyner yeniden oluşturma denemesi **yapılmamıştır**. A-04'ün
-konteyner düzeyi kabul kanıtı bu bakımdan **açıktır** — compose değişikliği
-uygulanmış olsa da (§8) çalıştığı doğrulanmadı.
-
-Docker'ı olan birinin koşturması gereken adımlar:
+Docker'ı olan bir makinede koşturuldu (Docker Desktop 29.5.3, dal `f72a8d3`).
+Test edilen şey: konteyner **yeniden oluşturulduğunda** (restart değil,
+`docker rm -f` ile yok edilip yenisi kurulduğunda) durum korunuyor mu.
 
 ```bash
-cd deploy
-docker compose up -d alarm_service
-# kritik bir geçiş üretilip bildirildikten sonra:
-docker compose down
-docker compose up -d alarm_service
-docker compose logs alarm_service   # aynı geçiş YENİDEN bildirilmemeli
-docker volume inspect deploy_gridup_alarm_durum
+docker build -t gridup-alarm ./alarm
+# sahte API + SMS gateway host'ta; konteyner --add-host=host.docker.internal:host-gateway ile erişir
+docker run -d --name a04_1 -v a04_test:/durum ... gridup-alarm   # 1 kritik alarm teslim edilir
+docker rm -f a04_1                                                # konteyner YOK EDİLİR
+docker run -d --name a04_2 -v a04_test:/durum ... gridup-alarm   # aynı volume, yeni konteyner
 ```
 
-Beklenen: ikinci açılışta log `📂 Durum yüklendi: son_gecis_id=<önceki id>`
-yazmalı ve aynı geçiş için ikinci bir bildirim çıkmamalıdır.
+Sonuç:
 
----
+| Adım | Beklenen | Gözlenen |
+|---|---|---|
+| İlk konteyner | 1 teslim | ✅ 1 teslim, `son_gecis_id: 101` volume'a yazıldı |
+| Yeniden oluşturma | tekrar YOK | ✅ teslim sayısı 1'de kaldı |
+| Yeni konteynerin logu | eski imleç | ✅ `📂 Durum yüklendi: son_gecis_id=101, cooldown kaydı=1` |
+| Sahte API tarafı | yalnız yeni geçiş sorgusu | ✅ sadece `GET /gecisler?sonra=101`, hiç `POST /message` yok |
+
+**Negatif kontrol** (aynı akış, volume olmadan): ikinci konteyner aynı alarmı
+**yeniden** bildirdi (teslim sayısı 2, log `son_gecis_id=None`). Yani test
+gerçekten volume'un etkisini ölçüyor — pozitif sonuç kendiliğinden geçen bir
+test değil.
+
+`docker compose config` ile bağlamanın doğruluğu ayrıca doğrulandı:
+`gridup_alarm_durum → /durum`, `ALARM_STATE_FILE=/durum/alarm_state.json`.
 
 ## 8. Compose ve kalıcı volume
 
@@ -279,14 +286,26 @@ için `VOLUME` bildirir. `deploy/docker-compose.yml` bu dalda buna göre
   güncellendi.
 
 Bu sayede `docker compose down && up` alarm durumunu (imleç, bekleyen
-bildirimler, tekrar önleme kayıtları) korur.
+bildirimler, tekrar önleme kayıtları) korur — §7'de gerçek konteynerle
+doğrulandı.
+
+### Ayarları vermek
+
+```bash
+cp deploy/.env.example deploy/.env    # sonra SMS_GATEWAY_* alanlarını doldurun
+```
+
+`deploy/.env` zorunlu değildir: `environment` bloğu her değişkeni
+`${DEGISKEN:-}` ile aldığı ve Compose `.env`'i kendiliğinden okuduğu için
+dosya yokken de `docker compose config` çalışır. (`env_file: .env` girdisi
+kaldırıldı; dosya yoksa temiz bir klonda hata veriyordu.) Ama SMS ayarları
+doldurulmadan kritik alarm **teslim edilemez**.
 
 > **Not:** `deploy/docker-compose.yml` bu görevin tek sahipliğinde değildir;
 > değişiklik alarm servisinin ihtiyacı kadar tutulmuş, başka servise
 > dokunulmamıştır. Compose sahibinin gözden geçirmesi beklenir.
 >
-> **Doğrulanmayan:** Bu ortamda Docker daemon yok; compose dosyası YAML
-> olarak doğrulandı ama **ayağa kaldırılmadı** (bkz. §7).
+> Konteyner düzeyi kalıcılık §7'de gerçek Docker ile doğrulandı.
 
 ## 9. Kapsam dışı
 
