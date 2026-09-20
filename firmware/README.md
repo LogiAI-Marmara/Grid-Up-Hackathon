@@ -41,7 +41,7 @@ build_flags = -DWIFI_SSID=\"saha\" -DWIFI_SIFRE=\"...\" -DTOPLAMA_URL=\"http://g
 | gönder | `UretilenPaket` | `HTTPClient.POST(TOPLAMA_URL)` |
 
 **Politika:** her 30 sn bir paket, termal özet + 768 değerlik kare her ölçüm çevriminde, modül içi
-eşik yok (entegrasyon kararı madde 2; `entegrasyon-gorev-dagilimi.md` §2.4). Hüküm merkezde. Tek istisna
+eşik yok. Hüküm merkezde. Tek istisna
 aşağıdaki düşük güç modu: ölçüm çevrimi yapılmaz, kare de yoktur; `modul.py` adım 7 ile aynı davranış.
 
 **Düşük güç:** süperkap gerilimi ölçülmüyor (03'te pin yok); yedekte 3 dk geçince (`YEDEK_DUSUK_GUC_S`,

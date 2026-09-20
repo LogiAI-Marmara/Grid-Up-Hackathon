@@ -138,8 +138,7 @@ Takım çalışması ve sözleşme sınırları 3 bağımsız iş izine bölünm
 
 ```
 ├── sozlesmeler/               # İzler arası ortak sözleşmeler (JSON şemaları ve Enum sözlüğü)
-├── gridup-proje-karar-kaydi.md# Projenin tek referans üst karar kaydı
-├── entegrasyon-gorev-dagilimi.md# Sistem entegrasyonu görev ve kabul kriterleri
+├── gridup-proje-karar-kaydi.md# Projenin üst karar kaydı
 │
 ├── docs/                      # Jüriye sunulan nihai teknik dokümanlar
 │   ├── track-a/               # İZ A: T1 & T2 donanım, mekanik, şema ve montaj dokümanları (01–09)

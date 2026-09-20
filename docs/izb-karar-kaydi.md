@@ -5,27 +5,6 @@
 **Belge tarihi:** 15 Eylül 2026
 **Üst belge:** `gridup-proje-karar-kaydi.md` (proje geneli)
 **Repo:** https://github.com/LogiAI-Marmara/Grid-Up-Hackathon
-**Durum:** Karar aşaması tamamlandı, uygulamaya geçiliyor.
-
----
-
-## 0. Bu belge nedir, nasıl kullanılır
-
-Bu belge İZ B'nin **tek referans kaynağıdır.** Proje geneli karar kaydının alt belgesidir; onunla çelişmez, onu daraltır ve derinleştirir.
-
-İçinde şunlar var:
-
-- İZ B'nin projedeki yeri ve sorumluluk sınırı
-- Analiz katmanını anlamak için gereken alan bilgisi (konuyu hiç bilmeyen okuyucu için)
-- Alınmış üç ana karar — gerekçeleriyle ve **reddedilen alternatifleriyle**
-- Dedektörün iç mimarisi
-- İZ B'nin ürettiği ve tükettiği sözleşmeler, üst belgeye önerilen değişiklikler
-- Doğrulama ve kanıt stratejisi
-- Görev listesi ve açık konular
-
-**Kimler için:** Takım üyeleri, projeyi denetleyecek kişi, veya İZ B'yi devralacak bir yapay zekâ asistanı. Bu belgeyi baştan sona okuyan biri İZ B'yi tam olarak anlamış olur.
-
-**Değişiklik kuralı:** Bu belgedeki kararlardan **üst belgenin sözleşmelerine dokunanlar** (Bölüm 6) üç kişiyi birden bağlar; değişiklikleri lider onayı ve duyuru gerektirir. Geri kalanı iz içi kararlardır.
 
 ---
 
@@ -59,9 +38,7 @@ ve saha tarafı  │     │                   │  ④  │
 | Yapmaz | Kim yapar |
 |---|---|
 | Veri üretmek, toplamak, veritabanına yazmak | İZ A |
-| Modül içi eşik mantığı (tam kare ne zaman gönderilir) | İZ A |
 | Arayüz, grafik çizme, ısı haritası görüntüleme | İZ C |
-| SMS/WhatsApp gönderme, alarm tekrar yönetimi | İZ C |
 | Modbus register sunucusu | İZ C |
 | On-prem kompozisyon | İZ C |
 
@@ -187,49 +164,6 @@ Biz genel amaçlı anomali dedektörü yapmıyoruz; **pano izleme dedektörü** 
 4. **Geç gelen veri kendiliğinden yakalanır.** Modül 5 dakika sinyal kaybedip 300 satırı birden gönderirse hepsi alınır; özel kod gerekmez.
 5. Paralel geliştirme kolaylığı.
 
-### 3.5 Gecikme neden sorun değil
-
-Üst belge 7.2'de tespit edilecek olayların zaman ölçeği **dakikalar–saatler** olarak sabitlendi (gevşek klemens günler–haftalar, aşırı yük saatler–günler). 10 saniyelik tarama periyodu bu ölçekte görünmez.
-
-Anlık tepki gerektiren tek olay ark flaştır; o da TVOC-2'nin işidir (SIL-2 sertifikalı, <1 ms) ve biz yalnızca kaydını okuruz.
-
-### 3.6 Tarama periyodu ile değerlendirme penceresi farklıdır
-
-Bu ayrım kritiktir ve karıştırılması dedektörün yanlış anlaşılmasına yol açar.
-
-- **Tarama periyodu:** dedektörün veritabanına ne sıklıkla uğradığı. Varsayılan 10 sn.
-- **Değerlendirme penceresi:** uğradığında ne kadar geçmişe baktığı. Dedektör başına ayrı, dakikalar–saatler mertebesinde.
-
-İkisi birbirinden bağımsızdır. Dedektör **hiçbir zaman "şu anki değere" bakmaz.**
-
-Tur mantığı:
-
-```
-Dedektör tek bir işaretçi tutar: en son işlenen zaman damgası
-
-Her tur:
-  1. İşaretçiden şimdiye kadar hangi satırlar geldi?   → ARALIK sorgusu
-  2. Gelen satırlardan hangi modüller etkilendi?
-  3. Etkilenen her modül için: pencereyi çek, değerlendir
-  4. İşaretçiyi ilerlet
-```
-
-Adım 1 aralık sorgusu olduğu için **hiçbir ölçüm kaçmaz:**
-
-| Durum | Sonuç |
-|---|---|
-| Saniyede 1 ölçüm, tur 10 sn | 10 satır gelir, 10'u da alınır |
-| 20 saniyede 1 ölçüm, tur 10 sn | Bir turda 1 satır, sonraki turda 0. Kayıp yok |
-| Modül 5 dk susup 300 satır birden gönderdi | 300'ü de alınır |
-
-Bir turda aynı modül için **bir kez** değerlendirme yapılır; kaç satır geldiği değerlendirme sayısını değiştirmez. Gelen satırlar yalnızca "bu modülü yeniden değerlendir" sinyalidir.
-
-### 3.7 Varsayılan parametreler
-
-- Tarama periyodu: 10 sn (ayarlanabilir)
-- İşaretçi: kendi tablosunda, yeniden başlatmada kaldığı yerden devam eder, elle geri alınabilir
-- Değerlendirme penceresi: dedektör başına ayrı (Bölüm 5)
-
 ---
 
 ## 4. Karar K2 — Tespit yöntemi ailesi ve başarı kanıtı
@@ -238,7 +172,6 @@ Bir turda aynı modül için **bir kez** değerlendirme yapılır; kaç satır g
 
 **Dört katmanlı dedektör. Çekirdekte makine öğrenmesi yok.**
 
-Kanıt: kendi zor senaryo setim + İZ A verisi + **düzenli kör testler**; dört metrik birlikte raporlanır.
 
 ### 4.2 Neden bu karar önemliydi
 
@@ -257,7 +190,6 @@ Değerlendirme kriterlerinin 2. maddesi — "anomali ve risk tespit yaklaşımı
 | Doğrulama döngüsel olur | Kendi ürettiğimiz dağılımı öğrenip kendi ürettiğimiz anomaliyi bulur — hiçbir şey kanıtlanmaz |
 | Jüri sorusu | "Bu modeli neyle eğittiniz?" sorusunun savunulabilir cevabı yok |
 
-**Sunumda nasıl anlatılır:** *"Sentetik veriyle eğitilmiş bir model gerçek sahada hiçbir şey kanıtlamaz. Bu yüzden fiziksel gerekçesi olan, açıklanabilir ve standartlara dayanan bir yaklaşım seçtik."* ML kullanmamak burada daha olgun bir mühendislik kararıdır.
 
 Fark katmanı olarak sonradan eklenmek istenirse: mimari buna kapalı değil, ancak çekirdek tespit hiçbir zaman modele bağlanmaz.
 
@@ -465,27 +397,12 @@ GET /anomaliler/{id}/gecisler    → olayın durum geçişleri (journal)
 
 Diğer uç noktalar üst belgedeki gibidir.
 
-### 7.4 Değişiklik durumu
-
-Bölüm 7.2 ve 7.3'teki değişiklikler **üç izi birden bağlar.** Lider onayı alınmıştır; İZ A ve İZ C'ye duyurulacaktır.
-
 ---
 
 ## 8. Ölçeklenebilirlik — T5
 
 Brief'in T5 maddesi 100 modülü ekranda göstermeyi değil, *"işleyebilecek şekilde tasarlanmasını ve gerekli kaynak kullanımının değerlendirilmesini"* istiyor. İZ B'nin yük testi + kaynak raporu bu maddeyi karşılar.
 
-**Hacim temeli:** 100 modül × 6 ölçüm tipi × 10 saniyede bir ≈ 60 satır/saniye ≈ 5 milyon satır/gün.
-
-**Ölçülecekler:**
-
-- Bir tarama turunun süresi, modül sayısının fonksiyonu olarak (10 / 50 / 100 modül)
-- Tur başına işlenen satır sayısı
-- CPU ve bellek kullanımı
-- Veritabanı sorgu süreleri ve indeks etkisi
-- Tur süresinin tarama periyodunu aşıp aşmadığı (aşarsa dedektör geride kalmaya başlar — bu, ölçeğin gerçek sınırıdır)
-
-**Rapor biçimi:** ham ölçüm çıktısı, özetlenmemiş; tek tablo + sınır değerlendirmesi.
 
 ---
 
@@ -514,7 +431,7 @@ Bu tasarımı üç noktada doğrular:
 - **Ortam havasına göre delta ikinci tabandır** — ortam sensörü koyma kararının gerekçesi
 - **Öncelik sınıfları seviye enum'una eşlenebilir** — eşikler uydurulmak yerine yayınlanmış kaynağa dayandırılır
 
-**Sınır — dürüstçe belirtilmelidir:** Bu kriterler anlık denetim içindir (teknisyen kamerayla gelir, bakar, gider), sürekli izleme için değil. Kaynağın kendisi "kesin bilim değil, önceliklendirme aracı" demektedir. Katman 1'de referans olarak kullanılır; katman 2'nin eğilim tespiti bunun ötesinde bir şeydir ve projenin kattığı değer orasıdır.
+**Sınır:** Bu kriterler anlık denetim içindir (teknisyen kamerayla gelir, bakar, gider), sürekli izleme için değil. Kaynağın kendisi "kesin bilim değil, önceliklendirme aracı" demektedir. Katman 1'de referans olarak kullanılır; katman 2'nin eğilim tespiti bunun ötesinde bir şeydir ve projenin kattığı değer orasıdır.
 
 ### 9.3 Kaynaklar
 
@@ -524,74 +441,3 @@ Bu tasarımı üç noktada doğrular:
 - Schneider Electric Geo SCADA — Alarm Summary dokümantasyonu
 - Infraspection Institute, *Standard for Infrared Inspection of Electrical Systems & Rotating Equipment*, 2016
 - TEDAŞ-MLZ/2003-06.B — AG dağıtım panoları teknik şartnamesi
-
----
-
-## 10. Görev listesi
-
-Üst belgenin madde 12–21 karşılığı, karar sonrası netleşmiş haliyle.
-
-### Kod
-
-| # | İş | Karşılığı |
-|---|---|---|
-| 1 | Proje iskeleti, veritabanı bağlantısı, ayar yönetimi | — |
-| 2 | Tarama döngüsü + işaretçi tablosu + geriye dönük yeniden tarama | K1 |
-| 3 | Katman 0 — sensör sağlığı filtresi | Senaryo 6 |
-| 4 | Katman 1 — mutlak sınırlar | Senaryo 2, 3, 4, 5 |
-| 5 | Katman 2 — taban çizgisi (medyan + MAD) ve eğilim | Madde 12, Tür A |
-| 6 | Katman 3 — ilişki katmanı (akım-sıcaklık, faz-faz, komşu piksel, modül-modül) | Madde 13, 14 |
-| 7 | Skor ve seviye üretimi | Madde 17 |
-| 8 | `gerekce` şablon üretimi | Madde 18 |
-| 9 | Olay yaşam döngüsü + journal yazımı | K3 |
-| 10 | Okuma API'si — sözleşme ⑤ + `/gecisler` | Madde 19 |
-| 11 | Test veri üreteci (kendi zor senaryolarım) | K2 |
-| 12 | Kör test değerlendirme aracı — dört metrik | K2 |
-| 13 | Yük testi düzeneği ve kaynak ölçümü | Madde 20, T5 |
-
-### Doküman
-
-| # | İş |
-|---|---|
-| 14 | Tespit yaklaşımının dokümantasyonu (madde 21) — bu belgeden türetilir |
-| 15 | Ölçeklenebilirlik raporu (T5) |
-| 16 | Kör test sonuç raporu |
-
----
-
-## 11. Açık konular ve denetim listesi
-
-### 11.1 Entegrasyon denetiminde bakılacaklar
-
-Bunlar ana karar değil; toplu denetimde doğrulanacak sözleşme noktalarıdır.
-
-1. **`kare_id` üretimi.** Sözleşme ③'ün `kanit` alanı termal kareye referans verir — kareyi yazan İZ A, referans veren İZ B. İd'nin kim tarafından, hangi formatta üretildiği yazılı değil.
-2. **Saha/pano meta verisi.** `GET /sahalar` bir ağaç döndürür, ancak saha adı ve pano adı gibi insan okunur bilgilerin modül tablosunda olup olmadığı konuşulmadı. `modul_id`'den ayrıştırmak kod bazlı çözümdür; isim gerekiyorsa şemada olmalı.
-3. **Anomali tablosunda monoton sıra numarası ve zaman indeksi** — alarm servisinin olay kaçırmaması için.
-
-### 11.2 İZ A'dan istenecekler
-
-- Kör test setleri: her büyük değişiklikten sonra yeni tohumla
-- Temiz modül şartı ve tek kullanım şartı (Bölüm 4.4'teki iki tuzak)
-- L2/L3 faz verilerinin üretiliyor olması (faz dengesizliği tespiti bunu gerektirir)
-
-### 11.3 İz içi kararlar — sorulmaz, uygulanır ve bildirilir
-
-Dil ve kütüphane seçimi (Python), klasör ve dosya düzeni, kod stili, test kurgusu, iç fonksiyon tasarımı, veri saklama politikasının uygulama ayrıntısı, taban çizgisi pencere uzunlukları ve soğuk başlangıç davranışı.
-
----
-
-## 12. Hızlı özet
-
-| Konu | Karar |
-|---|---|
-| **Veriye bağlanma** | Periyodik veritabanı taraması, işaretçi tablosu, geriye dönük yeniden tarama |
-| **Tarama periyodu** | 10 sn (ayarlanabilir) — değerlendirme penceresinden bağımsız |
-| **Tespit yöntemi** | Dört katman: sensör sağlığı → mutlak sınırlar → taban çizgisi sapması → ilişki katmanı |
-| **Makine öğrenmesi** | Çekirdekte yok; gerekçesi dokümante edilir |
-| **Taban çizgisi** | Robust istatistik (medyan + MAD), modül-kanal bazında, zehirlenmeye karşı korumalı |
-| **Anomali kaydı** | Olay modeli (aç/güncelle/kapat) + ayrı journal tablosu |
-| **Kapanma** | ~30 dk histerezis |
-| **Kanıt** | Düzenli kör testler + dört metrik (tespit oranı, kazanılan süre, yanlış alarm, sensör ayrımı) |
-| **Standart dayanağı** | ISA-18.2 (alarm modeli), NETA/Infraspection delta T (eşikler) |
-| **T5** | Tur süresi / satır / CPU / bellek, 10-50-100 modül; ham çıktı |

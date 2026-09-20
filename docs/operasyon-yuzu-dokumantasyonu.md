@@ -11,7 +11,6 @@
 
 Bu doküman, ADM Elektrik ve GDZ Elektrik tarafından düzenlenen **Grid Up Hackathon** kapsamında geliştirilen **Pano/Hücre İçi Anomali Erken Uyarı Sistemi**'nin **İZ C (Operasyon Yüzü)** kulvarına ait güncel mimariyi, bileşen detaylarını, Modbus TCP register haritasını, acil bildirim servisinin kanal kurallarını, modern web arayüzünü ve on-premise kurulum adımlarını tanımlar.
 
-İZ C kulvarı; sahadan toplanan (İZ A) ve yapay zeka/makine öğrenmesi algoritmalarıyla analiz edilen (İZ B) anomali verilerini operatörlerin 7/24 anlık takip edebileceği yüksek standartlı bir SCADA/Monitoring Operasyon Merkezine dönüştürür. Dış SCADA altyapılarına endüstriyel Modbus TCP üzerinden veri aktarırken, sahada görev yapan mühendislere, teslimi izlenen ve tekrarı önlenen acil alarmlar iletir.
 
 ### Karşılanan Hackathon Teslimat Kalemleri
 * **T4 (Monitoring / İzleme):** Merkezi toplama ve izleme web uygulaması, saha hiyerarşisi (`Saha → Pano → Modül`), 32×24 (768 piksel) termal ısı haritası görselleştirmesi, canlı sıcak nokta (hotspot) reticle takibi ve SCADA entegrasyonu (Modbus TCP haritalama).

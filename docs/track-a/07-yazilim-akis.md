@@ -6,16 +6,9 @@
 firmware akışından türetilmiştir. Kod tarafı PR #1 ile teslim edilmiş, entegrasyon kararıyla
 (17 Eyl, commit `3b83483`) güncellenmiştir.
 
-> **Politika notu (entegrasyon kararı, 17 Eyl 2026, madde 2):** Karar kaydı §7.4'teki *"normalde
-> özet, anomali anında tam kare"* politikası entegrasyonda değiştirildi: **tam kare her paketle
-> gider**, paket ve termal çevrimi **30 sn**'ye hizalandı, modül içi eşik kapısı kaldırıldı.
-> Belge: [`entegrasyon-gorev-dagilimi.md`](../../entegrasyon-gorev-dagilimi.md) §2.4 ve İZ A madde 2.
-> Gerekçe ve etkisi §7.3'te. Karar kaydı §7.2 / §7.4 henüz bu karara göre güncellenmedi (lider).
-
 > **Kapsam notu — mikrodenetleyici kodu (T3):** Brief T3 *"mikrodenetleyici üzerinde çalışan
 > kaynak kodlar"* der. İki gerçekleme var: (1) `/modul-sim` (Python) — modül mantığı + 7 arıza
-> senaryosu, gerçek toplama servisine karşı koşan **asıl** kod (karar kaydı §12: *"modül mantığı"* =
-> `modul-sim`); bu doküman onun akışıdır. (2) [`/firmware`](../../firmware/README.md) — aynı dokuz
+> senaryosu, gerçek toplama servisine karşı koşan **asıl** kod; bu doküman onun akışıdır. (2) [`/firmware`](../../firmware/README.md) — aynı dokuz
 > adımın ESP32-S3-WROOM-1U-N8 için C++ karşılığı (PlatformIO, Arduino): pinler
 > [3. doküman §3.1](03-pinout.md)'den, sabitler `ayar.py`'den, paket sözleşme ② `POST /paket`.
 > **Derlenir (RAM %26, flash %28); fiziksel modül üretilmediği için (§1.4) donanımda doğrulanmadı.**
@@ -60,9 +53,6 @@ flowchart TD
     class START,SEND out
 ```
 
-> **Okuma notu:** Terimler karar kaydı Türkçesiyle hizalıdır — *uyan → oku → özetle → gönder*
-> (§7 doküman çıktıları satır 630'daki *"eşik kontrol"* adımı entegrasyon kararıyla düştü, §7.3).
-
 ---
 
 ## 7.2 Örnekleme takvimi (§7.2, koddan doğrulanmış)
@@ -96,8 +86,7 @@ anomaliyi kendi başına tanıyabilmesi"* şartının karşılığıydı.
 politika geri istenirse tek noktadan takılsın diye ve merkezden modüle ayar gönderme kavramının
 (§7.4 satır 304, T5) yeri belli olsun diye korunmuştur.
 
-**Neden değişti** ([`entegrasyon-gorev-dagilimi.md`](../../entegrasyon-gorev-dagilimi.md) §2.4, İZ A
-madde 2–3): *"Eski politikanın dayanağı ölçülmemişti."* Belgenin saydığı üç kazanım: (1) modül içi
+**Neden değişti**: *"Eski politikanın dayanağı ölçülmemişti."* Belgenin saydığı üç kazanım: (1) modül içi
 eşik mantığı ortadan kalkar, varlık sebebi karenin ne zaman gönderileceğine karar vermekti;
 (2) kanıt karesinin *"en yakını hangisi"* sorunu kalkar, her olay anının kendi karesi vardır
 (`kanit.kare_id`, `analiz/README` 10–11); (3) geçmişe dönük yeniden tarama gerçekten mümkün olur,

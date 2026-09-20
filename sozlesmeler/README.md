@@ -124,13 +124,7 @@ this is the reading we fixed. It applies to `termal_ozet.maks_konum` and
 
 **Quadrants.** `bolge_ort` is four 16×12 zone means in the order top-left,
 top-right, bottom-left, bottom-right. It gives the detector coarse spatial
-context without transmitting the frame.
-
-**Data policy.** `termal_kare` is `null` in normal operation and carries the full
-768 values only when the module's own threshold logic fires. This is what the
-"we process at the edge" claim reduces to in practice, and it is why the module
-has to recognise an anomaly on its own — otherwise it could not know when to send
-the frame.
+context.
 
 ## Interpretations we fixed
 
