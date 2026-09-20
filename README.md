@@ -58,7 +58,9 @@ Sistem, fiziksel pano içi donanımdan merkezi operasyon yüzüne kadar birbirin
         ═════════════════════════════════════════════════════
 ```
 
-*Detaylı vektörel mimari çizimi için: [`docs/track-a/08-sistem-mimarisi.svg`](docs/track-a/08-sistem-mimarisi.svg)*
+![Uçtan Uca Sistem Mimarisi](docs/track-a/08-sistem-mimarisi.svg)
+
+*Pano içi modülden saha gateway'ine, merkezi veritabanından analiz motoru, SCADA, web izleme arayüzü ve alarm servisine uçtan uca sistem mimarisi.*
 
 ---
 
@@ -75,6 +77,18 @@ Yarışma şartnamesindeki tüm teslimat kalemleri projemizde eksiksiz karşıla
 | **T5** | **Ölçeklenebilirlik & Kaynak Kullanımı** | [`analiz/`](analiz/) (100 modül eşzamanlı ingest ve anomali tarama testi, kaynak tüketim raporu) · [`modul-sim`](modul-sim/) (`--modul 100`) |
 | **T6** | **On-Premise / Özel Altyapı** | [`deploy/docker-compose.yml`](deploy/docker-compose.yml) (Public Cloud bağımsızlığı, tek komutla yerel orkestrasyon) |
 | **T7** | **Alarm ve Acil Bildirim Mekanizması** | [`alarm/`](alarm/) (Android SMS Gateway yerel sunucu kipi, olay bazlı tekrar önleme, bekleyen kuyruğu ve kalıcı durum; Telegram bulut hizmeti olduğu için varsayılan kuralda yok — bkz. `alarm/README.md`) |
+
+---
+
+## 📐 Donanım Tasarımı Görselleri (T1 – T2)
+
+![PCB Yerleşimi](docs/track-a/02-pcb-yerlesimi.svg)
+
+*ESP32-S3, MLX90640 termal dizi, SHT31, RAC05 güç modülü ve süperkapasitör içeren 110 × 70 mm iki katmanlı modül PCB yerleşimi.*
+
+![Modül Bağlantı Şeması](docs/track-a/03-baglanti-semasi.svg)
+
+*Besleme, I²C sensör hattı, RS-485 Modbus arayüzü ve anten bağlantı şeması.*
 
 ---
 
