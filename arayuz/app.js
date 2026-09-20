@@ -588,6 +588,7 @@ function _modulSecProgramatik(modulId, modulIsmi) {
     const seciliEl = document.getElementById(`modul-item-${modulId}`);
     if (seciliEl && seciliEl.classList) seciliEl.classList.add('active');
 
+    resetModulEkranGorunumu(modulId, state.aktifModulIsmi);
     modulDetayYukle(modulId);
     zamanSerisiYukle();
 }
@@ -779,6 +780,15 @@ async function modulDetayYukle(modulId, isPolling = false) {
         // Son görülme referans zamanını kaydet
         if (data.son_gorulme) {
             state.sonGorulmeZamani = data.son_gorulme;
+        }
+
+        const badgeEl = document.getElementById('active-module-badge');
+        const nameEl = document.getElementById('active-module-name');
+        if (badgeEl && (!badgeEl.textContent || badgeEl.textContent === '--')) {
+            badgeEl.textContent = modulId;
+        }
+        if (nameEl && (!nameEl.textContent || nameEl.textContent === 'Modül Seçiniz')) {
+            nameEl.textContent = state.aktifModulIsmi || modulId;
         }
 
         // 1. Cihaz Durumu ve Zaman (UI-01)
@@ -1260,6 +1270,22 @@ async function anomaliSec(anomaliId) {
     state.kanitAnomali = anomali;
     state.kanitKareModu = true;
     state.termalKaynak = 'kanit';
+
+    // Alarm seçildiğinde ilgili modülü de seçili yap ve rozetini senkronize et
+    if (anomali.modul_id && anomali.modul_id !== state.aktifModulId) {
+        state.aktifModulId = anomali.modul_id;
+        state.aktifModulIsmi = anomali.modul_id;
+        document.querySelectorAll('.tree-modul-item').forEach(el => {
+            if (el && el.classList) el.classList.remove('active');
+        });
+        const seciliEl = document.getElementById(`modul-item-${anomali.modul_id}`);
+        if (seciliEl && seciliEl.classList) seciliEl.classList.add('active');
+        const badgeEl = document.getElementById('active-module-badge');
+        const nameEl = document.getElementById('active-module-name');
+        if (badgeEl) badgeEl.textContent = anomali.modul_id;
+        if (nameEl) nameEl.textContent = anomali.modul_id;
+        modulRozetiniGuncelle(anomali.modul_id);
+    }
 
     document.querySelectorAll('.alarm-card').forEach(c => c.classList.remove('selected-alarm'));
     const seciliKart = document.getElementById(`alarm-card-${anomaliId}`);
