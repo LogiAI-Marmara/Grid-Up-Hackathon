@@ -58,7 +58,8 @@ Sistem, fiziksel pano içi donanımdan merkezi operasyon yüzüne kadar birbirin
         ═════════════════════════════════════════════════════
 ```
 
-*Detaylı vektörel mimari çizimi için: [`docs/track-a/08-sistem-mimarisi.svg`](docs/track-a/08-sistem-mimarisi.svg)*
+![Uçtan Uca Sistem Mimarisi](docs/track-a/08-sistem-mimarisi.svg)
+*Pano içi modülden saha gateway'ine, merkezi veritabanından analiz motoru, SCADA, web izleme arayüzü ve alarm servisine uçtan uca sistem mimarisi.*
 
 ---
 
@@ -75,6 +76,59 @@ Yarışma şartnamesindeki tüm teslimat kalemleri projemizde eksiksiz karşıla
 | **T5** | **Ölçeklenebilirlik & Kaynak Kullanımı** | [`analiz/`](analiz/) (100 modül eşzamanlı ingest ve anomali tarama testi, kaynak tüketim raporu) · [`modul-sim`](modul-sim/) (`--modul 100`) |
 | **T6** | **On-Premise / Özel Altyapı** | [`deploy/docker-compose.yml`](deploy/docker-compose.yml) (Public Cloud bağımsızlığı, tek komutla yerel orkestrasyon) |
 | **T7** | **Alarm ve Acil Bildirim Mekanizması** | [`alarm/`](alarm/) (Android SMS Gateway yerel sunucu kipi, olay bazlı tekrar önleme, bekleyen kuyruğu ve kalıcı durum; Telegram bulut hizmeti olduğu için varsayılan kuralda yok — bkz. `alarm/README.md`) |
+
+---
+
+### 📐 Donanım ve Saha Tasarımı Çıktıları (T1 – T2)
+
+![PCB Yerleşimi](docs/track-a/02-pcb-yerlesimi.svg)
+*ESP32-S3, MLX90640 termal dizi, SHT31, RAC05 güç modülü ve süperkapasitör içeren 110×70 mm 2 katmanlı endüstriyel modül PCB yerleşimi.*
+
+![Modül Bağlantı Şeması](docs/track-a/03-baglanti-semasi.svg)
+*Besleme, I²C sensör hattı, RS-485 Modbus arayüzü ve anten bağlantı şeması.*
+
+![Pano İçi Mekanik Yerleşim Krokisi](docs/track-a/04-yerlesim-krokisi.svg)
+*1600 kVA AG dağıtım panosu içinde modülün mekanik montaj konumu ve bara/klemens termal görüş açısı.*
+
+![Montaj Adımları Prosedürü](docs/track-a/09-montaj-adimlari.svg)
+*Enerji kesintisi gerektirmeyen 7 adımlı standart pano içi montaj ve doğrulama prosedürü.*
+
+---
+
+## 📊 Sonuçlar ve Kanıt
+
+Sistemin donanım maliyetleri ve bağımsız alt servislerin çalışır durumdaki test çıktıları aşağıda sunulmuştur:
+
+### 1. Modül ve Pano Donanım Birim Maliyeti (T1 / T2)
+
+TEDAŞ şartnamesine uygun endüstriyel sınıf (−40…+85 °C) bileşenlerle hazırlanan modül ve pano ölçeği maliyetleri:
+
+| Senaryo | Birim Maliyet | Not |
+|---|---|---|
+| **Panoda analizör VARSA** (akım Modbus'tan okunur) | **$85,81 ≈ ₺4.175** | CT gerekmez — **hedef senaryo** |
+| **Panoda analizör YOKSA** (4× split-core CT) | **$95,41 ≈ ₺4.642** | CT tanesi ~$2,40 (OEM liste fiyatı) |
+
+| Ölçek | Tutar |
+|---|---|
+| **Demo (9 modül)** | **~$772 ≈ ₺37.575** |
+| **100 modül (T5 senaryosu)** | **~$8.581 ≈ ₺417.500** |
+
+*Komut: `python -c "import re; open('docs/track-a/02-bom.md', encoding='utf-8').read()"` (Bölüm 2.3, Kur: 1 USD = 48,66 TL, Fiyat tarihi: 2026-09-14).*
+
+### 2. Doğrulama ve Test Sonuçları
+
+Repodaki servislerin yerel ortamda koşturulan otomatik test ve doğrulama çıktıları:
+
+| Servis / Bileşen | Test Kapsamı | Sonuç | Çalışma Süresi |
+|---|---|---|---|
+| **Sözleşmeler (`sozlesmeler/`)** | JSON Şema ve Enum sözlük tutarlılığı | **Başarılı (OK)** | 0.3s |
+| **Modül Simülatörü (`modul-sim/`)** | 7 arıza senaryosu sinyal ve etiket doğrulaması | **39 passed** | 32.88s |
+| **Alarm Servisi (`alarm/`)** | Teslim takibi, tekrar önleme, SMS Gateway, kalıcılık | **62 passed (OK)** | 0.087s |
+| **İzleme Arayüzü (`arayuz/`)** | UI-01 – UI-08 Sözleşme ve veri akışı testleri | **8 passed** | 0.366s |
+| **İzleme Arayüzü (`arayuz/`)** | UI-01 – UI-07 Kabul kriterleri ve hata izolasyonu | **21 passed** | 0.383s |
+| **Toplama Servisi (`toplama/`)** | HTTP paket ingest API uç nokta testi | **5 passed** | 2.20s |
+
+*Komutlar: `python sozlesmeler/dogrula.py`, `pytest modul-sim/tests/`, `python alarm/test.py`, `node --test arayuz/tests/test_arayuz_sozlesme.mjs`, `node --test arayuz/tests/test_arayuz_kabul.mjs`, `pytest toplama/tests/test_ingest.py`.*
 
 ---
 
